@@ -26,6 +26,7 @@ import { Consultation } from './consultations/consultations.entity';
         entities: [User, Customer, Consultation],
         synchronize: config.get('NODE_ENV') !== 'production',
         logging: config.get('NODE_ENV') === 'development',
+        ssl: config.get('NODE_ENV') === 'production' ? { rejectUnauthorized: false } : false,
       }),
     }),
     AuthModule,
