@@ -35,7 +35,7 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
           aws configure set region $AWS_REGION
-          aws s3 cp fit-hair-deploy-${GITHUB_SHA}.zip s3://${{ secrets.S3_BUCKET }}/elasticbeanstalk-artifacts/fit-hair-deploy-${GITHUB_SHA}.zip
+          aws s3 cp fit-hair-deploy-${GITHUB_SHA}.zip s3://momong-staging/elasticbeanstalk-artifacts/fit-hair-deploy-${GITHUB_SHA}.zip
 
       - name: Deploy To AWS Elastic Beanstalk
         env:
@@ -44,11 +44,11 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
           aws elasticbeanstalk create-application-version \
-            --application-name "${{ secrets.EB_APP_NAME }}" \
+            --application-name "momong-staging" \
             --version-label $GITHUB_SHA \
-            --source-bundle S3Bucket=${{ secrets.S3_BUCKET }},S3Key=elasticbeanstalk-artifacts/fit-hair-deploy-${GITHUB_SHA}.zip
+            --source-bundle S3Bucket=momong-staging,S3Key=elasticbeanstalk-artifacts/fit-hair-deploy-${GITHUB_SHA}.zip
 
           aws elasticbeanstalk update-environment \
-            --application-name "${{ secrets.EB_APP_NAME }}" \
-            --environment-name "${{ secrets.EB_ENV_NAME }}" \
+            --application-name "momong-staging" \
+            --environment-name "momong-manager-staging-env" \
             --version-label $GITHUB_SHA
