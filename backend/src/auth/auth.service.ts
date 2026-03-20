@@ -1,0 +1,86 @@
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import { User } from './users.entity';
+import { SignupDto, LoginDto, FindIdDto, ResetPasswordDto } from './dto/auth.dto';
+
+@Injectable()
+export class AuthService {
+  constructor(
+    @InjectRepository(User)
+    private readonly usersRepo: Repository<User>,
+    private readonly jwtService: JwtService,
+  ) {}
+
+  async signup(dto: SignupDto) {
+    const existing = await this.usersRepo.findOne({ where: { email: dto.email } });
+    if (existing) throw new ConflictException('이미 사용 중인 이메일입니다');
+
+    const password_hash = await bcrypt.hash(dto.password, 10);
+    const user = this.usersRepo.create({
+      email: dto.email,
+      name: dto.name,
+      password_hash,
+      phone: dto.phone,
+    });
+    const saved = await this.usersRepo.save(user);
+
+    const token = this.jwtService.sign({ sub: saved.id, email: saved.email });
+    return {
+      token,
+      user: { id: saved.id, email: saved.email, name: saved.name },
+    };
+  }
+
+  async login(dto: LoginDto) {
+    const user = await this.usersRepo.findOne({ where: { email: dto.email } });
+    if (!user) throw new UnauthorizedException('이메일 또는 비밀번호가 올바르지 않습니다');
+
+    const isValid = await bcrypt.compare(dto.password, user.password_hash);
+    if (!isValid) throw new UnauthorizedException('이메일 또는 비밀번호가 올바르지 않습니다');
+
+    const token = this.jwtService.sign({ sub: user.id, email: user.email });
+    return {
+      token,
+      user: { id: user.id, email: user.email, name: user.name },
+    };
+  }
+
+  async findId(dto: FindIdDto) {
+    const user = await this.usersRepo.findOne({ where: { phone: dto.phone } });
+    if (!user) throw new NotFoundException('해당 전화번호로 가입된 계정이 없습니다');
+
+    // 이메일 일부 마스킹: abc***@example.com
+    const [local, domain] = user.email.split('@');
+    const maskedLocal =
+      local.length <= 3
+        ? local[0] + '***'
+        : local.slice(0, 3) + '*'.repeat(local.length - 3);
+
+    return { email: `${maskedLocal}@${domain}` };
+  }
+
+  async resetPassword(dto: ResetPasswordDto) {
+    const user = await this.usersRepo.findOne({
+      where: { email: dto.email, name: dto.name },
+    });
+    if (!user) throw new NotFoundException('이메일과 이름이 일치하는 계정이 없습니다');
+
+    user.password_hash = await bcrypt.hash(dto.newPassword, 10);
+    await this.usersRepo.save(user);
+    return { success: true };
+  }
+
+  async getMe(userId: string) {
+    const user = await this.usersRepo.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException();
+    return { id: user.id, email: user.email, name: user.name, phone: user.phone };
+  }
+}

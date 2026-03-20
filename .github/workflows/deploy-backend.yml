@@ -1,0 +1,54 @@
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+
+      - name: Install Dependencies
+        working-directory: backend
+        run: npm install
+
+      - name: Build Project
+        working-directory: backend
+        run: npm run build
+
+      - name: Zip Artifacts For Deployment
+        working-directory: backend
+        run: zip -r ../fit-hair-deploy-${GITHUB_SHA}.zip . -x '*.git*' 'node_modules/*' 'test/*' '.vscode/*'
+
+      - name: Upload to S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          aws configure set region $AWS_REGION
+          aws s3 cp fit-hair-deploy-${GITHUB_SHA}.zip s3://${{ secrets.S3_BUCKET }}/elasticbeanstalk-artifacts/fit-hair-deploy-${GITHUB_SHA}.zip
+
+      - name: Deploy To AWS Elastic Beanstalk
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          aws elasticbeanstalk create-application-version \
+            --application-name "${{ secrets.EB_APP_NAME }}" \
+            --version-label $GITHUB_SHA \
+            --source-bundle S3Bucket=${{ secrets.S3_BUCKET }},S3Key=elasticbeanstalk-artifacts/fit-hair-deploy-${GITHUB_SHA}.zip
+
+          aws elasticbeanstalk update-environment \
+            --application-name "${{ secrets.EB_APP_NAME }}" \
+            --environment-name "${{ secrets.EB_ENV_NAME }}" \
+            --version-label $GITHUB_SHA
