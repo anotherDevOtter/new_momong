@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../auth/users.entity';
 import { Consultation } from '../consultations/consultations.entity';
+import { AdminAccount } from './admin-account.entity';
 
 @Injectable()
 export class AdminService {
@@ -13,6 +14,8 @@ export class AdminService {
     private readonly usersRepo: Repository<User>,
     @InjectRepository(Consultation)
     private readonly consultationsRepo: Repository<Consultation>,
+    @InjectRepository(AdminAccount)
+    private readonly adminAccountsRepo: Repository<AdminAccount>,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -27,13 +30,38 @@ export class AdminService {
     }
 
     // DB 어드민 계정 확인
-    const user = await this.usersRepo.findOne({ where: { email, role: 'admin' } });
-    if (user && await bcrypt.compare(password, user.password_hash)) {
-      const token = this.jwtService.sign({ sub: user.id, email, admin: true });
+    const adminAccount = await this.adminAccountsRepo.findOne({ where: { email } });
+    if (adminAccount && await bcrypt.compare(password, adminAccount.password_hash)) {
+      const token = this.jwtService.sign({ sub: adminAccount.id, email, admin: true });
       return { token };
     }
 
     throw new UnauthorizedException('이메일 또는 비밀번호가 올바르지 않습니다');
+  }
+
+  async register(email: string, password: string, authHeader?: string) {
+    const adminCount = await this.adminAccountsRepo.count();
+    const hasEnvAdmin = !!(process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD);
+
+    // 어드민이 존재하면 인증 필요
+    if (adminCount > 0 || hasEnvAdmin) {
+      let isAdmin = false;
+      if (authHeader?.startsWith('Bearer ')) {
+        try {
+          const payload = this.jwtService.verify(authHeader.slice(7));
+          isAdmin = !!payload.admin;
+        } catch {}
+      }
+      if (!isAdmin) throw new UnauthorizedException('기존 어드민 인증이 필요합니다');
+    }
+
+    const existing = await this.adminAccountsRepo.findOne({ where: { email } });
+    if (existing) throw new ConflictException('이미 존재하는 이메일입니다');
+
+    const password_hash = await bcrypt.hash(password, 10);
+    const admin = this.adminAccountsRepo.create({ email, password_hash });
+    await this.adminAccountsRepo.save(admin);
+    return { message: '어드민 계정이 생성되었습니다' };
   }
 
   async getUsers() {
@@ -66,31 +94,6 @@ export class AdminService {
     user.status = status;
     await this.usersRepo.save(user);
     return { success: true };
-  }
-
-  async register(email: string, password: string, authHeader?: string) {
-    const adminCount = await this.usersRepo.count({ where: { role: 'admin' } });
-    const hasEnvAdmin = !!(process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD);
-
-    // 어드민이 존재하면 인증 필요
-    if (adminCount > 0 || hasEnvAdmin) {
-      let isAdmin = false;
-      if (authHeader?.startsWith('Bearer ')) {
-        try {
-          const payload = this.jwtService.verify(authHeader.slice(7));
-          isAdmin = !!payload.admin;
-        } catch {}
-      }
-      if (!isAdmin) throw new UnauthorizedException('기존 어드민 인증이 필요합니다');
-    }
-
-    const existing = await this.usersRepo.findOne({ where: { email } });
-    if (existing) throw new ConflictException('이미 존재하는 이메일입니다');
-
-    const password_hash = await bcrypt.hash(password, 10);
-    const admin = this.usersRepo.create({ email, password_hash, store_name: '관리자', owner_name: '관리자', status: 'approved', role: 'admin' });
-    await this.usersRepo.save(admin);
-    return { message: '어드민 계정이 생성되었습니다' };
   }
 
   async getStats() {

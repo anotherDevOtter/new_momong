@@ -7,10 +7,11 @@ import { AdminService } from './admin.service';
 import { AdminGuard } from './admin.guard';
 import { User } from '../auth/users.entity';
 import { Consultation } from '../consultations/consultations.entity';
+import { AdminAccount } from './admin-account.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Consultation]),
+    TypeOrmModule.forFeature([User, Consultation, AdminAccount]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

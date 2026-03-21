@@ -30,6 +30,19 @@ async function bootstrap() {
   // Global exception filter
   app.useGlobalFilters(new AllExceptionsFilter());
 
+  // Swagger UI 기본 인증
+  const swaggerUser = process.env.SWAGGER_USER || 'admin';
+  const swaggerPassword = process.env.SWAGGER_PASSWORD || 'admin1234';
+  app.use(['/api/docs', '/api/docs-json'], (req: any, res: any, next: any) => {
+    const auth = req.headers['authorization'];
+    if (auth?.startsWith('Basic ')) {
+      const [user, pass] = Buffer.from(auth.slice(6), 'base64').toString().split(':');
+      if (user === swaggerUser && pass === swaggerPassword) return next();
+    }
+    res.setHeader('WWW-Authenticate', 'Basic realm="Swagger"');
+    return res.status(401).send('Unauthorized');
+  });
+
   // Swagger
   const config = new DocumentBuilder()
     .setTitle('FIT 헤어컨설팅 API')

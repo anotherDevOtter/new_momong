@@ -12,6 +12,7 @@ import { User } from './auth/users.entity';
 import { Customer } from './customers/customers.entity';
 import { Consultation } from './consultations/consultations.entity';
 import { ConsultationShare } from './shares/shares.entity';
+import { AdminAccount } from './admin/admin-account.entity';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { ConsultationShare } from './shares/shares.entity';
         username: config.get('DB_USERNAME', 'postgres'),
         password: config.get('DB_PASSWORD', 'password'),
         database: config.get('DB_DATABASE', 'fit_hair'),
-        entities: [User, Customer, Consultation, ConsultationShare],
+        entities: [User, Customer, Consultation, ConsultationShare, AdminAccount],
         synchronize: config.get('NODE_ENV') !== 'production',
         logging: config.get('NODE_ENV') === 'development',
         ssl: config.get('NODE_ENV') !== 'development' ? { rejectUnauthorized: false } : false,
