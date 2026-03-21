@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const registered = searchParams.get('registered') === 'true';
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,6 +36,12 @@ export default function LoginPage() {
           <p className="text-xs tracking-[0.2em] text-gray-400 uppercase mb-1">Merci Momong</p>
           <h1 className="text-2xl font-semibold text-[#111]">FIT 헤어컨설팅</h1>
         </div>
+
+        {registered && (
+          <div className="mb-6 px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 text-center">
+            가입 신청이 완료되었습니다.<br />관리자 승인 후 로그인이 가능합니다.
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

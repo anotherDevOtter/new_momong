@@ -31,7 +31,7 @@ export default function SignupPage() {
     setLoading(true);
     try {
       await signup(form.email, form.storeName, form.ownerName, form.password, form.phone || undefined);
-      router.replace('/login');
+      router.replace('/login?registered=true');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : '회원가입에 실패했습니다');
     } finally {

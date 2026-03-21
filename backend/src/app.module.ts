@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { CustomersModule } from './customers/customers.module';
 import { ConsultationsModule } from './consultations/consultations.module';
 import { SharesModule } from './shares/shares.module';
+import { AdminModule } from './admin/admin.module';
 import { User } from './auth/users.entity';
 import { Customer } from './customers/customers.entity';
 import { Consultation } from './consultations/consultations.entity';
@@ -40,6 +41,7 @@ import { ConsultationShare } from './shares/shares.entity';
     CustomersModule,
     ConsultationsModule,
     SharesModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

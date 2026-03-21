@@ -30,14 +30,10 @@ export class AuthService {
       owner_name: dto.ownerName,
       password_hash,
       phone: dto.phone,
+      status: 'pending',
     });
-    const saved = await this.usersRepo.save(user);
-
-    const token = this.jwtService.sign({ sub: saved.id, email: saved.email });
-    return {
-      token,
-      user: { id: saved.id, email: saved.email, storeName: saved.store_name, ownerName: saved.owner_name },
-    };
+    await this.usersRepo.save(user);
+    return { message: '가입 신청이 완료되었습니다. 관리자 승인 후 로그인이 가능합니다.' };
   }
 
   async login(dto: LoginDto) {
@@ -46,6 +42,9 @@ export class AuthService {
 
     const isValid = await bcrypt.compare(dto.password, user.password_hash);
     if (!isValid) throw new UnauthorizedException('이메일 또는 비밀번호가 올바르지 않습니다');
+
+    if (user.status === 'pending') throw new UnauthorizedException('관리자 승인 대기 중입니다');
+    if (user.status === 'rejected') throw new UnauthorizedException('가입이 거절되었습니다. 관리자에게 문의하세요');
 
     const token = this.jwtService.sign({ sub: user.id, email: user.email });
     return {

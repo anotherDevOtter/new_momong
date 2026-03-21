@@ -26,6 +26,9 @@ export class User {
   @Column({ length: 20, nullable: true })
   phone: string;
 
+  @Column({ default: 'approved' })
+  status: 'pending' | 'approved' | 'rejected';
+
   @CreateDateColumn({ name: 'created_at' })
   created_at: Date;
 
