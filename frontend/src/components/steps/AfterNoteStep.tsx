@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { DesignCycleGuide } from '@/components/ui/DesignCycleGuide';
@@ -17,8 +17,8 @@ interface AfterNoteStepProps {
 }
 
 export const AfterNoteStep = ({ data, onChange, onBack, onComplete }: AfterNoteStepProps) => {
-  const { token } = useAuth();
-  const [designerName, setDesignerName] = useState(data.designerName || '');
+  const { token, user } = useAuth();
+  const [designerName, setDesignerName] = useState(data.designerName || user?.name || '');
   const [afterNote, setAfterNote] = useState(data.afterNote || '');
   const [isSaving, setIsSaving] = useState(false);
 

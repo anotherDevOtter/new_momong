@@ -45,9 +45,7 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation }: Cli
             <span className="text-sm">목록으로</span>
           </button>
           <h1 className="text-xl font-semibold text-[#111111]">고객 상세</h1>
-          <button onClick={onStartNewConsultation} className="px-6 py-2 bg-[#111111] text-white text-sm rounded-full hover:bg-[#222222] transition-colors">
-            새 컨설팅 시작
-          </button>
+          <div className="w-24" />
         </div>
       </div>
 
@@ -155,6 +153,21 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation }: Cli
                             {record.nextDirection.colorChange?.length > 0 && <li>• 컬러: {record.nextDirection.colorChange.join(', ')}</li>}
                             {record.nextDirection.others?.map((item, i) => <li key={i}>• {item}</li>)}
                           </ul>
+                        </div>
+                      )}
+
+                      {/* Design Cycle Guide */}
+                      {record.designCycleGuide?.selectedMonths?.length > 0 && (
+                        <div>
+                          <p className="text-xs font-semibold text-[#111111] uppercase tracking-wider mb-2">Design Cycle Guide</p>
+                          <div className="text-xs text-[#555555] leading-relaxed bg-[#FAFAFA] p-3 border border-[#EAEAEA]">
+                            {record.designCycleGuide.selectedMonths.map((m) => {
+                              const parts = [];
+                              if (m.services.length > 0) parts.push(m.services.join(', '));
+                              if (m.memo) parts.push(`(${m.memo})`);
+                              return `${m.month}: ${parts.join(' ') || '시술 미정'}`;
+                            }).join(' / ')}
+                          </div>
                         </div>
                       )}
 

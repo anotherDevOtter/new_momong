@@ -80,9 +80,7 @@ export const ClientListStep = ({ onBack, onSelectClient }: ClientListStepProps) 
             <span className="text-sm">돌아가기</span>
           </button>
           <h1 className="text-xl font-semibold text-[#111111]">고객 목록</h1>
-          <button onClick={loadCustomers} className="text-xs text-[#777777] hover:text-[#111111] px-3 py-1 border border-[#E5E5E5] rounded hover:border-[#111111] transition-colors">
-            새로고침
-          </button>
+          <div className="w-24" />
         </div>
       </div>
 
@@ -100,7 +98,12 @@ export const ClientListStep = ({ onBack, onSelectClient }: ClientListStepProps) 
           </div>
         </div>
 
-        <p className="text-sm text-[#777777] mb-6">총 {filteredCustomers.length}명의 고객</p>
+        <div className="flex items-center gap-3 mb-6">
+          <p className="text-sm text-[#777777]">총 {filteredCustomers.length}명의 고객</p>
+          <button onClick={loadCustomers} className="text-xs text-[#777777] hover:text-[#111111] px-3 py-1 border border-[#E5E5E5] rounded hover:border-[#111111] transition-colors">
+            새로고침
+          </button>
+        </div>
 
         {isLoading ? (
           <div className="text-center py-20">
