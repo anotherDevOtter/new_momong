@@ -28,7 +28,7 @@ import { AdminAccount } from './admin/admin-account.entity';
         password: config.get('DB_PASSWORD', 'password'),
         database: config.get('DB_DATABASE', 'fit_hair'),
         entities: [User, Customer, Consultation, ConsultationShare, AdminAccount],
-        synchronize: true,
+        synchronize: config.get('NODE_ENV') !== 'production',
         logging: config.get('NODE_ENV') === 'development',
         ssl: config.get('NODE_ENV') !== 'development' ? { rejectUnauthorized: false } : false,
         extra: {

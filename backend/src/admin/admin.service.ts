@@ -39,20 +39,19 @@ export class AdminService {
     throw new UnauthorizedException('이메일 또는 비밀번호가 올바르지 않습니다');
   }
 
-  async register(email: string, password: string, registerCode: string, authHeader?: string) {
-    const envCode = process.env.ADMIN_REGISTER_CODE;
+  async register(email: string, password: string, authHeader?: string) {
+    const adminCount = await this.adminAccountsRepo.count();
 
-    // 등록 코드 또는 기존 어드민 JWT 중 하나 필요
-    let authorized = false;
-    if (envCode && registerCode === envCode) {
-      authorized = true;
-    } else if (authHeader?.startsWith('Bearer ')) {
-      try {
-        const payload = this.jwtService.verify(authHeader.slice(7));
-        authorized = !!payload.admin;
-      } catch {}
+    if (adminCount > 0) {
+      let isAdmin = false;
+      if (authHeader?.startsWith('Bearer ')) {
+        try {
+          const payload = this.jwtService.verify(authHeader.slice(7));
+          isAdmin = !!payload.admin;
+        } catch {}
+      }
+      if (!isAdmin) throw new UnauthorizedException('기존 어드민 인증이 필요합니다');
     }
-    if (!authorized) throw new UnauthorizedException('등록 코드 또는 어드민 인증이 필요합니다');
 
     const existing = await this.adminAccountsRepo.findOne({ where: { email } });
     if (existing) throw new ConflictException('이미 존재하는 이메일입니다');

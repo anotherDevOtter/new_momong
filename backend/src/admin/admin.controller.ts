@@ -20,11 +20,11 @@ export class AdminController {
 
   @Post('auth/register')
   @ApiBearerAuth()
-  @ApiOperation({ summary: '어드민 계정 추가 (registerCode 또는 Bearer 토큰 필요)' })
-  @ApiBody({ schema: { properties: { email: { type: 'string' }, password: { type: 'string' }, registerCode: { type: 'string' } } } })
-  async register(@Body('email') email: string, @Body('password') password: string, @Body('registerCode') registerCode: string, @Req() req: Request) {
+  @ApiOperation({ summary: '어드민 계정 추가 (관리자 없으면 인증 불필요, 있으면 Bearer 토큰 필요)' })
+  @ApiBody({ schema: { properties: { email: { type: 'string' }, password: { type: 'string' } } } })
+  async register(@Body('email') email: string, @Body('password') password: string, @Req() req: Request) {
     const authHeader = req.headers['authorization'];
-    const result = await this.adminService.register(email, password, registerCode, authHeader);
+    const result = await this.adminService.register(email, password, authHeader);
     return { data: result };
   }
 
