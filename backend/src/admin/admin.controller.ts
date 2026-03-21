@@ -1,5 +1,6 @@
-import { Controller, Post, Get, Patch, Body, Param, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody, ApiSecurity } from '@nestjs/swagger';
+import { Controller, Post, Get, Patch, Body, Param, UseGuards, HttpCode, HttpStatus, Req } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { Request } from 'express';
 import { AdminService } from './admin.service';
 import { AdminGuard } from './admin.guard';
 
@@ -18,12 +19,12 @@ export class AdminController {
   }
 
   @Post('auth/register')
-  @UseGuards(AdminGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: '어드민 계정 추가 (기존 어드민 인증 필요)' })
+  @ApiOperation({ summary: '어드민 계정 추가 (어드민 없으면 인증 불필요, 있으면 Bearer 토큰 필요)' })
   @ApiBody({ schema: { properties: { email: { type: 'string' }, password: { type: 'string' } } } })
-  async register(@Body('email') email: string, @Body('password') password: string) {
-    const result = await this.adminService.register(email, password);
+  async register(@Body('email') email: string, @Body('password') password: string, @Req() req: Request) {
+    const authHeader = req.headers['authorization'];
+    const result = await this.adminService.register(email, password, authHeader);
     return { data: result };
   }
 

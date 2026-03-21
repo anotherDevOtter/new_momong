@@ -68,9 +68,25 @@ export class AdminService {
     return { success: true };
   }
 
-  async register(email: string, password: string) {
+  async register(email: string, password: string, authHeader?: string) {
+    const adminCount = await this.usersRepo.count({ where: { role: 'admin' } });
+    const hasEnvAdmin = !!(process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD);
+
+    // 어드민이 존재하면 인증 필요
+    if (adminCount > 0 || hasEnvAdmin) {
+      let isAdmin = false;
+      if (authHeader?.startsWith('Bearer ')) {
+        try {
+          const payload = this.jwtService.verify(authHeader.slice(7));
+          isAdmin = !!payload.admin;
+        } catch {}
+      }
+      if (!isAdmin) throw new UnauthorizedException('기존 어드민 인증이 필요합니다');
+    }
+
     const existing = await this.usersRepo.findOne({ where: { email } });
     if (existing) throw new ConflictException('이미 존재하는 이메일입니다');
+
     const password_hash = await bcrypt.hash(password, 10);
     const admin = this.usersRepo.create({ email, password_hash, store_name: '관리자', owner_name: '관리자', status: 'approved', role: 'admin' });
     await this.usersRepo.save(admin);
