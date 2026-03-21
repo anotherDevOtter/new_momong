@@ -5,22 +5,18 @@ frontend:
       commands:
         - |
           if [ "$AWS_BRANCH" = "admin" ]; then
-            cd frontend/admin && npm ci
+            npm ci --prefix frontend/admin
           else
-            cd frontend/user && npm ci
+            npm ci --prefix frontend/user
           fi
     build:
       commands:
         - |
           if [ "$AWS_BRANCH" = "admin" ]; then
-            cd frontend/admin && npm run build
-          else
-            cd frontend/user && npm run build
-          fi
-        - |
-          if [ "$AWS_BRANCH" = "admin" ]; then
+            npm run build --prefix frontend/admin
             cp -r frontend/admin/.next .next
           else
+            npm run build --prefix frontend/user
             cp -r frontend/user/.next .next
           fi
   artifacts:
