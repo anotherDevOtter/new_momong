@@ -50,5 +50,5 @@ jobs:
 
           aws elasticbeanstalk update-environment \
             --application-name "momong-staging" \
-            --environment-name "momong-manager-staging-env" \
+            --environment-name "Momong-staging-env" \
             --version-label $GITHUB_SHA
