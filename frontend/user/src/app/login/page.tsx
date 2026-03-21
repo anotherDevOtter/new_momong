@@ -1,14 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 
-export default function LoginPage() {
-  const router = useRouter();
+function RegisteredBanner() {
   const searchParams = useSearchParams();
   const registered = searchParams.get('registered') === 'true';
+
+  if (!registered) return null;
+
+  return (
+    <div className="mb-6 px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 text-center">
+      가입 신청이 완료되었습니다.<br />관리자 승인 후 로그인이 가능합니다.
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  const router = useRouter();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -37,11 +48,9 @@ export default function LoginPage() {
           <h1 className="text-2xl font-semibold text-[#111]">FIT 헤어컨설팅</h1>
         </div>
 
-        {registered && (
-          <div className="mb-6 px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 text-center">
-            가입 신청이 완료되었습니다.<br />관리자 승인 후 로그인이 가능합니다.
-          </div>
-        )}
+        <Suspense fallback={null}>
+          <RegisteredBanner />
+        </Suspense>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
