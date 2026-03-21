@@ -1,5 +1,5 @@
 import { Controller, Post, Get, Patch, Body, Param, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody, ApiSecurity } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { AdminGuard } from './admin.guard';
 
@@ -14,6 +14,16 @@ export class AdminController {
   @ApiBody({ schema: { properties: { email: { type: 'string' }, password: { type: 'string' } } } })
   async login(@Body('email') email: string, @Body('password') password: string) {
     const result = await this.adminService.login(email, password);
+    return { data: result };
+  }
+
+  @Post('auth/register')
+  @UseGuards(AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '어드민 계정 추가 (기존 어드민 인증 필요)' })
+  @ApiBody({ schema: { properties: { email: { type: 'string' }, password: { type: 'string' } } } })
+  async register(@Body('email') email: string, @Body('password') password: string) {
+    const result = await this.adminService.register(email, password);
     return { data: result };
   }
 

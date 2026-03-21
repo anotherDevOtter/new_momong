@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { ArrowLeft, User, Calendar, Phone, Clock, ChevronDown, ChevronUp, Scissors, Link, Copy, Check, Eye, EyeOff } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { ArrowLeft, User, Calendar, Phone, Clock, ChevronDown, ChevronUp, Scissors, Link, Copy, Check, Eye, EyeOff, Download } from 'lucide-react';
+import QRCode from 'react-qr-code';
 import { getConsultationsByCustomerPhone, getShareByConsultation } from '@/utils/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { Customer, ConsultationRecord } from '@/types';
@@ -20,6 +21,7 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation }: Cli
   const [shareInfo, setShareInfo] = useState<Record<string, { token: string; password: string; url: string } | null>>({});
   const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
   const [copied, setCopied] = useState<string | null>(null);
+  const qrRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const handleExpand = async (id: string) => {
     const next = expandedId === id ? null : id;
@@ -34,6 +36,28 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation }: Cli
     await navigator.clipboard.writeText(url);
     setCopied(id);
     setTimeout(() => setCopied(null), 2000);
+  };
+
+  const handleDownloadQR = (id: string) => {
+    const svg = qrRefs.current[id]?.querySelector('svg');
+    if (!svg) return;
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement('canvas');
+    const size = 260;
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d')!;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, size, size);
+    const img = new Image();
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0, size, size);
+      const link = document.createElement('a');
+      link.download = `share-qr-${id}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    };
+    img.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}`;
   };
 
   const formatDate = (dateString: string) => {
@@ -141,34 +165,57 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation }: Cli
                     <div className="mt-5 space-y-5 text-sm">
 
                       {/* 공유 링크 */}
-                      {shareInfo[record.id] && (
-                        <div className="border border-[#EAEAEA] p-4 bg-[#FAFAFA] space-y-3">
-                          <p className="text-xs font-semibold text-[#111111] uppercase tracking-wider">공유 링크</p>
-                          <div className="flex items-center gap-2">
-                            <div className="flex-1 px-3 py-2 bg-white border border-[#E5E5E5] text-xs text-[#555555] font-mono truncate">
-                              {shareInfo[record.id]!.url || `/share/${shareInfo[record.id]!.token}`}
+                      {shareInfo[record.id] && (() => {
+                        const info = shareInfo[record.id]!;
+                        const url = info.url || `${typeof window !== 'undefined' ? window.location.origin : ''}/share/${info.token}`;
+                        return (
+                          <div className="border border-[#EAEAEA] p-4 bg-[#FAFAFA] space-y-4">
+                            <p className="text-xs font-semibold text-[#111111] uppercase tracking-wider">공유 링크</p>
+
+                            {/* 링크 */}
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 px-3 py-2 bg-white border border-[#E5E5E5] text-xs text-[#555555] font-mono truncate">
+                                {url}
+                              </div>
+                              <button
+                                onClick={() => handleCopy(record.id, url)}
+                                className="shrink-0 w-8 h-8 flex items-center justify-center border border-[#E5E5E5] bg-white hover:border-[#111111] transition-colors"
+                              >
+                                {copied === record.id ? <Check size={13} className="text-[#111111]" /> : <Copy size={13} className="text-[#999999]" />}
+                              </button>
+                            </div>
+
+                            {/* QR 코드 */}
+                            <div
+                              ref={(el) => { qrRefs.current[record.id] = el; }}
+                              className="flex justify-center p-4 bg-white border border-[#E5E5E5]"
+                            >
+                              <QRCode value={url} size={140} />
                             </div>
                             <button
-                              onClick={() => handleCopy(record.id, shareInfo[record.id]!.url || `/share/${shareInfo[record.id]!.token}`)}
-                              className="shrink-0 w-8 h-8 flex items-center justify-center border border-[#E5E5E5] bg-white hover:border-[#111111] transition-colors"
+                              onClick={() => handleDownloadQR(record.id)}
+                              className="w-full h-9 flex items-center justify-center gap-2 text-xs text-[#777777] hover:text-[#111111] border border-[#E5E5E5] bg-white hover:border-[#999999] transition-colors"
                             >
-                              {copied === record.id ? <Check size={13} className="text-[#111111]" /> : <Copy size={13} className="text-[#999999]" />}
+                              <Download size={13} />
+                              QR 이미지 저장
                             </button>
+
+                            {/* 비밀번호 */}
+                            <div className="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E5E5]">
+                              <span className="text-xs text-[#999999] w-16 shrink-0">비밀번호</span>
+                              <span className="text-xs font-medium text-[#111111] font-mono tracking-widest flex-1">
+                                {showPassword[record.id] ? info.password : '••••••••'}
+                              </span>
+                              <button
+                                onClick={() => setShowPassword((prev) => ({ ...prev, [record.id]: !prev[record.id] }))}
+                                className="text-[#999999] hover:text-[#111111] transition-colors"
+                              >
+                                {showPassword[record.id] ? <EyeOff size={13} /> : <Eye size={13} />}
+                              </button>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-[#999999] w-16 shrink-0">비밀번호</span>
-                            <span className="text-xs font-medium text-[#111111] font-mono tracking-widest">
-                              {showPassword[record.id] ? shareInfo[record.id]!.password : '••••••••'}
-                            </span>
-                            <button
-                              onClick={() => setShowPassword((prev) => ({ ...prev, [record.id]: !prev[record.id] }))}
-                              className="text-[#999999] hover:text-[#111111] transition-colors"
-                            >
-                              {showPassword[record.id] ? <EyeOff size={13} /> : <Eye size={13} />}
-                            </button>
-                          </div>
-                        </div>
-                      )}
+                        );
+                      })()}
                       {shareInfo[record.id] === null && (
                         <p className="text-xs text-[#999999]">생성된 공유 링크가 없습니다.</p>
                       )}

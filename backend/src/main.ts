@@ -35,6 +35,7 @@ async function bootstrap() {
     .setTitle('FIT 헤어컨설팅 API')
     .setDescription('MERCI MOMONG - FIT 헤어컨설팅 백엔드 API')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);

@@ -29,6 +29,9 @@ export class User {
   @Column({ default: 'approved' })
   status: 'pending' | 'approved' | 'rejected';
 
+  @Column({ default: 'user' })
+  role: 'user' | 'admin';
+
   @CreateDateColumn({ name: 'created_at' })
   created_at: Date;
 

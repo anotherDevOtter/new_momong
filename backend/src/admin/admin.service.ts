@@ -1,4 +1,5 @@
-import { Injectable, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, NotFoundException, ConflictException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -19,15 +20,20 @@ export class AdminService {
     const adminEmail = process.env.ADMIN_EMAIL;
     const adminPassword = process.env.ADMIN_PASSWORD;
 
-    if (!adminEmail || !adminPassword) {
-      throw new UnauthorizedException('어드민 계정이 설정되지 않았습니다');
-    }
-    if (email !== adminEmail || password !== adminPassword) {
-      throw new UnauthorizedException('이메일 또는 비밀번호가 올바르지 않습니다');
+    // 환경변수 어드민 계정 확인
+    if (adminEmail && adminPassword && email === adminEmail && password === adminPassword) {
+      const token = this.jwtService.sign({ sub: 'admin', email, admin: true });
+      return { token };
     }
 
-    const token = this.jwtService.sign({ sub: 'admin', email, admin: true });
-    return { token };
+    // DB 어드민 계정 확인
+    const user = await this.usersRepo.findOne({ where: { email, role: 'admin' } });
+    if (user && await bcrypt.compare(password, user.password_hash)) {
+      const token = this.jwtService.sign({ sub: user.id, email, admin: true });
+      return { token };
+    }
+
+    throw new UnauthorizedException('이메일 또는 비밀번호가 올바르지 않습니다');
   }
 
   async getUsers() {
@@ -60,6 +66,15 @@ export class AdminService {
     user.status = status;
     await this.usersRepo.save(user);
     return { success: true };
+  }
+
+  async register(email: string, password: string) {
+    const existing = await this.usersRepo.findOne({ where: { email } });
+    if (existing) throw new ConflictException('이미 존재하는 이메일입니다');
+    const password_hash = await bcrypt.hash(password, 10);
+    const admin = this.usersRepo.create({ email, password_hash, store_name: '관리자', owner_name: '관리자', status: 'approved', role: 'admin' });
+    await this.usersRepo.save(admin);
+    return { message: '어드민 계정이 생성되었습니다' };
   }
 
   async getStats() {
