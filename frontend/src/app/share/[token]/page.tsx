@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { verifyShare } from '@/utils/api';
 import { ConsultationData } from '@/types';
-import { Lock, Eye, EyeOff } from 'lucide-react';
+import { Lock, Eye, EyeOff, Download } from 'lucide-react';
 
 export default function SharePage() {
   const params = useParams();
@@ -86,9 +86,31 @@ export default function SharePage() {
 }
 
 function AfterNoteView({ data }: { data: ConsultationData }) {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    if (!contentRef.current) return;
+    setDownloading(true);
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      const canvas = await html2canvas(contentRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+      });
+      const link = document.createElement('a');
+      link.download = `after-note-${data.clientInfo.name}-${data.visitDate}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-2xl mx-auto px-6 py-16 space-y-10">
+      <div ref={contentRef} className="max-w-2xl mx-auto px-6 py-16 space-y-10">
         {/* 헤더 */}
         <div className="text-center space-y-2 pb-8 border-b border-[#EAEAEA]">
           <p className="text-xs tracking-[0.2em] text-[#999999] uppercase">After Note</p>
@@ -165,6 +187,18 @@ function AfterNoteView({ data }: { data: ConsultationData }) {
           <p className="text-xs text-[#999999]">BE YOURSELF</p>
           <p className="text-[11px] tracking-[0.2em] text-[#BBBBBB] uppercase">MERCI MOMONG</p>
         </div>
+      </div>
+
+      {/* 이미지 다운로드 버튼 */}
+      <div className="max-w-2xl mx-auto px-6 pb-16">
+        <button
+          onClick={handleDownload}
+          disabled={downloading}
+          className="w-full h-12 bg-[#111111] text-white text-sm font-medium flex items-center justify-center gap-2 hover:bg-[#333333] transition-colors disabled:opacity-40"
+        >
+          <Download size={16} />
+          {downloading ? '저장 중...' : '이미지로 저장'}
+        </button>
       </div>
     </div>
   );

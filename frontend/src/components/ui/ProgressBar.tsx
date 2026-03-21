@@ -9,7 +9,7 @@ export const ProgressBar = ({ currentStep, totalSteps }: ProgressBarProps) => {
   const progress = (currentStep / (totalSteps - 1)) * 100;
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-[#F0F0F0]">
+    <div className="w-full bg-white border-b border-[#F0F0F0]">
       <div className="h-[73px] flex items-center px-6">
         <div className="w-full">
           <div className="flex justify-between items-center mb-2">

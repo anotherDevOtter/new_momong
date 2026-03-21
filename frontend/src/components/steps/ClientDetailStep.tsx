@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ArrowLeft, User, Calendar, Phone, Clock, ChevronDown, ChevronUp, Scissors } from 'lucide-react';
-import { getConsultationsByCustomerPhone } from '@/utils/api';
+import { ArrowLeft, User, Calendar, Phone, Clock, ChevronDown, ChevronUp, Scissors, Link, Copy, Check, Eye, EyeOff } from 'lucide-react';
+import { getConsultationsByCustomerPhone, getShareByConsultation } from '@/utils/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { Customer, ConsultationRecord } from '@/types';
 
@@ -17,6 +17,24 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation }: Cli
   const [consultations, setConsultations] = useState<ConsultationRecord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [shareInfo, setShareInfo] = useState<Record<string, { token: string; password: string; url: string } | null>>({});
+  const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
+  const [copied, setCopied] = useState<string | null>(null);
+
+  const handleExpand = async (id: string) => {
+    const next = expandedId === id ? null : id;
+    setExpandedId(next);
+    if (next && !(id in shareInfo) && token) {
+      const info = await getShareByConsultation(token, id);
+      setShareInfo((prev) => ({ ...prev, [id]: info }));
+    }
+  };
+
+  const handleCopy = async (id: string, url: string) => {
+    await navigator.clipboard.writeText(url);
+    setCopied(id);
+    setTimeout(() => setCopied(null), 2000);
+  };
 
   const formatDate = (dateString: string) => {
     try {
@@ -96,7 +114,7 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation }: Cli
               {consultations.map((record) => (
                 <div key={record.id} className="px-8 py-5">
                   <button
-                    onClick={() => setExpandedId(expandedId === record.id ? null : record.id)}
+                    onClick={() => handleExpand(record.id)}
                     className="w-full flex items-center justify-between text-left"
                   >
                     <div className="flex items-center gap-4">
@@ -121,6 +139,40 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation }: Cli
 
                   {expandedId === record.id && (
                     <div className="mt-5 space-y-5 text-sm">
+
+                      {/* 공유 링크 */}
+                      {shareInfo[record.id] && (
+                        <div className="border border-[#EAEAEA] p-4 bg-[#FAFAFA] space-y-3">
+                          <p className="text-xs font-semibold text-[#111111] uppercase tracking-wider">공유 링크</p>
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 px-3 py-2 bg-white border border-[#E5E5E5] text-xs text-[#555555] font-mono truncate">
+                              {shareInfo[record.id]!.url || `/share/${shareInfo[record.id]!.token}`}
+                            </div>
+                            <button
+                              onClick={() => handleCopy(record.id, shareInfo[record.id]!.url || `/share/${shareInfo[record.id]!.token}`)}
+                              className="shrink-0 w-8 h-8 flex items-center justify-center border border-[#E5E5E5] bg-white hover:border-[#111111] transition-colors"
+                            >
+                              {copied === record.id ? <Check size={13} className="text-[#111111]" /> : <Copy size={13} className="text-[#999999]" />}
+                            </button>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-[#999999] w-16 shrink-0">비밀번호</span>
+                            <span className="text-xs font-medium text-[#111111] font-mono tracking-widest">
+                              {showPassword[record.id] ? shareInfo[record.id]!.password : '••••••••'}
+                            </span>
+                            <button
+                              onClick={() => setShowPassword((prev) => ({ ...prev, [record.id]: !prev[record.id] }))}
+                              className="text-[#999999] hover:text-[#111111] transition-colors"
+                            >
+                              {showPassword[record.id] ? <EyeOff size={13} /> : <Eye size={13} />}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                      {shareInfo[record.id] === null && (
+                        <p className="text-xs text-[#999999]">생성된 공유 링크가 없습니다.</p>
+                      )}
+
                       {/* 고객 니즈 - TODAY KEYWORD */}
                       {record.todayKeyword && (
                         record.todayKeyword.faceConcerns?.length > 0 ||

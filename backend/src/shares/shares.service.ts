@@ -39,10 +39,30 @@ export class SharesService {
       token,
       consultation_id: consultationId,
       password_hash,
+      password_plain: password,
     });
     await this.shareRepo.save(share);
 
     return { token };
+  }
+
+  async getShareByConsultation(consultationId: string, userId: string) {
+    const consultation = await this.consultationRepo.findOne({
+      where: { id: consultationId, user_id: userId },
+    });
+    if (!consultation) throw new NotFoundException('컨설팅을 찾을 수 없습니다');
+
+    const share = await this.shareRepo.findOne({
+      where: { consultation_id: consultationId },
+    });
+    if (!share) return null;
+
+    const baseUrl = process.env.FRONTEND_URL || '';
+    return {
+      token: share.token,
+      password: share.password_plain,
+      url: baseUrl ? `${baseUrl}/share/${share.token}` : `/share/${share.token}`,
+    };
   }
 
   async verifyAndGetConsultation(token: string, password: string) {

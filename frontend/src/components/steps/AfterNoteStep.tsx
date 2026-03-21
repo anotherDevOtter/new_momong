@@ -5,9 +5,6 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { DesignCycleGuide } from '@/components/ui/DesignCycleGuide';
 import { ConsultationData, CycleMonth } from '@/types';
-import { saveConsultation } from '@/utils/api';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
 
 interface AfterNoteStepProps {
   data: ConsultationData;
@@ -17,34 +14,16 @@ interface AfterNoteStepProps {
 }
 
 export const AfterNoteStep = ({ data, onChange, onBack, onComplete }: AfterNoteStepProps) => {
-  const { token } = useAuth();
   const [designerName, setDesignerName] = useState(data.designerName || '');
   const [afterNote, setAfterNote] = useState(data.afterNote || '');
-  const [isSaving, setIsSaving] = useState(false);
 
   const handleCycleGuideChange = (selectedMonths: CycleMonth[]) => {
     onChange({ ...data, designCycleGuide: { selectedMonths } });
   };
 
-  const handleComplete = async () => {
-    if (!designerName || !afterNote) return;
-
-    setIsSaving(true);
-    const finalData = { ...data, designerName, afterNote };
-    onChange(finalData);
-
-    try {
-      await saveConsultation(token!, finalData);
-      toast.success('컨설팅이 저장되었습니다');
-      onComplete();
-    } catch (error) {
-      console.error('저장 실패:', error);
-      // 저장 실패해도 완료 처리 (오프라인 대응)
-      toast.error('저장 중 오류가 발생했습니다. 로컬에는 기록됩니다.');
-      onComplete();
-    } finally {
-      setIsSaving(false);
-    }
+  const handleComplete = () => {
+    onChange({ ...data, designerName, afterNote });
+    onComplete();
   };
 
   return (
@@ -154,9 +133,9 @@ export const AfterNoteStep = ({ data, onChange, onBack, onComplete }: AfterNoteS
           onClick={handleComplete}
           variant="primary"
           fullWidth
-          disabled={!designerName || !afterNote || isSaving}
+          disabled={!designerName || !afterNote}
         >
-          {isSaving ? '저장 중...' : '완료'}
+          완료
         </Button>
       </div>
     </div>

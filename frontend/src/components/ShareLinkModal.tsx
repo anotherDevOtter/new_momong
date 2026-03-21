@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import QRCode from 'react-qr-code';
-import { X, Copy, Check, Link } from 'lucide-react';
+import { X, Copy, Check, Link, Download } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { createShare } from '@/utils/api';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,18 +10,22 @@ import { toast } from 'sonner';
 
 interface ShareLinkModalProps {
   consultationId: string;
+  clientName?: string;
+  visitDate?: string;
+  designerName?: string;
   onClose: () => void;
 }
 
 type Step = 'password' | 'result';
 
-export const ShareLinkModal = ({ consultationId, onClose }: ShareLinkModalProps) => {
-  const { token } = useAuth();
+export const ShareLinkModal = ({ consultationId, clientName, visitDate, designerName, onClose }: ShareLinkModalProps) => {
+  const { token, user } = useAuth();
   const [step, setStep] = useState<Step>('password');
   const [password, setPassword] = useState('');
   const [shareUrl, setShareUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const qrRef = useRef<HTMLDivElement>(null);
 
   const handleCreate = async () => {
     if (!password.trim()) {
@@ -41,6 +45,83 @@ export const ShareLinkModal = ({ consultationId, onClose }: ShareLinkModalProps)
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDownloadQR = () => {
+    const svg = qrRef.current?.querySelector('svg');
+    if (!svg) return;
+
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const qrSize = 260;
+    const padding = 48;
+    const headerH = 100;
+    const footerH = 80;
+    const canvasW = qrSize + padding * 2;
+    const canvasH = headerH + qrSize + footerH;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = canvasW * 2;   // 2x for retina
+    canvas.height = canvasH * 2;
+    const ctx = canvas.getContext('2d')!;
+    ctx.scale(2, 2);
+
+    // 배경
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvasW, canvasH);
+
+    // 상단 테두리 라인
+    ctx.fillStyle = '#111111';
+    ctx.fillRect(padding, 20, canvasW - padding * 2, 1);
+
+    // 매장명
+    ctx.fillStyle = '#111111';
+    ctx.font = '600 11px sans-serif';
+    ctx.letterSpacing = '3px';
+    ctx.textAlign = 'center';
+    ctx.fillText((user?.storeName || 'MERCI MOMONG').toUpperCase(), canvasW / 2, 42);
+
+    // 고객명
+    ctx.font = '700 22px sans-serif';
+    ctx.letterSpacing = '0px';
+    ctx.fillText(clientName || '', canvasW / 2, 72);
+
+    // 날짜 · 디자이너
+    ctx.fillStyle = '#999999';
+    ctx.font = '400 11px sans-serif';
+    const meta = [visitDate, designerName].filter(Boolean).join('  ·  ');
+    ctx.fillText(meta, canvasW / 2, 92);
+
+    // QR 코드
+    const img = new Image();
+    img.onload = () => {
+      ctx.drawImage(img, padding, headerH, qrSize, qrSize);
+
+      // 하단 라인
+      ctx.fillStyle = '#eeeeee';
+      ctx.fillRect(padding, headerH + qrSize + 16, canvasW - padding * 2, 1);
+
+      // AFTER NOTE 텍스트
+      ctx.fillStyle = '#999999';
+      ctx.font = '400 10px sans-serif';
+      ctx.letterSpacing = '2px';
+      ctx.fillText('AFTER NOTE', canvasW / 2, headerH + qrSize + 36);
+
+      // 하단 브랜드
+      ctx.fillStyle = '#111111';
+      ctx.font = '600 10px sans-serif';
+      ctx.letterSpacing = '3px';
+      ctx.fillText('MERCI MOMONG', canvasW / 2, headerH + qrSize + 58);
+
+      // 하단 테두리 라인
+      ctx.fillStyle = '#111111';
+      ctx.fillRect(padding, canvasH - 20, canvasW - padding * 2, 1);
+
+      const link = document.createElement('a');
+      link.download = `after-note-qr-${clientName || 'guest'}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    };
+    img.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}`;
   };
 
   const handleCopy = async () => {
@@ -102,8 +183,17 @@ export const ShareLinkModal = ({ consultationId, onClose }: ShareLinkModalProps)
             </p>
 
             {/* QR Code */}
-            <div className="flex justify-center p-6 bg-[#FAFAFA] border border-[#EAEAEA]">
-              <QRCode value={shareUrl} size={160} />
+            <div className="space-y-2">
+              <div ref={qrRef} className="flex justify-center p-6 bg-[#FAFAFA] border border-[#EAEAEA]">
+                <QRCode value={shareUrl} size={160} />
+              </div>
+              <button
+                onClick={handleDownloadQR}
+                className="w-full h-10 flex items-center justify-center gap-2 text-xs text-[#777777] hover:text-[#111111] border border-[#E5E5E5] hover:border-[#999999] transition-colors"
+              >
+                <Download size={13} />
+                QR코드 이미지 저장
+              </button>
             </div>
 
             {/* Link */}

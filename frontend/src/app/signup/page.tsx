@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { formatPhone } from '@/lib/utils';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -115,7 +116,7 @@ export default function SignupPage() {
             <input
               type="tel"
               value={form.phone}
-              onChange={set('phone')}
+              onChange={(e) => setForm((f) => ({ ...f, phone: formatPhone(e.target.value) }))}
               className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-[#111] transition-colors"
               placeholder="010-0000-0000"
             />

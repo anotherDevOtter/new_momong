@@ -16,7 +16,7 @@ import { HairConditionStep } from '@/components/steps/HairConditionStep';
 import { HairStyleProposalStep } from '@/components/steps/HairStyleProposalStep';
 import { TodayDesignStep } from '@/components/steps/TodayDesignStep';
 import { AfterNoteStep } from '@/components/steps/AfterNoteStep';
-import { CompletionStep } from '@/components/steps/CompletionStep';
+import { ReviewStep } from '@/components/steps/ReviewStep';
 import { ClientListStep } from '@/components/steps/ClientListStep';
 import { ClientDetailStep } from '@/components/steps/ClientDetailStep';
 import { ConsultationData, Customer } from '@/types';
@@ -50,6 +50,7 @@ export default function Home() {
   const { user, loading, logout } = useAuth();
   const [currentView, setCurrentView] = useState<AppView>('consultation');
   const [currentStep, setCurrentStep] = useState(0);
+  const [fromReview, setFromReview] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Customer | null>(null);
   const [consultationData, setConsultationData] = useState<ConsultationData>({
     ...INITIAL_DATA,
@@ -103,6 +104,18 @@ export default function Home() {
     window.history.replaceState({ step: 0, view: 'consultation' } satisfies AppHistoryState, '');
     setCurrentStep(0);
     setConsultationData({ ...INITIAL_DATA, visitDate: new Date().toLocaleDateString('ko-KR') });
+  };
+
+  const handleGoToStep = (step: number) => {
+    setFromReview(true);
+    pushState(step, 'consultation');
+    setCurrentStep(step);
+  };
+
+  const handleReturnToReview = () => {
+    setFromReview(false);
+    pushState(11, 'consultation');
+    setCurrentStep(11);
   };
 
   const handleGoToClientList = () => {
@@ -228,11 +241,13 @@ export default function Home() {
           />
         );
       case 11:
-        return <CompletionStep data={consultationData} onRestart={handleComplete} onBack={handleBack} />;
+        return <ReviewStep data={consultationData} onGoToStep={handleGoToStep} onRestart={handleComplete} />;
       default:
         return <IntroStep onNext={handleNext} />;
     }
   };
+
+  const showProgressBar = currentView === 'consultation' && currentStep > 0 && currentStep < 11;
 
   return (
     <>
@@ -243,37 +258,50 @@ export default function Home() {
         }}
       />
 
-      {/* 로그아웃 버튼 */}
-      <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
-        <span className="text-xs text-gray-400">{user.storeName}</span>
-        <button
-          onClick={logout}
-          className="text-xs text-gray-400 hover:text-gray-700 px-2 py-1 border border-gray-200 rounded hover:border-gray-400 transition-colors"
-        >
-          로그아웃
-        </button>
-      </div>
+      {/* 상단 헤더 */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+        <div className="w-28">
+          {currentView === 'consultation' && currentStep >= 1 && (
+            <button
+              onClick={() => {
+                if (window.confirm('처음으로 돌아가면 현재 컨설팅 내용이 모두 사라집니다. 계속하시겠습니까?')) {
+                  setFromReview(false);
+                  handleComplete();
+                }
+              }}
+              className="text-xs text-gray-400 hover:text-gray-700 px-2 py-1 border border-gray-200 rounded hover:border-gray-400 transition-colors"
+            >
+              처음으로
+            </button>
+          )}
+        </div>
 
-      {/* 처음으로 버튼 - 컨설팅 진행 중에만 표시 */}
-      {currentView === 'consultation' && currentStep >= 1 && (
-        <div className="fixed top-4 left-4 z-50">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-400">{user.storeName}</span>
           <button
-            onClick={handleComplete}
+            onClick={logout}
             className="text-xs text-gray-400 hover:text-gray-700 px-2 py-1 border border-gray-200 rounded hover:border-gray-400 transition-colors"
           >
-            처음으로
+            로그아웃
           </button>
         </div>
-      )}
+      </div>
+
+      {showProgressBar && <ProgressBar currentStep={currentStep} totalSteps={TOTAL_STEPS} />}
 
       {currentView === 'consultation' && (
         <>
-          {currentStep > 0 && currentStep < 11 && (
-            <ProgressBar currentStep={currentStep} totalSteps={TOTAL_STEPS} />
+          {renderStep()}
+          {fromReview && currentStep >= 1 && currentStep < 11 && (
+            <div className="max-w-2xl mx-auto px-6 pb-12 -mt-20">
+              <button
+                onClick={handleReturnToReview}
+                className="w-full h-12 bg-[#111111] text-white text-sm font-medium hover:bg-[#333333] transition-colors"
+              >
+                확인 페이지로
+              </button>
+            </div>
           )}
-          <div className={currentStep > 0 && currentStep < 11 ? 'pt-[73px]' : ''}>
-            {renderStep()}
-          </div>
         </>
       )}
 

@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
   Param,
   HttpCode,
@@ -30,8 +31,20 @@ export class SharesController {
     const result = await this.sharesService.createShare(
       consultationId,
       password,
-      req.user.userId,
+      req.user.id,
     );
+    return { data: result };
+  }
+
+  // 인증 필요: 공유 링크 조회 (링크 + 비밀번호)
+  @Get('by-consultation/:consultationId')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async getShare(
+    @Param('consultationId') consultationId: string,
+    @Request() req: { user: { id: string } },
+  ) {
+    const result = await this.sharesService.getShareByConsultation(consultationId, req.user.id);
     return { data: result };
   }
 

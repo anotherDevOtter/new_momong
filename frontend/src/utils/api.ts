@@ -120,6 +120,15 @@ export const createShare = async (token: string, consultationId: string, passwor
   return json.data;
 };
 
+export const getShareByConsultation = async (token: string, consultationId: string): Promise<{ token: string; password: string; url: string } | null> => {
+  const res = await fetch(`${API_BASE}/shares/by-consultation/${consultationId}`, {
+    headers: authHeaders(token),
+  });
+  if (!res.ok) return null;
+  const json = await res.json();
+  return json.data;
+};
+
 export const verifyShare = async (shareToken: string, password: string): Promise<ConsultationData> => {
   const res = await fetch(`${API_BASE}/shares/${shareToken}/verify`, {
     method: 'POST',

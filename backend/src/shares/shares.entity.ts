@@ -26,6 +26,9 @@ export class ConsultationShare {
   @Column({ name: 'password_hash' })
   password_hash: string;
 
+  @Column({ name: 'password_plain', nullable: true })
+  password_plain: string;
+
   @Column({ name: 'expires_at', nullable: true })
   expires_at: Date;
 

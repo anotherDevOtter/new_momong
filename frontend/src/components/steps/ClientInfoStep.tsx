@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { RadioGroup } from '@/components/ui/RadioGroup';
 import { ClientInfo } from '@/types';
+import { formatPhone } from '@/lib/utils';
 
 interface ClientInfoStepProps {
   data: ClientInfo;
@@ -32,7 +33,7 @@ export const ClientInfoStep = ({ data, onChange, onNext, onBack }: ClientInfoSte
         <Input
           label="연락처"
           value={data.phone}
-          onChange={(value) => onChange({ ...data, phone: value })}
+          onChange={(value) => onChange({ ...data, phone: formatPhone(value) })}
           type="tel"
           placeholder="010-0000-0000"
           required
