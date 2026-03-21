@@ -41,10 +41,9 @@ export class AdminService {
 
   async register(email: string, password: string, authHeader?: string) {
     const adminCount = await this.adminAccountsRepo.count();
-    const hasEnvAdmin = !!(process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD);
 
-    // 어드민이 존재하면 인증 필요
-    if (adminCount > 0 || hasEnvAdmin) {
+    // DB 어드민이 존재하면 인증 필요
+    if (adminCount > 0) {
       let isAdmin = false;
       if (authHeader?.startsWith('Bearer ')) {
         try {
