@@ -17,8 +17,8 @@ interface AfterNoteStepProps {
 }
 
 export const AfterNoteStep = ({ data, onChange, onBack, onComplete }: AfterNoteStepProps) => {
-  const { token, user } = useAuth();
-  const [designerName, setDesignerName] = useState(data.designerName || user?.name || '');
+  const { token } = useAuth();
+  const [designerName, setDesignerName] = useState(data.designerName || '');
   const [afterNote, setAfterNote] = useState(data.afterNote || '');
   const [isSaving, setIsSaving] = useState(false);
 

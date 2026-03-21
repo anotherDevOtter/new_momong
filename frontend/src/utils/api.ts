@@ -104,3 +104,30 @@ export const deleteConsultation = async (token: string, id: string): Promise<voi
   });
   if (!res.ok) throw new Error('컨설팅 삭제 실패');
 };
+
+// ──────────────────────────────────────────────
+// Shares
+// ──────────────────────────────────────────────
+
+export const createShare = async (token: string, consultationId: string, password: string): Promise<{ token: string }> => {
+  const res = await fetch(`${API_BASE}/shares/${consultationId}`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify({ password }),
+  });
+  if (!res.ok) throw new Error('링크 생성 실패');
+  const json = await res.json();
+  return json.data;
+};
+
+export const verifyShare = async (shareToken: string, password: string): Promise<ConsultationData> => {
+  const res = await fetch(`${API_BASE}/shares/${shareToken}/verify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password }),
+  });
+  if (res.status === 401) throw new Error('비밀번호가 올바르지 않습니다');
+  if (!res.ok) throw new Error('링크를 찾을 수 없습니다');
+  const json = await res.json();
+  return json.data;
+};

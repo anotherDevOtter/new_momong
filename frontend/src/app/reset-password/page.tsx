@@ -9,7 +9,7 @@ type Step = 'form' | 'done';
 export default function ResetPasswordPage() {
   const { resetPassword } = useAuth();
   const [step, setStep] = useState<Step>('form');
-  const [form, setForm] = useState({ email: '', name: '', newPassword: '', newPasswordConfirm: '' });
+  const [form, setForm] = useState({ email: '', ownerName: '', newPassword: '', newPasswordConfirm: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -30,7 +30,7 @@ export default function ResetPasswordPage() {
     }
     setLoading(true);
     try {
-      await resetPassword(form.email, form.name, form.newPassword);
+      await resetPassword(form.email, form.ownerName, form.newPassword);
       setStep('done');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : '비밀번호 재설정에 실패했습니다');
@@ -45,7 +45,7 @@ export default function ResetPasswordPage() {
         <div className="mb-8 text-center">
           <p className="text-xs tracking-[0.2em] text-gray-400 uppercase mb-1">Merci Momong</p>
           <h1 className="text-2xl font-semibold text-[#111]">비밀번호 재설정</h1>
-          <p className="text-sm text-gray-400 mt-2">이메일과 이름으로 본인 확인 후 재설정됩니다</p>
+          <p className="text-sm text-gray-400 mt-2">이메일과 대표명으로 본인 확인 후 재설정됩니다</p>
         </div>
 
         {step === 'done' ? (
@@ -75,14 +75,14 @@ export default function ResetPasswordPage() {
             </div>
 
             <div>
-              <label className="block text-sm text-gray-600 mb-1">이름</label>
+              <label className="block text-sm text-gray-600 mb-1">대표명</label>
               <input
                 type="text"
-                value={form.name}
-                onChange={set('name')}
+                value={form.ownerName}
+                onChange={set('ownerName')}
                 required
                 className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-[#111] transition-colors"
-                placeholder="가입 시 등록한 이름"
+                placeholder="가입 시 등록한 대표명"
               />
             </div>
 

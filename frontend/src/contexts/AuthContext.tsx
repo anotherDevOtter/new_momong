@@ -7,7 +7,8 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 interface AuthUser {
   id: string;
   email: string;
-  name: string;
+  storeName: string;
+  ownerName: string;
 }
 
 interface AuthContextValue {
@@ -16,9 +17,9 @@ interface AuthContextValue {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  signup: (email: string, name: string, password: string, phone?: string) => Promise<void>;
+  signup: (email: string, storeName: string, ownerName: string, password: string, phone?: string) => Promise<void>;
   findId: (phone: string) => Promise<string>;
-  resetPassword: (email: string, name: string, newPassword: string) => Promise<void>;
+  resetPassword: (email: string, ownerName: string, newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -76,11 +77,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }
 
-  async function signup(email: string, name: string, password: string, phone?: string) {
+  async function signup(email: string, storeName: string, ownerName: string, password: string, phone?: string) {
     const res = await fetch(`${API_BASE}/auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, name, password, phone }),
+      body: JSON.stringify({ email, storeName, ownerName, password, phone }),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -102,11 +103,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return json.data.email;
   }
 
-  async function resetPassword(email: string, name: string, newPassword: string) {
+  async function resetPassword(email: string, ownerName: string, newPassword: string) {
     const res = await fetch(`${API_BASE}/auth/reset-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, name, newPassword }),
+      body: JSON.stringify({ email, ownerName, newPassword }),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));

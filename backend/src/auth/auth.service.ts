@@ -26,7 +26,8 @@ export class AuthService {
     const password_hash = await bcrypt.hash(dto.password, 10);
     const user = this.usersRepo.create({
       email: dto.email,
-      name: dto.name,
+      store_name: dto.storeName,
+      owner_name: dto.ownerName,
       password_hash,
       phone: dto.phone,
     });
@@ -35,7 +36,7 @@ export class AuthService {
     const token = this.jwtService.sign({ sub: saved.id, email: saved.email });
     return {
       token,
-      user: { id: saved.id, email: saved.email, name: saved.name },
+      user: { id: saved.id, email: saved.email, storeName: saved.store_name, ownerName: saved.owner_name },
     };
   }
 
@@ -49,7 +50,7 @@ export class AuthService {
     const token = this.jwtService.sign({ sub: user.id, email: user.email });
     return {
       token,
-      user: { id: user.id, email: user.email, name: user.name },
+      user: { id: user.id, email: user.email, storeName: user.store_name, ownerName: user.owner_name },
     };
   }
 
@@ -69,9 +70,9 @@ export class AuthService {
 
   async resetPassword(dto: ResetPasswordDto) {
     const user = await this.usersRepo.findOne({
-      where: { email: dto.email, name: dto.name },
+      where: { email: dto.email, owner_name: dto.ownerName },
     });
-    if (!user) throw new NotFoundException('이메일과 이름이 일치하는 계정이 없습니다');
+    if (!user) throw new NotFoundException('이메일과 대표명이 일치하는 계정이 없습니다');
 
     user.password_hash = await bcrypt.hash(dto.newPassword, 10);
     await this.usersRepo.save(user);
@@ -81,6 +82,6 @@ export class AuthService {
   async getMe(userId: string) {
     const user = await this.usersRepo.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException();
-    return { id: user.id, email: user.email, name: user.name, phone: user.phone };
+    return { id: user.id, email: user.email, storeName: user.store_name, ownerName: user.owner_name, phone: user.phone };
   }
 }

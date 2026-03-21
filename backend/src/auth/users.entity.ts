@@ -14,8 +14,11 @@ export class User {
   @Column({ length: 100, unique: true })
   email: string;
 
-  @Column({ length: 100 })
-  name: string;
+  @Column({ name: 'store_name', length: 100, default: '' })
+  store_name: string;
+
+  @Column({ name: 'owner_name', length: 100, default: '' })
+  owner_name: string;
 
   @Column({ name: 'password_hash' })
   password_hash: string;

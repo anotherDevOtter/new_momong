@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function SignupPage() {
   const router = useRouter();
   const { signup } = useAuth();
-  const [form, setForm] = useState({ email: '', name: '', password: '', passwordConfirm: '', phone: '' });
+  const [form, setForm] = useState({ email: '', storeName: '', ownerName: '', password: '', passwordConfirm: '', phone: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -29,7 +29,7 @@ export default function SignupPage() {
     }
     setLoading(true);
     try {
-      await signup(form.email, form.name, form.password, form.phone || undefined);
+      await signup(form.email, form.storeName, form.ownerName, form.password, form.phone || undefined);
       router.replace('/login');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : '회원가입에 실패했습니다');
@@ -61,11 +61,23 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label className="block text-sm text-gray-600 mb-1">이름 *</label>
+            <label className="block text-sm text-gray-600 mb-1">매장명 *</label>
             <input
               type="text"
-              value={form.name}
-              onChange={set('name')}
+              value={form.storeName}
+              onChange={set('storeName')}
+              required
+              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-[#111] transition-colors"
+              placeholder="머시모몽"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">대표명 *</label>
+            <input
+              type="text"
+              value={form.ownerName}
+              onChange={set('ownerName')}
               required
               className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-[#111] transition-colors"
               placeholder="홍길동"
@@ -99,7 +111,7 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label className="block text-sm text-gray-600 mb-1">전화번호 (아이디 찾기용, 선택)</label>
+            <label className="block text-sm text-gray-600 mb-1">매장 대표 전화번호 (아이디 찾기용, 선택)</label>
             <input
               type="tel"
               value={form.phone}

@@ -121,6 +121,112 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation }: Cli
 
                   {expandedId === record.id && (
                     <div className="mt-5 space-y-5 text-sm">
+                      {/* 고객 니즈 - TODAY KEYWORD */}
+                      {record.todayKeyword && (
+                        record.todayKeyword.faceConcerns?.length > 0 ||
+                        record.todayKeyword.hairConcerns?.length > 0 ||
+                        record.todayKeyword.imageKeywords?.length > 0
+                      ) && (
+                        <div>
+                          <p className="text-xs font-semibold text-[#111111] uppercase tracking-wider mb-3">고객 니즈</p>
+                          <div className="border border-[#EAEAEA] overflow-hidden">
+                            {record.todayKeyword.faceConcerns?.length > 0 && (
+                              <div className="grid grid-cols-[25%_75%] border-b border-[#EAEAEA]">
+                                <div className="px-3 py-2 text-xs text-[#777777] border-r border-[#EAEAEA]">얼굴 고민</div>
+                                <div className="px-3 py-2 text-xs text-[#111111]">
+                                  <div className="font-medium mb-1">{record.todayKeyword.faceConcerns.join(', ')}</div>
+                                  {record.todayKeyword.faceConcernsMemo && <div className="text-[#555555] mt-1">{record.todayKeyword.faceConcernsMemo}</div>}
+                                </div>
+                              </div>
+                            )}
+                            {record.todayKeyword.hairConcerns?.length > 0 && (
+                              <div className="grid grid-cols-[25%_75%] border-b border-[#EAEAEA]">
+                                <div className="px-3 py-2 text-xs text-[#777777] border-r border-[#EAEAEA]">머릿결 고민</div>
+                                <div className="px-3 py-2 text-xs text-[#111111]">
+                                  <div className="font-medium mb-1">{record.todayKeyword.hairConcerns.join(', ')}</div>
+                                  {record.todayKeyword.hairConcernsMemo && <div className="text-[#555555] mt-1">{record.todayKeyword.hairConcernsMemo}</div>}
+                                </div>
+                              </div>
+                            )}
+                            {record.todayKeyword.imageKeywords?.length > 0 && (
+                              <div className="grid grid-cols-[25%_75%]">
+                                <div className="px-3 py-2 text-xs text-[#777777] border-r border-[#EAEAEA]">이미지 키워드</div>
+                                <div className="px-3 py-2 text-xs font-medium text-[#111111]">{record.todayKeyword.imageKeywords.join(', ')}</div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 진단 결과 */}
+                      {(record.faceImageType?.type || record.hairCondition) && (
+                        <div>
+                          <p className="text-xs font-semibold text-[#111111] uppercase tracking-wider mb-3">진단 결과</p>
+                          <div className="border border-[#EAEAEA] overflow-hidden">
+                            {record.faceImageType?.type && (
+                              <>
+                                <div className="grid grid-cols-[25%_75%] border-b border-[#EAEAEA]">
+                                  <div className="px-3 py-2 text-xs text-[#777777] border-r border-[#EAEAEA]">퍼스널 이미지</div>
+                                  <div className="px-3 py-2 text-xs font-medium text-[#111111]">
+                                    {record.faceImageType.type === 'warm' && '웜 (따뜻함)'}
+                                    {record.faceImageType.type === 'cool' && '쿨 (차가운)'}
+                                    {record.faceImageType.type === 'neutral' && '뉴트럴 (중성)'}
+                                  </div>
+                                </div>
+                                {record.faceImageType.features?.face && (
+                                  <div className="grid grid-cols-[25%_75%] border-b border-[#EAEAEA]">
+                                    <div className="px-3 py-2 text-xs text-[#777777] border-r border-[#EAEAEA]">얼굴형</div>
+                                    <div className="px-3 py-2 text-xs text-[#555555]">{record.faceImageType.features.face}</div>
+                                  </div>
+                                )}
+                                {record.faceImageType.features?.eyebrows && (
+                                  <div className="grid grid-cols-[25%_75%] border-b border-[#EAEAEA]">
+                                    <div className="px-3 py-2 text-xs text-[#777777] border-r border-[#EAEAEA]">눈썹</div>
+                                    <div className="px-3 py-2 text-xs text-[#555555]">{record.faceImageType.features.eyebrows}</div>
+                                  </div>
+                                )}
+                                {record.faceImageType.features?.eyes && (
+                                  <div className="grid grid-cols-[25%_75%] border-b border-[#EAEAEA]">
+                                    <div className="px-3 py-2 text-xs text-[#777777] border-r border-[#EAEAEA]">눈</div>
+                                    <div className="px-3 py-2 text-xs text-[#555555]">{record.faceImageType.features.eyes}</div>
+                                  </div>
+                                )}
+                                {record.faceImageType.features?.lips && (
+                                  <div className="grid grid-cols-[25%_75%] border-b border-[#EAEAEA]">
+                                    <div className="px-3 py-2 text-xs text-[#777777] border-r border-[#EAEAEA]">입술</div>
+                                    <div className="px-3 py-2 text-xs text-[#555555]">{record.faceImageType.features.lips}</div>
+                                  </div>
+                                )}
+                              </>
+                            )}
+                            {record.hairCondition?.damageLevel && (
+                              <div className="grid grid-cols-[25%_75%] border-b border-[#EAEAEA]">
+                                <div className="px-3 py-2 text-xs text-[#777777] border-r border-[#EAEAEA]">손상도</div>
+                                <div className="px-3 py-2 text-xs font-medium text-[#111111]">{record.hairCondition.damageLevel}</div>
+                              </div>
+                            )}
+                            {record.hairCondition?.hairType?.length > 0 && (
+                              <div className="grid grid-cols-[25%_75%] border-b border-[#EAEAEA]">
+                                <div className="px-3 py-2 text-xs text-[#777777] border-r border-[#EAEAEA]">모발 유형</div>
+                                <div className="px-3 py-2 text-xs text-[#555555]">{record.hairCondition.hairType.join(', ')}</div>
+                              </div>
+                            )}
+                            {record.hairCondition?.thickness && (
+                              <div className="grid grid-cols-[25%_75%] border-b border-[#EAEAEA]">
+                                <div className="px-3 py-2 text-xs text-[#777777] border-r border-[#EAEAEA]">모발 굵기</div>
+                                <div className="px-3 py-2 text-xs text-[#555555]">{record.hairCondition.thickness}</div>
+                              </div>
+                            )}
+                            {record.hairCondition?.density && (
+                              <div className="grid grid-cols-[25%_75%]">
+                                <div className="px-3 py-2 text-xs text-[#777777] border-r border-[#EAEAEA]">모발 숱</div>
+                                <div className="px-3 py-2 text-xs text-[#555555]">{record.hairCondition.density}</div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                       {/* TODAY DESIGN */}
                       {record.todayDesign && (
                         <div>

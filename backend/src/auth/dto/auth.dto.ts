@@ -6,9 +6,13 @@ export class SignupDto {
   @IsEmail()
   email: string;
 
+  @ApiProperty({ example: '머시모몽' })
+  @IsString()
+  storeName: string;
+
   @ApiProperty({ example: '홍길동' })
   @IsString()
-  name: string;
+  ownerName: string;
 
   @ApiProperty({ minLength: 6 })
   @IsString()
@@ -42,9 +46,9 @@ export class ResetPasswordDto {
   @IsEmail()
   email: string;
 
-  @ApiProperty({ description: '가입 시 등록한 이름' })
+  @ApiProperty({ description: '가입 시 등록한 대표명' })
   @IsString()
-  name: string;
+  ownerName: string;
 
   @ApiProperty({ description: '새 비밀번호', minLength: 6 })
   @IsString()

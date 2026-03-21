@@ -245,7 +245,7 @@ export default function Home() {
 
       {/* 로그아웃 버튼 */}
       <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
-        <span className="text-xs text-gray-400">{user.name}</span>
+        <span className="text-xs text-gray-400">{user.storeName}</span>
         <button
           onClick={logout}
           className="text-xs text-gray-400 hover:text-gray-700 px-2 py-1 border border-gray-200 rounded hover:border-gray-400 transition-colors"
@@ -253,6 +253,18 @@ export default function Home() {
           로그아웃
         </button>
       </div>
+
+      {/* 처음으로 버튼 - 컨설팅 진행 중에만 표시 */}
+      {currentView === 'consultation' && currentStep >= 1 && (
+        <div className="fixed top-4 left-4 z-50">
+          <button
+            onClick={handleComplete}
+            className="text-xs text-gray-400 hover:text-gray-700 px-2 py-1 border border-gray-200 rounded hover:border-gray-400 transition-colors"
+          >
+            처음으로
+          </button>
+        </div>
+      )}
 
       {currentView === 'consultation' && (
         <>
