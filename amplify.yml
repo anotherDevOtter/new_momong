@@ -3,28 +3,15 @@ frontend:
   phases:
     preBuild:
       commands:
-        - |
-          if [ "$AWS_BRANCH" = "admin" ]; then
-            npm ci --prefix frontend/admin
-          else
-            npm ci --prefix frontend/user
-          fi
+        - npm ci
     build:
       commands:
-        - |
-          if [ "$AWS_BRANCH" = "admin" ]; then
-            npm run build --prefix frontend/admin
-            cp -r frontend/admin/.next .next
-          else
-            npm run build --prefix frontend/user
-            cp -r frontend/user/.next .next
-          fi
+        - npm run build
   artifacts:
     baseDirectory: .next
     files:
       - '**/*'
   cache:
     paths:
-      - frontend/user/node_modules/**/*
-      - frontend/admin/node_modules/**/*
+      - node_modules/**/*
       - .next/cache/**/*
