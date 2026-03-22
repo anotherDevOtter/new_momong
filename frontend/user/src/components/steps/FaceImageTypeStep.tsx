@@ -77,37 +77,47 @@ export const FaceImageTypeStep = ({ data, gender, onChange, onNext, onBack }: Fa
 
         <RadioGroup
           label="윤곽"
+          labelClassName="font-bold text-base"
           options={['둥근', '중간', '각진']}
           selected={data.features.face}
           onChange={(value) => onChange({ ...data, features: { ...data.features, face: value } })}
+          variant="button-grid"
           columns={3}
         />
         <RadioGroup
           label="눈썹"
+          labelClassName="font-bold text-base"
           options={['둥근 내려간', '중간', '각진 올라간']}
           selected={data.features.eyebrows}
           onChange={(value) => onChange({ ...data, features: { ...data.features, eyebrows: value } })}
+          variant="button-grid"
           columns={3}
         />
         <RadioGroup
           label="눈"
+          labelClassName="font-bold text-base"
           options={['둥근 내려간 눈', '중간', '직선 올라간 눈']}
           selected={data.features.eyes}
           onChange={(value) => onChange({ ...data, features: { ...data.features, eyes: value } })}
+          variant="button-grid"
           columns={3}
         />
         <RadioGroup
           label="코"
+          labelClassName="font-bold text-base"
           options={['둥근 코', '중간', '뾰족한 코']}
           selected={data.features.nose}
           onChange={(value) => onChange({ ...data, features: { ...data.features, nose: value } })}
+          variant="button-grid"
           columns={3}
         />
         <RadioGroup
           label="입술"
+          labelClassName="font-bold text-base"
           options={['도톰', '중간', '얇은']}
           selected={data.features.lips}
           onChange={(value) => onChange({ ...data, features: { ...data.features, lips: value } })}
+          variant="button-grid"
           columns={3}
         />
       </div>
@@ -119,6 +129,7 @@ export const FaceImageTypeStep = ({ data, gender, onChange, onNext, onBack }: Fa
         onChange={(value) =>
           onChange({ ...data, type: value.toLowerCase() as 'warm' | 'neutral' | 'cool' })
         }
+        variant="button-grid"
         columns={3}
       />
 

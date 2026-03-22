@@ -51,39 +51,51 @@ export const HairConditionStep = ({ data, gender, onChange, onNext, onBack }: Ha
       <div className="space-y-10">
         <RadioGroup
           label="손상도 단계"
+          labelClassName="font-bold text-base"
           options={['건강모', '약손상', '중손상', '강손상', '극손상', '초극손상']}
           selected={data.damageLevel}
           onChange={(value) => onChange({ ...data, damageLevel: value })}
+          variant="button-grid"
+          columns={3}
         />
 
         <CheckboxGroup
           label="현재 모질 상태"
+          labelClassName="font-bold text-base"
           options={['직모', '반곱슬', '곱슬']}
           selected={data.hairType}
           onChange={(selected) => onChange({ ...data, hairType: selected })}
+          variant="button-grid"
+          columns={3}
         />
 
         <RadioGroup
           label="모발 굵기"
+          labelClassName="font-bold text-base"
           options={['가늘다', '보통', '굵다']}
           selected={data.thickness}
           onChange={(value) => onChange({ ...data, thickness: value })}
+          variant="button-grid"
           columns={3}
         />
 
         <RadioGroup
           label="모발 숱"
+          labelClassName="font-bold text-base"
           options={['적다', '보통', '많다']}
           selected={data.density}
           onChange={(value) => onChange({ ...data, density: value })}
+          variant="button-grid"
           columns={3}
         />
 
         <RadioGroup
           label="곱슬 정도"
+          labelClassName="font-bold text-base"
           options={['곱슬 없음', '부분', '전체']}
           selected={data.curl}
           onChange={(value) => onChange({ ...data, curl: value })}
+          variant="button-grid"
           columns={3}
         />
 

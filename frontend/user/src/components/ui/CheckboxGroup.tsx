@@ -5,13 +5,15 @@ import { cn } from '@/lib/utils';
 
 interface CheckboxGroupProps {
   label?: string;
+  labelClassName?: string;
   options: string[];
   selected: string[];
   onChange: (selected: string[]) => void;
+  columns?: number;
   variant?: 'default' | 'button-grid';
 }
 
-export const CheckboxGroup = ({ label, options, selected, onChange, variant = 'default' }: CheckboxGroupProps) => {
+export const CheckboxGroup = ({ label, labelClassName, options, selected, onChange, columns, variant = 'default' }: CheckboxGroupProps) => {
   const toggle = (option: string) => {
     if (selected.includes(option)) {
       onChange(selected.filter((o) => o !== option));
@@ -21,10 +23,11 @@ export const CheckboxGroup = ({ label, options, selected, onChange, variant = 'd
   };
 
   if (variant === 'button-grid') {
+    const cols = columns ?? 2;
     return (
       <div className="space-y-3">
-        {label && <label className="block text-sm font-medium text-[#111111]">{label}</label>}
-        <div className="grid grid-cols-2 gap-2">
+        {label && <label className={cn('block text-sm font-medium text-[#111111]', labelClassName)}>{label}</label>}
+        <div className={cn('grid gap-2', `grid-cols-${cols}`)}>
           {options.map((option) => {
             const isSelected = selected.includes(option);
             return (
