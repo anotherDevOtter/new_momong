@@ -8,9 +8,35 @@ interface RadioGroupProps {
   selected: string;
   onChange: (value: string) => void;
   columns?: number;
+  variant?: 'default' | 'button-grid';
 }
 
-export const RadioGroup = ({ label, options, selected, onChange, columns }: RadioGroupProps) => {
+export const RadioGroup = ({ label, options, selected, onChange, columns, variant = 'default' }: RadioGroupProps) => {
+  if (variant === 'button-grid') {
+    return (
+      <div className="space-y-3">
+        {label && <label className="block text-sm font-medium text-[#111111]">{label}</label>}
+        <div className="grid grid-cols-2 gap-2">
+          {options.map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => onChange(option)}
+              className={cn(
+                'h-14 px-4 text-sm font-medium transition-all border',
+                selected === option
+                  ? 'bg-[#111111] text-white border-[#111111]'
+                  : 'bg-white text-[#111111] border-[#E5E5E5] hover:border-[#111111]'
+              )}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3">
       {label && <label className="block text-sm text-[#555555]">{label}</label>}

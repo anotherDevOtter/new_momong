@@ -43,12 +43,14 @@ export const ClientInfoStep = ({ data, onChange, onNext, onBack }: ClientInfoSte
           options={['20-30대', '40대', '50대', '60대 이상']}
           selected={data.ageGroup}
           onChange={(value) => onChange({ ...data, ageGroup: value })}
+          variant="button-grid"
         />
         <RadioGroup
           label="성별"
           options={['여자', '남자']}
           selected={data.gender === 'female' ? '여자' : data.gender === 'male' ? '남자' : ''}
           onChange={(value) => onChange({ ...data, gender: value === '여자' ? 'female' : 'male' })}
+          variant="button-grid"
         />
       </div>
 

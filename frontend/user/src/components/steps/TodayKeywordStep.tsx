@@ -51,6 +51,7 @@ export const TodayKeywordStep = ({ data, gender, onChange, onNext, onBack }: Tod
             options={faceConcernOptions}
             selected={data.faceConcerns}
             onChange={(selected) => onChange({ ...data, faceConcerns: selected })}
+            variant="button-grid"
           />
           {data.faceConcerns.includes('기타') && (
             <div className="ml-6">
@@ -71,6 +72,7 @@ export const TodayKeywordStep = ({ data, gender, onChange, onNext, onBack }: Tod
             options={hairConcernOptions}
             selected={data.hairConcerns}
             onChange={(selected) => onChange({ ...data, hairConcerns: selected })}
+            variant="button-grid"
           />
           {data.hairConcerns.includes('기타') && (
             <div className="ml-6">
@@ -90,6 +92,7 @@ export const TodayKeywordStep = ({ data, gender, onChange, onNext, onBack }: Tod
           options={imageKeywords}
           selected={data.imageKeywords}
           onChange={(selected) => onChange({ ...data, imageKeywords: selected })}
+          variant="button-grid"
         />
       </div>
 
