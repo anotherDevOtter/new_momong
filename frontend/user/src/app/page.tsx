@@ -59,7 +59,8 @@ export default function Home() {
 
   useEffect(() => {
     if (!loading && !user) {
-      router.replace('/login');
+      const hasToken = typeof window !== 'undefined' && !!localStorage.getItem('auth_token');
+      if (!hasToken) router.replace('/login');
     }
   }, [loading, user, router]);
 
@@ -82,7 +83,7 @@ export default function Home() {
     return () => window.removeEventListener('popstate', handler);
   }, []);
 
-  if (loading || !user) return null;
+  if (!user) return null;
 
   // ── 히스토리 푸시 헬퍼 ──────────────────────────
   const pushState = (step: number, view: AppView) => {
@@ -184,7 +185,10 @@ export default function Home() {
           />
         );
       case 4:
-        return <LoadingStep clientName={consultationData.clientInfo.name} onNext={handleNext} onBack={handleBack} />;
+        return <LoadingStep clientName={consultationData.clientInfo.name} onNext={() => {
+          window.history.replaceState({ step: 5, view: 'consultation' } satisfies AppHistoryState, '');
+          setCurrentStep(5);
+        }} onBack={handleBack} />;
       case 5:
         return <DesignSummaryStep data={consultationData} onNext={handleNext} onBack={handleBack} />;
       case 6:

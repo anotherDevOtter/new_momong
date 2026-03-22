@@ -31,13 +31,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const saved = localStorage.getItem('auth_token');
+    const cachedUser = localStorage.getItem('auth_user');
     if (saved) {
       setToken(saved);
+      // 캐시된 유저 정보가 있으면 먼저 적용 (화면 즉시 표시)
+      if (cachedUser) {
+        try { setUser(JSON.parse(cachedUser)); } catch (_e) { /* ignore */ }
+      }
       fetchMe(saved)
-        .then(setUser)
-        .catch(() => {
-          localStorage.removeItem('auth_token');
-          setToken(null);
+        .then((u) => {
+          setUser(u);
+          localStorage.setItem('auth_user', JSON.stringify(u));
+        })
+        .catch((err: unknown) => {
+          if (err instanceof Error && err.message === 'unauthorized') {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('auth_user');
+            setToken(null);
+            setUser(null);
+          }
+          // 네트워크 에러는 캐시된 유저 유지
         })
         .finally(() => setLoading(false));
     } else {
@@ -46,12 +59,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function fetchMe(t: string): Promise<AuthUser> {
-    const res = await fetch(`${API_BASE}/auth/me`, {
-      headers: { Authorization: `Bearer ${t}` },
-    });
-    if (!res.ok) throw new Error('unauthorized');
-    const json = await res.json();
-    return json.data;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    try {
+      const res = await fetch(`${API_BASE}/auth/me`, {
+        headers: { Authorization: `Bearer ${t}` },
+        signal: controller.signal,
+      });
+      if (!res.ok) throw new Error('unauthorized');
+      const json = await res.json();
+      return json.data;
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   async function login(email: string, password: string) {
@@ -67,12 +87,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const json = await res.json();
     const { token: access_token, user: u } = json.data;
     localStorage.setItem('auth_token', access_token);
+    localStorage.setItem('auth_user', JSON.stringify(u));
     setToken(access_token);
     setUser(u);
   }
 
   function logout() {
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
     setToken(null);
     setUser(null);
   }
