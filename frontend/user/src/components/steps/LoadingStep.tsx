@@ -1,7 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
-
 interface LoadingStepProps {
   clientName: string;
   onNext: () => void;
@@ -9,13 +7,6 @@ interface LoadingStepProps {
 }
 
 export const LoadingStep = ({ clientName, onNext }: LoadingStepProps) => {
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onNext();
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, [onNext]);
-
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="text-center space-y-8">
@@ -35,6 +26,13 @@ export const LoadingStep = ({ clientName, onNext }: LoadingStepProps) => {
             />
           ))}
         </div>
+
+        <button
+          onClick={onNext}
+          className="mt-4 px-8 py-3 bg-[#111111] text-white text-sm tracking-widest"
+        >
+          결과 보기
+        </button>
       </div>
     </div>
   );
