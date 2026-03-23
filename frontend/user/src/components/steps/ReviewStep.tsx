@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ConsultationData } from '@/types';
-import { saveConsultation } from '@/utils/api';
+import { saveConsultation, updateConsultation } from '@/utils/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { ShareLinkModal } from '@/components/ShareLinkModal';
 import { Pencil, Link } from 'lucide-react';
@@ -65,10 +65,12 @@ export const ReviewStep = ({ data, onGoToStep, onRestart }: ReviewStepProps) => 
     if (!data.clientInfo?.name || !token) return;
     setSaveStatus('saving');
     try {
-      const record = await saveConsultation(token, data);
+      const record = data.id
+        ? await updateConsultation(token, data.id, data)
+        : await saveConsultation(token, data);
       setConsultationId(record.id);
       setSaveStatus('saved');
-      toast.success('컨설팅 데이터가 저장되었습니다');
+      toast.success(data.id ? '컨설팅이 수정되었습니다' : '컨설팅 데이터가 저장되었습니다');
     } catch {
       setSaveStatus('failed');
       toast.error('저장에 실패했습니다');

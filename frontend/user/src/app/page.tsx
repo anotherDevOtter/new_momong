@@ -19,7 +19,7 @@ import { AfterNoteStep } from '@/components/steps/AfterNoteStep';
 import { ReviewStep } from '@/components/steps/ReviewStep';
 import { ClientListStep } from '@/components/steps/ClientListStep';
 import { ClientDetailStep } from '@/components/steps/ClientDetailStep';
-import { ConsultationData, Customer } from '@/types';
+import { ConsultationData, ConsultationRecord, Customer } from '@/types';
 
 type AppView = 'consultation' | 'client-list' | 'client-detail';
 
@@ -128,6 +128,27 @@ export default function Home() {
     setSelectedClient(client);
     pushState(0, 'client-detail');
     setCurrentView('client-detail');
+  };
+
+  const handleEditConsultation = (record: ConsultationRecord) => {
+    setConsultationData({
+      id: record.id,
+      clientInfo: record.clientInfo,
+      todayKeyword: record.todayKeyword,
+      fashionStyle: record.fashionStyle,
+      faceImageType: record.faceImageType,
+      hairCondition: record.hairCondition,
+      hairStyleProposal: record.hairStyleProposal,
+      todayDesign: record.todayDesign,
+      nextDirection: record.nextDirection,
+      designCycleGuide: record.designCycleGuide,
+      designerName: record.designerName,
+      visitDate: record.visitDate,
+      afterNote: record.afterNote,
+    });
+    pushState(11, 'consultation');
+    setCurrentView('consultation');
+    setCurrentStep(11);
   };
 
   const handleStartNewConsultationFromClient = () => {
@@ -321,6 +342,7 @@ export default function Home() {
           client={selectedClient}
           onBack={handleBack}
           onStartNewConsultation={handleStartNewConsultationFromClient}
+          onEditConsultation={handleEditConsultation}
         />
       )}
     </>

@@ -109,6 +109,27 @@ export class ConsultationsService {
     return records.map((r) => this.toRecord(r));
   }
 
+  async update(userId: string, id: string, dto: CreateConsultationDto) {
+    const record = await this.repo.findOne({ where: { id, user_id: userId } });
+    if (!record) throw new NotFoundException('컨설팅을 찾을 수 없습니다');
+
+    if (dto.clientInfo !== undefined) record.client_info = dto.clientInfo;
+    if (dto.todayKeyword !== undefined) record.today_keyword = dto.todayKeyword;
+    if (dto.fashionStyle !== undefined) record.fashion_style = dto.fashionStyle;
+    if (dto.faceImageType !== undefined) record.face_image_type = dto.faceImageType;
+    if (dto.hairCondition !== undefined) record.hair_condition = dto.hairCondition;
+    if (dto.hairStyleProposal !== undefined) record.hair_style_proposal = dto.hairStyleProposal;
+    if (dto.todayDesign !== undefined) record.today_design = dto.todayDesign;
+    if (dto.nextDirection !== undefined) record.next_direction = dto.nextDirection;
+    if (dto.designCycleGuide !== undefined) record.design_cycle_guide = dto.designCycleGuide;
+    if (dto.designerName !== undefined) record.designer_name = dto.designerName;
+    if (dto.visitDate !== undefined) record.visit_date = dto.visitDate;
+    if (dto.afterNote !== undefined) record.after_note = dto.afterNote;
+
+    const saved = await this.repo.save(record);
+    return { consultation: this.toRecord(saved) };
+  }
+
   async remove(userId: string, id: string): Promise<void> {
     const record = await this.repo.findOne({ where: { id, user_id: userId } });
     if (!record) throw new NotFoundException('컨설팅을 찾을 수 없습니다');

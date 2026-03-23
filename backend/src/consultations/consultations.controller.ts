@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Delete,
   Body,
   Param,
@@ -63,6 +64,13 @@ export class ConsultationsController {
   async findOne(@Request() req, @Param('id') id: string) {
     const consultation = await this.consultationsService.findOne(req.user.id, id);
     return { success: true, data: { consultation } };
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: '컨설팅 수정' })
+  async update(@Request() req, @Param('id') id: string, @Body() dto: CreateConsultationDto) {
+    const result = await this.consultationsService.update(req.user.id, id, dto);
+    return { success: true, data: result };
   }
 
   @Delete(':id')

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, User, Calendar, Phone, Clock, ChevronDown, ChevronUp, Scissors, Copy, Check, Eye, EyeOff, Download } from 'lucide-react';
+import { ArrowLeft, User, Calendar, Phone, Clock, ChevronDown, ChevronUp, Scissors, Copy, Check, Eye, EyeOff, Download, Pencil } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { getConsultationsByCustomerPhone, getShareByConsultation } from '@/utils/api';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,9 +11,10 @@ interface ClientDetailStepProps {
   client: Customer;
   onBack: () => void;
   onStartNewConsultation: () => void;
+  onEditConsultation: (record: ConsultationRecord) => void;
 }
 
-export const ClientDetailStep = ({ client, onBack, onStartNewConsultation }: ClientDetailStepProps) => {
+export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onEditConsultation }: ClientDetailStepProps) => {
   const { token } = useAuth();
   const [consultations, setConsultations] = useState<ConsultationRecord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -158,7 +159,14 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation }: Cli
                         )}
                       </div>
                     </div>
-                    {expandedId === record.id ? <ChevronUp size={16} className="text-[#999999] shrink-0" /> : <ChevronDown size={16} className="text-[#999999] shrink-0" />}
+                      {expandedId === record.id ? <ChevronUp size={16} className="text-[#999999] shrink-0" /> : <ChevronDown size={16} className="text-[#999999] shrink-0" />}
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onEditConsultation(record); }}
+                    className="flex items-center gap-1 text-xs text-[#999999] hover:text-[#111111] transition-colors px-2 py-1 border border-[#E5E5E5] hover:border-[#999999]"
+                  >
+                    <Pencil size={11} />
+                    수정
                   </button>
 
                   {expandedId === record.id && (

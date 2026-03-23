@@ -97,6 +97,17 @@ export const getConsultationsByCustomerPhone = async (token: string, phone: stri
   return json.data.consultations;
 };
 
+export const updateConsultation = async (token: string, id: string, data: ConsultationData): Promise<ConsultationRecord> => {
+  const res = await fetch(`${API_BASE}/consultations/${id}`, {
+    method: 'PATCH',
+    headers: authHeaders(token),
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('컨설팅 수정 실패');
+  const json = await res.json();
+  return json.data.consultation;
+};
+
 export const deleteConsultation = async (token: string, id: string): Promise<void> => {
   const res = await fetch(`${API_BASE}/consultations/${id}`, {
     method: 'DELETE',
