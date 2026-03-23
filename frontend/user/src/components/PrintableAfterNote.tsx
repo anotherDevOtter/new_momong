@@ -95,7 +95,7 @@ export const PrintableAfterNote = ({ data, designerName, afterNote }: PrintableA
           </div>
           <div>
             <div style={{ fontSize: '8pt', color: '#999999', marginBottom: '4px', fontWeight: 300 }}>담당 디자이너</div>
-            <div style={{ fontSize: '10pt', color: '#1C1C1C', fontWeight: 400 }}>{designerName}</div>
+            <div style={{ fontSize: '13pt', color: '#1C1C1C', fontWeight: 600, letterSpacing: '0.03em' }}>{designerName}</div>
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, User, Calendar, Phone, Clock, ChevronDown, ChevronUp, Scissors, Link, Copy, Check, Eye, EyeOff, Download } from 'lucide-react';
+import { ArrowLeft, User, Calendar, Phone, Clock, ChevronDown, ChevronUp, Scissors, Copy, Check, Eye, EyeOff, Download } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { getConsultationsByCustomerPhone, getShareByConsultation } from '@/utils/api';
 import { useAuth } from '@/contexts/AuthContext';
@@ -57,7 +57,7 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation }: Cli
       link.href = canvas.toDataURL('image/png');
       link.click();
     };
-    img.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}`;
+    img.src = `data:image/svg+xml;base64,${btoa(new TextEncoder().encode(svgData).reduce((s, b) => s + String.fromCharCode(b), ''))}`;
   };
 
   const formatDate = (dateString: string) => {
@@ -167,7 +167,7 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation }: Cli
                       {/* 공유 링크 */}
                       {shareInfo[record.id] && (() => {
                         const info = shareInfo[record.id]!;
-                        const url = info.url || `${typeof window !== 'undefined' ? window.location.origin : ''}/share/${info.token}`;
+                        const url = `${window.location.origin}/share/${info.token}`;
                         return (
                           <div className="border border-[#EAEAEA] p-4 bg-[#FAFAFA] space-y-4">
                             <p className="text-xs font-semibold text-[#111111] uppercase tracking-wider">공유 링크</p>
