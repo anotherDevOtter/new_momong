@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, User, Calendar, Phone, Clock, ChevronDown, ChevronUp, Scissors, Copy, Check, Eye, EyeOff, Download, Pencil } from 'lucide-react';
+import { ArrowLeft, User, Calendar, Phone, Clock, ChevronDown, ChevronUp, Scissors, Copy, Check, Eye, EyeOff, Download, Pencil, Trash2 } from 'lucide-react';
 import QRCode from 'react-qr-code';
-import { getConsultationsByCustomerPhone, getShareByConsultation } from '@/utils/api';
+import { getConsultationsByCustomerPhone, getShareByConsultation, deleteConsultation } from '@/utils/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { Customer, ConsultationRecord } from '@/types';
 
@@ -23,6 +23,13 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onEdi
   const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
   const [copied, setCopied] = useState<string | null>(null);
   const qrRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  const handleDelete = async (id: string) => {
+    if (!token || !window.confirm('이 컨설팅 기록을 삭제하시겠습니까?')) return;
+    await deleteConsultation(token, id);
+    setConsultations((prev) => prev.filter((c) => c.id !== id));
+    if (expandedId === id) setExpandedId(null);
+  };
 
   const handleExpand = async (id: string) => {
     const next = expandedId === id ? null : id;
@@ -138,11 +145,11 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onEdi
             <div className="divide-y divide-[#E5E5E5]">
               {consultations.map((record) => (
                 <div key={record.id} className="px-8 py-5">
-                  <button
-                    onClick={() => handleExpand(record.id)}
-                    className="w-full flex items-center justify-between text-left"
-                  >
-                    <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <button
+                      onClick={() => handleExpand(record.id)}
+                      className="flex-1 flex items-center gap-4 text-left"
+                    >
                       <div>
                         <p className="text-sm font-medium text-[#111111]">{record.visitDate || formatDate(record.createdAt)}</p>
                         <p className="text-xs text-[#999999] mt-0.5">담당: {record.designerName || '-'}</p>
@@ -158,16 +165,25 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onEdi
                           <span className="px-2 py-0.5 bg-[#F5F5F5] text-[#555555] text-xs">{record.todayDesign.length.join(', ')}</span>
                         )}
                       </div>
+                    </button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={() => onEditConsultation(record)}
+                        className="flex items-center gap-1 text-xs text-[#999999] hover:text-[#111111] transition-colors px-2 py-1 border border-[#E5E5E5] hover:border-[#999999]"
+                      >
+                        <Pencil size={11} />
+                        수정
+                      </button>
+                      <button
+                        onClick={() => handleDelete(record.id)}
+                        className="flex items-center gap-1 text-xs text-[#999999] hover:text-red-500 transition-colors px-2 py-1 border border-[#E5E5E5] hover:border-red-300"
+                      >
+                        <Trash2 size={11} />
+                        삭제
+                      </button>
+                      {expandedId === record.id ? <ChevronUp size={16} className="text-[#999999]" /> : <ChevronDown size={16} className="text-[#999999]" />}
                     </div>
-                      {expandedId === record.id ? <ChevronUp size={16} className="text-[#999999] shrink-0" /> : <ChevronDown size={16} className="text-[#999999] shrink-0" />}
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onEditConsultation(record); }}
-                    className="flex items-center gap-1 text-xs text-[#999999] hover:text-[#111111] transition-colors px-2 py-1 border border-[#E5E5E5] hover:border-[#999999]"
-                  >
-                    <Pencil size={11} />
-                    수정
-                  </button>
+                  </div>
 
                   {expandedId === record.id && (
                     <div className="mt-5 space-y-5 text-sm">
