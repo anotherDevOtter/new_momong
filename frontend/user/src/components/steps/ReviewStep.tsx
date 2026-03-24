@@ -15,18 +15,10 @@ interface ReviewStepProps {
   onRestart: () => void;
 }
 
-const SectionTitle = ({
-  title,
-  onEdit,
-  editable,
-}: {
-  title: string;
-  onEdit?: () => void;
-  editable: boolean;
-}) => (
+const SectionTitle = ({ title, onEdit }: { title: string; onEdit?: () => void }) => (
   <div className="flex items-center justify-between mb-3">
     <h3 className="font-semibold text-[#111111] text-sm tracking-[-0.01em]">{title}</h3>
-    {editable && onEdit && (
+    {onEdit && (
       <button
         onClick={onEdit}
         className="flex items-center gap-1 text-xs text-[#999999] hover:text-[#111111] transition-colors"
@@ -51,8 +43,8 @@ const InfoItem = ({ label, value }: { label: string; value?: string | string[] }
 
 export const ReviewStep = ({ data, onGoToStep, onRestart }: ReviewStepProps) => {
   const { token } = useAuth();
-  const [consultationId, setConsultationId] = useState<string | null>(null);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'failed'>('idle');
+  const [consultationId, setConsultationId] = useState<string | null>(data.id || null);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'failed'>(data.id ? 'saved' : 'idle');
   const [showShareModal, setShowShareModal] = useState(false);
 
   const completed = saveStatus === 'saved';
@@ -104,7 +96,7 @@ export const ReviewStep = ({ data, onGoToStep, onRestart }: ReviewStepProps) => 
         <div className="bg-white border border-[#EAEAEA] p-8 space-y-6">
           {/* 고객 기본 정보 */}
           <div className="pb-6 border-b border-[#EAEAEA]">
-            <SectionTitle title="고객 기본 정보" onEdit={() => onGoToStep(1)} editable={!completed} />
+            <SectionTitle title="고객 기본 정보" onEdit={!completed ? () => onGoToStep(1) : undefined} />
             <div className="grid grid-cols-2 gap-4">
               <InfoItem label="이름" value={clientInfo.name} />
               <InfoItem label="연락처" value={clientInfo.phone} />
@@ -115,7 +107,7 @@ export const ReviewStep = ({ data, onGoToStep, onRestart }: ReviewStepProps) => 
 
           {/* 오늘의 키워드 */}
           <div className="pb-6 border-b border-[#EAEAEA]">
-            <SectionTitle title="오늘의 키워드" onEdit={() => onGoToStep(2)} editable={!completed} />
+            <SectionTitle title="오늘의 키워드" onEdit={!completed ? () => onGoToStep(2) : undefined} />
             <div className="grid grid-cols-2 gap-4">
               <InfoItem label="얼굴 고민" value={[...todayKeyword.faceConcerns, todayKeyword.faceConcernsMemo].filter(Boolean)} />
               <InfoItem label="모발 고민" value={[...todayKeyword.hairConcerns, todayKeyword.hairConcernsMemo].filter(Boolean)} />
@@ -125,13 +117,13 @@ export const ReviewStep = ({ data, onGoToStep, onRestart }: ReviewStepProps) => 
 
           {/* 패션 스타일 */}
           <div className="pb-6 border-b border-[#EAEAEA]">
-            <SectionTitle title="패션 스타일" onEdit={() => onGoToStep(3)} editable={!completed} />
+            <SectionTitle title="패션 스타일" onEdit={!completed ? () => onGoToStep(3) : undefined} />
             <InfoItem label="선택 스타일" value={fashionStyle.selected} />
           </div>
 
           {/* 페이스 이미지 타입 */}
           <div className="pb-6 border-b border-[#EAEAEA]">
-            <SectionTitle title="페이스 이미지 타입" onEdit={() => onGoToStep(6)} editable={!completed} />
+            <SectionTitle title="페이스 이미지 타입" onEdit={!completed ? () => onGoToStep(6) : undefined} />
             <div className="grid grid-cols-3 gap-4">
               <InfoItem label="색조 타입" value={toneLabel} />
               <InfoItem label="얼굴형" value={faceImageType.features.face} />
@@ -144,7 +136,7 @@ export const ReviewStep = ({ data, onGoToStep, onRestart }: ReviewStepProps) => 
 
           {/* 헤어 컨디션 */}
           <div className="pb-6 border-b border-[#EAEAEA]">
-            <SectionTitle title="헤어 컨디션" onEdit={() => onGoToStep(7)} editable={!completed} />
+            <SectionTitle title="헤어 컨디션" onEdit={!completed ? () => onGoToStep(7) : undefined} />
             <div className="grid grid-cols-3 gap-4">
               <InfoItem label="손상도" value={hairCondition.damageLevel} />
               <InfoItem label="모질" value={hairCondition.hairType} />
@@ -156,13 +148,13 @@ export const ReviewStep = ({ data, onGoToStep, onRestart }: ReviewStepProps) => 
 
           {/* 원하는 스타일 */}
           <div className="pb-6 border-b border-[#EAEAEA]">
-            <SectionTitle title="원하는 스타일" onEdit={() => onGoToStep(8)} editable={!completed} />
+            <SectionTitle title="원하는 스타일" onEdit={!completed ? () => onGoToStep(8) : undefined} />
             <InfoItem label="원하는 길이" value={hairStyleProposal.length} />
           </div>
 
           {/* TODAY DESIGN */}
           <div className="pb-6 border-b border-[#EAEAEA]">
-            <SectionTitle title="TODAY DESIGN" onEdit={() => onGoToStep(9)} editable={!completed} />
+            <SectionTitle title="TODAY DESIGN" onEdit={!completed ? () => onGoToStep(9) : undefined} />
             <div className="border border-[#EAEAEA]">
               <div className="grid grid-cols-[20%_30%_50%] border-b border-[#EAEAEA] bg-[#FAFAFA]">
                 {['항목', '결과', '메모'].map((h) => (
@@ -182,7 +174,7 @@ export const ReviewStep = ({ data, onGoToStep, onRestart }: ReviewStepProps) => 
           {/* NEXT DIRECTION */}
           {hasNextDirection && (
             <div className="pb-6 border-b border-[#EAEAEA]">
-              <SectionTitle title="NEXT DIRECTION" onEdit={() => onGoToStep(9)} editable={!completed} />
+              <SectionTitle title="NEXT DIRECTION" onEdit={!completed ? () => onGoToStep(9) : undefined} />
               <ul className="space-y-1 text-sm text-[#555555]">
                 {nextDirection.lengthChange.length > 0 && <li>• 길이 변화 ({nextDirection.lengthChange.join(', ')})</li>}
                 {nextDirection.colorChange.length > 0 && <li>• 컬러 변화 ({nextDirection.colorChange.join(', ')})</li>}
@@ -194,7 +186,7 @@ export const ReviewStep = ({ data, onGoToStep, onRestart }: ReviewStepProps) => 
           {/* 디자인 사이클 가이드 */}
           {cycleMonths.length > 0 && (
             <div className="pb-6 border-b border-[#EAEAEA]">
-              <SectionTitle title="디자인 사이클 가이드" onEdit={() => onGoToStep(10)} editable={!completed} />
+              <SectionTitle title="디자인 사이클 가이드" onEdit={!completed ? () => onGoToStep(10) : undefined} />
               <div className="space-y-1 text-sm text-[#555555]">
                 {cycleMonths.map((m) => (
                   <div key={m.month}>• {m.month}: {[m.services.join(', '), m.memo].filter(Boolean).join(' / ')}</div>
@@ -205,7 +197,7 @@ export const ReviewStep = ({ data, onGoToStep, onRestart }: ReviewStepProps) => 
 
           {/* 애프터 노트 */}
           <div>
-            <SectionTitle title="애프터 노트" onEdit={() => onGoToStep(10)} editable={!completed} />
+            <SectionTitle title="애프터 노트" onEdit={!completed ? () => onGoToStep(10) : undefined} />
             <div className="grid grid-cols-3 gap-4 mb-4">
               <InfoItem label="디자이너" value={designerName} />
               <InfoItem label="방문일" value={visitDate} />
@@ -244,6 +236,11 @@ export const ReviewStep = ({ data, onGoToStep, onRestart }: ReviewStepProps) => 
           )}
           {saveStatus === 'failed' && (
             <p className="text-xs text-center text-red-400">저장에 실패했습니다. 다시 시도해주세요.</p>
+          )}
+          {completed && (
+            <Button onClick={() => setSaveStatus('idle')} variant="secondary" fullWidth>
+              수정하기
+            </Button>
           )}
           <Button onClick={onRestart} variant="secondary" fullWidth>
             새로운 컨설팅 시작
