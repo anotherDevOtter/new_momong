@@ -77,7 +77,7 @@ interface NextDirectionFieldProps {
 const NextDirectionField = ({ label, options, selectedOptions, onOptionsChange }: NextDirectionFieldProps) => {
   const [showOptions, setShowOptions] = useState(selectedOptions.length > 0);
 
-  const isSelected = showOptions || selectedOptions.length > 0;
+  const isSelected = selectedOptions.length > 0;
 
   const toggle = (option: string) => {
     if (selectedOptions.includes(option)) {
