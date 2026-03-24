@@ -69,7 +69,7 @@ export default function SignupPage() {
               onChange={set('storeName')}
               required
               className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-[#111] transition-colors"
-              placeholder="머시모몽"
+              placeholder="메르시모몽"
             />
           </div>
 
