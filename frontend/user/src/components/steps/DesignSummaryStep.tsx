@@ -15,8 +15,8 @@ export const DesignSummaryStep = ({ data, onNext, onBack }: DesignSummaryStepPro
   return (
     <div className="max-w-2xl mx-auto px-6 py-24 space-y-12">
       <div className="text-center space-y-3">
-        <h2 className="font-semibold text-[#111111] tracking-[-0.01em]">DESIGN SUMMARY</h2>
-        <p className="text-sm text-[#999999]">지금까지 입력하신 내용을 확인해주세요</p>
+        <h2 className="font-semibold text-[#111111] tracking-[-0.01em]">INFO</h2>
+        <p className="text-sm text-[#999999]">컨설팅 전 정보 요약</p>
       </div>
 
       <div className="space-y-6">
@@ -70,6 +70,8 @@ export const DesignSummaryStep = ({ data, onNext, onBack }: DesignSummaryStepPro
           </div>
         )}
       </div>
+
+      <p className="text-xs text-[#999999]">*디자이너 내부 확인용입니다</p>
 
       <div className="flex gap-4 pt-8">
         <Button onClick={onBack} variant="secondary" fullWidth>이전</Button>
