@@ -52,6 +52,7 @@ export default function Home() {
   const [currentStep, setCurrentStep] = useState(0);
   const [fromReview, setFromReview] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Customer | null>(null);
+  const [reviewSaveStatus, setReviewSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'failed'>('idle');
   const [consultationData, setConsultationData] = useState<ConsultationData>({
     ...INITIAL_DATA,
     visitDate: new Date().toLocaleDateString('ko-KR'),
@@ -105,6 +106,7 @@ export default function Home() {
     window.history.replaceState({ step: 0, view: 'consultation' } satisfies AppHistoryState, '');
     setCurrentStep(0);
     setConsultationData({ ...INITIAL_DATA, visitDate: new Date().toLocaleDateString('ko-KR') });
+    setReviewSaveStatus('idle');
   };
 
   const handleGoToStep = (step: number) => {
@@ -146,6 +148,7 @@ export default function Home() {
       visitDate: record.visitDate,
       afterNote: record.afterNote,
     });
+    setReviewSaveStatus('saved');
     pushState(11, 'consultation');
     setCurrentView('consultation');
     setCurrentStep(11);
@@ -167,6 +170,7 @@ export default function Home() {
       }));
     }
     setSelectedClient(null);
+    setReviewSaveStatus('idle');
     pushState(1, 'consultation');
     setCurrentView('consultation');
     setCurrentStep(1);
@@ -266,7 +270,15 @@ export default function Home() {
           />
         );
       case 11:
-        return <ReviewStep data={consultationData} onGoToStep={handleGoToStep} onRestart={handleComplete} />;
+        return (
+          <ReviewStep
+            data={consultationData}
+            saveStatus={reviewSaveStatus}
+            onSaveStatusChange={setReviewSaveStatus}
+            onGoToStep={handleGoToStep}
+            onRestart={handleComplete}
+          />
+        );
       default:
         return <IntroStep onNext={handleNext} />;
     }

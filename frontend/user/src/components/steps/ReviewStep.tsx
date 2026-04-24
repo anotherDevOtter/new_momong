@@ -9,8 +9,12 @@ import { Pencil, Link } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/Button';
 
+type SaveStatus = 'idle' | 'saving' | 'saved' | 'failed';
+
 interface ReviewStepProps {
   data: ConsultationData;
+  saveStatus: SaveStatus;
+  onSaveStatusChange: (status: SaveStatus) => void;
   onGoToStep: (step: number) => void;
   onRestart: () => void;
 }
@@ -41,26 +45,25 @@ const InfoItem = ({ label, value }: { label: string; value?: string | string[] }
   );
 };
 
-export const ReviewStep = ({ data, onGoToStep, onRestart }: ReviewStepProps) => {
+export const ReviewStep = ({ data, saveStatus, onSaveStatusChange, onGoToStep, onRestart }: ReviewStepProps) => {
   const { token } = useAuth();
   const [consultationId, setConsultationId] = useState<string | null>(data.id || null);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'failed'>(data.id ? 'saved' : 'idle');
   const [showShareModal, setShowShareModal] = useState(false);
 
   const completed = saveStatus === 'saved';
 
   const handleComplete = async () => {
     if (!data.clientInfo?.name || !token) return;
-    setSaveStatus('saving');
+    onSaveStatusChange('saving');
     try {
       const record = data.id
         ? await updateConsultation(token, data.id, data)
         : await saveConsultation(token, data);
       setConsultationId(record.id);
-      setSaveStatus('saved');
+      onSaveStatusChange('saved');
       toast.success(data.id ? '컨설팅이 수정되었습니다' : '컨설팅 데이터가 저장되었습니다');
     } catch {
-      setSaveStatus('failed');
+      onSaveStatusChange('failed');
       toast.error('저장에 실패했습니다');
     }
   };
@@ -238,7 +241,7 @@ export const ReviewStep = ({ data, onGoToStep, onRestart }: ReviewStepProps) => 
             <p className="text-xs text-center text-red-400">저장에 실패했습니다. 다시 시도해주세요.</p>
           )}
           {completed && (
-            <Button onClick={() => setSaveStatus('idle')} variant="secondary" fullWidth>
+            <Button onClick={() => onSaveStatusChange('idle')} variant="secondary" fullWidth>
               수정하기
             </Button>
           )}
