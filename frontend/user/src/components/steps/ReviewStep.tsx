@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ConsultationData } from '@/types';
 import { saveConsultation, updateConsultation } from '@/utils/api';
+import { describeApiError } from '@/utils/api-error';
 import { useAuth } from '@/contexts/AuthContext';
 import { ShareLinkModal } from '@/components/ShareLinkModal';
 import { Pencil, Link } from 'lucide-react';
@@ -62,9 +63,9 @@ export const ReviewStep = ({ data, saveStatus, onSaveStatusChange, onGoToStep, o
       setConsultationId(record.id);
       onSaveStatusChange('saved');
       toast.success(data.id ? '컨설팅이 수정되었습니다' : '컨설팅 데이터가 저장되었습니다');
-    } catch {
+    } catch (err) {
       onSaveStatusChange('failed');
-      toast.error('저장에 실패했습니다');
+      toast.error(describeApiError(err));
     }
   };
 

@@ -1,4 +1,5 @@
 import { Customer, ConsultationData, ConsultationRecord } from '@/types';
+import { apiFetch } from './api-error';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
@@ -98,13 +99,10 @@ export const getConsultationsByCustomerPhone = async (token: string, phone: stri
 };
 
 export const updateConsultation = async (token: string, id: string, data: ConsultationData): Promise<ConsultationRecord> => {
-  const res = await fetch(`${API_BASE}/consultations/${id}`, {
-    method: 'PATCH',
-    headers: authHeaders(token),
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error('컨설팅 수정 실패');
-  const json = await res.json();
+  const json = await apiFetch<{ data: { consultation: ConsultationRecord } }>(
+    `${API_BASE}/consultations/${id}`,
+    { method: 'PATCH', token, body: JSON.stringify(data) },
+  );
   return json.data.consultation;
 };
 
