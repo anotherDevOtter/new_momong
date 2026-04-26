@@ -21,18 +21,13 @@ export async function apiFetch<T>(
   let res: Response;
   try {
     res = await fetch(url, { ...init, headers });
-  } catch (err) {
-    console.error('[API] network error', init.method ?? 'GET', url, err);
+  } catch {
     throw new ApiError(0, 'NETWORK_ERROR', '네트워크 연결을 확인해주세요');
   }
 
   const json = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    console.error('[API]', init.method ?? 'GET', url, {
-      status: res.status,
-      body: json,
-    });
     throw new ApiError(
       res.status,
       json?.code,
