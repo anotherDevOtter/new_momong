@@ -1,16 +1,17 @@
 'use client';
 
-import { Users } from 'lucide-react';
+import { Users, ArrowRight } from 'lucide-react';
 
 interface IntroStepProps {
-  onNext: () => void;
+  onNext?: () => void;
   onViewClients?: () => void;
+  onStart3Way?: () => void;
 }
 
-export const IntroStep = ({ onNext, onViewClients }: IntroStepProps) => {
+export const IntroStep = ({ onNext, onViewClients, onStart3Way }: IntroStepProps) => {
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-20">
-      <div className="w-full max-w-[1200px] flex flex-col items-center pt-36 pb-20">
+    <div className="min-h-[calc(100vh-51px)] bg-white flex items-center justify-center px-20">
+      <div className="w-full max-w-[1200px] flex flex-col items-center pt-28 pb-12">
         <div className="mb-8">
           <p className="text-xs tracking-[0.2em] text-[#999999] uppercase">
             Today&apos;s Design Direction
@@ -34,12 +35,24 @@ export const IntroStep = ({ onNext, onViewClients }: IntroStepProps) => {
         </div>
 
         <div className="flex flex-col gap-3 items-center">
-          <button
-            onClick={onNext}
-            className="w-60 h-[52px] bg-[#111111] text-white rounded-full font-medium text-[15px] hover:bg-[#222222] transition-colors duration-200"
-          >
-            Start
-          </button>
+          {onNext && (
+            <button
+              onClick={onNext}
+              className="w-60 h-[52px] bg-[#111111] text-white rounded-full font-medium text-[15px] hover:bg-[#222222] transition-colors duration-200"
+            >
+              FIT 컨설팅 시작
+            </button>
+          )}
+
+          {onStart3Way && (
+            <button
+              onClick={onStart3Way}
+              className="w-60 h-[52px] border border-[#111111] text-[#111111] rounded-full font-medium text-[15px] hover:bg-[#111111] hover:text-white transition-colors duration-200 flex items-center justify-center gap-2"
+            >
+              3WAY 컨설팅 시작
+              <ArrowRight size={16} strokeWidth={1.5} />
+            </button>
+          )}
 
           {onViewClients && (
             <button
@@ -50,12 +63,6 @@ export const IntroStep = ({ onNext, onViewClients }: IntroStepProps) => {
               고객 목록
             </button>
           )}
-        </div>
-
-        <div className="mt-auto pt-24">
-          <p className="text-[11px] tracking-[0.3em] text-[#BBBBBB] uppercase">
-            MERCI MOMONG
-          </p>
         </div>
       </div>
     </div>

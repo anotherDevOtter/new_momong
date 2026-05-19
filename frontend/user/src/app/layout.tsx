@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { FeaturesProvider } from "@/contexts/FeaturesContext";
 
 export const metadata: Metadata = {
   title: "FIT 헤어컨설팅 — MERCI MOMONG",
@@ -15,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className="antialiased bg-white text-[#111111]">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <FeaturesProvider>{children}</FeaturesProvider>
+        </AuthProvider>
       </body>
     </html>
   );
