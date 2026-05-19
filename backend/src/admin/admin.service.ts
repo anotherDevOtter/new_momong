@@ -1,4 +1,11 @@
-import { Injectable, UnauthorizedException, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  NotFoundException,
+  ConflictException,
+  Logger,
+  OnModuleInit,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -7,8 +14,13 @@ import { User } from '../auth/users.entity';
 import { Consultation } from '../consultations/consultations.entity';
 import { AdminAccount } from './admin-account.entity';
 
+const DEFAULT_ADMIN_EMAIL = 'admin@momong.com';
+const DEFAULT_ADMIN_PASSWORD = 'admin1234';
+
 @Injectable()
-export class AdminService {
+export class AdminService implements OnModuleInit {
+  private readonly logger = new Logger(AdminService.name);
+
   constructor(
     @InjectRepository(User)
     private readonly usersRepo: Repository<User>,
@@ -18,6 +30,21 @@ export class AdminService {
     private readonly adminAccountsRepo: Repository<AdminAccount>,
     private readonly jwtService: JwtService,
   ) {}
+
+  async onModuleInit(): Promise<void> {
+    const count = await this.adminAccountsRepo.count();
+    if (count > 0) return;
+
+    const email = process.env.ADMIN_SEED_EMAIL || DEFAULT_ADMIN_EMAIL;
+    const password = process.env.ADMIN_SEED_PASSWORD || DEFAULT_ADMIN_PASSWORD;
+
+    const password_hash = await bcrypt.hash(password, 10);
+    await this.adminAccountsRepo.save(this.adminAccountsRepo.create({ email, password_hash }));
+
+    this.logger.warn(
+      `기본 어드민 계정이 생성되었습니다: ${email} / ${password} (운영 환경에서는 반드시 변경)`,
+    );
+  }
 
   async login(email: string, password: string) {
     const adminEmail = process.env.ADMIN_EMAIL;
