@@ -19,6 +19,7 @@ export default function AdminHeader({ currentPath }: AdminHeaderProps) {
   const navLinks = [
     { href: '/dashboard', label: '대시보드' },
     { href: '/users', label: '유저 관리' },
+    { href: '/features', label: '기능 설정' },
   ];
 
   return (
