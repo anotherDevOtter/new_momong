@@ -62,8 +62,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!loading && !user) {
-      const hasToken = typeof window !== 'undefined' && !!localStorage.getItem('auth_token');
-      if (!hasToken) router.replace('/login');
+      router.replace('/login');
     }
   }, [loading, user, router]);
 
@@ -91,6 +90,13 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentStep, currentView]);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <p className="text-sm text-[#999999]">불러오는 중...</p>
+      </div>
+    );
+  }
   if (!user) return null;
 
   // ── 히스토리 푸시 헬퍼 ──────────────────────────
