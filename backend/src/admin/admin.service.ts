@@ -15,7 +15,7 @@ import { Consultation } from '../consultations/consultations.entity';
 import { AdminAccount } from './admin-account.entity';
 
 const DEFAULT_ADMIN_EMAIL = 'admin@momong.com';
-const DEFAULT_ADMIN_PASSWORD = 'admin1234';
+const DEFAULT_ADMIN_PASSWORD = '!Password1234';
 
 @Injectable()
 export class AdminService implements OnModuleInit {
