@@ -69,6 +69,11 @@ export default function ThreeWayPage() {
     }
   }, [featuresLoading, features.threeWayEnabled, router]);
 
+  // 페이지 전환 시 상단으로 스크롤
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
+
   if (!user) return null;
   if (!features.threeWayEnabled) return null;
 

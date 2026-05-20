@@ -86,6 +86,11 @@ export default function Home() {
     return () => window.removeEventListener('popstate', handler);
   }, []);
 
+  // step/view 변경 시 페이지 상단으로 스크롤
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentStep, currentView]);
+
   if (!user) return null;
 
   // ── 히스토리 푸시 헬퍼 ──────────────────────────
