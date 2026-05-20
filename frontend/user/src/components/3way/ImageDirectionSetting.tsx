@@ -151,11 +151,10 @@ export function ImageDirectionSetting({ onBack, onNext }: ImageDirectionSettingP
             transition={{ duration: 0.6 }}
             className="text-center mb-12"
           >
-            <p className="text-xs text-gray-500 font-light tracking-wider mb-2">Step 9 of 12</p>
-            <h1 className="text-xl md:text-2xl font-light tracking-wider text-black mb-3">
+            <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em] mb-3">
               이미지 키워드 설정
-            </h1>
-            <p className="text-sm text-gray-600 font-light">
+            </h2>
+            <p className="text-sm text-[#999999]">
               분석 결과를 기반으로 이미지 방향을 설정합니다.
             </p>
           </motion.div>

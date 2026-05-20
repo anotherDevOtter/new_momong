@@ -89,12 +89,9 @@ export function CustomerHistoryDetail({
             </span>
           </button>
 
-          <h1
-            className="text-[2rem] tracking-[0.12em] text-[#111111] mb-6"
-            style={{ fontWeight: 400 }}
-          >
+          <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em] mb-6">
             상담 기록
-          </h1>
+          </h2>
 
           {/* 고객 기본 정보 */}
           <div className="space-y-2 mb-12 pb-8 border-b border-[#E5E5E5]">

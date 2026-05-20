@@ -125,16 +125,10 @@ export function CustomerHistory({ onHistoryDetail, onBack }: CustomerHistoryProp
             </button>
           )}
           
-          <h1
-            className="text-[2rem] tracking-[0.12em] text-[#111111] mb-4"
-            style={{ fontWeight: 400 }}
-          >
+          <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em] mb-3">
             고객 상담 이력
-          </h1>
-          <p
-            className="text-[15px] leading-[1.8] tracking-[0.02em] text-[#6F6F6F]"
-            style={{ fontWeight: 300 }}
-          >
+          </h2>
+          <p className="text-sm text-[#999999]">
             이전 상담 내용을 조회하고 설계 히스토리를 확인하세요
           </p>
         </motion.div>

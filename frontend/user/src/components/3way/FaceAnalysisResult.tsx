@@ -122,11 +122,10 @@ export function FaceAnalysisResult({ onBack, onNext }: FaceAnalysisResultProps) 
             transition={{ duration: 0.6 }}
             className="text-center mb-12"
           >
-            <p className="text-xs text-gray-500 font-light tracking-wider mb-2">Step 8 of 12</p>
-            <h1 className="text-xl md:text-2xl font-light tracking-wider text-black mb-3 uppercase">
-              Face Precision Result
-            </h1>
-            <p className="text-sm text-gray-600 font-light">
+            <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em] mb-3">
+              얼굴 정밀 분석 결과
+            </h2>
+            <p className="text-sm text-[#999999]">
               얼굴 비율 및 이미지 타입 분석 결과입니다.
             </p>
           </motion.div>

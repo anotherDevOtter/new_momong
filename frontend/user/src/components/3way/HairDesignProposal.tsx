@@ -76,11 +76,10 @@ export function HairDesignProposal({ onBack, onNext }: HairDesignProposalProps) 
             transition={{ duration: 0.4 }}
             className="text-center mb-8"
           >
-            <p className="text-xs text-gray-500 font-light tracking-wider mb-2">Step 10 of 12</p>
-            <h1 className="text-xl md:text-2xl font-light tracking-wide text-black mb-2">
-              Personalized Hair Design Proposal
-            </h1>
-            <p className="text-sm text-gray-600 font-light">
+            <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em] mb-3">
+              헤어디자인 제안
+            </h2>
+            <p className="text-sm text-[#999999]">
               오늘의 디자인 제안을 확인해주세요.
             </p>
           </motion.div>

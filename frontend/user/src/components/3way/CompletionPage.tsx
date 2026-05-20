@@ -36,17 +36,17 @@ export function CompletionPage({ onDownloadPDF, onShareLink, onGoHome }: Complet
           transition={{ delay: 0.4, duration: 0.8 }}
           className="text-center mb-12"
         >
-          <h2 className="text-[20px] tracking-[0.08em] text-[#111111] mb-8" style={{ fontWeight: 400 }}>
-            REPORT COMPLETE
+          <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em] mb-6">
+            리포트 완성
           </h2>
-          <p className="text-[13px] leading-[1.8] text-[#777777]" style={{ fontWeight: 300 }}>
+          <p className="text-sm text-[#999999] leading-relaxed">
             고객님의
             <br />
             3WAY 프리미엄 이미지 설계 리포트가
             <br />
             완성되었습니다
           </p>
-          <p className="text-[13px] leading-[1.8] text-[#777777] mt-8" style={{ fontWeight: 300 }}>
+          <p className="text-sm text-[#999999] leading-relaxed mt-6">
             오늘의 디자인은 단순한 시술이 아닌
             <br />
             구조 기반 이미지 설계입니다

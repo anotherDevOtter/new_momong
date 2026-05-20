@@ -31,84 +31,68 @@ export function CourseCard({
       transition={{ duration: 0.6 }}
       onClick={onSelect}
       className={`
-        relative w-full p-8 cursor-pointer transition-all duration-200
-        ${
-          selected
-            ? 'bg-white border-2 border-[#111111]'
-            : 'bg-white border border-[#E5E5E5] hover:border-[#AAAAAA]'
-        }
+        relative w-full p-8 cursor-pointer bg-white text-[#111111] border transition-colors
+        ${selected ? 'border-[#111111]' : 'border-[#E5E5E5] hover:border-[#111111]'}
       `}
     >
       {/* 상단: 타이틀과 선택 표시 */}
       <div className="flex items-start justify-between mb-8">
         <div className="flex-1">
           <div className="flex items-center gap-4 mb-2">
-            <h3 className="text-[18px] tracking-[0.05em] text-[#111111]" style={{ fontWeight: 500 }}>
+            <h3 className="text-lg font-semibold text-[#111111] tracking-[-0.01em]">
               {title}
             </h3>
             {recommended && (
-              <span className="px-3 py-1 bg-[#111111] text-white text-[10px] tracking-[0.15em] uppercase" style={{ fontWeight: 400 }}>
+              <span className="px-3 py-1 bg-[#111111] text-white text-[10px] tracking-[0.15em] uppercase font-medium">
                 추천
               </span>
             )}
           </div>
         </div>
 
-        {/* 선택 표시 */}
+        {/* 선택 체크박스 */}
         <div
           className={`
-            w-5 h-5 border flex items-center justify-center transition-all duration-200
-            ${
-              selected
-                ? 'bg-[#111111] border-[#111111]'
-                : 'bg-white border-[#E5E5E5]'
-            }
+            w-5 h-5 flex-shrink-0 flex items-center justify-center border-[1.5px] transition-all
+            ${selected ? 'bg-[#111111] border-[#111111]' : 'bg-white border-[#CCCCCC]'}
           `}
         >
-          {selected && <Check className="w-3 h-3 text-white" strokeWidth={2.5} />}
+          {selected && <Check size={12} color="#FFFFFF" strokeWidth={3} />}
         </div>
       </div>
 
       {/* 구성 설명 */}
       <div className="mb-8">
-        <p className="text-[10px] text-[#AAAAAA] mb-3 tracking-[0.15em] uppercase" style={{ fontWeight: 300 }}>
+        <p className="text-[10px] text-[#AAAAAA] mb-3 tracking-[0.15em] uppercase font-medium">
           COMPOSITION
         </p>
         {options ? (
           <div className="space-y-3">
             {options.map((option, idx) => (
               <div key={idx}>
-                <p className="text-[13px] text-[#777777] mb-1" style={{ fontWeight: 300 }}>
-                  {option.label}
-                </p>
-                <p className="text-[14px] text-[#111111] leading-[1.6]" style={{ fontWeight: 400 }}>
+                <p className="text-sm text-[#777777] mb-1">{option.label}</p>
+                <p className="text-sm font-medium text-[#111111] leading-[1.6]">
                   {option.items.join(' + ')}
                 </p>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-[14px] text-[#111111] leading-[1.6]" style={{ fontWeight: 400 }}>
-            {description}
-          </p>
+          <p className="text-sm font-medium text-[#111111] leading-[1.6]">{description}</p>
         )}
       </div>
 
       {/* 제공 서비스 */}
       <div className="mb-6 pb-6 border-b border-[#E5E5E5]">
-        <p className="text-[10px] text-[#AAAAAA] mb-3 tracking-[0.15em] uppercase" style={{ fontWeight: 300 }}>
+        <p className="text-[10px] text-[#AAAAAA] mb-3 tracking-[0.15em] uppercase font-medium">
           SERVICES
         </p>
-        <p className="text-[13px] text-[#777777] leading-[1.6]" style={{ fontWeight: 300 }}>
-          {services}
-        </p>
+        <p className="text-sm text-[#777777] leading-[1.6]">{services}</p>
       </div>
 
       {/* 하단 문구 */}
       {footer && (
-        <p className="text-[11px] text-[#AAAAAA] text-center tracking-[0.02em]" style={{ fontWeight: 300 }}>
-          {footer}
-        </p>
+        <p className="text-xs text-[#AAAAAA] text-center">{footer}</p>
       )}
     </motion.div>
   );

@@ -79,11 +79,9 @@ export function FashionStyleCard({
       {/* 라벨 */}
       <div className="mt-3 text-center">
         <span
-          className={`
-            text-[13px] tracking-[0.02em] transition-colors duration-200
-            ${selected ? 'text-[#111111]' : 'text-[#777777]'}
-          `}
-          style={{ fontWeight: selected ? 400 : 300 }}
+          className={`text-sm font-medium transition-colors duration-200 ${
+            selected ? 'text-[#111111]' : 'text-[#777777]'
+          }`}
         >
           {label}
         </span>

@@ -123,14 +123,12 @@ export function FashionPreferenceDiagnosis({ onBack, onNext }: FashionPreference
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-24"
+          className="text-center mb-12 space-y-3"
         >
-          <h1 className="text-[2rem] tracking-[0.12em] text-[#111111] mb-4" style={{ fontWeight: 400 }}>
-            FASHION PREFERENCE
-          </h1>
-          <p className="text-[13px] leading-[1.8] tracking-[0.02em] text-[#777777]" style={{ fontWeight: 300 }}>
-            선호하는 스타일과 선호하지 않는 스타일을 선택해주세요
-          </p>
+          <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em]">
+            패션 선호도
+          </h2>
+          <p className="text-sm text-[#999999]">선호하는 스타일과 선호하지 않는 스타일을 선택해주세요</p>
         </motion.div>
 
         {/* Section 1: 선호 스타일 */}
@@ -138,14 +136,10 @@ export function FashionPreferenceDiagnosis({ onBack, onNext }: FashionPreference
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.8 }}
-          className="mb-24"
+          className="mb-16"
         >
-          <h2 className="text-[18px] tracking-[0.05em] text-[#111111] mb-2 uppercase" style={{ fontWeight: 600 }}>
-            Preferred Styles
-          </h2>
-          <p className="text-[13px] leading-[1.8] tracking-[0.01em] text-[#777777] mb-12" style={{ fontWeight: 300 }}>
-            선호하는 패션 스타일
-          </p>
+          <h3 className="text-sm font-medium text-[#111111] mb-2">Q. 선호하는 패션 스타일</h3>
+          <p className="text-xs text-[#999999] mb-4">복수 선택 가능</p>
 
           <div className="grid grid-cols-3 gap-5">
             {fashionStyles.map((style, index) => (
@@ -167,9 +161,6 @@ export function FashionPreferenceDiagnosis({ onBack, onNext }: FashionPreference
           </div>
         </motion.div>
 
-        {/* 섹션 구분선 */}
-        <div className="w-full h-px bg-[#E5E5E5] my-20" />
-
         {/* Section 2: 비선호 스타일 */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -177,12 +168,8 @@ export function FashionPreferenceDiagnosis({ onBack, onNext }: FashionPreference
           transition={{ delay: 0.5, duration: 0.8 }}
           className="mb-16"
         >
-          <h2 className="text-[18px] tracking-[0.05em] text-[#111111] mb-2 uppercase" style={{ fontWeight: 600 }}>
-            Avoided Styles
-          </h2>
-          <p className="text-[13px] leading-[1.8] tracking-[0.01em] text-[#777777] mb-12" style={{ fontWeight: 300 }}>
-            선호하지 않는 패션 스타일
-          </p>
+          <h3 className="text-sm font-medium text-[#111111] mb-2">Q. 선호하지 않는 패션 스타일</h3>
+          <p className="text-xs text-[#999999] mb-4">복수 선택 가능</p>
 
           <div className="grid grid-cols-3 gap-5">
             {fashionStyles.map((style, index) => (

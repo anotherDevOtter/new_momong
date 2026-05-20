@@ -69,18 +69,13 @@ export function PersonalColorAnalysis({ onBack, onNext }: PersonalColorAnalysisP
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-24"
+          className="text-center mb-12 space-y-3"
         >
-          <h1 className="text-[2rem] tracking-[0.12em] text-[#111111] mb-4" style={{ fontWeight: 400 }}>
-            PERSONAL COLOR ANALYSIS
-          </h1>
-          <p className="text-[13px] leading-[1.8] tracking-[0.02em] text-[#777777]" style={{ fontWeight: 300 }}>
-            당신에게 어울리는 퍼스널컬러를 분석합니다
-          </p>
+          <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em]">
+            퍼스널컬러 분석
+          </h2>
+          <p className="text-sm text-[#999999]">당신에게 어울리는 퍼스널컬러를 분석합니다</p>
         </motion.div>
-
-        {/* 구분선 */}
-        <div className="w-full h-px bg-[#111111] mb-20" />
 
         {/* 계절별 컬러 차트 */}
         <div className="space-y-12 mb-20">
@@ -91,32 +86,26 @@ export function PersonalColorAnalysis({ onBack, onNext }: PersonalColorAnalysisP
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 + index * 0.1, duration: 0.6 }}
               onClick={() => setSelectedSeason(season.id)}
-              className={`cursor-pointer border transition-all duration-300 ${
-                selectedSeason === season.id
-                  ? 'border-[#111111] bg-[#FAFAFA]'
-                  : 'border-[#E5E5E5] hover:border-[#AAAAAA]'
+              className={`cursor-pointer bg-white text-[#111111] border transition-colors ${
+                selectedSeason === season.id ? 'border-[#111111]' : 'border-[#E5E5E5] hover:border-[#111111]'
               }`}
             >
               <div className="p-8">
                 {/* 헤더 */}
                 <div className="flex items-start justify-between mb-6">
                   <div>
-                    <h2 className="text-[20px] tracking-[0.05em] text-[#111111] mb-1 uppercase" style={{ fontWeight: 600 }}>
+                    <h3 className="text-lg font-semibold text-[#111111] tracking-[-0.01em] mb-1">
                       {season.name}
-                    </h2>
-                    <p className="text-[14px] tracking-[0.01em] text-[#777777]" style={{ fontWeight: 300 }}>
-                      {season.subtitle}
-                    </p>
+                    </h3>
+                    <p className="text-sm text-[#777777]">{season.subtitle}</p>
                   </div>
-                  
+
                   {/* 선택 체크박스 */}
-                  <div className={`w-6 h-6 border flex-shrink-0 flex items-center justify-center transition-all duration-200 ${
-                    selectedSeason === season.id
-                      ? 'border-[#111111] bg-[#111111]'
-                      : 'border-[#E5E5E5]'
+                  <div className={`w-5 h-5 flex-shrink-0 flex items-center justify-center border-[1.5px] ${
+                    selectedSeason === season.id ? 'bg-[#111111] border-[#111111]' : 'bg-white border-[#CCCCCC]'
                   }`}>
                     {selectedSeason === season.id && (
-                      <div className="w-3 h-3 bg-white" />
+                      <div className="w-2.5 h-2.5 bg-white" />
                     )}
                   </div>
                 </div>
@@ -136,10 +125,8 @@ export function PersonalColorAnalysis({ onBack, onNext }: PersonalColorAnalysisP
                 <div className="space-y-2">
                   {season.characteristics.map((char, idx) => (
                     <div key={idx} className="flex items-start gap-3">
-                      <div className="w-1 h-1 bg-[#111111] rounded-full mt-2 flex-shrink-0" />
-                      <p className="text-[13px] tracking-[0.01em] text-[#777777]" style={{ fontWeight: 300 }}>
-                        {char}
-                      </p>
+                      <div className="w-1 h-1 rounded-full mt-2 flex-shrink-0 bg-[#111111]" />
+                      <p className="text-sm text-[#777777]">{char}</p>
                     </div>
                   ))}
                 </div>
@@ -157,10 +144,10 @@ export function PersonalColorAnalysis({ onBack, onNext }: PersonalColorAnalysisP
             className="mb-20"
           >
             <div className="border border-[#111111] p-8">
-              <h3 className="text-[16px] tracking-[0.05em] text-[#111111] mb-4 uppercase" style={{ fontWeight: 600 }}>
-                Recommended Hair Color
+              <h3 className="text-lg font-semibold text-[#111111] tracking-[-0.01em] mb-3">
+                추천 헤어 컬러
               </h3>
-              <p className="text-[13px] leading-[1.8] tracking-[0.01em] text-[#777777]" style={{ fontWeight: 300 }}>
+              <p className="text-sm text-[#777777] leading-[1.7]">
                 선택하신 {seasons.find(s => s.id === selectedSeason)?.name} 타입에 어울리는 헤어 컬러를 제안합니다.
                 자연스러운 그라데이션부터 포인트 컬러까지 다양한 옵션을 컨설팅 시 제공해드립니다.
               </p>

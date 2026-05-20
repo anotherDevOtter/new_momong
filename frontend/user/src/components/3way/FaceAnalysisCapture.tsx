@@ -99,10 +99,10 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
             className="text-center mb-8"
           >
           
-            <h1 className="text-xl md:text-2xl font-light tracking-wider text-black mb-3 uppercase">
-              Face Precision Analysis
-            </h1>
-            <p className="text-sm text-gray-600 font-light leading-relaxed">
+            <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em] mb-3">
+              얼굴 정밀 분석
+            </h2>
+            <p className="text-sm text-[#999999] leading-relaxed">
               정확한 분석을 위해 아래 가이드를 따라 촬영해주세요.
             </p>
           </motion.div>

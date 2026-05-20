@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { ProgressSteps } from './ProgressSteps';
 import { NavigationButtons } from './NavigationButtons';
+import { Input } from '@/components/ui/Input';
 
 interface CustomerInfoProps {
   onBack: () => void;
@@ -68,14 +69,10 @@ export function CustomerInfo({ onBack, onNext }: CustomerInfoProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-24"
+          className="text-center mb-12 space-y-3"
         >
-          <h1 className="text-[2rem] tracking-[0.12em] text-[#111111] mb-4" style={{ fontWeight: 400 }}>
-            CLIENT INFORMATION
-          </h1>
-          <p className="text-[15px] leading-[1.8] tracking-[0.02em] text-[#777777]" style={{ fontWeight: 300 }}>
-            정확한 컨설팅을 위해 기본 정보를 입력해주세요
-          </p>
+          <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em]">고객 정보</h2>
+          <p className="text-sm text-[#999999]">정확한 컨설팅을 위해 기본 정보를 입력해주세요</p>
         </motion.div>
 
         {/* 입력 필드 영역 */}
@@ -83,73 +80,46 @@ export function CustomerInfo({ onBack, onNext }: CustomerInfoProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.8 }}
-          className="space-y-12 mb-16"
+          className="space-y-8 mb-16"
         >
-          {/* 고객명 */}
-          <div>
-            <label className="block text-[11px] text-[#777777] mb-4 tracking-[0.05em]" style={{ fontWeight: 300 }}>
-              고객명 <span className="text-[#111111]">*</span>
-            </label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-0 py-3 border-0 border-b border-[#E5E5E5] bg-transparent text-[15px] text-[#111111] focus:outline-none focus:border-[#111111] transition-colors duration-200"
-              style={{ fontWeight: 300 }}
-            />
-          </div>
+          <Input
+            label="고객명"
+            value={formData.name}
+            onChange={(value) => setFormData({ ...formData, name: value })}
+            required
+          />
 
-          {/* 연락처 */}
-          <div>
-            <label className="block text-[11px] text-[#777777] mb-4 tracking-[0.05em]" style={{ fontWeight: 300 }}>
-              연락처 <span className="text-[#111111]">*</span>
-            </label>
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => handlePhoneChange(e.target.value)}
-              placeholder="010-0000-0000"
-              maxLength={13}
-              className="w-full px-0 py-3 border-0 border-b border-[#E5E5E5] bg-transparent text-[15px] text-[#111111] placeholder:text-[#CCCCCC] focus:outline-none focus:border-[#111111] transition-colors duration-200"
-              style={{ fontWeight: 300 }}
-            />
-          </div>
+          <Input
+            label="연락처"
+            type="tel"
+            value={formData.phone}
+            onChange={(value) => handlePhoneChange(value)}
+            placeholder="010-0000-0000"
+            maxLength={13}
+            required
+          />
 
-          {/* 직업 */}
-          <div>
-            <label className="block text-[11px] text-[#777777] mb-4 tracking-[0.05em]" style={{ fontWeight: 300 }}>
-              직업
-            </label>
-            <input
-              type="text"
-              value={formData.occupation}
-              onChange={(e) => setFormData({ ...formData, occupation: e.target.value })}
-              placeholder="예: 디자이너, 회사원, 학생 등"
-              className="w-full px-0 py-3 border-0 border-b border-[#E5E5E5] bg-transparent text-[15px] text-[#111111] placeholder:text-[#CCCCCC] focus:outline-none focus:border-[#111111] transition-colors duration-200"
-              style={{ fontWeight: 300 }}
-            />
-          </div>
+          <Input
+            label="직업"
+            value={formData.occupation}
+            onChange={(value) => setFormData({ ...formData, occupation: value })}
+            placeholder="예: 디자이너, 회사원, 학생 등"
+          />
 
           {/* 연령대 */}
-          <div>
-            <label className="block text-[11px] text-[#777777] mb-6 tracking-[0.05em]" style={{ fontWeight: 300 }}>
-              연령대
-            </label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="space-y-2">
+            <label className="block text-sm text-[#555555]">연령대</label>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {ageGroups.map((age) => (
                 <button
                   key={age}
                   type="button"
                   onClick={() => setFormData({ ...formData, ageGroup: age })}
-                  className={`
-                    py-4 px-4 border transition-all duration-200 text-[13px] tracking-[0.02em]
-                    ${
-                      formData.ageGroup === age
-                        ? 'border-[#111111] bg-white text-[#111111]'
-                        : 'border-[#E5E5E5] bg-white text-[#777777] hover:border-[#AAAAAA]'
-                    }
-                  `}
-                  style={{ fontWeight: formData.ageGroup === age ? 400 : 300 }}
+                  className={`h-14 px-4 text-sm font-medium border transition-all ${
+                    formData.ageGroup === age
+                      ? 'bg-[#111111] text-white border-[#111111]'
+                      : 'bg-white text-[#111111] border-[#E5E5E5] hover:border-[#111111]'
+                  }`}
                 >
                   {age}
                 </button>
@@ -158,25 +128,19 @@ export function CustomerInfo({ onBack, onNext }: CustomerInfoProps) {
           </div>
 
           {/* 성별 */}
-          <div>
-            <label className="block text-[11px] text-[#777777] mb-6 tracking-[0.05em]" style={{ fontWeight: 300 }}>
-              성별
-            </label>
-            <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <label className="block text-sm text-[#555555]">성별</label>
+            <div className="grid grid-cols-2 gap-2">
               {genders.map((gender) => (
                 <button
                   key={gender}
                   type="button"
                   onClick={() => setFormData({ ...formData, gender })}
-                  className={`
-                    py-4 px-4 border transition-all duration-200 text-[13px] tracking-[0.02em]
-                    ${
-                      formData.gender === gender
-                        ? 'border-[#111111] bg-white text-[#111111]'
-                        : 'border-[#E5E5E5] bg-white text-[#777777] hover:border-[#AAAAAA]'
-                    }
-                  `}
-                  style={{ fontWeight: formData.gender === gender ? 400 : 300 }}
+                  className={`h-14 px-4 text-sm font-medium border transition-all ${
+                    formData.gender === gender
+                      ? 'bg-[#111111] text-white border-[#111111]'
+                      : 'bg-white text-[#111111] border-[#E5E5E5] hover:border-[#111111]'
+                  }`}
                 >
                   {gender}
                 </button>

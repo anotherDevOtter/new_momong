@@ -185,11 +185,10 @@ export function NextDirection({ onBack, onNext, onCycleDataChange }: NextDirecti
             transition={{ duration: 0.6 }}
             className="text-center mb-10"
           >
-            <p className="text-xs text-gray-500 font-light tracking-wider mb-2">Step 12 of 12</p>
-            <h1 className="text-2xl md:text-3xl font-light tracking-[0.05em] text-black mb-3">
-              NEXT DIRECTION
-            </h1>
-            <p className="text-sm text-gray-600 font-light leading-relaxed">
+            <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em] mb-3">
+              다음 디자인 방향
+            </h2>
+            <p className="text-sm text-[#999999] leading-relaxed">
               다음 디자인 이동 방향을 선택해주세요.
               <br />
               (복수 선택 가능)

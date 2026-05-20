@@ -85,18 +85,13 @@ export function SkeletonImageAnalysis({ onBack, onNext }: SkeletonImageAnalysisP
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-24"
+          className="text-center mb-12 space-y-3"
         >
-          <h1 className="text-[2rem] tracking-[0.12em] text-[#111111] mb-4" style={{ fontWeight: 400 }}>
-            SKELETAL IMAGE ANALYSIS
-          </h1>
-          <p className="text-[13px] leading-[1.8] tracking-[0.02em] text-[#777777]" style={{ fontWeight: 300 }}>
-            얼굴 골격에 어울리는 이미지 타입을 분석합니다
-          </p>
+          <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em]">
+            골격 이미지 분석
+          </h2>
+          <p className="text-sm text-[#999999]">얼굴 골격에 어울리는 이미지 타입을 분석합니다</p>
         </motion.div>
-
-        {/* 구분선 */}
-        <div className="w-full h-px bg-[#111111] mb-20" />
 
         {/* 골격 타입별 차트 */}
         <div className="space-y-12 mb-20">
@@ -107,10 +102,8 @@ export function SkeletonImageAnalysis({ onBack, onNext }: SkeletonImageAnalysisP
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 + index * 0.1, duration: 0.6 }}
               onClick={() => setSelectedType(type.id)}
-              className={`cursor-pointer border transition-all duration-300 ${
-                selectedType === type.id
-                  ? 'border-[#111111] bg-[#FAFAFA]'
-                  : 'border-[#E5E5E5] hover:border-[#AAAAAA]'
+              className={`cursor-pointer bg-white text-[#111111] border transition-colors ${
+                selectedType === type.id ? 'border-[#111111]' : 'border-[#E5E5E5] hover:border-[#111111]'
               }`}
             >
               <div className="p-8">
@@ -121,25 +114,11 @@ export function SkeletonImageAnalysis({ onBack, onNext }: SkeletonImageAnalysisP
                       {type.visualLines.map((line: any, idx: number) => {
                         if (line.type === 'curve') {
                           return (
-                            <polyline
-                              key={idx}
-                              points={line.points}
-                              fill="none"
-                              stroke="#111111"
-                              strokeWidth="2"
-                            />
+                            <polyline key={idx} points={line.points} fill="none" stroke="#111111" strokeWidth="2" />
                           );
                         }
                         return (
-                          <line
-                            key={idx}
-                            x1={line.x1}
-                            y1={line.y1}
-                            x2={line.x2}
-                            y2={line.y2}
-                            stroke="#111111"
-                            strokeWidth="2"
-                          />
+                          <line key={idx} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} stroke="#111111" strokeWidth="2" />
                         );
                       })}
                     </svg>
@@ -150,41 +129,31 @@ export function SkeletonImageAnalysis({ onBack, onNext }: SkeletonImageAnalysisP
                     {/* 헤더 */}
                     <div className="flex items-start justify-between mb-4">
                       <div>
-                        <h2 className="text-[20px] tracking-[0.05em] text-[#111111] mb-1 uppercase" style={{ fontWeight: 600 }}>
+                        <h3 className="text-lg font-semibold text-[#111111] tracking-[-0.01em] mb-1">
                           {type.name}
-                        </h2>
-                        <p className="text-[14px] tracking-[0.01em] text-[#777777] mb-2" style={{ fontWeight: 300 }}>
-                          {type.subtitle}
-                        </p>
-                        <p className="text-[12px] tracking-[0.01em] text-[#999999]" style={{ fontWeight: 300 }}>
-                          {type.description}
-                        </p>
+                        </h3>
+                        <p className="text-sm text-[#777777] mb-2">{type.subtitle}</p>
+                        <p className="text-xs text-[#999999]">{type.description}</p>
                       </div>
-                      
+
                       {/* 선택 체크박스 */}
-                      <div className={`w-6 h-6 border flex-shrink-0 flex items-center justify-center transition-all duration-200 ${
-                        selectedType === type.id
-                          ? 'border-[#111111] bg-[#111111]'
-                          : 'border-[#E5E5E5]'
+                      <div className={`w-5 h-5 flex-shrink-0 flex items-center justify-center border-[1.5px] ${
+                        selectedType === type.id ? 'bg-[#111111] border-[#111111]' : 'bg-white border-[#CCCCCC]'
                       }`}>
                         {selectedType === type.id && (
-                          <div className="w-3 h-3 bg-white" />
+                          <div className="w-2.5 h-2.5 bg-white" />
                         )}
                       </div>
                     </div>
 
                     {/* 특징 */}
                     <div className="mb-4">
-                      <p className="text-[11px] tracking-[0.05em] text-[#999999] mb-2 uppercase" style={{ fontWeight: 500 }}>
-                        Characteristics
-                      </p>
+                      <p className="text-xs uppercase font-medium mb-2 text-[#999999]">특징</p>
                       <div className="space-y-1">
                         {type.characteristics.map((char, idx) => (
                           <div key={idx} className="flex items-start gap-2">
-                            <div className="w-1 h-1 bg-[#111111] rounded-full mt-1.5 flex-shrink-0" />
-                            <p className="text-[12px] tracking-[0.01em] text-[#777777]" style={{ fontWeight: 300 }}>
-                              {char}
-                            </p>
+                            <div className="w-1 h-1 rounded-full mt-1.5 flex-shrink-0 bg-[#111111]" />
+                            <p className="text-sm text-[#777777]">{char}</p>
                           </div>
                         ))}
                       </div>
@@ -192,15 +161,12 @@ export function SkeletonImageAnalysis({ onBack, onNext }: SkeletonImageAnalysisP
 
                     {/* 추천 헤어스타일 */}
                     <div>
-                      <p className="text-[11px] tracking-[0.05em] text-[#999999] mb-2 uppercase" style={{ fontWeight: 500 }}>
-                        Recommended Styles
-                      </p>
+                      <p className="text-xs uppercase font-medium mb-2 text-[#999999]">추천 스타일</p>
                       <div className="flex gap-2 flex-wrap">
                         {type.hairRecommendations.map((rec, idx) => (
                           <span
                             key={idx}
-                            className="px-3 py-1 bg-white border border-[#E5E5E5] text-[11px] tracking-[0.01em] text-[#777777]"
-                            style={{ fontWeight: 300 }}
+                            className="px-3 py-1 text-xs border bg-white text-[#777777] border-[#E5E5E5]"
                           >
                             {rec}
                           </span>
@@ -223,15 +189,15 @@ export function SkeletonImageAnalysis({ onBack, onNext }: SkeletonImageAnalysisP
             className="mb-20"
           >
             <div className="border border-[#111111] p-8">
-              <h3 className="text-[16px] tracking-[0.05em] text-[#111111] mb-4 uppercase" style={{ fontWeight: 600 }}>
-                Detailed Analysis
+              <h3 className="text-lg font-semibold text-[#111111] tracking-[-0.01em] mb-3">
+                상세 분석
               </h3>
-              <p className="text-[13px] leading-[1.8] tracking-[0.01em] text-[#777777] mb-4" style={{ fontWeight: 300 }}>
-                선택하신 {skeletonTypes.find(s => s.id === selectedType)?.name} 타입의 골격 특성에 맞춰 
+              <p className="text-sm text-[#777777] leading-[1.7] mb-3">
+                선택하신 {skeletonTypes.find(s => s.id === selectedType)?.name} 타입의 골격 특성에 맞춰
                 얼굴형 보완과 이미지 연출을 위한 헤어 디자인을 제안합니다.
               </p>
-              <p className="text-[13px] leading-[1.8] tracking-[0.01em] text-[#777777]" style={{ fontWeight: 300 }}>
-                볼륨 포지션, 레이어 위치, 길이감 등 세부적인 디테일까지 
+              <p className="text-sm text-[#777777] leading-[1.7]">
+                볼륨 포지션, 레이어 위치, 길이감 등 세부적인 디테일까지
                 전문가 컨설팅을 통해 안내해드립니다.
               </p>
             </div>

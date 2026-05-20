@@ -125,11 +125,10 @@ export function ConsultingSummary({
             transition={{ duration: 0.6 }}
             className="text-center mb-12"
           >
-            <p className="text-xs text-gray-500 font-light tracking-wider mb-2">Step 5 of 12</p>
-            <h1 className="text-2xl md:text-3xl font-light tracking-wide text-black mb-3">
-              컨설팅 요약 대시보드
-            </h1>
-            <p className="text-sm text-gray-600 font-light">상담 전 핵심 정보를 확인하세요.</p>
+            <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em] mb-3">
+              컨설팅 요약
+            </h2>
+            <p className="text-sm text-[#999999]">상담 전 핵심 정보를 확인하세요.</p>
           </motion.div>
 
           {/* Section 1: 기본 정보 */}

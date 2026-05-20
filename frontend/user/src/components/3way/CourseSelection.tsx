@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
+import { Check } from 'lucide-react';
 import { CourseCard } from './CourseCard';
 import { ProgressSteps } from './ProgressSteps';
 import { NavigationButtons } from './NavigationButtons';
@@ -89,14 +90,12 @@ export function CourseSelection({ onNext, onBack }: CourseSelectionProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-24"
+          className="text-center mb-12 space-y-3"
         >
-          <h1 className="text-[2rem] tracking-[0.12em] text-[#111111] mb-4" style={{ fontWeight: 400 }}>
-            CONSULTING COURSE
-          </h1>
-          <p className="text-[13px] leading-[1.8] tracking-[0.02em] text-[#777777]" style={{ fontWeight: 300 }}>
-            원하는 진단 범위를 선택해주세요
-          </p>
+          <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em]">
+            컨설팅 코스 선택
+          </h2>
+          <p className="text-sm text-[#999999]">원하는 진단 범위를 선택해주세요</p>
         </motion.div>
 
         {/* 코스 카드 영역 */}
@@ -137,27 +136,25 @@ export function CourseSelection({ onNext, onBack }: CourseSelectionProps) {
                   {features.courses['2way-personal'] && (
                   <div
                     onClick={() => setSelected2WayOption('personal')}
-                    className={`group cursor-pointer py-4 px-6 border transition-all duration-200 ${
+                    className={`cursor-pointer py-4 px-6 bg-white text-[#111111] border transition-colors ${
                       selected2WayOption === 'personal'
-                        ? 'border-[#111111] bg-[#FAFAFA]'
-                        : 'border-[#E5E5E5] hover:border-[#AAAAAA]'
+                        ? 'border-[#111111]'
+                        : 'border-[#E5E5E5] hover:border-[#111111]'
                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className={`w-5 h-5 border flex-shrink-0 flex items-center justify-center transition-all duration-200 ${
+                      <div className={`w-5 h-5 flex-shrink-0 flex items-center justify-center border-[1.5px] mt-0.5 ${
                         selected2WayOption === 'personal'
-                          ? 'border-[#111111] bg-[#111111]'
-                          : 'border-[#E5E5E5]'
+                          ? 'bg-[#111111] border-[#111111]'
+                          : 'bg-white border-[#CCCCCC]'
                       }`}>
                         {selected2WayOption === 'personal' && (
-                          <div className="w-2 h-2 bg-white" />
+                          <Check size={12} color="#FFFFFF" strokeWidth={3} />
                         )}
                       </div>
                       <div>
-                        <p className="text-[14px] tracking-[0.01em] text-[#111111] mb-1" style={{ fontWeight: 500 }}>
-                          옵션 A: 퍼스널컬러
-                        </p>
-                        <p className="text-[12px] tracking-[0.01em] text-[#777777]" style={{ fontWeight: 300 }}>
+                        <p className="text-sm font-medium text-[#111111] mb-1">옵션 A: 퍼스널컬러</p>
+                        <p className="text-xs text-[#777777]">
                           얼굴 정밀 분석 + 퍼스널컬러 진단
                         </p>
                       </div>
@@ -169,27 +166,25 @@ export function CourseSelection({ onNext, onBack }: CourseSelectionProps) {
                   {features.courses['2way-skeleton'] && (
                   <div
                     onClick={() => setSelected2WayOption('skeleton')}
-                    className={`group cursor-pointer py-4 px-6 border transition-all duration-200 ${
+                    className={`cursor-pointer py-4 px-6 bg-white text-[#111111] border transition-colors ${
                       selected2WayOption === 'skeleton'
-                        ? 'border-[#111111] bg-[#FAFAFA]'
-                        : 'border-[#E5E5E5] hover:border-[#AAAAAA]'
+                        ? 'border-[#111111]'
+                        : 'border-[#E5E5E5] hover:border-[#111111]'
                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className={`w-5 h-5 border flex-shrink-0 flex items-center justify-center transition-all duration-200 ${
+                      <div className={`w-5 h-5 flex-shrink-0 flex items-center justify-center border-[1.5px] mt-0.5 ${
                         selected2WayOption === 'skeleton'
-                          ? 'border-[#111111] bg-[#111111]'
-                          : 'border-[#E5E5E5]'
+                          ? 'bg-[#111111] border-[#111111]'
+                          : 'bg-white border-[#CCCCCC]'
                       }`}>
                         {selected2WayOption === 'skeleton' && (
-                          <div className="w-2 h-2 bg-white" />
+                          <Check size={12} color="#FFFFFF" strokeWidth={3} />
                         )}
                       </div>
                       <div>
-                        <p className="text-[14px] tracking-[0.01em] text-[#111111] mb-1" style={{ fontWeight: 500 }}>
-                          옵션 B: 골격 이미지 진단
-                        </p>
-                        <p className="text-[12px] tracking-[0.01em] text-[#777777]" style={{ fontWeight: 300 }}>
+                        <p className="text-sm font-medium text-[#111111] mb-1">옵션 B: 골격 이미지 진단</p>
+                        <p className="text-xs text-[#777777]">
                           얼굴 정밀 분석 + 골격 이미지 진단
                         </p>
                       </div>
