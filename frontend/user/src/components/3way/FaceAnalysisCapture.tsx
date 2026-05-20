@@ -99,8 +99,8 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
             className="text-center mb-8"
           >
           
-            <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em] mb-3">
-              얼굴 정밀 분석
+            <h2 className="text-2xl font-bold text-[#111111] tracking-[-0.01em] mb-3">
+              Face Precision Analysis
             </h2>
             <p className="text-sm text-[#999999] leading-relaxed">
               정확한 분석을 위해 아래 가이드를 따라 촬영해주세요.
@@ -124,7 +124,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
                   className="flex items-center gap-2"
                 >
                   <item.icon className="w-4 h-4 text-gray-500" strokeWidth={1.5} />
-                  <span className="font-light">{item.text}</span>
+                  <span className="font-normal">{item.text}</span>
                 </motion.div>
               ))}
             </div>
@@ -154,7 +154,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
               {cameraError && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
                   <Camera className="w-16 h-16 text-gray-400 mb-4" strokeWidth={1} />
-                  <p className="text-sm text-gray-500 font-light text-center px-6">
+                  <p className="text-sm text-gray-500 font-normal text-center px-6">
                     카메라 미리보기 (데모 모드)
                   </p>
                 </div>
@@ -239,7 +239,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
                     exit={{ opacity: 0, y: -10 }}
                     className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-sm px-4 py-2 rounded-full"
                   >
-                    <p className="text-xs text-white font-light flex items-center gap-2">
+                    <p className="text-xs text-white font-normal flex items-center gap-2">
                       <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
                       얼굴 인식 완료
                     </p>
@@ -256,14 +256,14 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
             transition={{ delay: 0.6, duration: 0.6 }}
             className="text-center mb-6"
           >
-            <p className="text-xs text-gray-500 font-light mb-6">
+            <p className="text-xs text-gray-500 font-normal mb-6">
               촬영 후 자동으로 분석이 시작됩니다.
             </p>
 
             {/* 촬영 버튼 */}
             <button
               onClick={handleCapture}
-              className="w-full max-w-md mx-auto block bg-black text-white py-4 rounded-full text-sm font-light tracking-wider uppercase transition-all duration-300 hover:bg-gray-900 active:scale-98"
+              className="w-full max-w-md mx-auto block bg-black text-white py-4 rounded-full text-sm font-normal tracking-wider uppercase transition-all duration-300 hover:bg-gray-900 active:scale-98"
             >
               촬영하기
             </button>
@@ -274,7 +274,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8, duration: 0.6 }}
-            className="flex items-center justify-center gap-2 text-xs text-gray-400 font-light mb-8"
+            className="flex items-center justify-center gap-2 text-xs text-gray-400 font-normal mb-8"
           >
             <Lock className="w-3 h-3" strokeWidth={1.5} />
             <span>사진은 분석 외 용도로 저장되지 않습니다.</span>
@@ -284,7 +284,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
           <div className="flex justify-between items-center gap-4">
             <button
               onClick={onBack}
-              className="px-8 py-3 text-sm font-light text-gray-600 hover:text-black transition-colors duration-300"
+              className="px-8 py-3 text-sm font-normal text-gray-600 hover:text-black transition-colors duration-300"
             >
               이전
             </button>
