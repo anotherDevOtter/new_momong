@@ -74,6 +74,24 @@
 - 현재 e2e 폴더에는 1WAY 전용 시나리오 없을 가능성 큼
 - 1WAY 코스 선택 → 끝까지 진행 → 저장 확인 시나리오 작성
 
+### 9. 얼굴 정밀 분석 결과 - 비율 데이터 (상중하 / 얼굴비율 / 중안부) Python 서버 연동
+- [FaceAnalysisResult.tsx:105-109](frontend/user/src/components/3way/FaceAnalysisResult.tsx#L105-L109) 의 `ratios` state 가 하드코딩 (`1:1:1`, `1:1.4`, `1:2`)
+- Python 서버 (`face_landmark/analyze_face.py`) 는 현재 WNC/SNH 모듈의 `grade` 만 반환하고 비율 raw 값은 응답에 없음
+- 관련 모듈은 이미 존재:
+  - `SNH_TYPE_02_face_length.py` — `ratio = face_height / face_width` 계산함 (얼굴비율)
+  - `SNH_TYPE_11_midface_ratio.py` — `left_cheek_ratio` 반환 (중안부)
+  - 상중하는 새로 계산 필요 (MediaPipe 랜드마크 10→9→2→152)
+- **할 일**:
+  1. `face_landmark/analyze_face.py` 에 `compute_face_ratios()` 메서드 추가 → `data.ratios` 필드 생성
+     ```json
+     "ratios": { "vertical": "1:0.95:1.05", "face": "1:1.4", "midSection": "1:2.0" }
+     ```
+  2. `backend/src/face-analysis/python-analysis.service.ts` `PythonAnalysisResponse` 타입에 `ratios` 추가
+  3. `backend/src/face-analysis/face-analysis.service.ts` 반환값에 `ratios` 통과
+  4. `frontend/user/src/utils/face-analysis-api.ts` `AnalyzeResponse` 타입에 `ratios` 추가
+  5. `frontend/user/src/components/3way/FaceAnalysisResult.tsx` useState 초기값을 `analysisResult.ratios` 로 세팅 (없으면 현재 하드코딩 fallback 유지)
+- **결정 필요**: 상중하 계산 기준점 (이마 top 10 → 눈썹 9 → 코 아래 2 → 턱 152 로 진행할지)
+
 ---
 
 ## 🔎 결정해야 할 비즈니스 질문
@@ -100,3 +118,43 @@
 3. **#3 코스명 default fallback 정리** (안전망)
 4. **비즈니스 결정** (#1번 질문) → 결과에 따라 #2, #4, #6, #7 처리
 5. **#8 E2E 테스트**
+
+---
+
+## 🚀 운영 배포 전 체크리스트 (Elastic Beanstalk)
+
+### EB 콘솔 → Configuration → Software → Environment properties 에 추가/확인
+
+face_landmark 연동을 운영에서 동작시키려면 아래 환경변수가 EB 환경에 설정되어 있어야 함:
+
+| Key | 값 (예시) | 비고 |
+|---|---|---|
+| `PYTHON_SERVER_URL` | `https://face-landmark-xxx.elasticbeanstalk.com` | face_landmark EB 환경의 URL |
+| `AWS_REGION` | `ap-northeast-2` | 이미 설정되어 있을 가능성 큼 |
+| `AWS_S3_BUCKET` | `momong-staging` | 운영은 staging 버킷 사용 (로컬은 momong-dev) |
+| `AWS_PRESIGNED_EXPIRES_IN` | `300` | (선택) presigned URL 만료 초 |
+
+### 인증 방식 (둘 중 하나)
+
+(A) **IAM Instance Profile 사용 (권장)**
+- EB 환경 → Configuration → Security → IAM instance profile 에 S3 권한 가진 role 부여
+- `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` 환경변수 **불필요**
+- SDK 가 자동으로 인스턴스 메타데이터에서 credentials 가져옴
+
+(B) **환경변수로 키 직접 주입**
+- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` 추가 (momong_backend 환경의 키 그대로 가능)
+- 보안상 (A) 권장
+
+### momong-staging 버킷 CORS 확인
+
+운영 user 프론트(`https://*.merci-momong.com`) 가 직접 S3 PUT 하려면 기존 CORS 에 해당 origin 이 있어야 함. 현재 CORS:
+```
+AllowedOrigins: ['http://localhost:3002', 'https://*.merci-momong.com']
+AllowedMethods: ['PUT', 'POST', 'GET', 'HEAD']
+```
+→ `*.merci-momong.com` 이미 포함되어 있어 운영에서는 추가 작업 불필요.
+
+### 기타
+
+- `image_detection_results` 테이블이 운영 DB 에도 생성되어야 함 — TypeORM `synchronize:true` 가 dev 만이라 운영은 **수동 마이그레이션 필요** (`CREATE TABLE image_detection_results …`)
+- 운영용 `JWT_SECRET`, `ADMIN_SEED_*` 등도 EB 환경에 적절히 설정됐는지 확인
