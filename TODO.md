@@ -156,5 +156,5 @@ AllowedMethods: ['PUT', 'POST', 'GET', 'HEAD']
 
 ### 기타
 
-- `image_detection_results` 테이블이 운영 DB 에도 생성되어야 함 — TypeORM `synchronize:true` 가 dev 만이라 운영은 **수동 마이그레이션 필요** (`CREATE TABLE image_detection_results …`)
+- `face_analysis_results` 테이블이 운영 DB 에 수동 생성 필요 — TypeORM `synchronize:true` 가 dev 만이라 운영은 수동 마이그레이션 (`CREATE TABLE face_analysis_results …`). 옛 momong_backend 의 `image_detection_results` 와 schema 가 달라서 별도 테이블명 사용함.
 - 운영용 `JWT_SECRET`, `ADMIN_SEED_*` 등도 EB 환경에 적절히 설정됐는지 확인

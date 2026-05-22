@@ -13,10 +13,12 @@ export type DetectionType = 'WNC' | 'SNH';
 
 /**
  * 얼굴 분석 결과 (face_landmark Python 서버 분석 결과 보관)
- * momong_backend 의 image_detection_results 와 같은 패턴.
  * 한 번의 분석 호출 시 WNC + SNH 두 행을 만든다.
+ *
+ * 참고: 옛 momong_backend 의 image_detection_results 테이블(detection_type_id FK,
+ * detected_by_manager_id 등 다른 스키마) 과 충돌하지 않도록 별도 테이블명 사용.
  */
-@Entity('image_detection_results')
+@Entity('face_analysis_results')
 export class ImageDetectionResult {
   @PrimaryGeneratedColumn('uuid')
   id: string;
