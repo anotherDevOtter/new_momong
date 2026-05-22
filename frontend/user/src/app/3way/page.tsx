@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
@@ -37,7 +37,16 @@ type PageKey =
   | 'nextDirection' | 'report' | 'diagnosis' | 'completion'
   | 'history' | 'historyDetail';
 
+// Next.js 16 의 prerender 요구: useSearchParams() 호출부는 Suspense 안에 있어야 함
 export default function ThreeWayPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+      <ThreeWayPageInner />
+    </Suspense>
+  );
+}
+
+function ThreeWayPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading } = useAuth();
