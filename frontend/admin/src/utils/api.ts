@@ -65,3 +65,35 @@ export const getAdminStats = async (token: string): Promise<AdminStats> => {
   const json = await res.json();
   return json.data;
 };
+
+export type FeatureSettings = {
+  fitEnabled: boolean;
+  threeWayEnabled: boolean;
+  courses: {
+    '1way': boolean;
+    '2way-personal': boolean;
+    '2way-skeleton': boolean;
+    '3way': boolean;
+  };
+};
+
+export const getFeatureSettings = async (): Promise<FeatureSettings> => {
+  const res = await fetch(`${API_BASE}/feature-settings`);
+  if (!res.ok) throw new Error('기능 설정 조회 실패');
+  const json = await res.json();
+  return json.data;
+};
+
+export const updateFeatureSettings = async (
+  token: string,
+  patch: Partial<FeatureSettings>,
+): Promise<FeatureSettings> => {
+  const res = await fetch(`${API_BASE}/admin/feature-settings`, {
+    method: 'PATCH',
+    headers: authHeaders(token),
+    body: JSON.stringify(patch),
+  });
+  if (!res.ok) throw new Error('기능 설정 수정 실패');
+  const json = await res.json();
+  return json.data;
+};

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Toaster } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { useFeatures } from '@/contexts/FeaturesContext';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { IntroStep } from '@/components/steps/IntroStep';
 import { ClientInfoStep } from '@/components/steps/ClientInfoStep';
@@ -48,6 +49,7 @@ const TOTAL_STEPS = 12;
 export default function Home() {
   const router = useRouter();
   const { user, loading, logout } = useAuth();
+  const { features } = useFeatures();
   const [currentView, setCurrentView] = useState<AppView>('consultation');
   const [currentStep, setCurrentStep] = useState(0);
   const [fromReview, setFromReview] = useState(false);
@@ -60,8 +62,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!loading && !user) {
-      const hasToken = typeof window !== 'undefined' && !!localStorage.getItem('auth_token');
-      if (!hasToken) router.replace('/login');
+      router.replace('/login');
     }
   }, [loading, user, router]);
 
@@ -84,6 +85,18 @@ export default function Home() {
     return () => window.removeEventListener('popstate', handler);
   }, []);
 
+  // step/view 변경 시 페이지 상단으로 스크롤
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentStep, currentView]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <p className="text-sm text-[#999999]">불러오는 중...</p>
+      </div>
+    );
+  }
   if (!user) return null;
 
   // ── 히스토리 푸시 헬퍼 ──────────────────────────
@@ -179,7 +192,13 @@ export default function Home() {
   const renderStep = () => {
     switch (currentStep) {
       case 0:
-        return <IntroStep onNext={handleNext} onViewClients={handleGoToClientList} />;
+        return (
+          <IntroStep
+            onNext={features.fitEnabled ? handleNext : undefined}
+            onViewClients={handleGoToClientList}
+            onStart3Way={features.threeWayEnabled ? () => router.push('/3way?start=1') : undefined}
+          />
+        );
       case 1:
         return (
           <ClientInfoStep
@@ -297,7 +316,10 @@ export default function Home() {
 
       {/* 상단 헤더 */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-        <div className="w-28">
+        <div className="flex items-center gap-3">
+          <span className="text-[11px] tracking-[0.25em] text-[#111111] uppercase font-medium">
+            MERCI MOMONG
+          </span>
           {currentView === 'consultation' && currentStep >= 1 && (
             <button
               onClick={() => {
