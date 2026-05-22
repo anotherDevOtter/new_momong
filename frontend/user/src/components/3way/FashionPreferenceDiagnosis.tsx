@@ -22,8 +22,13 @@ interface FashionStyle {
 }
 
 export function FashionPreferenceDiagnosis({ onBack, onNext }: FashionPreferenceDiagnosisProps) {
-  const [preferredStyles, setPreferredStyles] = useState<string[]>([]);
-  const [dislikedStyles, setDislikedStyles] = useState<string[]>([]);
+  const isDev = process.env.NODE_ENV === 'development';
+  const [preferredStyles, setPreferredStyles] = useState<string[]>(
+    isDev ? ['classic', 'minimal'] : [],
+  );
+  const [dislikedStyles, setDislikedStyles] = useState<string[]>(
+    isDev ? ['street'] : [],
+  );
 
   const fashionStyles: FashionStyle[] = [
     {

@@ -15,8 +15,13 @@ export interface PreInterviewData {
 }
 
 export function PreInterview({ onBack, onNext }: PreInterviewProps) {
-  const [selectedFaceAreas, setSelectedFaceAreas] = useState<string[]>([]);
-  const [selectedHairConcerns, setSelectedHairConcerns] = useState<string[]>([]);
+  const isDev = process.env.NODE_ENV === 'development';
+  const [selectedFaceAreas, setSelectedFaceAreas] = useState<string[]>(
+    isDev ? ['이마', '광대'] : [],
+  );
+  const [selectedHairConcerns, setSelectedHairConcerns] = useState<string[]>(
+    isDev ? ['앞머리', '정수리 볼륨'] : [],
+  );
 
   const faceAreas = [
     '이마',

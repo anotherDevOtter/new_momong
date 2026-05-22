@@ -19,14 +19,26 @@ export interface CustomerData {
 }
 
 export function CustomerInfo({ onBack, onNext }: CustomerInfoProps) {
-  const [formData, setFormData] = useState<CustomerData>({
-    name: '',
-    phone: '',
-    occupation: '',
-    ageGroup: '',
-    gender: '',
-    designerName: '',
-  });
+  const isDev = process.env.NODE_ENV === 'development';
+  const [formData, setFormData] = useState<CustomerData>(
+    isDev
+      ? {
+          name: '홍길동',
+          phone: '010-1234-5678',
+          occupation: '회사원',
+          ageGroup: '20–30대',
+          gender: '여자',
+          designerName: '테스트 디자이너',
+        }
+      : {
+          name: '',
+          phone: '',
+          occupation: '',
+          ageGroup: '',
+          gender: '',
+          designerName: '',
+        },
+  );
 
   const ageGroups = ['20–30대', '40대', '50대', '60대 이상'];
   const genders = ['여자', '남자'];

@@ -16,8 +16,13 @@ export interface ImagePreferenceData {
 }
 
 export function ImagePreferenceDiagnosis({ onBack, onNext }: ImagePreferenceDiagnosisProps) {
-  const [preferredKeywords, setPreferredKeywords] = useState<string[]>([]);
-  const [dislikedKeywords, setDislikedKeywords] = useState<string[]>([]);
+  const isDev = process.env.NODE_ENV === 'development';
+  const [preferredKeywords, setPreferredKeywords] = useState<string[]>(
+    isDev ? ['청초한', '단아한', '자연스러운'] : [],
+  );
+  const [dislikedKeywords, setDislikedKeywords] = useState<string[]>(
+    isDev ? ['귀여운 / 사랑스러운'] : [],
+  );
 
   const keywords = [
     '귀여운 / 사랑스러운',
