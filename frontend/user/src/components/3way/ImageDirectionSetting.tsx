@@ -151,10 +151,11 @@ export function ImageDirectionSetting({ onBack, onNext }: ImageDirectionSettingP
             transition={{ duration: 0.6 }}
             className="text-center mb-12"
           >
-            <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em] mb-3">
+            <p className="text-xs text-gray-500 font-normal tracking-wider mb-2">Step 9 of 12</p>
+            <h2 className="text-2xl font-bold text-[#111111] tracking-[-0.01em] mb-3">
               이미지 키워드 설정
             </h2>
-            <p className="text-sm text-[#999999]">
+            <p className="text-sm text-[#111111] font-medium">
               분석 결과를 기반으로 이미지 방향을 설정합니다.
             </p>
           </motion.div>
@@ -169,7 +170,7 @@ export function ImageDirectionSetting({ onBack, onNext }: ImageDirectionSettingP
               className="space-y-6"
             >
               <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-                <h2 className="text-sm font-light tracking-wide text-black mb-6">
+                <h2 className="text-sm font-normal tracking-wide text-black mb-6">
                   타입 조합 시각화
                 </h2>
 
@@ -188,7 +189,7 @@ export function ImageDirectionSetting({ onBack, onNext }: ImageDirectionSettingP
                                 : 'bg-white text-gray-700 border-gray-300'
                             }`}
                           >
-                            <span className="text-xs font-light tracking-wider">
+                            <span className="text-xs font-normal tracking-wider">
                               {type.warmCool}/{type.softHard}
                             </span>
                           </div>
@@ -200,13 +201,13 @@ export function ImageDirectionSetting({ onBack, onNext }: ImageDirectionSettingP
 
                 {/* 가로축 레이블 */}
                 <div className="grid grid-cols-3 gap-2 text-center mb-6">
-                  <span className="text-xs text-gray-500 font-light">Warm</span>
-                  <span className="text-xs text-gray-500 font-light">Neutral</span>
-                  <span className="text-xs text-gray-500 font-light">Cool</span>
+                  <span className="text-xs text-gray-500 font-normal">Warm</span>
+                  <span className="text-xs text-gray-500 font-normal">Neutral</span>
+                  <span className="text-xs text-gray-500 font-normal">Cool</span>
                 </div>
 
                 {/* 세로축 레이블 (우측) */}
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-8 hidden lg:flex flex-col justify-between h-48 text-xs text-gray-500 font-light">
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-8 hidden lg:flex flex-col justify-between h-48 text-xs text-gray-500 font-normal">
                   <span>Soft</span>
                   <span>Neutral</span>
                   <span>Hard</span>
@@ -215,20 +216,20 @@ export function ImageDirectionSetting({ onBack, onNext }: ImageDirectionSettingP
                 {/* 설명 박스 */}
                 <div className="bg-white rounded-xl p-4 border border-gray-300 space-y-3">
                   <div>
-                    <p className="text-xs text-gray-500 font-light mb-1">현재 타입:</p>
-                    <p className="text-sm text-black font-light">
+                    <p className="text-xs text-gray-500 font-normal mb-1">현재 타입:</p>
+                    <p className="text-sm text-black font-normal">
                       Neutral Tone / Neutral Balance (N/N)
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 font-light mb-1">기본 이미지 성향:</p>
-                    <p className="text-sm text-black font-light">
+                    <p className="text-xs text-gray-500 font-normal mb-1">기본 이미지 성향:</p>
+                    <p className="text-sm text-black font-normal">
                       자연스러운 / 담백한 / 단아한
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500 font-light mb-1">좌표 이동 가능:</p>
-                    <p className="text-xs text-gray-600 font-light leading-relaxed">
+                    <p className="text-xs text-gray-500 font-normal mb-1">좌표 이동 가능:</p>
+                    <p className="text-xs text-gray-600 font-normal leading-relaxed">
                       S 방향: 조금 더 어려 보이게<br />
                       W/H 방향: 여성스러운 분위기<br />
                       C/H 방향: 시크하고 도시적으로
@@ -247,12 +248,12 @@ export function ImageDirectionSetting({ onBack, onNext }: ImageDirectionSettingP
             >
               <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-sm font-light tracking-wide text-black">
+                  <h2 className="text-sm font-normal tracking-wide text-black">
                     이미지 좌표 맵
                   </h2>
                   <button
                     onClick={() => setShowImageMapReference(true)}
-                    className="text-xs text-gray-600 font-light hover:text-black transition-colors flex items-center gap-1"
+                    className="text-xs text-gray-600 font-normal hover:text-black transition-colors flex items-center gap-1"
                   >
                     <ImageIcon className="w-3.5 h-3.5" strokeWidth={1.5} />
                     <span>실제 예시 보기</span>
@@ -288,25 +289,25 @@ export function ImageDirectionSetting({ onBack, onNext }: ImageDirectionSettingP
                   </svg>
 
                   {/* 축 레이블 */}
-                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs text-gray-700 font-light">
+                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs text-gray-700 font-normal">
                     <div className="flex items-center gap-1">
                       <span>S</span>
                       <span className="text-gray-400">(가벼움 / 짧아짐)</span>
                     </div>
                   </div>
-                  <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-gray-700 font-light">
+                  <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-gray-700 font-normal">
                     <div className="flex items-center gap-1">
                       <span>H</span>
                       <span className="text-gray-400">(무게감 / 길어짐)</span>
                     </div>
                   </div>
-                  <div className="absolute -left-20 top-1/2 -translate-y-1/2 text-xs text-gray-700 font-light">
+                  <div className="absolute -left-20 top-1/2 -translate-y-1/2 text-xs text-gray-700 font-normal">
                     <div className="flex flex-col items-end gap-1">
                       <span>W</span>
                       <span className="text-gray-400 text-right">(곡선 / 웨이브)</span>
                     </div>
                   </div>
-                  <div className="absolute -right-20 top-1/2 -translate-y-1/2 text-xs text-gray-700 font-light">
+                  <div className="absolute -right-20 top-1/2 -translate-y-1/2 text-xs text-gray-700 font-normal">
                     <div className="flex flex-col items-start gap-1">
                       <span>C</span>
                       <span className="text-gray-400">(직선 / 스트레이트)</span>
@@ -330,7 +331,7 @@ export function ImageDirectionSetting({ onBack, onNext }: ImageDirectionSettingP
                           {item.keywords.map((keyword, kIndex) => (
                             <p
                               key={kIndex}
-                              className="text-[10px] text-gray-600 font-light whitespace-nowrap leading-tight"
+                              className="text-[10px] text-gray-600 font-normal whitespace-nowrap leading-tight"
                             >
                               {keyword}
                             </p>
@@ -376,7 +377,7 @@ export function ImageDirectionSetting({ onBack, onNext }: ImageDirectionSettingP
             transition={{ delay: 0.4, duration: 0.6 }}
             className="mb-12"
           >
-            <h2 className="text-base font-light tracking-wide text-black mb-6">
+            <h2 className="text-base font-normal tracking-wide text-black mb-6">
               이미지 방향 전략
             </h2>
 
@@ -394,7 +395,7 @@ export function ImageDirectionSetting({ onBack, onNext }: ImageDirectionSettingP
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <span
-                        className={`text-xs font-light w-6 h-6 rounded-full flex items-center justify-center ${
+                        className={`text-xs font-normal w-6 h-6 rounded-full flex items-center justify-center ${
                           selectedStrategy === strategy.id
                             ? 'bg-black text-white'
                             : 'bg-gray-200 text-gray-600'
@@ -402,23 +403,23 @@ export function ImageDirectionSetting({ onBack, onNext }: ImageDirectionSettingP
                       >
                         {strategy.number}
                       </span>
-                      <h3 className="text-sm font-light text-black">{strategy.title}</h3>
+                      <h3 className="text-sm font-normal text-black">{strategy.title}</h3>
                     </div>
                     {selectedStrategy === strategy.id && (
                       <Check className="w-5 h-5 text-black" strokeWidth={2} />
                     )}
                   </div>
-                  <p className="text-xs text-gray-600 font-light mb-2 leading-relaxed">
+                  <p className="text-xs text-gray-600 font-normal mb-2 leading-relaxed">
                     {strategy.description}
                   </p>
                   <div className="space-y-1">
                     {strategy.example && (
-                      <p className="text-xs text-gray-500 font-light">
+                      <p className="text-xs text-gray-500 font-normal">
                         예: {strategy.example}
                       </p>
                     )}
                     {strategy.shiftDirection && (
-                      <p className="text-xs text-black font-light">
+                      <p className="text-xs text-black font-normal">
                         좌표 이동: {strategy.shiftDirection}
                       </p>
                     )}
@@ -437,23 +438,23 @@ export function ImageDirectionSetting({ onBack, onNext }: ImageDirectionSettingP
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <p className="text-xs text-gray-500 font-light mb-2">추천 방향:</p>
-                <p className="text-sm text-black font-light">Natural 기반 Fresh 요소 강조</p>
+                <p className="text-xs text-gray-500 font-normal mb-2">추천 방향:</p>
+                <p className="text-sm text-black font-normal">Natural 기반 Fresh 요소 강조</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 font-light mb-2">디자인 전략:</p>
+                <p className="text-xs text-gray-500 font-normal mb-2">디자인 전략:</p>
                 <div className="space-y-1">
                   <div className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-black flex-shrink-0 mt-0.5" strokeWidth={2} />
-                    <span className="text-xs text-gray-700 font-light">과한 볼륨 X</span>
+                    <span className="text-xs text-gray-700 font-normal">과한 볼륨 X</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-black flex-shrink-0 mt-0.5" strokeWidth={2} />
-                    <span className="text-xs text-gray-700 font-light">부드러운 텍스처</span>
+                    <span className="text-xs text-gray-700 font-normal">부드러운 텍스처</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-black flex-shrink-0 mt-0.5" strokeWidth={2} />
-                    <span className="text-xs text-gray-700 font-light">균형 중심 커트 라인</span>
+                    <span className="text-xs text-gray-700 font-normal">균형 중심 커트 라인</span>
                   </div>
                 </div>
               </div>
