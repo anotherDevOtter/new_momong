@@ -57,6 +57,7 @@ export default function ThreeWayPage() {
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerRecord | null>(null);
   const [selectedConsultRecord, setSelectedConsultRecord] = useState<ConsultRecord | null>(null);
   const [faceAnalysisResult, setFaceAnalysisResult] = useState<AnalyzeResponse | null>(null);
+  const [faceImageUrl, setFaceImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -122,8 +123,9 @@ export default function ThreeWayPage() {
 
   const handleFaceAnalysisBack = () => setCurrentPage('summary');
   // 분석 결과는 Capture 에서 이미 받았으므로 Processing 은 짧은 트랜지션용으로만 사용
-  const handleFaceAnalysisNext = (result: AnalyzeResponse) => {
+  const handleFaceAnalysisNext = (result: AnalyzeResponse, imageUrl: string) => {
     setFaceAnalysisResult(result);
+    setFaceImageUrl(imageUrl);
     setCurrentPage('faceProcessing');
   };
   const handleFaceProcessingComplete = () => setCurrentPage('faceResult');
@@ -173,9 +175,16 @@ export default function ThreeWayPage() {
         course: courseName,
         designerName: customerData.designerName,
         consultData: {
-          imageType: 'Soft Natural',
-          colorType: 'Warm Light',
-          design: 'Long Layered C Curl',
+          faceAnalysis: faceAnalysisResult
+            ? {
+                wncId: faceAnalysisResult.wncId,
+                snhId: faceAnalysisResult.snhId,
+                wncFinal: faceAnalysisResult.wnc.final,
+                snhFinal: faceAnalysisResult.snh.final,
+                imageType: `${faceAnalysisResult.wnc.final} / ${faceAnalysisResult.snh.final}`,
+                faceImageUrl,
+              }
+            : null,
           cycleData,
           imagePreferenceData,
           fashionPreferenceData,

@@ -13,7 +13,7 @@ import {
 
 interface FaceAnalysisCaptureProps {
   onBack: () => void;
-  onNext: (result: AnalyzeResponse) => void;
+  onNext: (result: AnalyzeResponse, faceImageUrl: string) => void;
 }
 
 const OVAL_RATIO = { cx: 0.5, cy: 0.44, rx: 0.3, ry: 0.32 };
@@ -273,8 +273,8 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
       // 4) 분석 호출
       const result = await analyzeFace({ faceImageUrl: publicUrl });
 
-      // 5) 결과를 상위로 전달 → /3way page 가 다음 화면으로 이동
-      onNext(result);
+      // 5) 결과 + 업로드된 S3 URL 을 상위로 전달 → consultation 저장 시 함께 보관
+      onNext(result, publicUrl);
     } catch (e) {
       const msg = e instanceof Error ? e.message : '분석 중 오류가 발생했습니다';
       setAnalyzeError(msg);
