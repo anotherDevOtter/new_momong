@@ -15,6 +15,7 @@ import { ConsultingSummary } from '@/components/3way/ConsultingSummary';
 import { FaceAnalysisCapture } from '@/components/3way/FaceAnalysisCapture';
 import { FaceAnalysisProcessing } from '@/components/3way/FaceAnalysisProcessing';
 import { FaceAnalysisResult } from '@/components/3way/FaceAnalysisResult';
+import type { AnalyzeResponse } from '@/utils/face-analysis-api';
 import { PersonalColorAnalysis } from '@/components/3way/PersonalColorAnalysis';
 import { SkeletonImageAnalysis } from '@/components/3way/SkeletonImageAnalysis';
 import { ImageDirectionSetting } from '@/components/3way/ImageDirectionSetting';
@@ -55,6 +56,7 @@ export default function ThreeWayPage() {
   const [cycleData, setCycleData] = useState<CycleData | null>(null);
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerRecord | null>(null);
   const [selectedConsultRecord, setSelectedConsultRecord] = useState<ConsultRecord | null>(null);
+  const [faceAnalysisResult, setFaceAnalysisResult] = useState<AnalyzeResponse | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -119,7 +121,11 @@ export default function ThreeWayPage() {
   const handleSummaryNext = () => setCurrentPage('faceAnalysis');
 
   const handleFaceAnalysisBack = () => setCurrentPage('summary');
-  const handleFaceAnalysisNext = () => setCurrentPage('faceProcessing');
+  // 분석 결과는 Capture 에서 이미 받았으므로 Processing 은 짧은 트랜지션용으로만 사용
+  const handleFaceAnalysisNext = (result: AnalyzeResponse) => {
+    setFaceAnalysisResult(result);
+    setCurrentPage('faceProcessing');
+  };
   const handleFaceProcessingComplete = () => setCurrentPage('faceResult');
 
   const handleFaceResultBack = () => setCurrentPage('faceAnalysis');
@@ -259,7 +265,13 @@ export default function ThreeWayPage() {
   }
 
   if (currentPage === 'faceResult') {
-    return <FaceAnalysisResult onBack={handleFaceResultBack} onNext={handleFaceResultNext} />;
+    return (
+      <FaceAnalysisResult
+        analysisResult={faceAnalysisResult}
+        onBack={handleFaceResultBack}
+        onNext={handleFaceResultNext}
+      />
+    );
   }
 
   if (currentPage === 'personalColor') {
