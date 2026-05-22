@@ -3,8 +3,9 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FaceDetector } from '@mediapipe/tasks-vision';
 
+// 운영에서 갑자기 깨지지 않도록 npm 설치 버전과 동일한 픽스 버전 사용
 const WASM_URL =
-  'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm';
+  'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm';
 const MODEL_URL =
   'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite';
 
