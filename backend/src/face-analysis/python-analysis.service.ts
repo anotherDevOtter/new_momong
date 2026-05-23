@@ -17,7 +17,7 @@ export interface PythonAnalysisRequest {
   save_images: boolean;
 }
 
-// Python 응답의 한 모듈 결과 (실제: name, grade, value, description, image)
+// Python 응답의 한 모듈 결과 (실제: name, grade, value, description, image, measurement)
 export interface AnalysisModule {
   name: string;
   grade?: string; // 'W'|'N'|'C' or 'S'|'N'|'H'
@@ -25,6 +25,25 @@ export interface AnalysisModule {
   value?: number | null;
   description?: string | null;
   image?: string | null;
+  measurement?: Measurement | null;
+}
+
+/** 원본 이미지 위에 오버레이로 그릴 측정 도형들 (절대 픽셀 좌표) */
+export interface Measurement {
+  image_size: { width: number; height: number };
+  shapes: MeasurementShape[];
+}
+
+export type MeasurementShape =
+  | { type: 'point'; point: Point; color?: string; label?: string }
+  | { type: 'line' | 'polyline' | 'polygon' | 'rectangle'; points: Point[]; stroke?: string; stroke_width?: number; fill?: string; dashed?: boolean; label?: string }
+  | { type: 'circle'; point: Point; radius: number; stroke?: string; stroke_width?: number; fill?: string; dashed?: boolean; label?: string }
+  | { type: 'text'; point: Point; text: string; color?: string; font_size?: number };
+
+export interface Point {
+  x: number;
+  y: number;
+  label?: string;
 }
 
 export interface WNCResult {

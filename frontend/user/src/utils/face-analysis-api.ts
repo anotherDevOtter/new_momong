@@ -7,16 +7,43 @@ function getToken(): string {
   return token;
 }
 
+export interface Point {
+  x: number;
+  y: number;
+  label?: string;
+}
+
+export type MeasurementShape =
+  | { type: 'point'; point: Point; color?: string; label?: string }
+  | { type: 'line' | 'polyline' | 'polygon' | 'rectangle'; points: Point[]; stroke?: string; stroke_width?: number; fill?: string; dashed?: boolean; label?: string }
+  | { type: 'circle'; point: Point; radius: number; stroke?: string; stroke_width?: number; fill?: string; dashed?: boolean; label?: string }
+  | { type: 'text'; point: Point; text: string; color?: string; font_size?: number };
+
+export interface Measurement {
+  image_size: { width: number; height: number };
+  shapes: MeasurementShape[];
+}
+
+export interface AnalysisModule {
+  name: string;
+  grade?: string;
+  type?: string; // legacy
+  value?: number | null;
+  description?: string | null;
+  image?: string | null;
+  measurement?: Measurement | null;
+}
+
 export interface WNCResult {
   final: string;
   counts: { W: number; N: number; C: number };
-  results: Record<string, { type: string; value: number; name: string }>;
+  results: Record<string, AnalysisModule>;
 }
 
 export interface SNHResult {
   final: string;
   counts: { S: number; N: number; H: number };
-  results: Record<string, { type: string; value: number; name: string }>;
+  results: Record<string, AnalysisModule>;
 }
 
 export interface AnalyzeResponse {
