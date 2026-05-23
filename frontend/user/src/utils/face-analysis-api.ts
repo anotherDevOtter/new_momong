@@ -30,7 +30,11 @@ export interface AnalyzeResponse {
 /**
  * S3 업로드용 presigned URL 발급 + 결과 publicUrl 반환.
  */
-export async function requestUploadUrl(contentType: string, ext?: string): Promise<{
+export async function requestUploadUrl(
+  contentType: string,
+  ext?: string,
+  contentLength?: number,
+): Promise<{
   uploadUrl: string;
   publicUrl: string;
   key: string;
@@ -41,7 +45,7 @@ export async function requestUploadUrl(contentType: string, ext?: string): Promi
       'Content-Type': 'application/json',
       Authorization: `Bearer ${getToken()}`,
     },
-    body: JSON.stringify({ contentType, ext }),
+    body: JSON.stringify({ contentType, ext, contentLength }),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));

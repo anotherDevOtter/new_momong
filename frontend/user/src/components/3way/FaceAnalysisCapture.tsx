@@ -10,6 +10,7 @@ import {
   dataUrlToFile,
   AnalyzeResponse,
 } from '@/utils/face-analysis-api';
+import { prepareImageForAnalysis } from '@/utils/image-resize';
 
 interface FaceAnalysisCaptureProps {
   onBack: () => void;
@@ -259,13 +260,16 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
     setAnalyzeError(null);
     try {
       // 1) 업로드용 파일 준비 (업로드는 원본 file, 카메라는 dataUrl 변환)
-      const file =
+      const rawFile =
         imageSource === 'upload' && uploadedFile
           ? uploadedFile
           : dataUrlToFile(previewImage, `face-${Date.now()}.jpg`);
 
-      // 2) S3 presigned URL 발급
-      const { uploadUrl, publicUrl } = await requestUploadUrl(file.type);
+      // 1-1) 3MB / 2048px 초과 시 자동 리사이즈 (재압축 최소화)
+      const { file } = await prepareImageForAnalysis(rawFile);
+
+      // 2) S3 presigned URL 발급 (백엔드가 3MB 한도 확인)
+      const { uploadUrl, publicUrl } = await requestUploadUrl(file.type, undefined, file.size);
 
       // 3) S3 에 직접 업로드
       await uploadToS3(uploadUrl, file, file.type);
