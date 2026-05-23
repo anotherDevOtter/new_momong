@@ -8,6 +8,7 @@ import { PythonAnalysisService } from './python-analysis.service';
 import { FaceAnalysisService } from './face-analysis.service';
 import { FaceAnalysisController } from './face-analysis.controller';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AdminGuard } from '../admin/admin.guard';
 
 @Module({
   imports: [
@@ -23,6 +24,6 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
     }),
   ],
   controllers: [FaceAnalysisController],
-  providers: [FaceAnalysisService, PythonAnalysisService, JwtAuthGuard],
+  providers: [FaceAnalysisService, PythonAnalysisService, JwtAuthGuard, AdminGuard],
 })
 export class FaceAnalysisModule {}

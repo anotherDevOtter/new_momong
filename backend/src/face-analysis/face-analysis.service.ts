@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { randomUUID } from 'crypto';
-import { ImageDetectionResult } from './face-analysis.entity';
+import { ImageDetectionResult, AnalysisSource } from './face-analysis.entity';
 import { PythonAnalysisService, PythonAnalysisResponse } from './python-analysis.service';
 
 @Injectable()
@@ -34,6 +34,7 @@ export class FaceAnalysisService {
     faceImageUrl: string;
     imageId?: string;
     clientProvidedData?: Record<string, unknown> | null;
+    source?: AnalysisSource;
   }): Promise<{
     wnc: PythonAnalysisResponse['data']['wnc'];
     snh: PythonAnalysisResponse['data']['snh'];
@@ -48,6 +49,7 @@ export class FaceAnalysisService {
       user_id: opts.userId || null,
       customer_id: opts.customerId || null,
       face_image_url: opts.faceImageUrl,
+      source: opts.source || 'consultation',
     };
 
     const [wncSaved, snhSaved] = await Promise.all([
