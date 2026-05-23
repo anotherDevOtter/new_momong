@@ -11,6 +11,9 @@ import { Customer } from '../customers/customers.entity';
 
 export type DetectionType = 'WNC' | 'SNH';
 
+/** 분석 호출의 출처를 구분. consultation = 실제 3WAY 컨설팅, admin_test = admin 테스트 페이지 */
+export type AnalysisSource = 'consultation' | 'admin_test';
+
 /**
  * 얼굴 분석 결과 (face_landmark Python 서버 분석 결과 보관)
  * 한 번의 분석 호출 시 WNC + SNH 두 행을 만든다.
@@ -39,6 +42,9 @@ export class ImageDetectionResult {
 
   @Column({ name: 'detection_type', length: 10 })
   detection_type: DetectionType;
+
+  @Column({ name: 'source', length: 20, default: 'consultation' })
+  source: AnalysisSource;
 
   @Column({ name: 'face_image_url', length: 1000 })
   face_image_url: string;
