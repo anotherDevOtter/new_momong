@@ -163,6 +163,14 @@ export class PythonAnalysisService {
     return { uploadUrl, publicUrl, key: opts.key, expiresIn: this.presignedUrlExpiresIn };
   }
 
+  /**
+   * 저장된 S3 객체를 GET 으로 열어볼 수 있는 presigned URL 발급.
+   * face_image_url 이 우리 버킷의 객체일 때만 동작 (그 외는 원본 그대로 반환).
+   */
+  async createDownloadPresignedUrl(faceImageUrl: string): Promise<string> {
+    return this.maybeSignS3Url(faceImageUrl);
+  }
+
   // ────────────────────────── private ──────────────────────────
 
   private handlePythonError(message?: string, rawError?: unknown): never {

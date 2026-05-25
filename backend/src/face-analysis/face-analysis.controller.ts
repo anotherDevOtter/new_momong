@@ -1,9 +1,10 @@
-import { BadRequestException, Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminGuard } from '../admin/admin.guard';
 import { FaceAnalysisService } from './face-analysis.service';
+import { PythonAnalysisService } from './python-analysis.service';
 
 const MAX_UPLOAD_BYTES = 3 * 1024 * 1024;
 
@@ -11,7 +12,10 @@ const MAX_UPLOAD_BYTES = 3 * 1024 * 1024;
 @Controller('face-analysis')
 @ApiBearerAuth()
 export class FaceAnalysisController {
-  constructor(private readonly service: FaceAnalysisService) {}
+  constructor(
+    private readonly service: FaceAnalysisService,
+    private readonly python: PythonAnalysisService,
+  ) {}
 
   @Post('upload-url')
   @UseGuards(JwtAuthGuard)
@@ -35,12 +39,11 @@ export class FaceAnalysisController {
   @ApiOperation({ summary: '[admin] S3 업로드용 presigned URL 발급' })
   async createAdminUploadUrl(
     @Body() body: { contentType: string; ext?: string; contentLength?: number },
-    @Req() req: Request,
   ) {
     validateUploadBody(body);
-    const adminId = (req.user as { sub?: string } | undefined)?.sub;
+    // admin 의 sub 는 admin_accounts.id 라서 users 테이블에 없음 → S3 key 도 별도 prefix 로
     const data = await this.service.createUploadUrl({
-      userId: adminId,
+      userId: 'admin',
       contentType: body.contentType,
       ext: body.ext,
     });
@@ -81,18 +84,46 @@ export class FaceAnalysisController {
       faceImageUrl: string;
       imageId?: string;
     },
-    @Req() req: Request,
   ) {
-    const adminId = (req.user as { sub?: string } | undefined)?.sub;
+    // admin 의 sub 는 admin_accounts.id 라서 users FK 위반 → user_id 는 null 로 저장
+    // source='admin_test' 로 구분되므로 admin 호출임을 추적 가능
     const data = await this.service.analyze({
-      userId: adminId || null,
+      userId: null,
       customerId: null,
       faceImageUrl: body.faceImageUrl,
       imageId: body.imageId,
       clientProvidedData: null,
       source: 'admin_test',
     });
-    return { data };
+    // 프론트가 원본 이미지를 표시할 수 있도록 GET presigned URL 도 함께 반환
+    const faceImageDownloadUrl = await this.python.createDownloadPresignedUrl(body.faceImageUrl);
+    return { data: { ...data, faceImageDownloadUrl } };
+  }
+
+  @Get('admin/history')
+  @UseGuards(AdminGuard)
+  @ApiOperation({ summary: '[admin] 분석 테스트 기록 목록 (최신순)' })
+  async listHistory(@Query('limit') limit?: string) {
+    const records = await this.service.listBySource('admin_test', {
+      limit: limit ? parseInt(limit, 10) : undefined,
+    });
+    return { data: records };
+  }
+
+  @Get('admin/:id')
+  @UseGuards(AdminGuard)
+  @ApiOperation({ summary: '[admin] 분석 기록 단건 조회' })
+  async getRecord(@Param('id') id: string) {
+    const record = await this.service.getRecordById(id);
+    return { data: record };
+  }
+
+  @Delete('admin/:id')
+  @UseGuards(AdminGuard)
+  @ApiOperation({ summary: '[admin] 분석 기록 삭제 (WNC+SNH 짝까지)' })
+  async deleteRecord(@Param('id') id: string) {
+    const result = await this.service.deleteRecordById(id);
+    return { data: result };
   }
 }
 

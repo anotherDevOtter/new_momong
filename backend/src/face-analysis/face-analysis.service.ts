@@ -1,9 +1,18 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { randomUUID } from 'crypto';
 import { ImageDetectionResult, AnalysisSource } from './face-analysis.entity';
 import { PythonAnalysisService, PythonAnalysisResponse } from './python-analysis.service';
+
+export interface AdminTestRecord {
+  id: string;
+  faceImageUrl: string;
+  faceImageDownloadUrl: string;
+  detectedAt: Date;
+  wnc: { id: string; result: Record<string, unknown> };
+  snh: { id: string; result: Record<string, unknown> };
+}
 
 @Injectable()
 export class FaceAnalysisService {
@@ -78,6 +87,82 @@ export class FaceAnalysisService {
       wncId: wncSaved.id,
       snhId: snhSaved.id,
     };
+  }
+
+  /**
+   * source 별 분석 기록 목록. WNC + SNH 행을 face_image_url 기준으로 짝지어 반환.
+   * 이미지 다운로드용 presigned URL 도 포함.
+   */
+  async listBySource(source: AnalysisSource, opts: { limit?: number } = {}): Promise<AdminTestRecord[]> {
+    const limit = Math.min(opts.limit ?? 50, 100);
+    // 짝수 행 가져오려면 *2
+    const rows = await this.resultsRepo.find({
+      where: { source },
+      order: { detected_at: 'DESC' },
+      take: limit * 2,
+    });
+
+    // face_image_url 로 그룹핑
+    const groups = new Map<string, ImageDetectionResult[]>();
+    for (const row of rows) {
+      const arr = groups.get(row.face_image_url) || [];
+      arr.push(row);
+      groups.set(row.face_image_url, arr);
+    }
+
+    const records: AdminTestRecord[] = [];
+    for (const [faceImageUrl, pair] of groups) {
+      const wnc = pair.find((r) => r.detection_type === 'WNC');
+      const snh = pair.find((r) => r.detection_type === 'SNH');
+      if (!wnc || !snh) continue; // 불완전 쌍 스킵
+      const downloadUrl = await this.python.createDownloadPresignedUrl(faceImageUrl);
+      records.push({
+        id: wnc.id, // 식별용 — WNC id 사용
+        faceImageUrl,
+        faceImageDownloadUrl: downloadUrl,
+        detectedAt: wnc.detected_at,
+        wnc: { id: wnc.id, result: wnc.python_analysis_result },
+        snh: { id: snh.id, result: snh.python_analysis_result },
+      });
+      if (records.length >= limit) break;
+    }
+    return records;
+  }
+
+  /**
+   * id (WNC 또는 SNH) 로 짝 조회. 이미지 다운로드 URL 포함.
+   */
+  async getRecordById(id: string): Promise<AdminTestRecord> {
+    const row = await this.resultsRepo.findOne({ where: { id } });
+    if (!row) throw new NotFoundException('분석 기록을 찾을 수 없습니다');
+    const pair = await this.resultsRepo.find({
+      where: { face_image_url: row.face_image_url, source: row.source },
+    });
+    const wnc = pair.find((r) => r.detection_type === 'WNC');
+    const snh = pair.find((r) => r.detection_type === 'SNH');
+    if (!wnc || !snh) throw new NotFoundException('짝이 되는 분석 행을 찾을 수 없습니다');
+    const downloadUrl = await this.python.createDownloadPresignedUrl(row.face_image_url);
+    return {
+      id: wnc.id,
+      faceImageUrl: row.face_image_url,
+      faceImageDownloadUrl: downloadUrl,
+      detectedAt: wnc.detected_at,
+      wnc: { id: wnc.id, result: wnc.python_analysis_result },
+      snh: { id: snh.id, result: snh.python_analysis_result },
+    };
+  }
+
+  /**
+   * face_image_url 매칭으로 WNC+SNH 짝 모두 삭제. S3 객체는 lifecycle 정책으로 처리.
+   */
+  async deleteRecordById(id: string): Promise<{ deleted: number }> {
+    const row = await this.resultsRepo.findOne({ where: { id } });
+    if (!row) throw new NotFoundException('분석 기록을 찾을 수 없습니다');
+    const res = await this.resultsRepo.delete({
+      face_image_url: row.face_image_url,
+      source: row.source,
+    });
+    return { deleted: res.affected || 0 };
   }
 
   private extFromContentType(contentType: string): string {
