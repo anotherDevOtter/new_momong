@@ -31,6 +31,17 @@ export interface AnalyzeResponse {
   metadata: { image_id: string; total_modules: number };
   wncId: string;
   snhId: string;
+  /** 분석 직후 원본 이미지를 GET 으로 표시하기 위한 presigned URL */
+  faceImageDownloadUrl: string;
+}
+
+export interface AdminHistoryRecord {
+  id: string;
+  faceImageUrl: string;
+  faceImageDownloadUrl: string;
+  detectedAt: string;
+  wnc: { id: string; result: WNCResult };
+  snh: { id: string; result: SNHResult };
 }
 
 function authHeader(): Record<string, string> {
@@ -81,6 +92,34 @@ export async function analyzeTest(faceImageUrl: string): Promise<AnalyzeResponse
     const err = await res.json().catch(() => ({}));
     throw new Error(err.message || '얼굴 분석 실패');
   }
+  const json = await res.json();
+  return json.data;
+}
+
+export async function listAdminHistory(limit = 30): Promise<AdminHistoryRecord[]> {
+  const res = await fetch(`${API_BASE}/face-analysis/admin/history?limit=${limit}`, {
+    headers: authHeader(),
+  });
+  if (!res.ok) throw new Error('기록 목록 조회 실패');
+  const json = await res.json();
+  return json.data;
+}
+
+export async function getAdminRecord(id: string): Promise<AdminHistoryRecord> {
+  const res = await fetch(`${API_BASE}/face-analysis/admin/${id}`, {
+    headers: authHeader(),
+  });
+  if (!res.ok) throw new Error('기록 조회 실패');
+  const json = await res.json();
+  return json.data;
+}
+
+export async function deleteAdminRecord(id: string): Promise<{ deleted: number }> {
+  const res = await fetch(`${API_BASE}/face-analysis/admin/${id}`, {
+    method: 'DELETE',
+    headers: authHeader(),
+  });
+  if (!res.ok) throw new Error('기록 삭제 실패');
   const json = await res.json();
   return json.data;
 }
