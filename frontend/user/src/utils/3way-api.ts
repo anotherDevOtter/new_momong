@@ -101,7 +101,18 @@ export interface SaveConsultPayload {
   name: string;
   course: string;
   designerName?: string;
+  ageGroup?: string;
+  gender?: 'female' | 'male' | '여자' | '남자' | '';
+  occupation?: string;
   consultData?: Record<string, unknown>;
+}
+
+// 3WAY 의 "여자/남자" → DB 호환 "female/male" 로 정규화
+function normalizeGender(g?: string): 'female' | 'male' | '' {
+  if (g === 'female' || g === 'male') return g;
+  if (g === '여자') return 'female';
+  if (g === '남자') return 'male';
+  return '';
 }
 
 export async function saveConsult(payload: SaveConsultPayload): Promise<{ success: true; id: string }> {
@@ -111,10 +122,11 @@ export async function saveConsult(payload: SaveConsultPayload): Promise<{ succes
     clientInfo: {
       name: payload.name,
       phone: payload.phone,
-      ageGroup: '',
-      gender: '',
-      // course를 clientInfo jsonb 안에 함께 저장 (entity 변경 없이 보존)
+      ageGroup: payload.ageGroup || '',
+      gender: normalizeGender(payload.gender),
+      // 추가 메타는 jsonb 라 자유롭게 — course, occupation 함께 보존
       ...(payload.course ? { course: payload.course } : {}),
+      ...(payload.occupation ? { occupation: payload.occupation } : {}),
     } as ConsultationData['clientInfo'],
     todayKeyword: { faceConcerns: [], faceConcernsMemo: '', hairConcerns: [], hairConcernsMemo: '', imageKeywords: [] },
     fashionStyle: { selected: [] },

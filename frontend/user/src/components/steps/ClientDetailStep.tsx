@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, User, Calendar, Phone, Clock, ChevronDown, ChevronUp, Scissors, Copy, Check, Eye, EyeOff, Download, Pencil, Trash2 } from 'lucide-react';
+import { ArrowLeft, User, Calendar, Phone, Clock, ChevronDown, ChevronUp, Scissors, Copy, Check, Eye, EyeOff, Download, Pencil, Trash2, Briefcase, ClipboardList } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { getConsultationsByCustomerPhone, getShareByConsultation, deleteConsultation } from '@/utils/api';
 import { useAuth } from '@/contexts/AuthContext';
@@ -24,6 +24,16 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
   const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
   const [copied, setCopied] = useState<string | null>(null);
   const qrRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [tab, setTab] = useState<'history' | 'survey'>('history');
+
+  // 가장 최근 컨설팅에서 occupation 추출 (clientInfo jsonb 에서 — 최신 saveConsult 형식)
+  const latestOccupation = (() => {
+    for (const c of consultations) {
+      const occ = (c.clientInfo as { occupation?: string } | undefined)?.occupation;
+      if (occ) return occ;
+    }
+    return '';
+  })();
 
   const handleDelete = async (id: string) => {
     if (!token || !window.confirm('이 컨설팅 기록을 삭제하시겠습니까?')) return;
@@ -112,6 +122,11 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
               <div className="flex flex-wrap gap-2 mb-3">
                 {client.gender && <span className="px-3 py-1 bg-[#F5F5F5] text-[#555555] text-sm">{client.gender === 'female' ? '여성' : '남성'}</span>}
                 {client.age_group && <span className="px-3 py-1 bg-[#F5F5F5] text-[#555555] text-sm">{client.age_group}</span>}
+                {latestOccupation && (
+                  <span className="px-3 py-1 bg-[#F5F5F5] text-[#555555] text-sm inline-flex items-center gap-1">
+                    <Briefcase size={12} /> {latestOccupation}
+                  </span>
+                )}
               </div>
               <div className="space-y-1 text-sm text-[#777777]">
                 {client.phone && <div className="flex items-center gap-2"><Phone size={14} />{client.phone}</div>}
@@ -122,6 +137,53 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
           </div>
         </div>
 
+        {/* 새 컨설팅 시작 — 히스토리 위로 */}
+        <div className="border border-[#E5E5E5] p-8 text-center">
+          <p className="text-[#777777] text-sm mb-6">이 고객의 정보로 새 컨설팅을 시작합니다.</p>
+          <div className="flex justify-center gap-3 flex-wrap">
+            <button
+              onClick={onStartNewConsultation}
+              className="px-8 py-3 bg-[#111111] text-white text-sm rounded-full hover:bg-[#222222] transition-colors"
+            >
+              FIT 시작
+            </button>
+            {onStart3Way && (
+              <button
+                onClick={onStart3Way}
+                className="px-8 py-3 border border-[#111111] text-[#111111] text-sm rounded-full hover:bg-[#FAFAFA] transition-colors"
+              >
+                3WAY 시작
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* 탭 */}
+        <div className="flex border-b border-[#E5E5E5]">
+          <button
+            onClick={() => setTab('history')}
+            className={`px-5 py-3 text-sm transition-colors border-b-2 -mb-px ${
+              tab === 'history' ? 'border-[#111111] text-[#111111] font-medium' : 'border-transparent text-[#999999] hover:text-[#111111]'
+            }`}
+          >
+            <Scissors size={14} className="inline-block mr-1 -mt-0.5" /> 컨설팅 히스토리
+          </button>
+          <button
+            onClick={() => setTab('survey')}
+            className={`px-5 py-3 text-sm transition-colors border-b-2 -mb-px ${
+              tab === 'survey' ? 'border-[#111111] text-[#111111] font-medium' : 'border-transparent text-[#999999] hover:text-[#111111]'
+            }`}
+          >
+            <ClipboardList size={14} className="inline-block mr-1 -mt-0.5" /> 사전 설문
+          </button>
+        </div>
+
+        {tab === 'survey' && (
+          <SurveySection consultations={consultations} isLoading={isLoading} formatDate={formatDate} />
+        )}
+
+        {tab === 'history' && (
+        <>
         {/* 컨설팅 히스토리 */}
         <div className="border border-[#E5E5E5] overflow-hidden">
           <div className="px-8 py-5 border-b border-[#E5E5E5] bg-[#FAFAFA] flex items-center justify-between">
@@ -415,27 +477,93 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
             </div>
           )}
         </div>
-
-        <div className="border border-[#E5E5E5] p-8 text-center">
-          <p className="text-[#777777] text-sm mb-6">이 고객의 정보로 새 컨설팅을 시작합니다.</p>
-          <div className="flex justify-center gap-3 flex-wrap">
-            <button
-              onClick={onStartNewConsultation}
-              className="px-8 py-3 bg-[#111111] text-white text-sm rounded-full hover:bg-[#222222] transition-colors"
-            >
-              FIT 시작
-            </button>
-            {onStart3Way && (
-              <button
-                onClick={onStart3Way}
-                className="px-8 py-3 border border-[#111111] text-[#111111] text-sm rounded-full hover:bg-[#FAFAFA] transition-colors"
-              >
-                3WAY 시작
-              </button>
-            )}
-          </div>
-        </div>
+        </>
+        )}
       </div>
     </div>
   );
 };
+
+/* ─────────────────── 사전 설문 탭 ─────────────────── */
+function SurveySection({
+  consultations,
+  isLoading,
+  formatDate,
+}: {
+  consultations: ConsultationRecord[];
+  isLoading: boolean;
+  formatDate: (d: string) => string;
+}) {
+  // 3WAY 컨설팅에서 preInterviewData (faceConcerns/hairConcerns 등) 만 추출
+  const surveys = consultations
+    .map((c) => {
+      const tw = (c as unknown as { threeWay?: { preInterviewData?: unknown } }).threeWay;
+      const pre = tw?.preInterviewData as
+        | { selectedFaceAreas?: string[]; selectedHairConcerns?: string[]; faceAreasMemo?: string; hairConcernsMemo?: string }
+        | undefined;
+      return pre ? { consult: c, pre } : null;
+    })
+    .filter(Boolean) as { consult: ConsultationRecord; pre: { selectedFaceAreas?: string[]; selectedHairConcerns?: string[]; faceAreasMemo?: string; hairConcernsMemo?: string } }[];
+
+  if (isLoading) {
+    return (
+      <div className="border border-[#E5E5E5] px-8 py-12 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#111111] mx-auto mb-3" />
+        <p className="text-sm text-[#999999]">불러오는 중...</p>
+      </div>
+    );
+  }
+
+  if (surveys.length === 0) {
+    return (
+      <div className="border border-[#E5E5E5] px-8 py-12 text-center">
+        <ClipboardList size={32} className="mx-auto mb-3 text-[#CCCCCC]" />
+        <p className="text-sm text-[#999999]">사전 설문 기록이 없습니다.</p>
+        <p className="text-xs text-[#CCCCCC] mt-1">3WAY 컨설팅 진행 시 사전 인터뷰 단계의 답변이 여기 표시됩니다.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="border border-[#E5E5E5] divide-y divide-[#E5E5E5]">
+      {surveys.map(({ consult, pre }) => (
+        <div key={consult.id} className="px-8 py-5">
+          <div className="flex items-baseline justify-between mb-3">
+            <p className="text-sm font-medium text-[#111111]">
+              {consult.visitDate || formatDate(consult.createdAt)}
+            </p>
+            <p className="text-xs text-[#999999]">담당: {consult.designerName || '-'}</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-xs text-[#999999] uppercase tracking-wider mb-1">얼굴 보완 부위</p>
+              {pre.selectedFaceAreas?.length ? (
+                <div className="flex flex-wrap gap-1">
+                  {pre.selectedFaceAreas.map((a) => (
+                    <span key={a} className="px-2 py-0.5 bg-[#F5F5F5] text-[#555555] text-xs">{a}</span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-[#CCCCCC]">-</p>
+              )}
+              {pre.faceAreasMemo && <p className="text-xs text-[#777777] mt-2">{pre.faceAreasMemo}</p>}
+            </div>
+            <div>
+              <p className="text-xs text-[#999999] uppercase tracking-wider mb-1">헤어 고민</p>
+              {pre.selectedHairConcerns?.length ? (
+                <div className="flex flex-wrap gap-1">
+                  {pre.selectedHairConcerns.map((a) => (
+                    <span key={a} className="px-2 py-0.5 bg-[#F5F5F5] text-[#555555] text-xs">{a}</span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-[#CCCCCC]">-</p>
+              )}
+              {pre.hairConcernsMemo && <p className="text-xs text-[#777777] mt-2">{pre.hairConcernsMemo}</p>}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

@@ -170,6 +170,9 @@ function Inner() {
         name: customerData.name,
         course: courseName,
         designerName: customerData.designerName,
+        ageGroup: customerData.ageGroup,
+        gender: customerData.gender as 'female' | 'male' | '여자' | '남자' | '',
+        occupation: customerData.occupation,
         consultData: {
           faceAnalysis: faceAnalysisResult
             ? {
