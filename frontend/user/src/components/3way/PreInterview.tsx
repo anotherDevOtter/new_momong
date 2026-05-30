@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Check } from 'lucide-react';
-import { ProgressSteps } from './ProgressSteps';
 import { NavigationButtons } from './NavigationButtons';
 
 interface PreInterviewProps {
@@ -71,13 +70,6 @@ export function PreInterview({ onBack, onNext }: PreInterviewProps) {
   return (
     <div className="min-h-screen bg-white px-8 pt-24 pb-40">
       <div className="max-w-3xl mx-auto">
-        {/* 프로그레스 스텝 */}
-        <ProgressSteps
-          currentStep={3}
-          totalSteps={3}
-          steps={['코스 선택', '고객 정보', '사전 인터뷰']}
-        />
-
         {/* 상단 타이틀 영역 */}
         <motion.div
           initial={{ opacity: 0 }}
