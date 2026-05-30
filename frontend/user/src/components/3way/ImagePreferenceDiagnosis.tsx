@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { BrandHeader } from './BrandHeader';
-import { ProgressSteps } from './ProgressSteps';
 import { NavigationButtons } from './NavigationButtons';
 import { KeywordCard } from './KeywordCard';
 
@@ -71,26 +70,9 @@ export function ImagePreferenceDiagnosis({ onBack, onNext }: ImagePreferenceDiag
 
   const isValid = preferredKeywords.length > 0 || dislikedKeywords.length > 0;
 
-  const steps = [
-    '코스 선택',
-    '고객 정보',
-    '고민 체크',
-    '이미지 선호',
-    '진단 5',
-    '진단 6',
-    '진단 7',
-    '진단 8',
-    '진단 9',
-    '진단 10',
-    '진단 11',
-    '결과',
-  ];
-
   return (
     <div className="min-h-screen bg-white px-8 pt-24 pb-40">
       <div className="max-w-2xl mx-auto">
-        {/* 프로그레스 스텝 */}
-        <ProgressSteps currentStep={4} totalSteps={12} steps={steps} />
 
         {/* 상단 타이틀 영역 */}
         <motion.div

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { ProgressSteps } from './ProgressSteps';
 import { NavigationButtons } from './NavigationButtons';
 import { Input } from '@/components/ui/Input';
 
@@ -69,13 +68,6 @@ export function CustomerInfo({ onBack, onNext }: CustomerInfoProps) {
   return (
     <div className="min-h-screen bg-white px-8 pt-24 pb-40">
       <div className="max-w-2xl mx-auto">
-        {/* 프로그레스 스텝 */}
-        <ProgressSteps
-          currentStep={2}
-          totalSteps={3}
-          steps={['코스 선택', '고객 정보', '고민 체크']}
-        />
-
         {/* 상단 타이틀 영역 */}
         <motion.div
           initial={{ opacity: 0 }}
