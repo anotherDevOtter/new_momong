@@ -2,7 +2,6 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Toaster } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { ClientInfoStep } from '@/components/steps/ClientInfoStep';
@@ -47,7 +46,7 @@ export default function FitPage() {
 function FitPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, token, loading, logout } = useAuth();
+  const { user, token, loading } = useAuth();
 
   const customerId = searchParams.get('customerId');
   const editId = searchParams.get('editId');
@@ -268,37 +267,18 @@ function FitPageInner() {
 
   return (
     <>
-      <Toaster
-        position="top-center"
-        toastOptions={{
-          style: { background: '#111111', color: '#FFFFFF', border: '1px solid #333333', fontSize: '14px' },
-        }}
-      />
-
-      {/* 상단 헤더 */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-        <div className="flex items-center gap-3">
-          <span className="text-[11px] tracking-[0.25em] text-[#111111] uppercase font-medium">MERCI MOMONG</span>
-          <button
-            onClick={() => {
-              if (window.confirm('처음으로 돌아가면 현재 컨설팅 내용이 모두 사라집니다. 계속하시겠습니까?')) {
-                router.push('/');
-              }
-            }}
-            className="text-xs text-gray-400 hover:text-gray-700 px-2 py-1 border border-gray-200 rounded hover:border-gray-400 transition-colors"
-          >
-            처음으로
-          </button>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-400">{user.storeName}</span>
-          <button
-            onClick={logout}
-            className="text-xs text-gray-400 hover:text-gray-700 px-2 py-1 border border-gray-200 rounded hover:border-gray-400 transition-colors"
-          >
-            로그아웃
-          </button>
-        </div>
+      {/* 진행 중 안내 바 — "처음으로" 만 (MERCI MOMONG / 로그아웃 은 layout AppHeader) */}
+      <div className="flex items-center justify-end px-4 py-2 bg-[#FAFAFA] border-b border-gray-100">
+        <button
+          onClick={() => {
+            if (window.confirm('처음으로 돌아가면 현재 컨설팅 내용이 모두 사라집니다. 계속하시겠습니까?')) {
+              router.push('/');
+            }
+          }}
+          className="text-xs text-gray-400 hover:text-gray-700 px-2 py-1 border border-gray-200 rounded hover:border-gray-400 transition-colors"
+        >
+          처음으로
+        </button>
       </div>
 
       {showProgressBar && <ProgressBar currentStep={currentStep} totalSteps={TOTAL_STEPS} />}

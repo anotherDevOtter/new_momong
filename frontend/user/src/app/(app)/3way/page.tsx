@@ -89,22 +89,12 @@ function ThreeWayPageInner() {
   // 랜딩
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-8 py-20 relative">
+      {/* AppHeader 가 상단 공통 — "고객 이력" 만 우측에 배치 */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.8 }}
-        className="absolute top-10 left-10"
-      >
-        <span className="text-[11px] tracking-[0.25em] text-[#111111] uppercase font-medium">
-          MERCI MOMONG
-        </span>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2, duration: 0.8 }}
-        className="absolute top-10 right-10"
+        className="absolute top-6 right-10"
       >
         <button
           onClick={handleHistory}

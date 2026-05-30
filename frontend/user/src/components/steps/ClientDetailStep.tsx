@@ -89,7 +89,7 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="fixed top-0 left-0 right-0 bg-white border-b border-[#E5E5E5] z-10">
+      <div className="border-b border-[#E5E5E5]">
         <div className="max-w-[1200px] mx-auto px-6 md:px-20 py-6 flex items-center justify-between">
           <button onClick={onBack} className="flex items-center gap-2 text-[#111111] hover:text-[#555555] transition-colors">
             <ArrowLeft size={20} />
@@ -100,7 +100,7 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
         </div>
       </div>
 
-      <div className="max-w-[1200px] mx-auto px-6 md:px-20 pt-32 pb-20 space-y-6">
+      <div className="max-w-[1200px] mx-auto px-6 md:px-20 py-12 space-y-6">
         {/* 고객 정보 카드 */}
         <div className="border border-[#E5E5E5] p-8">
           <div className="flex items-start gap-4">

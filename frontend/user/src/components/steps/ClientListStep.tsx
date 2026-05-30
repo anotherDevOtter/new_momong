@@ -97,7 +97,8 @@ export const ClientListStep = ({ onBack, onSelectClient }: ClientListStepProps) 
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="fixed top-0 left-0 right-0 bg-white border-b border-[#E5E5E5] z-10">
+      {/* 컬렉션 페이지 헤더 — AppHeader 와 별개로 페이지 제목 + 뒤로 */}
+      <div className="border-b border-[#E5E5E5]">
         <div className="max-w-[1200px] mx-auto px-6 md:px-20 py-6 flex items-center justify-between">
           <button onClick={onBack} className="flex items-center gap-2 text-[#111111] hover:text-[#555555] transition-colors">
             <ArrowLeft size={20} />
@@ -108,7 +109,7 @@ export const ClientListStep = ({ onBack, onSelectClient }: ClientListStepProps) 
         </div>
       </div>
 
-      <div className="max-w-[1200px] mx-auto px-6 md:px-20 pt-32 pb-20">
+      <div className="max-w-[1200px] mx-auto px-6 md:px-20 py-12">
         <div className="mb-8">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#999999]" size={20} />
