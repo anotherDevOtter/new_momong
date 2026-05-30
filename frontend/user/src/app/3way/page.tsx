@@ -7,40 +7,11 @@ import { ArrowRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFeatures } from '@/contexts/FeaturesContext';
 import { CourseSelection } from '@/components/3way/CourseSelection';
-import { CustomerData } from '@/components/3way/CustomerInfo';
-import { CustomerSelector, type CustomerSummary, type NewCustomerData } from '@/components/CustomerSelector';
-import { CustomerConfirm, type ConfirmableCustomer } from '@/components/CustomerConfirm';
-import { PreInterview, PreInterviewData } from '@/components/3way/PreInterview';
-import { ImagePreferenceDiagnosis, ImagePreferenceData } from '@/components/3way/ImagePreferenceDiagnosis';
-import { FashionPreferenceDiagnosis, FashionPreferenceData } from '@/components/3way/FashionPreferenceDiagnosis';
-import { ConsultingSummary } from '@/components/3way/ConsultingSummary';
-import { FaceAnalysisCapture } from '@/components/3way/FaceAnalysisCapture';
-import { FaceAnalysisProcessing } from '@/components/3way/FaceAnalysisProcessing';
-import { FaceAnalysisResult } from '@/components/3way/FaceAnalysisResult';
-import type { AnalyzeResponse } from '@/utils/face-analysis-api';
-import { PersonalColorAnalysis } from '@/components/3way/PersonalColorAnalysis';
-import { SkeletonImageAnalysis } from '@/components/3way/SkeletonImageAnalysis';
-import { ImageDirectionSetting } from '@/components/3way/ImageDirectionSetting';
-import { HairDesignProposal } from '@/components/3way/HairDesignProposal';
-import { HairTextureAnalysis } from '@/components/3way/HairTextureAnalysis';
-import { NextDirection, CycleData } from '@/components/3way/NextDirection';
-import { PremiumReport } from '@/components/3way/PremiumReport';
-import { CompletionPage } from '@/components/3way/CompletionPage';
 import { CustomerHistory, CustomerRecord } from '@/components/3way/CustomerHistory';
 import { CustomerHistoryDetail, ConsultRecord } from '@/components/3way/CustomerHistoryDetail';
-import { saveConsult } from '@/utils/3way-api';
-import { getAllCustomers, createCustomer } from '@/utils/api';
 
-type PageKey =
-  | 'landing' | 'course' | 'customerSelect' | 'customerConfirm' | 'preInterview'
-  | 'imagePreference' | 'fashionPreference' | 'summary'
-  | 'faceAnalysis' | 'faceProcessing' | 'faceResult'
-  | 'personalColor' | 'skeletonImage'
-  | 'imageDirection' | 'hairDesign' | 'hairTexture'
-  | 'nextDirection' | 'report' | 'diagnosis' | 'completion'
-  | 'history' | 'historyDetail';
+type ScreenKey = 'landing' | 'course' | 'history' | 'historyDetail';
 
-// Next.js 16 의 prerender 요구: useSearchParams() 호출부는 Suspense 안에 있어야 함
 export default function ThreeWayPage() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-white" />}>
@@ -55,446 +26,67 @@ function ThreeWayPageInner() {
   const { user, loading } = useAuth();
   const { features, loading: featuresLoading } = useFeatures();
 
-  const [currentPage, setCurrentPage] = useState<PageKey>(
+  const [screen, setScreen] = useState<ScreenKey>(
     searchParams.get('start') === '1' ? 'course' : 'landing',
   );
-  const [showReport, setShowReport] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [selectedCourse, setSelectedCourse] = useState<string>('');
-  const [customerData, setCustomerData] = useState<CustomerData | null>(null);
-  const [preInterviewData, setPreInterviewData] = useState<PreInterviewData | null>(null);
-  const [imagePreferenceData, setImagePreferenceData] = useState<ImagePreferenceData | null>(null);
-  const [fashionPreferenceData, setFashionPreferenceData] = useState<FashionPreferenceData | null>(null);
-  const [cycleData, setCycleData] = useState<CycleData | null>(null);
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerRecord | null>(null);
   const [selectedConsultRecord, setSelectedConsultRecord] = useState<ConsultRecord | null>(null);
-  const [faceAnalysisResult, setFaceAnalysisResult] = useState<AnalyzeResponse | null>(null);
-  const [faceImageUrl, setFaceImageUrl] = useState<string | null>(null);
-  // 고객 선택/확인 단계 상태
-  const [customerOptions, setCustomerOptions] = useState<CustomerSummary[]>([]);
-  const [customerOptionsLoading, setCustomerOptionsLoading] = useState(false);
-  const [pendingCustomer, setPendingCustomer] = useState<ConfirmableCustomer | null>(null);
-
-  // /3way?customerId=... 로 진입한 경우 — 코스 선택 후 자동으로 해당 고객으로 confirm
-  // 처음 마운트 시 1회만 수행 (course 페이지 진입 후 user 가 코스 선택하면 customerSelect 건너뛰고 confirm)
-  const preselectCustomerIdRef = (typeof window !== 'undefined' && searchParams.get('customerId')) || null;
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.replace('/login');
-    }
+    if (!loading && !user) router.replace('/login');
   }, [loading, user, router]);
 
   useEffect(() => {
-    if (!featuresLoading && !features.threeWayEnabled) {
-      router.replace('/');
-    }
+    if (!featuresLoading && !features.threeWayEnabled) router.replace('/');
   }, [featuresLoading, features.threeWayEnabled, router]);
 
-  // 페이지 전환 시 상단으로 스크롤
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [currentPage]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <p className="text-sm text-[#999999]">불러오는 중...</p>
-      </div>
-    );
+  if (loading || featuresLoading) {
+    return <div className="min-h-screen flex items-center justify-center bg-white"><p className="text-sm text-[#999999]">불러오는 중...</p></div>;
   }
-  if (!user) return null;
-  if (!features.threeWayEnabled) return null;
+  if (!user || !features.threeWayEnabled) return null;
 
-  const handleStart = () => setCurrentPage('course');
+  const handleStart = () => setScreen('course');
+  const handleHistory = () => setScreen('history');
 
-  const handleCourseNext = async (courseId: string) => {
-    setSelectedCourse(courseId);
-
-    // ?customerId=xxx 로 진입한 경우: 고객 선택 단계 스킵하고 바로 confirm 으로
-    if (preselectCustomerIdRef) {
-      try {
-        const token = localStorage.getItem('auth_token');
-        if (token) {
-          const list = await getAllCustomers(token);
-          const full = list.find((x) => x.id === preselectCustomerIdRef);
-          if (full) {
-            setPendingCustomer({
-              source: 'existing',
-              id: full.id,
-              name: full.name,
-              phone: full.phone,
-              ageGroup: full.age_group || '',
-              gender: full.gender === 'male' ? 'male' : 'female',
-            });
-            setCurrentPage('customerConfirm');
-            return;
-          }
-        }
-      } catch (e) {
-        console.error('preselect 고객 로드 실패', e);
-      }
-    }
-
-    setCurrentPage('customerSelect');
-    // 고객 목록 로드 (페이지 전환과 병행)
-    setCustomerOptionsLoading(true);
-    try {
-      const token = localStorage.getItem('auth_token');
-      if (token) {
-        const list = await getAllCustomers(token);
-        setCustomerOptions(list.map((c) => ({
-          id: c.id,
-          name: c.name,
-          phone: c.phone,
-        })));
-      }
-    } catch (e) {
-      console.error('고객 목록 로드 실패', e);
-    } finally {
-      setCustomerOptionsLoading(false);
-    }
-  };
-  const handleCourseBack = () => setCurrentPage('landing');
-
-  const handleCustomerSelectBack = () => setCurrentPage('course');
-
-  const handleCustomerSelectExisting = (c: CustomerSummary) => {
-    // 기존 고객 → 풀 정보 조회 (gender, age_group)
-    (async () => {
-      try {
-        const token = localStorage.getItem('auth_token');
-        if (!token) return;
-        const list = await getAllCustomers(token);
-        const full = list.find((x) => x.id === c.id);
-        setPendingCustomer({
-          source: 'existing',
-          id: c.id,
-          name: c.name,
-          phone: c.phone,
-          ageGroup: full?.age_group || '',
-          gender: (full?.gender === 'male' ? 'male' : 'female'),
-        });
-        setCurrentPage('customerConfirm');
-      } catch (e) {
-        console.error('고객 상세 조회 실패', e);
-      }
-    })();
+  // 코스 선택 완료 → /consulting/start 로 이동 (?customerId 가 있으면 그대로 넘김)
+  const handleCourseNext = (courseId: string) => {
+    const customerId = searchParams.get('customerId');
+    const q = new URLSearchParams({ type: '3way', course: courseId });
+    if (customerId) q.set('customerId', customerId);
+    router.push(`/consulting/start?${q.toString()}`);
   };
 
-  const handleCustomerSelectNew = async (data: NewCustomerData) => {
-    try {
-      const token = localStorage.getItem('auth_token');
-      if (!token) return;
-      const created = await createCustomer(token, {
-        name: data.name,
-        phone: data.phone,
-        gender: data.gender,
-        age_group: data.ageGroup,
-      });
-      setPendingCustomer({
-        source: 'new',
-        id: created.id,
-        name: data.name,
-        phone: data.phone,
-        ageGroup: data.ageGroup,
-        gender: data.gender,
-        occupation: data.occupation,
-      });
-      setCurrentPage('customerConfirm');
-    } catch (e) {
-      alert(e instanceof Error ? e.message : '고객 등록 실패');
-    }
-  };
+  const handleCourseBack = () => setScreen('landing');
 
-  const handleCustomerConfirmBack = () => setCurrentPage('customerSelect');
-  const handleCustomerConfirm = () => {
-    if (!pendingCustomer) return;
-    // CustomerData (기존 3WAY 컴포넌트들이 기대하는 형태) 로 변환
-    setCustomerData({
-      name: pendingCustomer.name,
-      phone: pendingCustomer.phone,
-      occupation: pendingCustomer.occupation || '',
-      ageGroup: pendingCustomer.ageGroup,
-      gender: pendingCustomer.gender === 'female' ? '여자' : '남자',
-      designerName: user?.ownerName || '',
-    });
-    setCurrentPage('preInterview');
-  };
-
-  const handlePreInterviewBack = () => setCurrentPage('customerConfirm');
-  const handlePreInterviewNext = (data: PreInterviewData) => {
-    setPreInterviewData(data);
-    setCurrentPage('imagePreference');
-  };
-
-  const handleImagePreferenceBack = () => setCurrentPage('preInterview');
-  const handleImagePreferenceNext = (data: ImagePreferenceData) => {
-    setImagePreferenceData(data);
-    setCurrentPage('fashionPreference');
-  };
-
-  const handleFashionPreferenceBack = () => setCurrentPage('imagePreference');
-  const handleFashionPreferenceNext = (data: FashionPreferenceData) => {
-    setFashionPreferenceData(data);
-    setCurrentPage('summary');
-  };
-
-  const handleSummaryBack = () => setCurrentPage('fashionPreference');
-  const handleSummaryNext = () => setCurrentPage('faceAnalysis');
-
-  const handleFaceAnalysisBack = () => setCurrentPage('summary');
-  // 분석 결과는 Capture 에서 이미 받았으므로 Processing 은 짧은 트랜지션용으로만 사용
-  const handleFaceAnalysisNext = (result: AnalyzeResponse, imageUrl: string) => {
-    setFaceAnalysisResult(result);
-    setFaceImageUrl(imageUrl);
-    setCurrentPage('faceProcessing');
-  };
-  const handleFaceProcessingComplete = () => setCurrentPage('faceResult');
-
-  const handleFaceResultBack = () => setCurrentPage('faceAnalysis');
-  const handleFaceResultNext = () => {
-    if (selectedCourse === '2way-personal') setCurrentPage('personalColor');
-    else if (selectedCourse === '2way-skeleton') setCurrentPage('skeletonImage');
-    else setCurrentPage('imageDirection');
-  };
-
-  const handlePersonalColorBack = () => setCurrentPage('faceResult');
-  const handlePersonalColorNext = () => setCurrentPage('imageDirection');
-
-  const handleSkeletonImageBack = () => setCurrentPage('faceResult');
-  const handleSkeletonImageNext = () => setCurrentPage('imageDirection');
-
-  const handleImageDirectionBack = () => {
-    if (selectedCourse === '2way-personal') setCurrentPage('personalColor');
-    else if (selectedCourse === '2way-skeleton') setCurrentPage('skeletonImage');
-    else setCurrentPage('faceResult');
-  };
-  const handleImageDirectionNext = () => setCurrentPage('hairDesign');
-
-  const handleHairDesignBack = () => setCurrentPage('imageDirection');
-  const handleHairDesignNext = () => setCurrentPage('hairTexture');
-
-  const handleHairTextureBack = () => setCurrentPage('hairDesign');
-  const handleHairTextureNext = () => setCurrentPage('nextDirection');
-
-  const handleNextDirectionBack = () => setCurrentPage('hairTexture');
-  const handleNextDirectionNext = () => setShowReport(true);
-
-  const handleReportClose = () => {
-    setShowReport(false);
-
-    if (customerData && customerData.phone) {
-      const courseName =
-        selectedCourse === '3way' ? '3WAY'
-        : selectedCourse === '2way-personal' ? '2WAY (Personal Color)'
-        : selectedCourse === '2way-skeleton' ? '2WAY (Skeleton Image)'
-        : '1WAY';
-
-      saveConsult({
-        phone: customerData.phone,
-        name: customerData.name,
-        course: courseName,
-        designerName: customerData.designerName,
-        consultData: {
-          faceAnalysis: faceAnalysisResult
-            ? {
-                wncId: faceAnalysisResult.wncId,
-                snhId: faceAnalysisResult.snhId,
-                wncFinal: faceAnalysisResult.wnc.final,
-                snhFinal: faceAnalysisResult.snh.final,
-                imageType: `${faceAnalysisResult.wnc.final} / ${faceAnalysisResult.snh.final}`,
-                faceImageUrl,
-              }
-            : null,
-          cycleData,
-          imagePreferenceData,
-          fashionPreferenceData,
-          preInterviewData,
-        },
-      }).catch(() => {
-        // 저장 실패는 사용자 흐름을 막지 않음
-      });
-    }
-
-    setCurrentPage('completion');
-  };
-
-  const handleDownloadPDF = () => {
-    alert('PDF 다운로드 기능은 추후 연동 예정입니다.');
-  };
-
-  const handleShareLink = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url).then(
-      () => alert('링크가 클립보드에 복사되었습니다!'),
-      () => alert('링크 복사에 실패했습니다.'),
-    );
-  };
-
-  const handleGoHome = () => {
-    setCurrentPage('landing');
-    setShowReport(false);
-  };
-
-  const handleHistory = () => setCurrentPage('history');
-
-  const handleHistoryDetail = (customer: CustomerRecord, consult: ConsultRecord) => {
-    setSelectedCustomer(customer);
-    setSelectedConsultRecord(consult);
-    setCurrentPage('historyDetail');
-  };
-
-  const handleHistoryBack = () => setCurrentPage('history');
-
-  if (currentPage === 'course') {
+  if (screen === 'course') {
     return <CourseSelection onNext={handleCourseNext} onBack={handleCourseBack} />;
   }
 
-  if (currentPage === 'customerSelect') {
+  if (screen === 'history') {
     return (
-      <CustomerSelector
-        customers={customerOptions}
-        onSelectExisting={handleCustomerSelectExisting}
-        onCreateNew={handleCustomerSelectNew}
-        onCancel={handleCustomerSelectBack}
-        title="3WAY 컨설팅 시작"
-        subtitle={
-          customerOptionsLoading
-            ? '고객 목록 불러오는 중...'
-            : '기존 고객을 검색하거나 신규 고객을 등록해주세요'
-        }
+      <CustomerHistory
+        onHistoryDetail={(customer: CustomerRecord, consult: ConsultRecord) => {
+          setSelectedCustomer(customer);
+          setSelectedConsultRecord(consult);
+          setScreen('historyDetail');
+        }}
+        onBack={() => setScreen('landing')}
       />
     );
   }
 
-  if (currentPage === 'customerConfirm' && pendingCustomer) {
-    return (
-      <CustomerConfirm
-        customer={pendingCustomer}
-        onBack={handleCustomerConfirmBack}
-        onConfirm={handleCustomerConfirm}
-      />
-    );
-  }
-
-  if (currentPage === 'preInterview') {
-    return <PreInterview onBack={handlePreInterviewBack} onNext={handlePreInterviewNext} />;
-  }
-
-  if (currentPage === 'imagePreference') {
-    return <ImagePreferenceDiagnosis onBack={handleImagePreferenceBack} onNext={handleImagePreferenceNext} />;
-  }
-
-  if (currentPage === 'fashionPreference') {
-    return <FashionPreferenceDiagnosis onBack={handleFashionPreferenceBack} onNext={handleFashionPreferenceNext} />;
-  }
-
-  if (currentPage === 'summary') {
-    if (!customerData || !imagePreferenceData || !fashionPreferenceData) {
-      return (
-        <div className="min-h-screen bg-white flex items-center justify-center">
-          <p className="text-gray-600">데이터 로딩 중...</p>
-        </div>
-      );
-    }
-    return (
-      <ConsultingSummary
-        selectedCourse={selectedCourse}
-        customerData={customerData}
-        imagePreferenceData={imagePreferenceData}
-        fashionPreferenceData={fashionPreferenceData}
-        onBack={handleSummaryBack}
-        onNext={handleSummaryNext}
-      />
-    );
-  }
-
-  if (currentPage === 'faceAnalysis') {
-    return <FaceAnalysisCapture onBack={handleFaceAnalysisBack} onNext={handleFaceAnalysisNext} />;
-  }
-
-  if (currentPage === 'faceProcessing') {
-    return <FaceAnalysisProcessing onComplete={handleFaceProcessingComplete} />;
-  }
-
-  if (currentPage === 'faceResult') {
-    return (
-      <FaceAnalysisResult
-        analysisResult={faceAnalysisResult}
-        onBack={handleFaceResultBack}
-        onNext={handleFaceResultNext}
-      />
-    );
-  }
-
-  if (currentPage === 'personalColor') {
-    return <PersonalColorAnalysis onBack={handlePersonalColorBack} onNext={handlePersonalColorNext} />;
-  }
-
-  if (currentPage === 'skeletonImage') {
-    return <SkeletonImageAnalysis onBack={handleSkeletonImageBack} onNext={handleSkeletonImageNext} />;
-  }
-
-  if (currentPage === 'imageDirection') {
-    return <ImageDirectionSetting onBack={handleImageDirectionBack} onNext={handleImageDirectionNext} />;
-  }
-
-  if (currentPage === 'hairDesign') {
-    return <HairDesignProposal onBack={handleHairDesignBack} onNext={handleHairDesignNext} />;
-  }
-
-  if (currentPage === 'hairTexture') {
-    return <HairTextureAnalysis onBack={handleHairTextureBack} onNext={handleHairTextureNext} />;
-  }
-
-  if (currentPage === 'nextDirection') {
-    return (
-      <>
-        <NextDirection
-          onBack={handleNextDirectionBack}
-          onNext={handleNextDirectionNext}
-          onCycleDataChange={setCycleData}
-        />
-        {showReport && (
-          <PremiumReport
-            onClose={handleReportClose}
-            customerName={customerData?.name || '고객'}
-            consultDate={new Date().toLocaleDateString('ko-KR')}
-            designerName={customerData?.designerName || '디자이너'}
-            cycleData={cycleData}
-            selectedCourse={selectedCourse}
-          />
-        )}
-      </>
-    );
-  }
-
-  if (currentPage === 'completion') {
-    return (
-      <CompletionPage
-        onDownloadPDF={handleDownloadPDF}
-        onShareLink={handleShareLink}
-        onGoHome={handleGoHome}
-      />
-    );
-  }
-
-  if (currentPage === 'history') {
-    return <CustomerHistory onHistoryDetail={handleHistoryDetail} onBack={handleGoHome} />;
-  }
-
-  if (currentPage === 'historyDetail') {
+  if (screen === 'historyDetail') {
     return (
       <CustomerHistoryDetail
         customer={selectedCustomer}
         consult={selectedConsultRecord}
-        onBack={handleHistoryBack}
+        onBack={() => setScreen('history')}
       />
     );
   }
 
-  // 랜딩 페이지
+  // 랜딩
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-8 py-20 relative">
       <motion.div
@@ -503,9 +95,7 @@ function ThreeWayPageInner() {
         transition={{ delay: 0.2, duration: 0.8 }}
         className="absolute top-10 left-10"
       >
-        <span
-          className="text-[11px] tracking-[0.25em] text-[#111111] uppercase font-medium"
-        >
+        <span className="text-[11px] tracking-[0.25em] text-[#111111] uppercase font-medium">
           MERCI MOMONG
         </span>
       </motion.div>
@@ -595,7 +185,6 @@ function ThreeWayPageInner() {
           </button>
         </motion.div>
       </motion.div>
-
     </div>
   );
 }

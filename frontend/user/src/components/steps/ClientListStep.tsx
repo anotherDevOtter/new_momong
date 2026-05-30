@@ -6,7 +6,8 @@ import { getAllCustomers, deleteCustomer, createCustomer } from '@/utils/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { Customer } from '@/types';
 import { toast } from 'sonner';
-import { NewCustomerForm, type NewCustomerFormData } from '@/components/NewCustomerForm';
+import { type NewCustomerFormData } from '@/components/NewCustomerForm';
+import { NewCustomerDialog } from '@/components/NewCustomerDialog';
 
 interface ClientListStepProps {
   onBack: () => void;
@@ -136,15 +137,12 @@ export const ClientListStep = ({ onBack, onSelectClient }: ClientListStepProps) 
           </button>
         </div>
 
-        {showNewForm && (
-          <div className="mb-8 p-6 border border-[#E5E5E5] rounded-lg bg-[#FAFAFA]">
-            <NewCustomerForm
-              onSubmit={handleCreate}
-              onCancel={() => setShowNewForm(false)}
-              submitLabel={isCreating ? '등록 중…' : '등록'}
-            />
-          </div>
-        )}
+        <NewCustomerDialog
+          open={showNewForm}
+          onClose={() => setShowNewForm(false)}
+          onSubmit={handleCreate}
+          submitLabel={isCreating ? '등록 중…' : '등록'}
+        />
 
         {isLoading ? (
           <div className="text-center py-20">
