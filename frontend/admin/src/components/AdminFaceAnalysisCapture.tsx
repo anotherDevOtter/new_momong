@@ -28,6 +28,62 @@ function dataUrlToFile(dataUrl: string, filename: string): File {
   return new File([arr], filename, { type: mime });
 }
 
+// 검출된 얼굴 박스를 중심으로 4:5 portrait 영역 크롭. padding 만큼 여백.
+// 위쪽 여백을 더 주어 머리/이마가 포함되도록 face 중심을 세로 45% 지점에 배치.
+async function cropAroundFace(
+  img: HTMLImageElement,
+  faceBox: { originX: number; originY: number; width: number; height: number },
+  options: { padding?: number; aspectRatio?: number } = {},
+): Promise<File> {
+  const padding = options.padding ?? 2.5;
+  const aspectRatio = options.aspectRatio ?? 4 / 5; // W/H. <1 이면 portrait.
+  const fx = faceBox.originX + faceBox.width / 2;
+  const fy = faceBox.originY + faceBox.height / 2;
+  const faceLong = Math.max(faceBox.width, faceBox.height);
+  const baseDim = faceLong * padding;
+
+  let cropH = baseDim;
+  let cropW = baseDim * aspectRatio;
+  if (aspectRatio >= 1) {
+    cropW = baseDim;
+    cropH = baseDim / aspectRatio;
+  }
+
+  let cropX = fx - cropW / 2;
+  let cropY = fy - cropH * 0.45; // 얼굴이 약간 위쪽으로 (헤어 공간 확보)
+  if (cropW > img.naturalWidth) { cropW = img.naturalWidth; cropX = 0; }
+  if (cropH > img.naturalHeight) { cropH = img.naturalHeight; cropY = 0; }
+  cropX = Math.max(0, Math.min(cropX, img.naturalWidth - cropW));
+  cropY = Math.max(0, Math.min(cropY, img.naturalHeight - cropH));
+
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(cropW);
+  canvas.height = Math.round(cropH);
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('canvas context 를 얻을 수 없습니다');
+  ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, canvas.width, canvas.height);
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) return reject(new Error('canvas toBlob 실패'));
+        resolve(new File([blob], 'face-crop.jpg', { type: 'image/jpeg' }));
+      },
+      'image/jpeg',
+      0.92,
+    );
+  });
+}
+
+function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
 const OVAL_RATIO = { cx: 0.5, cy: 0.44, rx: 0.3, ry: 0.32 };
 
 export function AdminFaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps) {
@@ -49,6 +105,12 @@ export function AdminFaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCapture
   const streamRef = useRef<MediaStream | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const rafRef = useRef<number | null>(null);
+  // 업로드된 새 파일에 대해 한 번만 얼굴 자동 크롭 수행
+  const pendingCropRef = useRef(false);
+  // 업로드 이미지를 사용자가 직접 드래그/줌으로 위치 조정 (auto crop 실패 시 fallback)
+  const [imgTransform, setImgTransform] = useState({ tx: 0, ty: 0, scale: 1 });
+  const dragRef = useRef<{ startX: number; startY: number; startTx: number; startTy: number } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const faceDetector = useFaceDetector();
 
@@ -59,22 +121,27 @@ export function AdminFaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCapture
     }
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) {
       alert('이미지 파일만 업로드할 수 있습니다.');
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target?.result as string;
+    try {
+      // 큰 이미지 (2500x2500 등) 는 MediaPipe blaze_face_short_range 모델이
+      // 작은 얼굴을 검출 못 함 → 업로드 시 먼저 2048px 까지 리사이즈
+      const { file: prepared } = await prepareImageForAnalysis(file);
+      const dataUrl = await fileToDataUrl(prepared);
       setPreviewImage(dataUrl);
       setImageSource('upload');
-      setUploadedFile(file);
+      setUploadedFile(prepared);
+      pendingCropRef.current = true; // 다음 검출 사이클에서 얼굴 영역 자동 크롭
+      setImgTransform({ tx: 0, ty: 0, scale: 1 }); // 새 이미지 → transform 초기화
       stopCamera();
-    };
-    reader.readAsDataURL(file);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : '이미지 준비 실패');
+    }
   };
 
   const handleClearPreview = () => {
@@ -83,6 +150,8 @@ export function AdminFaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCapture
     setUploadedFile(null);
     setAnalyzeError(null);
     setFaceInOval(false);
+    pendingCropRef.current = false;
+    setImgTransform({ tx: 0, ty: 0, scale: 1 });
     if (fileInputRef.current) fileInputRef.current.value = '';
     // 카메라가 켜져 있던 흐름이면 다시 시작
     if (cameraStarted) startCamera();
@@ -219,13 +288,37 @@ export function AdminFaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCapture
     setDetectionHint(result.inside ? '얼굴 위치가 좋습니다' : result.reason || '얼굴을 맞춰주세요');
   };
 
-  // 업로드 이미지 검출
-  const handleImageLoaded = () => {
+  // 업로드 이미지 검출 (첫 검출에서 얼굴 검출되면 자동 크롭 → 두 번째 로드부터 정상 oval 검사)
+  const handleImageLoaded = async () => {
     const img = uploadedImgRef.current;
     const preview = previewRef.current;
     if (!img || !preview || !faceDetector.ready) return;
     try {
       const detections = faceDetector.detectInImage(img);
+
+      if (pendingCropRef.current) {
+        pendingCropRef.current = false;
+        if (detections.length > 0) {
+          try {
+            const cropped = await cropAroundFace(img, detections[0]);
+            const dataUrl = await fileToDataUrl(cropped);
+            setUploadedFile(cropped);
+            setPreviewImage(dataUrl); // → 재로드 → handleImageLoaded 재진입 (이번엔 일반 검출)
+            setImgTransform({ tx: 0, ty: 0, scale: 1 }); // 자동 크롭본 transform 초기화
+          } catch (cropErr) {
+            console.error('자동 크롭 실패', cropErr);
+            setFaceInOval(true);
+            setDetectionHint('자동 크롭 실패 — 원본 그대로 분석합니다');
+          }
+        } else {
+          // 작은 얼굴 / 전신 사진 등 MediaPipe 가 검출 못 한 경우:
+          // 원본 그대로 분석 진행 (Python 서버 Face Mesh 가 더 견고함).
+          setFaceInOval(true);
+          setDetectionHint('얼굴 자동 검출 실패 — 원본 그대로 분석합니다');
+        }
+        return;
+      }
+
       const rect = preview.getBoundingClientRect();
       evaluateDetections(detections, rect, img.naturalWidth, img.naturalHeight, false);
     } catch (e) {
@@ -246,14 +339,16 @@ export function AdminFaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCapture
     const video = videoRef.current;
     if (!video || video.readyState < 2 || video.videoWidth === 0) return;
 
-    // 화면은 object-cover 로 크롭되어 보이므로 캡처도 그 크롭된 영역만 추출해야
-    // 사용자가 본 그대로의 사진이 분석에 들어감.
+    // 화면은 object-cover + transform:scale(1.5) 로 크롭되어 보이므로
+    // 캡처도 그 크롭+줌된 영역만 추출해야 사용자가 본 그대로의 사진이 분석에 들어감.
+    // 비디오 표시 스타일이 바뀌면 이 두 상수도 함께 조정 필요.
     const preview = previewRef.current;
     const displayW = preview?.clientWidth || video.videoWidth;
     const displayH = preview?.clientHeight || video.videoHeight;
-    const scale = Math.max(displayW / video.videoWidth, displayH / video.videoHeight);
-    const srcW = displayW / scale;
-    const srcH = displayH / scale;
+    const VIDEO_CSS_ZOOM = 1.5; // <video style={{transform:'scale(1.5)'}}> 매칭
+    const coverScale = Math.max(displayW / video.videoWidth, displayH / video.videoHeight);
+    const srcW = displayW / coverScale / VIDEO_CSS_ZOOM;
+    const srcH = displayH / coverScale / VIDEO_CSS_ZOOM;
     const srcX = (video.videoWidth - srcW) / 2;
     const srcY = (video.videoHeight - srcH) / 2;
 
@@ -280,10 +375,12 @@ export function AdminFaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCapture
     setIsAnalyzing(true);
     setAnalyzeError(null);
     try {
-      // 1) 업로드용 파일 준비 (업로드는 원본 file, 카메라는 dataUrl 변환)
+      // 1) 업로드용 파일 준비
+      //    - 업로드: 사용자가 pan/zoom 으로 위치 조정한 영역만 crop (transform 적용)
+      //    - 카메라: handleCapture 가 이미 미리보기 영역만 잡아둔 dataUrl
       const rawFile =
-        imageSource === 'upload' && uploadedFile
-          ? uploadedFile
+        imageSource === 'upload'
+          ? await cropFromUploadView()
           : dataUrlToFile(previewImage, `face-${Date.now()}.jpg`);
 
       // 1-1) 3MB / 2048px 초과 시 자동 리사이즈 (재압축 최소화)
@@ -310,6 +407,82 @@ export function AdminFaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCapture
 
   const handleRetake = () => {
     handleClearPreview();
+  };
+
+  // 업로드 이미지 pan/zoom — 드래그 시작
+  const handleImgPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (imageSource !== 'upload') return;
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      startTx: imgTransform.tx,
+      startTy: imgTransform.ty,
+    };
+    setIsDragging(true);
+    (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+  };
+
+  const handleImgPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current) return;
+    const d = dragRef.current;
+    setImgTransform((prev) => ({
+      ...prev,
+      tx: d.startTx + (e.clientX - d.startX),
+      ty: d.startTy + (e.clientY - d.startY),
+    }));
+  };
+
+  const handleImgPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current) return;
+    dragRef.current = null;
+    setIsDragging(false);
+    (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
+  };
+
+  // React onWheel 은 passive 라 preventDefault 불가 → useEffect 에서 native addEventListener 사용
+  useEffect(() => {
+    const el = previewRef.current;
+    if (!el || imageSource !== 'upload') return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? 0.9 : 1.1;
+      setImgTransform((prev) => ({
+        ...prev,
+        scale: Math.max(1, Math.min(5, prev.scale * delta)),
+      }));
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [imageSource]);
+
+  // 업로드 이미지 → 사용자가 설정한 transform 영역만 crop 해서 분석에 사용
+  const cropFromUploadView = async (): Promise<File> => {
+    const img = uploadedImgRef.current;
+    const preview = previewRef.current;
+    if (!img || !preview) throw new Error('이미지 준비 실패');
+    const displayW = preview.clientWidth;
+    const displayH = preview.clientHeight;
+    const coverScale = Math.max(displayW / img.naturalWidth, displayH / img.naturalHeight);
+    const totalScale = imgTransform.scale * coverScale;
+    const srcW = displayW / totalScale;
+    const srcH = displayH / totalScale;
+    let srcX = img.naturalWidth / 2 - imgTransform.tx / totalScale - srcW / 2;
+    let srcY = img.naturalHeight / 2 - imgTransform.ty / totalScale - srcH / 2;
+    srcX = Math.max(0, Math.min(srcX, Math.max(0, img.naturalWidth - srcW)));
+    srcY = Math.max(0, Math.min(srcY, Math.max(0, img.naturalHeight - srcH)));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(srcW);
+    canvas.height = Math.round(srcH);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('canvas context');
+    ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, canvas.width, canvas.height);
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (blob) => (blob ? resolve(new File([blob], 'upload-cropped.jpg', { type: 'image/jpeg' })) : reject(new Error('toBlob 실패'))),
+        'image/jpeg',
+        0.92,
+      );
+    });
   };
 
   const guideItems = [
@@ -375,6 +548,14 @@ export function AdminFaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCapture
             <div
               ref={previewRef}
               className="relative w-full max-w-md mx-auto aspect-[4/5] rounded-3xl overflow-hidden bg-gray-100"
+              onPointerDown={handleImgPointerDown}
+              onPointerMove={handleImgPointerMove}
+              onPointerUp={handleImgPointerUp}
+              onPointerCancel={handleImgPointerUp}
+              style={{
+                cursor: imageSource === 'upload' ? (isDragging ? 'grabbing' : 'grab') : undefined,
+                touchAction: imageSource === 'upload' ? 'none' : undefined,
+              }}
             >
               {/* 업로드된 이미지 우선 표시 */}
               {previewImage ? (
@@ -383,9 +564,15 @@ export function AdminFaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCapture
                     ref={uploadedImgRef}
                     src={previewImage}
                     alt="업로드된 얼굴 이미지"
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover select-none"
+                    style={{
+                      transform: `translate(${imgTransform.tx}px, ${imgTransform.ty}px) scale(${imgTransform.scale})`,
+                      transformOrigin: 'center center',
+                      pointerEvents: 'none', // 컨테이너가 이벤트 받도록
+                    }}
                     onLoad={handleImageLoaded}
                     crossOrigin="anonymous"
+                    draggable={false}
                   />
                   <button
                     onClick={handleClearPreview}
@@ -573,10 +760,12 @@ export function AdminFaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCapture
                     <p className="text-xs text-red-500 text-center">{analyzeError}</p>
                   )}
 
-                  {/* 프리뷰 모드: 분석 / 다시 (촬영 또는 파일 선택) */}
+                  {/* 프리뷰 모드: 분석 / 다시 (촬영 또는 파일 선택)
+                      - 카메라: 가이드 안에 얼굴 들어와야 분석 가능 (촬영 품질 보장)
+                      - 업로드: MediaPipe 검출 실패해도 분석 가능 (Python 의 Face Mesh 가 더 견고) */}
                   <button
                     onClick={handleConfirm}
-                    disabled={!faceInOval || isAnalyzing}
+                    disabled={(imageSource === 'camera' && !faceInOval) || isAnalyzing}
                     className="w-full block bg-black text-white py-4 rounded-full text-sm font-normal tracking-wider uppercase transition-all duration-300 hover:bg-gray-900 active:scale-98 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300"
                   >
                     {isAnalyzing ? '분석 중…' : '이 이미지로 분석'}
