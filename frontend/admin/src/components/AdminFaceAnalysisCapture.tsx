@@ -246,16 +246,26 @@ export function AdminFaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCapture
     const video = videoRef.current;
     if (!video || video.readyState < 2 || video.videoWidth === 0) return;
 
-    // video 현재 프레임을 canvas 에 그려 dataURL 로 추출 (front camera 미러 보정)
+    // 화면은 object-cover 로 크롭되어 보이므로 캡처도 그 크롭된 영역만 추출해야
+    // 사용자가 본 그대로의 사진이 분석에 들어감.
+    const preview = previewRef.current;
+    const displayW = preview?.clientWidth || video.videoWidth;
+    const displayH = preview?.clientHeight || video.videoHeight;
+    const scale = Math.max(displayW / video.videoWidth, displayH / video.videoHeight);
+    const srcW = displayW / scale;
+    const srcH = displayH / scale;
+    const srcX = (video.videoWidth - srcW) / 2;
+    const srcY = (video.videoHeight - srcH) / 2;
+
     const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    canvas.width = Math.round(srcW);
+    canvas.height = Math.round(srcH);
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.save();
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1); // 셀카처럼 좌우 반전 보정
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(video, srcX, srcY, srcW, srcH, 0, 0, canvas.width, canvas.height);
     ctx.restore();
     const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
 
