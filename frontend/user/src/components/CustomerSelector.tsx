@@ -75,7 +75,7 @@ export function CustomerSelector({
         </div>
 
         {/* 검색 박스 */}
-        <div className="relative mb-4">
+        <div className="relative mb-6">
           <Search className="w-4 h-4 text-[#999999] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
@@ -86,19 +86,19 @@ export function CustomerSelector({
           />
         </div>
 
-        {/* 신규 등록 버튼 → 다이얼로그 (검색박스 바로 아래) */}
-        <button
-          onClick={() => setDialogOpen(true)}
-          className="w-full py-3 mb-8 border-2 border-dashed border-[#111111] rounded-lg text-sm text-[#111111] font-medium flex items-center justify-center gap-2 hover:bg-[#FAFAFA] transition-colors"
-        >
-          <Plus size={16} /> 신규 고객 등록
-        </button>
-
         {/* 고객 리스트 */}
         <div>
-          <h2 className="text-xs text-[#999999] uppercase tracking-wider mb-3">
-            {search.trim() ? `검색 결과 (${filtered.length})` : `최근 고객 (${filtered.length})`}
-          </h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xs text-[#999999] uppercase tracking-wider">
+              {search.trim() ? `검색 결과 (${filtered.length})` : `최근 고객 (${filtered.length})`}
+            </h2>
+            <button
+              onClick={() => setDialogOpen(true)}
+              className="inline-flex items-center gap-1 text-sm text-[#111111] px-4 py-2 border border-[#111111] rounded hover:bg-[#FAFAFA] transition-colors"
+            >
+              <Plus size={14} /> 신규 고객 등록
+            </button>
+          </div>
           {filtered.length === 0 ? (
             <div className="text-center py-12 text-sm text-[#999999] border border-dashed border-[#E5E5E5] rounded-lg">
               {search.trim() ? '검색 결과가 없습니다' : '등록된 고객이 없습니다'}
