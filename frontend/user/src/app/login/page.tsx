@@ -40,6 +40,21 @@ export default function LoginPage() {
     }
   }
 
+  // 로컬 전용: 테스트 계정 자동 로그인
+  const isDev = process.env.NODE_ENV === 'development';
+  async function handleTestLogin() {
+    setError('');
+    setLoading(true);
+    try {
+      await login('test@local.dev', 'test1234');
+      router.replace('/');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '테스트 로그인 실패');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="w-full max-w-sm">
@@ -88,6 +103,17 @@ export default function LoginPage() {
           >
             {loading ? '로그인 중...' : '로그인'}
           </button>
+
+          {isDev && (
+            <button
+              type="button"
+              onClick={handleTestLogin}
+              disabled={loading}
+              className="w-full border border-dashed border-gray-400 text-gray-600 rounded-lg py-2 text-xs font-normal hover:bg-gray-50 disabled:opacity-50 transition-colors"
+            >
+              🧪 테스트 계정 로그인 (test@local.dev)
+            </button>
+          )}
         </form>
 
         <div className="mt-6 flex items-center justify-center gap-4 text-xs text-gray-400">

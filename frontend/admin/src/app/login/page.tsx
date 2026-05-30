@@ -27,6 +27,22 @@ export default function LoginPage() {
     }
   };
 
+  // 로컬 전용: 기본 admin 계정 자동 로그인
+  const isDev = process.env.NODE_ENV === 'development';
+  const handleTestLogin = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const { token } = await adminLogin('admin@momong.com', '!Password1234');
+      setAdminToken(token);
+      router.push('/dashboard');
+    } catch {
+      setError('테스트 로그인 실패');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="w-full max-w-sm">
@@ -70,6 +86,17 @@ export default function LoginPage() {
           >
             {loading ? '로그인 중...' : '로그인'}
           </button>
+
+          {isDev && (
+            <button
+              type="button"
+              onClick={handleTestLogin}
+              disabled={loading}
+              className="w-full border border-dashed border-gray-400 text-gray-600 py-2 text-xs hover:bg-gray-50 disabled:opacity-50 transition-colors"
+            >
+              🧪 테스트 계정 로그인 (admin@momong.com)
+            </button>
+          )}
         </form>
       </div>
     </div>
