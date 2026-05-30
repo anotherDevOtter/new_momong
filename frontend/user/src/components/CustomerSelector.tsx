@@ -1,9 +1,11 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { Search, Plus, ArrowRight, Calendar } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Search, Plus, ArrowRight, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { NewCustomerDialog } from './NewCustomerDialog';
 import type { NewCustomerFormData } from './NewCustomerForm';
+
+const PAGE_SIZE = 20;
 
 export interface CustomerSummary {
   id: string;
@@ -36,6 +38,7 @@ export function CustomerSelector({
 }: CustomerSelectorProps) {
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [page, setPage] = useState(0); // 0-based
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -44,6 +47,16 @@ export function CustomerSelector({
       (c) => c.name.toLowerCase().includes(q) || c.phone.replace(/-/g, '').includes(q.replace(/-/g, '')),
     );
   }, [customers, search]);
+
+  // 검색어 변경 시 페이지 초기화
+  useEffect(() => {
+    setPage(0);
+  }, [search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages - 1);
+  const pageStart = safePage * PAGE_SIZE;
+  const pageItems = filtered.slice(pageStart, pageStart + PAGE_SIZE);
 
   return (
     <div className="min-h-screen bg-white">
@@ -62,7 +75,7 @@ export function CustomerSelector({
         </div>
 
         {/* 검색 박스 */}
-        <div className="relative mb-6">
+        <div className="relative mb-4">
           <Search className="w-4 h-4 text-[#999999] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
@@ -73,31 +86,54 @@ export function CustomerSelector({
           />
         </div>
 
+        {/* 신규 등록 버튼 → 다이얼로그 (검색박스 바로 아래) */}
+        <button
+          onClick={() => setDialogOpen(true)}
+          className="w-full py-3 mb-8 border-2 border-dashed border-[#111111] rounded-lg text-sm text-[#111111] font-medium flex items-center justify-center gap-2 hover:bg-[#FAFAFA] transition-colors"
+        >
+          <Plus size={16} /> 신규 고객 등록
+        </button>
+
         {/* 고객 리스트 */}
-        <div className="mb-6">
+        <div>
           <h2 className="text-xs text-[#999999] uppercase tracking-wider mb-3">
-            {search.trim() ? `검색 결과 (${filtered.length})` : `최근 고객 (${customers.length})`}
+            {search.trim() ? `검색 결과 (${filtered.length})` : `최근 고객 (${filtered.length})`}
           </h2>
           {filtered.length === 0 ? (
             <div className="text-center py-12 text-sm text-[#999999] border border-dashed border-[#E5E5E5] rounded-lg">
               {search.trim() ? '검색 결과가 없습니다' : '등록된 고객이 없습니다'}
             </div>
           ) : (
-            <div className="space-y-2">
-              {filtered.map((c) => (
-                <CustomerCard key={c.id} customer={c} onClick={() => onSelectExisting(c)} />
-              ))}
-            </div>
+            <>
+              <div className="space-y-2">
+                {pageItems.map((c) => (
+                  <CustomerCard key={c.id} customer={c} onClick={() => onSelectExisting(c)} />
+                ))}
+              </div>
+              {totalPages > 1 && (
+                <div className="mt-4 flex items-center justify-center gap-3 text-sm">
+                  <button
+                    onClick={() => setPage((p) => Math.max(0, p - 1))}
+                    disabled={safePage === 0}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 border border-[#E5E5E5] rounded text-[#555555] hover:border-[#111111] hover:text-[#111111] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronLeft size={14} /> 이전
+                  </button>
+                  <span className="text-xs text-[#999999]">
+                    {safePage + 1} / {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                    disabled={safePage >= totalPages - 1}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 border border-[#E5E5E5] rounded text-[#555555] hover:border-[#111111] hover:text-[#111111] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    다음 <ChevronRight size={14} />
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
-
-        {/* 신규 등록 버튼 → 다이얼로그 */}
-        <button
-          onClick={() => setDialogOpen(true)}
-          className="w-full py-4 border-2 border-dashed border-[#111111] rounded-lg text-sm text-[#111111] font-medium flex items-center justify-center gap-2 hover:bg-[#FAFAFA] transition-colors"
-        >
-          <Plus size={16} /> 신규 고객 등록
-        </button>
       </div>
 
       <NewCustomerDialog
