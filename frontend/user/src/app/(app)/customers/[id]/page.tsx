@@ -35,8 +35,9 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
   if (!user || !customer) return null;
 
   const handleBack = () => router.push('/customers');
-  const handleStartFit = () => router.push(`/consulting/start?type=fit&customerId=${customer.id}`);
-  const handleStart3Way = () => router.push(`/consulting/start?type=3way&customerId=${customer.id}`);
+  // 고객 상세에서 시작 시 /consulting/start (고객 선택 다이얼로그) 우회 → 바로 컨설팅으로
+  const handleStartFit = () => router.push(`/fit?customerId=${customer.id}`);
+  const handleStart3Way = () => router.push(`/3way?customerId=${customer.id}`);
   const handleEditConsultation = (record: ConsultationRecord) => {
     // TODO: 컨설팅 편집 라우트 별도 처리. 현재는 /fit 으로 라우트하면서 customerId 만 넘김
     router.push(`/fit?customerId=${customer.id}&editId=${record.id}`);

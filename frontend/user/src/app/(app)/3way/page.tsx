@@ -35,9 +35,13 @@ function ThreeWayPageInner() {
 
   const handleCourseNext = (courseId: string) => {
     const customerId = searchParams.get('customerId');
-    const q = new URLSearchParams({ type: '3way', course: courseId });
-    if (customerId) q.set('customerId', customerId);
-    router.push(`/consulting/start?${q.toString()}`);
+    if (customerId) {
+      // 고객 상세에서 진입한 경우 — 고객 선택 단계 우회, 바로 컨설팅으로
+      router.push(`/3way/consulting?course=${courseId}&customerId=${customerId}`);
+    } else {
+      // 홈에서 진입 — 고객 선택 화면으로
+      router.push(`/consulting/start?type=3way&course=${courseId}`);
+    }
   };
 
   const handleCourseBack = () => router.push('/');
