@@ -22,6 +22,7 @@ import { PremiumReport } from '@/components/3way/PremiumReport';
 import { CompletionPage } from '@/components/3way/CompletionPage';
 import { saveConsult } from '@/utils/3way-api';
 import { getCustomerById } from '@/utils/api';
+import { ProgressBar } from '@/components/ui/ProgressBar';
 
 type PageKey =
   | 'preInterview' | 'imagePreference' | 'fashionPreference' | 'summary'
@@ -29,6 +30,23 @@ type PageKey =
   | 'personalColor' | 'skeletonImage'
   | 'imageDirection' | 'hairDesign' | 'hairTexture'
   | 'nextDirection' | 'completion';
+
+// 진행률 표시에 포함되는 페이지 (transient 페이지 제외).
+// faceProcessing 은 짧은 전환, completion 은 끝났을 때라 둘 다 ProgressBar 미표시.
+function buildVisibleSteps(course: string): PageKey[] {
+  const steps: PageKey[] = [
+    'preInterview',
+    'imagePreference',
+    'fashionPreference',
+    'summary',
+    'faceAnalysis',
+    'faceResult',
+  ];
+  if (course === '2way-personal') steps.push('personalColor');
+  else if (course === '2way-skeleton') steps.push('skeletonImage');
+  steps.push('imageDirection', 'hairDesign', 'hairTexture', 'nextDirection');
+  return steps;
+}
 
 export default function ThreeWayConsultingPage() {
   return (
@@ -205,55 +223,71 @@ function Inner() {
   const handleGoHome = () => router.push('/');
 
   // 페이지 렌더링
-  if (currentPage === 'preInterview') return <PreInterview onBack={handlePreInterviewBack} onNext={handlePreInterviewNext} />;
-  if (currentPage === 'imagePreference') return <ImagePreferenceDiagnosis onBack={handleImagePreferenceBack} onNext={handleImagePreferenceNext} />;
-  if (currentPage === 'fashionPreference') return <FashionPreferenceDiagnosis onBack={handleFashionPreferenceBack} onNext={handleFashionPreferenceNext} />;
-  if (currentPage === 'summary') {
-    if (!imagePreferenceData || !fashionPreferenceData) {
-      return <div className="min-h-screen bg-white flex items-center justify-center"><p className="text-gray-600">데이터 로딩 중...</p></div>;
-    }
-    return (
-      <ConsultingSummary
-        selectedCourse={selectedCourse}
-        customerData={customerData}
-        imagePreferenceData={imagePreferenceData}
-        fashionPreferenceData={fashionPreferenceData}
-        onBack={handleSummaryBack}
-        onNext={handleSummaryNext}
-      />
-    );
-  }
-  if (currentPage === 'faceAnalysis') return <FaceAnalysisCapture onBack={handleFaceAnalysisBack} onNext={handleFaceAnalysisNext} />;
-  if (currentPage === 'faceProcessing') return <FaceAnalysisProcessing onComplete={handleFaceProcessingComplete} />;
-  if (currentPage === 'faceResult') return <FaceAnalysisResult analysisResult={faceAnalysisResult} onBack={handleFaceResultBack} onNext={handleFaceResultNext} />;
-  if (currentPage === 'personalColor') return <PersonalColorAnalysis onBack={handlePersonalColorBack} onNext={handlePersonalColorNext} />;
-  if (currentPage === 'skeletonImage') return <SkeletonImageAnalysis onBack={handleSkeletonImageBack} onNext={handleSkeletonImageNext} />;
-  if (currentPage === 'imageDirection') return <ImageDirectionSetting onBack={handleImageDirectionBack} onNext={handleImageDirectionNext} />;
-  if (currentPage === 'hairDesign') return <HairDesignProposal onBack={handleHairDesignBack} onNext={handleHairDesignNext} />;
-  if (currentPage === 'hairTexture') return <HairTextureAnalysis onBack={handleHairTextureBack} onNext={handleHairTextureNext} />;
-  if (currentPage === 'nextDirection') {
-    return (
-      <>
-        <NextDirection
-          onBack={handleNextDirectionBack}
-          onNext={handleNextDirectionNext}
-          onCycleDataChange={setCycleData}
+  const renderPage = () => {
+    if (currentPage === 'preInterview') return <PreInterview onBack={handlePreInterviewBack} onNext={handlePreInterviewNext} />;
+    if (currentPage === 'imagePreference') return <ImagePreferenceDiagnosis onBack={handleImagePreferenceBack} onNext={handleImagePreferenceNext} />;
+    if (currentPage === 'fashionPreference') return <FashionPreferenceDiagnosis onBack={handleFashionPreferenceBack} onNext={handleFashionPreferenceNext} />;
+    if (currentPage === 'summary') {
+      if (!imagePreferenceData || !fashionPreferenceData) {
+        return <div className="min-h-screen bg-white flex items-center justify-center"><p className="text-gray-600">데이터 로딩 중...</p></div>;
+      }
+      return (
+        <ConsultingSummary
+          selectedCourse={selectedCourse}
+          customerData={customerData}
+          imagePreferenceData={imagePreferenceData}
+          fashionPreferenceData={fashionPreferenceData}
+          onBack={handleSummaryBack}
+          onNext={handleSummaryNext}
         />
-        {showReport && (
-          <PremiumReport
-            onClose={handleReportClose}
-            customerName={customerData.name}
-            consultDate={new Date().toLocaleDateString('ko-KR')}
-            designerName={customerData.designerName || '디자이너'}
-            cycleData={cycleData}
-            selectedCourse={selectedCourse}
+      );
+    }
+    if (currentPage === 'faceAnalysis') return <FaceAnalysisCapture onBack={handleFaceAnalysisBack} onNext={handleFaceAnalysisNext} />;
+    if (currentPage === 'faceProcessing') return <FaceAnalysisProcessing onComplete={handleFaceProcessingComplete} />;
+    if (currentPage === 'faceResult') return <FaceAnalysisResult analysisResult={faceAnalysisResult} onBack={handleFaceResultBack} onNext={handleFaceResultNext} />;
+    if (currentPage === 'personalColor') return <PersonalColorAnalysis onBack={handlePersonalColorBack} onNext={handlePersonalColorNext} />;
+    if (currentPage === 'skeletonImage') return <SkeletonImageAnalysis onBack={handleSkeletonImageBack} onNext={handleSkeletonImageNext} />;
+    if (currentPage === 'imageDirection') return <ImageDirectionSetting onBack={handleImageDirectionBack} onNext={handleImageDirectionNext} />;
+    if (currentPage === 'hairDesign') return <HairDesignProposal onBack={handleHairDesignBack} onNext={handleHairDesignNext} />;
+    if (currentPage === 'hairTexture') return <HairTextureAnalysis onBack={handleHairTextureBack} onNext={handleHairTextureNext} />;
+    if (currentPage === 'nextDirection') {
+      return (
+        <>
+          <NextDirection
+            onBack={handleNextDirectionBack}
+            onNext={handleNextDirectionNext}
+            onCycleDataChange={setCycleData}
           />
-        )}
-      </>
-    );
-  }
-  if (currentPage === 'completion') {
-    return <CompletionPage onDownloadPDF={handleDownloadPDF} onShareLink={handleShareLink} onGoHome={handleGoHome} />;
-  }
-  return null;
+          {showReport && (
+            <PremiumReport
+              onClose={handleReportClose}
+              customerName={customerData.name}
+              consultDate={new Date().toLocaleDateString('ko-KR')}
+              designerName={customerData.designerName || '디자이너'}
+              cycleData={cycleData}
+              selectedCourse={selectedCourse}
+            />
+          )}
+        </>
+      );
+    }
+    if (currentPage === 'completion') {
+      return <CompletionPage onDownloadPDF={handleDownloadPDF} onShareLink={handleShareLink} onGoHome={handleGoHome} />;
+    }
+    return null;
+  };
+
+  // 진행률 — visibleSteps 에 포함된 페이지에서만 ProgressBar 표시
+  const visibleSteps = buildVisibleSteps(selectedCourse);
+  const stepIndex = visibleSteps.indexOf(currentPage);
+  const showProgress = stepIndex >= 0;
+
+  return (
+    <>
+      {showProgress && (
+        <ProgressBar currentStep={stepIndex + 1} totalSteps={visibleSteps.length + 1} />
+      )}
+      {renderPage()}
+    </>
+  );
 }
