@@ -108,16 +108,17 @@ function ConsultingStartInner() {
     }
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = (occupation: string) => {
     if (!confirming || !confirming.id) return;
     const customerId = confirming.id;
     if (type === 'fit') {
+      // FIT 흐름은 occupation 사용 안 함 — 일단 customerId 만
       router.push(`/fit?customerId=${customerId}`);
     } else {
       const q = new URLSearchParams();
       q.set('course', course);
       q.set('customerId', customerId);
-      if (confirming.occupation) q.set('occupation', confirming.occupation);
+      if (occupation) q.set('occupation', occupation);
       router.push(`/3way/consulting?${q.toString()}`);
     }
   };

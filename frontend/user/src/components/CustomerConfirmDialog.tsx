@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { User, Phone, Calendar, Briefcase, X } from 'lucide-react';
 import type { ConfirmableCustomer } from './CustomerConfirm';
 
@@ -8,7 +8,8 @@ interface CustomerConfirmDialogProps {
   open: boolean;
   customer: ConfirmableCustomer | null;
   onClose: () => void;
-  onConfirm: () => void;
+  /** 사용자가 다이얼로그에서 수정한 직업도 함께 전달 */
+  onConfirm: (occupation: string) => void;
   confirmLabel?: string;
   title?: string;
 }
@@ -21,6 +22,13 @@ export function CustomerConfirmDialog({
   confirmLabel = '시작하기',
   title = '고객 정보 확인',
 }: CustomerConfirmDialogProps) {
+  const [occupation, setOccupation] = useState('');
+
+  // 다이얼로그 열릴 때마다 직업 초기값 세팅
+  useEffect(() => {
+    setOccupation(customer?.occupation || '');
+  }, [customer]);
+
   // ESC 닫기
   useEffect(() => {
     if (!open) return;
@@ -91,19 +99,21 @@ export function CustomerConfirmDialog({
             <div className="text-[#999999]">성별</div>
             <div className="text-[#111111]">{customer.gender === 'female' ? '여자' : '남자'}</div>
 
-            {customer.occupation !== undefined && customer.occupation !== '' && (
-              <>
-                <div className="text-[#999999] inline-flex items-center gap-2">
-                  <Briefcase size={14} /> 직업
-                </div>
-                <div className="text-[#111111]">{customer.occupation}</div>
-              </>
-            )}
+            <div className="text-[#999999] inline-flex items-center gap-2">
+              <Briefcase size={14} /> 직업
+            </div>
+            <input
+              type="text"
+              value={occupation}
+              onChange={(e) => setOccupation(e.target.value)}
+              placeholder="예: 디자이너, 회사원, 학생"
+              className="px-3 py-1.5 border border-[#E5E5E5] rounded text-sm text-[#111111] placeholder-[#BBBBBB] focus:outline-none focus:border-[#111111] bg-white"
+            />
           </div>
         </div>
 
         <button
-          onClick={onConfirm}
+          onClick={() => onConfirm(occupation.trim())}
           className="w-full h-12 bg-[#111111] text-white rounded text-sm font-medium hover:bg-[#222222] transition-colors"
         >
           {confirmLabel}
