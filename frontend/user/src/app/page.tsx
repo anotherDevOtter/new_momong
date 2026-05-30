@@ -21,8 +21,11 @@ import { ReviewStep } from '@/components/steps/ReviewStep';
 import { ClientListStep } from '@/components/steps/ClientListStep';
 import { ClientDetailStep } from '@/components/steps/ClientDetailStep';
 import { ConsultationData, ConsultationRecord, Customer } from '@/types';
+import { CustomerSelector, type CustomerSummary, type NewCustomerData } from '@/components/CustomerSelector';
+import { CustomerConfirm, type ConfirmableCustomer } from '@/components/CustomerConfirm';
+import { getAllCustomers, createCustomer } from '@/utils/api';
 
-type AppView = 'consultation' | 'client-list' | 'client-detail';
+type AppView = 'consultation' | 'client-list' | 'client-detail' | 'customer-select' | 'customer-confirm';
 
 interface AppHistoryState {
   step: number;
@@ -55,6 +58,10 @@ export default function Home() {
   const [fromReview, setFromReview] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Customer | null>(null);
   const [reviewSaveStatus, setReviewSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'failed'>('idle');
+  // FIT 컨설팅 시작 시 고객 선택/등록 단계
+  const [customerOptions, setCustomerOptions] = useState<CustomerSummary[]>([]);
+  const [customerOptionsLoading, setCustomerOptionsLoading] = useState(false);
+  const [pendingCustomer, setPendingCustomer] = useState<ConfirmableCustomer | null>(null);
   const [consultationData, setConsultationData] = useState<ConsultationData>({
     ...INITIAL_DATA,
     visitDate: new Date().toLocaleDateString('ko-KR'),
@@ -109,6 +116,103 @@ export default function Home() {
     const next = Math.min(currentStep + 1, TOTAL_STEPS - 1);
     pushState(next, 'consultation');
     setCurrentStep(next);
+  };
+
+  // FIT 컨설팅 시작 — 고객 선택부터
+  const handleStartFit = async () => {
+    pushState(0, 'customer-select');
+    setCurrentView('customer-select');
+    setCustomerOptionsLoading(true);
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        const list = await getAllCustomers(token);
+        setCustomerOptions(list.map((c) => ({ id: c.id, name: c.name, phone: c.phone })));
+      }
+    } catch (e) {
+      console.error('고객 목록 로드 실패', e);
+    } finally {
+      setCustomerOptionsLoading(false);
+    }
+  };
+
+  const handleCustomerSelectBack = () => {
+    pushState(0, 'consultation');
+    setCurrentView('consultation');
+  };
+
+  const handleCustomerSelectExisting = async (c: CustomerSummary) => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) return;
+      const list = await getAllCustomers(token);
+      const full = list.find((x) => x.id === c.id);
+      setPendingCustomer({
+        source: 'existing',
+        id: c.id,
+        name: c.name,
+        phone: c.phone,
+        ageGroup: full?.age_group || '',
+        gender: full?.gender === 'male' ? 'male' : 'female',
+      });
+      pushState(0, 'customer-confirm');
+      setCurrentView('customer-confirm');
+    } catch (e) {
+      console.error('고객 상세 로드 실패', e);
+    }
+  };
+
+  const handleCustomerSelectNew = async (data: NewCustomerData) => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) return;
+      const created = await createCustomer(token, {
+        name: data.name,
+        phone: data.phone,
+        gender: data.gender,
+        age_group: data.ageGroup,
+      });
+      setPendingCustomer({
+        source: 'new',
+        id: created.id,
+        name: data.name,
+        phone: data.phone,
+        ageGroup: data.ageGroup,
+        gender: data.gender,
+        occupation: data.occupation,
+      });
+      pushState(0, 'customer-confirm');
+      setCurrentView('customer-confirm');
+    } catch (e) {
+      alert(e instanceof Error ? e.message : '고객 등록 실패');
+    }
+  };
+
+  const handleCustomerConfirmBack = () => {
+    pushState(0, 'customer-select');
+    setCurrentView('customer-select');
+  };
+
+  // 확인 → ClientInfoStep 건너뛰고 step 2 (Today Keyword) 부터
+  const handleCustomerConfirm = () => {
+    if (!pendingCustomer) return;
+    setConsultationData((prev) => ({
+      ...prev,
+      clientInfo: {
+        name: pendingCustomer.name,
+        phone: pendingCustomer.phone,
+        gender: pendingCustomer.gender,
+        ageGroup: pendingCustomer.ageGroup,
+      },
+      designerName: user?.ownerName || '',
+      visitDate: new Date().toLocaleDateString('ko-KR'),
+      id: undefined,
+      createdAt: undefined,
+    }));
+    setReviewSaveStatus('idle');
+    pushState(2, 'consultation');
+    setCurrentView('consultation');
+    setCurrentStep(2);
   };
 
   const handleBack = () => {
@@ -194,7 +298,7 @@ export default function Home() {
       case 0:
         return (
           <IntroStep
-            onNext={features.fitEnabled ? handleNext : undefined}
+            onNext={features.fitEnabled ? handleStartFit : undefined}
             onViewClients={handleGoToClientList}
             onStart3Way={features.threeWayEnabled ? () => router.push('/3way?start=1') : undefined}
           />
@@ -376,7 +480,35 @@ export default function Home() {
           client={selectedClient}
           onBack={handleBack}
           onStartNewConsultation={handleStartNewConsultationFromClient}
+          onStart3Way={
+            features.threeWayEnabled
+              ? () => router.push(`/3way?start=1&customerId=${selectedClient.id}`)
+              : undefined
+          }
           onEditConsultation={handleEditConsultation}
+        />
+      )}
+
+      {currentView === 'customer-select' && (
+        <CustomerSelector
+          customers={customerOptions}
+          onSelectExisting={handleCustomerSelectExisting}
+          onCreateNew={handleCustomerSelectNew}
+          onCancel={handleCustomerSelectBack}
+          title="FIT 컨설팅 시작"
+          subtitle={
+            customerOptionsLoading
+              ? '고객 목록 불러오는 중...'
+              : '기존 고객을 검색하거나 신규 고객을 등록해주세요'
+          }
+        />
+      )}
+
+      {currentView === 'customer-confirm' && pendingCustomer && (
+        <CustomerConfirm
+          customer={pendingCustomer}
+          onBack={handleCustomerConfirmBack}
+          onConfirm={handleCustomerConfirm}
         />
       )}
     </>

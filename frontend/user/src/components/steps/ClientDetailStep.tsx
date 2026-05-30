@@ -11,10 +11,11 @@ interface ClientDetailStepProps {
   client: Customer;
   onBack: () => void;
   onStartNewConsultation: () => void;
+  onStart3Way?: () => void;
   onEditConsultation: (record: ConsultationRecord) => void;
 }
 
-export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onEditConsultation }: ClientDetailStepProps) => {
+export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onStart3Way, onEditConsultation }: ClientDetailStepProps) => {
   const { token } = useAuth();
   const [consultations, setConsultations] = useState<ConsultationRecord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -416,10 +417,23 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onEdi
         </div>
 
         <div className="border border-[#E5E5E5] p-8 text-center">
-          <p className="text-[#777777] text-sm mb-6">이 고객의 정보로 새로운 FIT 헤어 컨설팅을 시작할 수 있습니다.</p>
-          <button onClick={onStartNewConsultation} className="px-8 py-3 bg-[#111111] text-white text-sm rounded-full hover:bg-[#222222] transition-colors">
-            새 컨설팅 시작하기
-          </button>
+          <p className="text-[#777777] text-sm mb-6">이 고객의 정보로 새 컨설팅을 시작합니다.</p>
+          <div className="flex justify-center gap-3 flex-wrap">
+            <button
+              onClick={onStartNewConsultation}
+              className="px-8 py-3 bg-[#111111] text-white text-sm rounded-full hover:bg-[#222222] transition-colors"
+            >
+              FIT 시작
+            </button>
+            {onStart3Way && (
+              <button
+                onClick={onStart3Way}
+                className="px-8 py-3 border border-[#111111] text-[#111111] text-sm rounded-full hover:bg-[#FAFAFA] transition-colors"
+              >
+                3WAY 시작
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

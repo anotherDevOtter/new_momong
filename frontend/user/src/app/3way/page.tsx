@@ -7,7 +7,9 @@ import { ArrowRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFeatures } from '@/contexts/FeaturesContext';
 import { CourseSelection } from '@/components/3way/CourseSelection';
-import { CustomerInfo, CustomerData } from '@/components/3way/CustomerInfo';
+import { CustomerData } from '@/components/3way/CustomerInfo';
+import { CustomerSelector, type CustomerSummary, type NewCustomerData } from '@/components/CustomerSelector';
+import { CustomerConfirm, type ConfirmableCustomer } from '@/components/CustomerConfirm';
 import { PreInterview, PreInterviewData } from '@/components/3way/PreInterview';
 import { ImagePreferenceDiagnosis, ImagePreferenceData } from '@/components/3way/ImagePreferenceDiagnosis';
 import { FashionPreferenceDiagnosis, FashionPreferenceData } from '@/components/3way/FashionPreferenceDiagnosis';
@@ -27,9 +29,10 @@ import { CompletionPage } from '@/components/3way/CompletionPage';
 import { CustomerHistory, CustomerRecord } from '@/components/3way/CustomerHistory';
 import { CustomerHistoryDetail, ConsultRecord } from '@/components/3way/CustomerHistoryDetail';
 import { saveConsult } from '@/utils/3way-api';
+import { getAllCustomers, createCustomer } from '@/utils/api';
 
 type PageKey =
-  | 'landing' | 'course' | 'customerInfo' | 'preInterview'
+  | 'landing' | 'course' | 'customerSelect' | 'customerConfirm' | 'preInterview'
   | 'imagePreference' | 'fashionPreference' | 'summary'
   | 'faceAnalysis' | 'faceProcessing' | 'faceResult'
   | 'personalColor' | 'skeletonImage'
@@ -67,6 +70,14 @@ function ThreeWayPageInner() {
   const [selectedConsultRecord, setSelectedConsultRecord] = useState<ConsultRecord | null>(null);
   const [faceAnalysisResult, setFaceAnalysisResult] = useState<AnalyzeResponse | null>(null);
   const [faceImageUrl, setFaceImageUrl] = useState<string | null>(null);
+  // 고객 선택/확인 단계 상태
+  const [customerOptions, setCustomerOptions] = useState<CustomerSummary[]>([]);
+  const [customerOptionsLoading, setCustomerOptionsLoading] = useState(false);
+  const [pendingCustomer, setPendingCustomer] = useState<ConfirmableCustomer | null>(null);
+
+  // /3way?customerId=... 로 진입한 경우 — 코스 선택 후 자동으로 해당 고객으로 confirm
+  // 처음 마운트 시 1회만 수행 (course 페이지 진입 후 user 가 코스 선택하면 customerSelect 건너뛰고 confirm)
+  const preselectCustomerIdRef = (typeof window !== 'undefined' && searchParams.get('customerId')) || null;
 
   useEffect(() => {
     if (!loading && !user) {
@@ -97,19 +108,121 @@ function ThreeWayPageInner() {
 
   const handleStart = () => setCurrentPage('course');
 
-  const handleCourseNext = (courseId: string) => {
+  const handleCourseNext = async (courseId: string) => {
     setSelectedCourse(courseId);
-    setCurrentPage('customerInfo');
+
+    // ?customerId=xxx 로 진입한 경우: 고객 선택 단계 스킵하고 바로 confirm 으로
+    if (preselectCustomerIdRef) {
+      try {
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+          const list = await getAllCustomers(token);
+          const full = list.find((x) => x.id === preselectCustomerIdRef);
+          if (full) {
+            setPendingCustomer({
+              source: 'existing',
+              id: full.id,
+              name: full.name,
+              phone: full.phone,
+              ageGroup: full.age_group || '',
+              gender: full.gender === 'male' ? 'male' : 'female',
+            });
+            setCurrentPage('customerConfirm');
+            return;
+          }
+        }
+      } catch (e) {
+        console.error('preselect 고객 로드 실패', e);
+      }
+    }
+
+    setCurrentPage('customerSelect');
+    // 고객 목록 로드 (페이지 전환과 병행)
+    setCustomerOptionsLoading(true);
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        const list = await getAllCustomers(token);
+        setCustomerOptions(list.map((c) => ({
+          id: c.id,
+          name: c.name,
+          phone: c.phone,
+        })));
+      }
+    } catch (e) {
+      console.error('고객 목록 로드 실패', e);
+    } finally {
+      setCustomerOptionsLoading(false);
+    }
   };
   const handleCourseBack = () => setCurrentPage('landing');
 
-  const handleCustomerInfoBack = () => setCurrentPage('course');
-  const handleCustomerInfoNext = (data: CustomerData) => {
-    setCustomerData(data);
+  const handleCustomerSelectBack = () => setCurrentPage('course');
+
+  const handleCustomerSelectExisting = (c: CustomerSummary) => {
+    // 기존 고객 → 풀 정보 조회 (gender, age_group)
+    (async () => {
+      try {
+        const token = localStorage.getItem('auth_token');
+        if (!token) return;
+        const list = await getAllCustomers(token);
+        const full = list.find((x) => x.id === c.id);
+        setPendingCustomer({
+          source: 'existing',
+          id: c.id,
+          name: c.name,
+          phone: c.phone,
+          ageGroup: full?.age_group || '',
+          gender: (full?.gender === 'male' ? 'male' : 'female'),
+        });
+        setCurrentPage('customerConfirm');
+      } catch (e) {
+        console.error('고객 상세 조회 실패', e);
+      }
+    })();
+  };
+
+  const handleCustomerSelectNew = async (data: NewCustomerData) => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) return;
+      const created = await createCustomer(token, {
+        name: data.name,
+        phone: data.phone,
+        gender: data.gender,
+        age_group: data.ageGroup,
+      });
+      setPendingCustomer({
+        source: 'new',
+        id: created.id,
+        name: data.name,
+        phone: data.phone,
+        ageGroup: data.ageGroup,
+        gender: data.gender,
+        occupation: data.occupation,
+      });
+      setCurrentPage('customerConfirm');
+    } catch (e) {
+      alert(e instanceof Error ? e.message : '고객 등록 실패');
+    }
+  };
+
+  const handleCustomerConfirmBack = () => setCurrentPage('customerSelect');
+  const handleCustomerConfirm = () => {
+    if (!pendingCustomer) return;
+    // CustomerData (기존 3WAY 컴포넌트들이 기대하는 형태) 로 변환
+    setCustomerData({
+      name: pendingCustomer.name,
+      phone: pendingCustomer.phone,
+      occupation: pendingCustomer.occupation || '',
+      ageGroup: pendingCustomer.ageGroup,
+      gender: pendingCustomer.gender === 'female' ? '여자' : '남자',
+      designerName: user?.ownerName || '',
+    });
     setCurrentPage('preInterview');
   };
 
-  const handlePreInterviewBack = () => setCurrentPage('customerInfo');
+  const handlePreInterviewBack = () => setCurrentPage('customerConfirm');
   const handlePreInterviewNext = (data: PreInterviewData) => {
     setPreInterviewData(data);
     setCurrentPage('imagePreference');
@@ -238,8 +351,31 @@ function ThreeWayPageInner() {
     return <CourseSelection onNext={handleCourseNext} onBack={handleCourseBack} />;
   }
 
-  if (currentPage === 'customerInfo') {
-    return <CustomerInfo onBack={handleCustomerInfoBack} onNext={handleCustomerInfoNext} />;
+  if (currentPage === 'customerSelect') {
+    return (
+      <CustomerSelector
+        customers={customerOptions}
+        onSelectExisting={handleCustomerSelectExisting}
+        onCreateNew={handleCustomerSelectNew}
+        onCancel={handleCustomerSelectBack}
+        title="3WAY 컨설팅 시작"
+        subtitle={
+          customerOptionsLoading
+            ? '고객 목록 불러오는 중...'
+            : '기존 고객을 검색하거나 신규 고객을 등록해주세요'
+        }
+      />
+    );
+  }
+
+  if (currentPage === 'customerConfirm' && pendingCustomer) {
+    return (
+      <CustomerConfirm
+        customer={pendingCustomer}
+        onBack={handleCustomerConfirmBack}
+        onConfirm={handleCustomerConfirm}
+      />
+    );
   }
 
   if (currentPage === 'preInterview') {
