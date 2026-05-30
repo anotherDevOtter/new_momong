@@ -264,24 +264,29 @@ function FitPageInner() {
   };
 
   const showProgressBar = currentStep > 0 && currentStep < 11;
+  // step 1 (ClientInfoStep) 는 새 흐름에서 스킵 → 사용자가 보는 단계는 1부터 10까지
+  // 내부 currentStep 2 → 표시 1, 내부 11 → 표시 10
+  const displayStep = Math.max(1, currentStep - 1);
+  const displayTotal = TOTAL_STEPS - 1; // = 11 (totalSteps - 1 이 분모: -1 한 번 더 ProgressBar 가 함)
+
+  const goHomeBtn = (
+    <button
+      onClick={() => {
+        if (window.confirm('처음으로 돌아가면 현재 컨설팅 내용이 모두 사라집니다. 계속하시겠습니까?')) {
+          router.push('/');
+        }
+      }}
+      className="text-xs text-gray-400 hover:text-gray-700 px-2 py-1 border border-gray-200 rounded hover:border-gray-400 transition-colors whitespace-nowrap"
+    >
+      처음으로
+    </button>
+  );
 
   return (
     <>
-      {/* 진행 중 안내 바 — "처음으로" 만 (MERCI MOMONG / 로그아웃 은 layout AppHeader) */}
-      <div className="flex items-center justify-end px-4 py-2 bg-[#FAFAFA] border-b border-gray-100">
-        <button
-          onClick={() => {
-            if (window.confirm('처음으로 돌아가면 현재 컨설팅 내용이 모두 사라집니다. 계속하시겠습니까?')) {
-              router.push('/');
-            }
-          }}
-          className="text-xs text-gray-400 hover:text-gray-700 px-2 py-1 border border-gray-200 rounded hover:border-gray-400 transition-colors"
-        >
-          처음으로
-        </button>
-      </div>
-
-      {showProgressBar && <ProgressBar currentStep={currentStep} totalSteps={TOTAL_STEPS} />}
+      {showProgressBar && (
+        <ProgressBar currentStep={displayStep} totalSteps={displayTotal} leftSlot={goHomeBtn} />
+      )}
 
       {renderStep()}
 
