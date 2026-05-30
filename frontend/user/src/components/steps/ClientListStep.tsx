@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Search, ArrowLeft, User, Calendar, Trash2 } from 'lucide-react';
-import { getAllCustomers, deleteCustomer } from '@/utils/api';
+import { Search, ArrowLeft, User, Calendar, Trash2, Plus } from 'lucide-react';
+import { getAllCustomers, deleteCustomer, createCustomer } from '@/utils/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { Customer } from '@/types';
 import { toast } from 'sonner';
+import { NewCustomerForm, type NewCustomerFormData } from '@/components/NewCustomerForm';
 
 interface ClientListStepProps {
   onBack: () => void;
@@ -18,6 +19,8 @@ export const ClientListStep = ({ onBack, onSelectClient }: ClientListStepProps) 
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showNewForm, setShowNewForm] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   const loadCustomers = useCallback(async () => {
     setIsLoading(true);
@@ -49,6 +52,26 @@ export const ClientListStep = ({ onBack, onSelectClient }: ClientListStepProps) 
       );
     }
   }, [searchQuery, customers]);
+
+  const handleCreate = async (data: NewCustomerFormData) => {
+    if (!token) return;
+    setIsCreating(true);
+    try {
+      await createCustomer(token, {
+        name: data.name,
+        phone: data.phone,
+        gender: data.gender,
+        age_group: data.ageGroup,
+      });
+      toast.success('고객이 등록되었습니다');
+      setShowNewForm(false);
+      loadCustomers();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : '등록 실패');
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   const handleDelete = async (e: React.MouseEvent, customer: Customer) => {
     e.stopPropagation();
@@ -98,12 +121,30 @@ export const ClientListStep = ({ onBack, onSelectClient }: ClientListStepProps) 
           </div>
         </div>
 
-        <div className="flex items-center gap-3 mb-6">
-          <p className="text-sm text-[#777777]">총 {filteredCustomers.length}명의 고객</p>
-          <button onClick={loadCustomers} className="text-xs text-[#777777] hover:text-[#111111] px-3 py-1 border border-[#E5E5E5] rounded hover:border-[#111111] transition-colors">
-            새로고침
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <p className="text-sm text-[#777777]">총 {filteredCustomers.length}명의 고객</p>
+            <button onClick={loadCustomers} className="text-xs text-[#777777] hover:text-[#111111] px-3 py-1 border border-[#E5E5E5] rounded hover:border-[#111111] transition-colors">
+              새로고침
+            </button>
+          </div>
+          <button
+            onClick={() => setShowNewForm(true)}
+            className="inline-flex items-center gap-1 text-sm text-[#111111] px-4 py-2 border border-[#111111] rounded hover:bg-[#FAFAFA] transition-colors"
+          >
+            <Plus size={14} /> 신규 고객 등록
           </button>
         </div>
+
+        {showNewForm && (
+          <div className="mb-8 p-6 border border-[#E5E5E5] rounded-lg bg-[#FAFAFA]">
+            <NewCustomerForm
+              onSubmit={handleCreate}
+              onCancel={() => setShowNewForm(false)}
+              submitLabel={isCreating ? '등록 중…' : '등록'}
+            />
+          </div>
+        )}
 
         {isLoading ? (
           <div className="text-center py-20">
