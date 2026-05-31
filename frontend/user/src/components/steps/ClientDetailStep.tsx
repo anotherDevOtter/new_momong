@@ -1,9 +1,17 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, User, Calendar, Phone, Clock, ChevronDown, ChevronUp, Scissors, Copy, Check, Eye, EyeOff, Download, Pencil, Trash2, Briefcase, ClipboardList } from 'lucide-react';
+import { ArrowLeft, User, Calendar, Phone, Clock, ChevronDown, ChevronUp, Scissors, Copy, Check, Eye, EyeOff, Download, Pencil, Trash2, Briefcase, ClipboardList, Link2 } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { getConsultationsByCustomerPhone, getShareByConsultation, deleteConsultation } from '@/utils/api';
+import {
+  createPreSurvey,
+  listPreSurveysByCustomer,
+  buildPreSurveyUrl,
+  type PreSurveyRecord,
+} from '@/utils/pre-survey-api';
+import { describeApiError } from '@/utils/api-error';
+import { PreSurveyLinkDialog } from '@/components/PreSurveyLinkDialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { Customer, ConsultationRecord } from '@/types';
 
@@ -25,6 +33,9 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
   const [copied, setCopied] = useState<string | null>(null);
   const qrRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [tab, setTab] = useState<'history' | 'survey'>('history');
+  const [preSurveys, setPreSurveys] = useState<PreSurveyRecord[]>([]);
+  const [preSurveyDialogToken, setPreSurveyDialogToken] = useState<string | null>(null);
+  const [creatingPreSurvey, setCreatingPreSurvey] = useState(false);
 
   // 가장 최근 컨설팅에서 occupation 추출 (clientInfo jsonb 에서 — 최신 saveConsult 형식)
   const latestOccupation = (() => {
@@ -97,6 +108,25 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
     }
   }, [client.phone, token]);
 
+  useEffect(() => {
+    if (!token) return;
+    listPreSurveysByCustomer(token, client.id).then(setPreSurveys).catch(console.error);
+  }, [client.id, token]);
+
+  const handleCreatePreSurvey = async () => {
+    if (!token) return;
+    setCreatingPreSurvey(true);
+    try {
+      const created = await createPreSurvey(token, client.id);
+      setPreSurveys((prev) => [created, ...prev]);
+      setPreSurveyDialogToken(created.token);
+    } catch (e) {
+      alert(describeApiError(e));
+    } finally {
+      setCreatingPreSurvey(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <div className="border-b border-[#E5E5E5]">
@@ -155,6 +185,14 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
                 3WAY 시작
               </button>
             )}
+            <button
+              onClick={handleCreatePreSurvey}
+              disabled={creatingPreSurvey}
+              className="px-8 py-3 border border-[#B88A5A] text-[#B88A5A] text-sm rounded-full hover:bg-[#FFFBF7] transition-colors inline-flex items-center gap-2 disabled:opacity-50"
+            >
+              <Link2 size={14} />
+              {creatingPreSurvey ? '발급 중...' : '사전설문지 링크 생성'}
+            </button>
           </div>
         </div>
 
@@ -179,7 +217,16 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
         </div>
 
         {tab === 'survey' && (
-          <SurveySection consultations={consultations} isLoading={isLoading} formatDate={formatDate} />
+          <>
+            <PreSurveyList
+              surveys={preSurveys}
+              onOpenLink={(t) => setPreSurveyDialogToken(t)}
+              onCreate={handleCreatePreSurvey}
+              creating={creatingPreSurvey}
+              formatDate={formatDate}
+            />
+            <SurveySection consultations={consultations} isLoading={isLoading} formatDate={formatDate} />
+          </>
         )}
 
         {tab === 'history' && (
@@ -480,9 +527,139 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
         </>
         )}
       </div>
+
+      <PreSurveyLinkDialog
+        open={!!preSurveyDialogToken}
+        surveyToken={preSurveyDialogToken}
+        customerName={client.name}
+        onClose={() => setPreSurveyDialogToken(null)}
+      />
     </div>
   );
 };
+
+/* ─────────────────── 사전설문 링크 목록 ─────────────────── */
+function PreSurveyList({
+  surveys,
+  onOpenLink,
+  onCreate,
+  creating,
+  formatDate,
+}: {
+  surveys: PreSurveyRecord[];
+  onOpenLink: (token: string) => void;
+  onCreate: () => void;
+  creating: boolean;
+  formatDate: (d: string) => string;
+}) {
+  const handleCopy = async (surveyToken: string) => {
+    await navigator.clipboard.writeText(buildPreSurveyUrl(surveyToken));
+  };
+
+  return (
+    <div className="border border-[#E5E5E5]">
+      <div className="px-8 py-5 border-b border-[#E5E5E5] bg-[#FAFAFA] flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Link2 size={16} className="text-[#555555]" />
+          <h3 className="text-sm font-semibold text-[#111111]">사전설문지 링크</h3>
+        </div>
+        <button
+          onClick={onCreate}
+          disabled={creating}
+          className="text-xs px-3 py-1.5 border border-[#B88A5A] text-[#B88A5A] hover:bg-[#FFFBF7] transition-colors disabled:opacity-50"
+        >
+          {creating ? '발급 중...' : '+ 새 링크 발급'}
+        </button>
+      </div>
+
+      {surveys.length === 0 ? (
+        <div className="px-8 py-10 text-center">
+          <p className="text-sm text-[#999999]">발급된 사전설문지 링크가 없습니다.</p>
+          <p className="text-xs text-[#CCCCCC] mt-1">위 버튼으로 새 링크를 발급해 고객님께 전달하세요.</p>
+        </div>
+      ) : (
+        <div className="divide-y divide-[#E5E5E5]">
+          {surveys.map((s) => {
+            const a = s.answers ?? {};
+            const filled = !!s.filled_at;
+            return (
+              <div key={s.id} className="px-8 py-5">
+                <div className="flex items-baseline justify-between gap-4 mb-3">
+                  <div>
+                    <span
+                      className={`px-2 py-0.5 text-xs ${
+                        filled ? 'bg-[#111111] text-white' : 'bg-[#F5F5F5] text-[#777777]'
+                      }`}
+                    >
+                      {filled ? '작성 완료' : '작성중'}
+                    </span>
+                    <span className="text-xs text-[#999999] ml-3">
+                      발급: {formatDate(s.created_at)}
+                      {filled && ` · 완료: ${formatDate(s.filled_at!)}`}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => handleCopy(s.token)}
+                      className="text-xs px-2 py-1 border border-[#E5E5E5] text-[#777777] hover:border-[#111111] hover:text-[#111111] transition-colors inline-flex items-center gap-1"
+                    >
+                      <Copy size={11} /> 복사
+                    </button>
+                    <button
+                      onClick={() => onOpenLink(s.token)}
+                      className="text-xs px-2 py-1 border border-[#E5E5E5] text-[#777777] hover:border-[#111111] hover:text-[#111111] transition-colors"
+                    >
+                      링크 보기
+                    </button>
+                  </div>
+                </div>
+
+                {filled && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                    <SurveyField label="나이 / 직업" value={[a.age, a.job].filter(Boolean).join(' · ') || '-'} />
+                    <SurveyField label="컨설팅 프로그램" value={a.selectedProgram || '-'} />
+                    <SurveyChipField label="선호 이미지" values={a.preferences} />
+                    <SurveyChipField label="비선호 이미지" values={a.dislikes} />
+                    <SurveyChipField label="얼굴 보완 부위" values={a.faceConcerns} />
+                    <SurveyChipField label="헤어 고민" values={a.hairConcerns} />
+                    <SurveyChipField label="체형 고민" values={a.bodyConcerns} />
+                    <SurveyField label="시술 희망" value={a.treatmentPreference || '-'} />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SurveyField({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-xs text-[#999999] uppercase tracking-wider mb-1">{label}</p>
+      <p className="text-xs text-[#111111]">{value}</p>
+    </div>
+  );
+}
+
+function SurveyChipField({ label, values }: { label: string; values?: string[] }) {
+  return (
+    <div>
+      <p className="text-xs text-[#999999] uppercase tracking-wider mb-1">{label}</p>
+      {values && values.length > 0 ? (
+        <div className="flex flex-wrap gap-1">
+          {values.map((v) => (
+            <span key={v} className="px-2 py-0.5 bg-[#F5F5F5] text-[#555555] text-xs">{v}</span>
+          ))}
+        </div>
+      ) : (
+        <p className="text-xs text-[#CCCCCC]">-</p>
+      )}
+    </div>
+  );
+}
 
 /* ─────────────────── 사전 설문 탭 ─────────────────── */
 function SurveySection({

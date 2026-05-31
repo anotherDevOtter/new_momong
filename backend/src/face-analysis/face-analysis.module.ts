@@ -25,5 +25,6 @@ import { AdminGuard } from '../admin/admin.guard';
   ],
   controllers: [FaceAnalysisController],
   providers: [FaceAnalysisService, PythonAnalysisService, JwtAuthGuard, AdminGuard],
+  exports: [PythonAnalysisService],
 })
 export class FaceAnalysisModule {}
