@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Check, Sparkles } from 'lucide-react';
-import { BrandHeader } from './BrandHeader';
 import { NavigationButtons } from './NavigationButtons';
 
 interface HairDesignProposalProps {
@@ -64,7 +63,6 @@ export function HairDesignProposal({ onBack, onNext }: HairDesignProposalProps) 
   return (
     <div className="min-h-screen bg-white">
       {/* 상단 브랜드 헤더 */}
-      <BrandHeader />
 
       {/* 메인 콘텐츠 */}
       <div className="pt-20 px-6 pb-16">

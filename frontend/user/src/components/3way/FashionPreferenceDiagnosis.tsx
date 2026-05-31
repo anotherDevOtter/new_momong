@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { BrandHeader } from './BrandHeader';
 import { NavigationButtons } from './NavigationButtons';
 import { FashionStyleCard } from './FashionStyleCard';
 

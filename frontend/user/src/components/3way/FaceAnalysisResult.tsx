@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Check, Edit2 } from 'lucide-react';
-import { BrandHeader } from './BrandHeader';
 import { NavigationButtons } from './NavigationButtons';
 import type { AnalyzeResponse } from '@/utils/face-analysis-api';
 const faceImage = '/3way/face-image.png';
@@ -170,7 +169,6 @@ export function FaceAnalysisResult({ onBack, onNext, analysisResult }: FaceAnaly
   return (
     <div className="min-h-screen bg-white">
       {/* 상단 브랜드 헤더 */}
-      <BrandHeader />
 
       {/* 메인 콘텐츠 */}
       <div className="pt-20 px-6 pb-16">

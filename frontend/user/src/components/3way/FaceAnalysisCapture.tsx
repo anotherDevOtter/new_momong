@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Camera, Eye, Sun, Minus, Circle, Lock, MoveLeft, Upload, X } from 'lucide-react';
-import { BrandHeader } from './BrandHeader';
+import { NavigationButtons } from './NavigationButtons';
 import { useFaceDetector, isFaceInsideOval } from './useFaceDetector';
 import {
   requestUploadUrl,
@@ -474,7 +474,6 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
   return (
     <div className="min-h-screen bg-white">
       {/* 상단 브랜드 헤더 */}
-      <BrandHeader />
 
       {/* 메인 콘텐츠 */}
       <div className="pt-20 px-6 pb-16">
@@ -794,14 +793,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
           </motion.div>
 
           {/* 하단 네비게이션 */}
-          <div className="flex justify-between items-center gap-4">
-            <button
-              onClick={onBack}
-              className="px-8 py-3 text-sm font-normal text-gray-600 hover:text-black transition-colors duration-300"
-            >
-              이전
-            </button>
-          </div>
+          <NavigationButtons onBack={onBack} showNext={false} backLabel="이전" />
         </div>
       </div>
     </div>

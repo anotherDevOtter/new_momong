@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Check, TrendingUp, Info } from 'lucide-react';
-import { BrandHeader } from './BrandHeader';
 import { NavigationButtons } from './NavigationButtons';
 
 interface NextDirectionProps {
@@ -173,7 +172,6 @@ export function NextDirection({ onBack, onNext, onCycleDataChange }: NextDirecti
   return (
     <div className="min-h-screen bg-white">
       {/* 상단 브랜드 헤더 */}
-      <BrandHeader />
 
       {/* 메인 콘텐츠 */}
       <div className="pt-20 px-6 pb-32">

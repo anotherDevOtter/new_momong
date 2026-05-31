@@ -1,6 +1,5 @@
 import { motion } from 'motion/react';
 import { Check, X } from 'lucide-react';
-import { BrandHeader } from './BrandHeader';
 import { NavigationButtons } from './NavigationButtons';
 import { CustomerData } from './CustomerInfo';
 import { ImagePreferenceData } from './ImagePreferenceDiagnosis';
@@ -113,7 +112,6 @@ export function ConsultingSummary({
   return (
     <div className="min-h-screen bg-white">
       {/* 상단 브랜드 헤더 */}
-      <BrandHeader />
 
       {/* 메인 콘텐츠 */}
       <div className="pt-20 px-6 pb-16">
