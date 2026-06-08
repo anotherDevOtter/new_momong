@@ -42,6 +42,16 @@ export class PreSurveysService {
     });
   }
 
+  async findOneByIdForOwner(
+    userId: string,
+    id: string,
+  ): Promise<{ survey: PreSurvey; photoDisplayUrls: Record<string, string> }> {
+    const survey = await this.repo.findOne({ where: { id, user_id: userId } });
+    if (!survey) throw new NotFoundException('사전설문지를 찾을 수 없습니다');
+    const photoDisplayUrls = await this.buildPhotoDisplayUrls(survey.answers);
+    return { survey, photoDisplayUrls };
+  }
+
   async findByToken(
     token: string,
   ): Promise<{ survey: PreSurvey; customer: Customer; photoDisplayUrls: Record<string, string> }> {

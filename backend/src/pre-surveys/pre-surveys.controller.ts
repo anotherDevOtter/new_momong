@@ -39,6 +39,15 @@ export class PreSurveysController {
     return { success: true, data: surveys };
   }
 
+  @Get(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: '사전설문지 단건 조회 (디자이너용 — 사진 signed URL 포함)' })
+  async getOne(@Request() req, @Param('id') id: string) {
+    const { survey, photoDisplayUrls } = await this.service.findOneByIdForOwner(req.user.id, id);
+    return { success: true, data: { ...survey, photoDisplayUrls } };
+  }
+
   @Get('token/:token')
   @ApiOperation({ summary: '공개: 토큰으로 사전설문지 조회 (고객 작성용)' })
   async fetchByToken(@Param('token') token: string) {

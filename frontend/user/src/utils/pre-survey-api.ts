@@ -54,6 +54,18 @@ export const listPreSurveysByCustomer = async (token: string, customerId: string
   return json.data;
 };
 
+export interface PreSurveyDetail extends PreSurveyRecord {
+  photoDisplayUrls: Record<string, string>;
+}
+
+export const getPreSurvey = async (token: string, id: string): Promise<PreSurveyDetail> => {
+  const json = await apiFetch<ApiResponse<PreSurveyDetail>>(
+    `${API_BASE}/pre-surveys/${id}`,
+    { token },
+  );
+  return json.data;
+};
+
 export interface PreSurveyPublicView {
   token: string;
   answers: PreSurveyAnswers;

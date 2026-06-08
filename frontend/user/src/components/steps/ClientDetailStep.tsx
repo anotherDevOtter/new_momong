@@ -7,8 +7,10 @@ import { getConsultationsByCustomerPhone, getShareByConsultation, deleteConsulta
 import {
   createPreSurvey,
   listPreSurveysByCustomer,
+  getPreSurvey,
   buildPreSurveyUrl,
   type PreSurveyRecord,
+  type PreSurveyDetail,
 } from '@/utils/pre-survey-api';
 import { describeApiError } from '@/utils/api-error';
 import { PreSurveyLinkDialog } from '@/components/PreSurveyLinkDialog';
@@ -552,16 +554,38 @@ function PreSurveyList({
   creating: boolean;
   formatDate: (d: string) => string;
 }) {
+  const { token } = useAuth();
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [detailCache, setDetailCache] = useState<Record<string, PreSurveyDetail>>({});
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+
   const handleCopy = async (surveyToken: string) => {
     await navigator.clipboard.writeText(buildPreSurveyUrl(surveyToken));
   };
 
+  const handleToggle = async (id: string) => {
+    const next = expandedId === id ? null : id;
+    setExpandedId(next);
+    if (next && !detailCache[id] && token) {
+      setLoadingId(id);
+      try {
+        const detail = await getPreSurvey(token, id);
+        setDetailCache((prev) => ({ ...prev, [id]: detail }));
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoadingId(null);
+      }
+    }
+  };
+
   return (
-    <div className="border border-[#E5E5E5]">
+    <div className="border border-[#E5E5E5] overflow-hidden">
       <div className="px-8 py-5 border-b border-[#E5E5E5] bg-[#FAFAFA] flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Link2 size={16} className="text-[#555555]" />
-          <h3 className="text-sm font-semibold text-[#111111]">사전설문지 링크</h3>
+          <h3 className="text-sm font-semibold text-[#111111]">사전설문지</h3>
+          <span className="text-xs text-[#999999] ml-1">총 {surveys.length}건</span>
         </div>
         <button
           onClick={onCreate}
@@ -574,18 +598,22 @@ function PreSurveyList({
 
       {surveys.length === 0 ? (
         <div className="px-8 py-10 text-center">
-          <p className="text-sm text-[#999999]">발급된 사전설문지 링크가 없습니다.</p>
+          <p className="text-sm text-[#999999]">발급된 사전설문지가 없습니다.</p>
           <p className="text-xs text-[#CCCCCC] mt-1">위 버튼으로 새 링크를 발급해 고객님께 전달하세요.</p>
         </div>
       ) : (
         <div className="divide-y divide-[#E5E5E5]">
           {surveys.map((s) => {
-            const a = s.answers ?? {};
             const filled = !!s.filled_at;
+            const isExpanded = expandedId === s.id;
+            const detail = detailCache[s.id];
             return (
               <div key={s.id} className="px-8 py-5">
-                <div className="flex items-baseline justify-between gap-4 mb-3">
-                  <div>
+                <div className="flex items-center justify-between gap-3">
+                  <button
+                    onClick={() => handleToggle(s.id)}
+                    className="flex-1 flex items-center gap-4 text-left"
+                  >
                     <span
                       className={`px-2 py-0.5 text-xs ${
                         filled ? 'bg-[#111111] text-white' : 'bg-[#F5F5F5] text-[#777777]'
@@ -593,11 +621,13 @@ function PreSurveyList({
                     >
                       {filled ? '작성 완료' : '작성중'}
                     </span>
-                    <span className="text-xs text-[#999999] ml-3">
-                      발급: {formatDate(s.created_at)}
-                      {filled && ` · 완료: ${formatDate(s.filled_at!)}`}
-                    </span>
-                  </div>
+                    <div>
+                      <p className="text-sm font-medium text-[#111111]">
+                        {filled ? `완료: ${formatDate(s.filled_at!)}` : '미작성'}
+                      </p>
+                      <p className="text-xs text-[#999999] mt-0.5">발급: {formatDate(s.created_at)}</p>
+                    </div>
+                  </button>
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => handleCopy(s.token)}
@@ -611,19 +641,26 @@ function PreSurveyList({
                     >
                       링크 보기
                     </button>
+                    {isExpanded ? (
+                      <ChevronUp size={16} className="text-[#999999]" />
+                    ) : (
+                      <ChevronDown size={16} className="text-[#999999]" />
+                    )}
                   </div>
                 </div>
 
-                {filled && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                    <SurveyField label="나이 / 직업" value={[a.age, a.job].filter(Boolean).join(' · ') || '-'} />
-                    <SurveyField label="컨설팅 프로그램" value={a.selectedProgram || '-'} />
-                    <SurveyChipField label="선호 이미지" values={a.preferences} />
-                    <SurveyChipField label="비선호 이미지" values={a.dislikes} />
-                    <SurveyChipField label="얼굴 보완 부위" values={a.faceConcerns} />
-                    <SurveyChipField label="헤어 고민" values={a.hairConcerns} />
-                    <SurveyChipField label="체형 고민" values={a.bodyConcerns} />
-                    <SurveyField label="시술 희망" value={a.treatmentPreference || '-'} />
+                {isExpanded && (
+                  <div className="mt-5">
+                    {loadingId === s.id && !detail ? (
+                      <div className="py-8 text-center">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#111111] mx-auto mb-2" />
+                        <p className="text-xs text-[#999999]">불러오는 중...</p>
+                      </div>
+                    ) : detail ? (
+                      <PreSurveyDetailView detail={detail} />
+                    ) : (
+                      <p className="text-xs text-[#CCCCCC] py-8 text-center">불러오기 실패</p>
+                    )}
                   </div>
                 )}
               </div>
@@ -635,27 +672,140 @@ function PreSurveyList({
   );
 }
 
-function SurveyField({ label, value }: { label: string; value: string }) {
+const PROGRAM_NAMES: Record<string, string> = {
+  '01': '3WAY HAIR CONSULTING',
+  '02': '2WAY HAIR CONSULTING (퍼스널컬러)',
+  '03': '2WAY HAIR CONSULTING (골격이미지)',
+  '04': '1WAY HAIR CONSULTING',
+};
+
+function PreSurveyDetailView({ detail }: { detail: PreSurveyDetail }) {
+  const a = detail.answers ?? {};
+  const displayMap = detail.photoDisplayUrls ?? {};
+
   return (
-    <div>
-      <p className="text-xs text-[#999999] uppercase tracking-wider mb-1">{label}</p>
-      <p className="text-xs text-[#111111]">{value}</p>
+    <div className="space-y-6 text-sm">
+      {/* 기본 정보 */}
+      <DetailGroup label="기본 정보">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <DetailField label="나이" value={a.age || '-'} />
+          <DetailField label="직업" value={a.job || '-'} />
+          <DetailField
+            label="컨설팅 프로그램"
+            value={a.selectedProgram ? PROGRAM_NAMES[a.selectedProgram] || a.selectedProgram : '-'}
+          />
+        </div>
+      </DetailGroup>
+
+      {/* 이미지 키워드 */}
+      <DetailGroup label="이미지 선호도">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <DetailChips label="선호 키워드" values={a.preferences} />
+          <DetailChips label="비선호 키워드" values={a.dislikes} />
+        </div>
+      </DetailGroup>
+
+      {/* 고민 */}
+      <DetailGroup label="상세 고민">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <DetailChips label="체형" values={a.bodyConcerns} note={a.otherBodyConcern} />
+          <DetailChips label="얼굴 보완 부위" values={a.faceConcerns} note={a.otherFaceConcern} />
+          <DetailChips label="헤어 고민" values={a.hairConcerns} note={a.otherHairConcern} />
+        </div>
+        <div className="mt-4">
+          <DetailField label="시술 희망" value={a.treatmentPreference || '-'} />
+        </div>
+      </DetailGroup>
+
+      {/* 사진 */}
+      <DetailGroup label="첨부 사진">
+        <div className="space-y-5">
+          <PhotoGroup label="얼굴 사진" photos={a.facePhotos} displayMap={displayMap} />
+          <PhotoGroup label="선호 헤어스타일" photos={a.preferredHairPhotos} displayMap={displayMap} />
+          <PhotoGroup label="비선호 헤어스타일" photos={a.dislikedHairPhotos} displayMap={displayMap} />
+          <PhotoGroup label="체형 사진" photos={a.bodyPhotos} displayMap={displayMap} />
+        </div>
+      </DetailGroup>
     </div>
   );
 }
 
-function SurveyChipField({ label, values }: { label: string; values?: string[] }) {
+function DetailGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="text-xs text-[#999999] uppercase tracking-wider mb-1">{label}</p>
+      <p className="text-xs font-semibold text-[#111111] uppercase tracking-wider mb-3">{label}</p>
+      <div className="border border-[#EAEAEA] p-4 bg-[#FAFAFA]">{children}</div>
+    </div>
+  );
+}
+
+function DetailField({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[11px] text-[#999999] uppercase tracking-wider mb-1">{label}</p>
+      <p className="text-xs text-[#111111]" style={{ fontWeight: 500 }}>{value}</p>
+    </div>
+  );
+}
+
+function DetailChips({ label, values, note }: { label: string; values?: string[]; note?: string }) {
+  return (
+    <div>
+      <p className="text-[11px] text-[#999999] uppercase tracking-wider mb-1">{label}</p>
       {values && values.length > 0 ? (
         <div className="flex flex-wrap gap-1">
           {values.map((v) => (
-            <span key={v} className="px-2 py-0.5 bg-[#F5F5F5] text-[#555555] text-xs">{v}</span>
+            <span key={v} className="px-2 py-0.5 bg-white border border-[#E5E5E5] text-[#555555] text-xs">{v}</span>
           ))}
         </div>
       ) : (
         <p className="text-xs text-[#CCCCCC]">-</p>
+      )}
+      {note && <p className="text-xs text-[#777777] mt-2 leading-relaxed">기타: {note}</p>}
+    </div>
+  );
+}
+
+function PhotoGroup({
+  label,
+  photos,
+  displayMap,
+}: {
+  label: string;
+  photos?: string[];
+  displayMap: Record<string, string>;
+}) {
+  const items = photos ?? [];
+  return (
+    <div>
+      <div className="flex items-baseline justify-between mb-2">
+        <p className="text-[11px] text-[#999999] uppercase tracking-wider">{label}</p>
+        <span className="text-[11px] text-[#CCCCCC]">{items.length}장</span>
+      </div>
+      {items.length === 0 ? (
+        <p className="text-xs text-[#CCCCCC]">-</p>
+      ) : (
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+          {items.map((raw, i) => {
+            const src = displayMap[raw] || raw;
+            return (
+              <a
+                key={`${raw}-${i}`}
+                href={src}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative aspect-square bg-[#F7F7F5] border border-[#E5E5E5] overflow-hidden group"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={src}
+                  alt={`${label} ${i + 1}`}
+                  className="absolute inset-0 w-full h-full object-cover group-hover:opacity-80 transition-opacity"
+                />
+              </a>
+            );
+          })}
+        </div>
       )}
     </div>
   );
