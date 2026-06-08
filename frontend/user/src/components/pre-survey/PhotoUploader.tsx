@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
 import { Plus, X } from 'lucide-react';
 import { prepareImageForAnalysis } from '@/utils/image-resize';
 import { uploadPreSurveyPhoto } from '@/utils/pre-survey-api';
@@ -32,12 +31,15 @@ export function PhotoUploader({
   const [localBlobUrls, setLocalBlobUrls] = useState<Record<string, string>>({});
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // 컴포넌트 unmount 시 blob URL 해제
+  // unmount 시에만 blob URL 해제. deps 에 localBlobUrls 를 넣으면 다음 업로드 직전에
+  // 이전 blob URL 이 revoke 되면서 표시 중이던 이미지가 깨짐.
+  const blobUrlsRef = useRef(localBlobUrls);
+  blobUrlsRef.current = localBlobUrls;
   useEffect(() => {
     return () => {
-      Object.values(localBlobUrls).forEach((u) => URL.revokeObjectURL(u));
+      Object.values(blobUrlsRef.current).forEach((u) => URL.revokeObjectURL(u));
     };
-  }, [localBlobUrls]);
+  }, []);
 
   const remaining = Math.max(0, max - photos.length);
 
@@ -104,13 +106,11 @@ export function PhotoUploader({
             key={`${rawUrl}-${i}`}
             className="relative aspect-square bg-[#F7F7F5] border border-[#E5E5E5] overflow-hidden"
           >
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={displayUrl(rawUrl)}
               alt={`업로드 ${i + 1}`}
-              fill
-              className="object-cover"
-              sizes="120px"
-              unoptimized
+              className="absolute inset-0 w-full h-full object-cover"
             />
             <button
               type="button"
