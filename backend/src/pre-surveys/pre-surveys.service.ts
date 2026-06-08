@@ -42,12 +42,30 @@ export class PreSurveysService {
     });
   }
 
-  async findByToken(token: string): Promise<{ survey: PreSurvey; customer: Customer }> {
+  async findByToken(
+    token: string,
+  ): Promise<{ survey: PreSurvey; customer: Customer; photoDisplayUrls: Record<string, string> }> {
     const survey = await this.repo.findOne({ where: { token } });
     if (!survey) throw new NotFoundException('사전설문지를 찾을 수 없습니다');
     const customer = await this.customers.findOne({ where: { id: survey.customer_id } });
     if (!customer) throw new NotFoundException('고객을 찾을 수 없습니다');
-    return { survey, customer };
+    const photoDisplayUrls = await this.buildPhotoDisplayUrls(survey.answers);
+    return { survey, customer, photoDisplayUrls };
+  }
+
+  private async buildPhotoDisplayUrls(answers: Record<string, unknown>): Promise<Record<string, string>> {
+    const PHOTO_KEYS = ['facePhotos', 'preferredHairPhotos', 'dislikedHairPhotos', 'bodyPhotos'];
+    const rawUrls = new Set<string>();
+    for (const key of PHOTO_KEYS) {
+      const arr = answers?.[key];
+      if (Array.isArray(arr)) {
+        for (const u of arr) if (typeof u === 'string' && u) rawUrls.add(u);
+      }
+    }
+    const entries = await Promise.all(
+      Array.from(rawUrls).map(async (url) => [url, await this.python.createDownloadPresignedUrl(url)] as const),
+    );
+    return Object.fromEntries(entries);
   }
 
   async saveAnswers(token: string, answers: Record<string, unknown>, submit = false): Promise<PreSurvey> {

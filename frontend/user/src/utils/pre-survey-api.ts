@@ -59,6 +59,7 @@ export interface PreSurveyPublicView {
   answers: PreSurveyAnswers;
   filled_at: string | null;
   customer: { name: string };
+  photoDisplayUrls: Record<string, string>;
 }
 
 export const fetchPreSurveyByToken = async (surveyToken: string): Promise<PreSurveyPublicView> => {

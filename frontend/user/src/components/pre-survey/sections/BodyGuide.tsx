@@ -7,6 +7,7 @@ import { PhotoUploader } from '../PhotoUploader';
 interface BodyGuideProps {
   surveyToken: string;
   bodyPhotos: string[];
+  photoDisplayUrls: Record<string, string>;
   onChangeBodyPhotos: (next: string[]) => void;
   onPrev: () => void;
   onNext: () => void;
@@ -16,6 +17,7 @@ interface BodyGuideProps {
 export function BodyGuide({
   surveyToken,
   bodyPhotos,
+  photoDisplayUrls,
   onChangeBodyPhotos,
   onPrev,
   onNext,
@@ -76,6 +78,7 @@ export function BodyGuide({
             photos={bodyPhotos}
             max={3}
             onChange={onChangeBodyPhotos}
+            displayUrlMap={photoDisplayUrls}
           />
         </div>
       </div>

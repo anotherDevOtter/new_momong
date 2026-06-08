@@ -9,6 +9,7 @@ interface HairGuideProps {
   facePhotos: string[];
   preferredHairPhotos: string[];
   dislikedHairPhotos: string[];
+  photoDisplayUrls: Record<string, string>;
   onChangeFacePhotos: (next: string[]) => void;
   onChangePreferredHairPhotos: (next: string[]) => void;
   onChangeDislikedHairPhotos: (next: string[]) => void;
@@ -22,6 +23,7 @@ export function HairGuide({
   facePhotos,
   preferredHairPhotos,
   dislikedHairPhotos,
+  photoDisplayUrls,
   onChangeFacePhotos,
   onChangePreferredHairPhotos,
   onChangeDislikedHairPhotos,
@@ -92,6 +94,7 @@ export function HairGuide({
             photos={facePhotos}
             max={3}
             onChange={onChangeFacePhotos}
+            displayUrlMap={photoDisplayUrls}
           />
           <PhotoUploader
             label="선호하는 헤어스타일 사진"
@@ -100,6 +103,7 @@ export function HairGuide({
             photos={preferredHairPhotos}
             max={3}
             onChange={onChangePreferredHairPhotos}
+            displayUrlMap={photoDisplayUrls}
           />
           <PhotoUploader
             label="비선호 헤어스타일 사진"
@@ -108,6 +112,7 @@ export function HairGuide({
             photos={dislikedHairPhotos}
             max={3}
             onChange={onChangeDislikedHairPhotos}
+            displayUrlMap={photoDisplayUrls}
           />
         </div>
       </div>

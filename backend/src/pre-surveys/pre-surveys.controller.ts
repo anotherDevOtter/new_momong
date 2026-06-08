@@ -42,7 +42,7 @@ export class PreSurveysController {
   @Get('token/:token')
   @ApiOperation({ summary: '공개: 토큰으로 사전설문지 조회 (고객 작성용)' })
   async fetchByToken(@Param('token') token: string) {
-    const { survey, customer } = await this.service.findByToken(token);
+    const { survey, customer, photoDisplayUrls } = await this.service.findByToken(token);
     return {
       success: true,
       data: {
@@ -50,6 +50,7 @@ export class PreSurveysController {
         answers: survey.answers,
         filled_at: survey.filled_at,
         customer: { name: customer.name },
+        photoDisplayUrls,
       },
     };
   }

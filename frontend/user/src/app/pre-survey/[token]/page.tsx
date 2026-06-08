@@ -66,6 +66,7 @@ export default function PreSurveyPage() {
   const [filled, setFilled] = useState<string | null>(null);
   const [justSubmitted, setJustSubmitted] = useState(false);
   const [answers, setAnswers] = useState<PreSurveyAnswers>(emptyAnswers());
+  const [photoDisplayUrls, setPhotoDisplayUrls] = useState<Record<string, string>>({});
   const [step, setStep] = useState<Step>('cover');
   const [submitting, setSubmitting] = useState(false);
   const [submitConfirmOpen, setSubmitConfirmOpen] = useState(false);
@@ -78,6 +79,7 @@ export default function PreSurveyPage() {
         setCustomerName(view.customer.name);
         setFilled(view.filled_at);
         setAnswers({ ...emptyAnswers(), ...view.answers });
+        setPhotoDisplayUrls(view.photoDisplayUrls ?? {});
       } catch (e) {
         setLoadError(describeApiError(e));
       } finally {
@@ -266,6 +268,7 @@ export default function PreSurveyPage() {
             facePhotos={answers.facePhotos ?? []}
             preferredHairPhotos={answers.preferredHairPhotos ?? []}
             dislikedHairPhotos={answers.dislikedHairPhotos ?? []}
+            photoDisplayUrls={photoDisplayUrls}
             onChangeFacePhotos={(v) => update('facePhotos', v)}
             onChangePreferredHairPhotos={(v) => update('preferredHairPhotos', v)}
             onChangeDislikedHairPhotos={(v) => update('dislikedHairPhotos', v)}
@@ -279,6 +282,7 @@ export default function PreSurveyPage() {
           <BodyGuide
             surveyToken={surveyToken}
             bodyPhotos={answers.bodyPhotos ?? []}
+            photoDisplayUrls={photoDisplayUrls}
             onChangeBodyPhotos={(v) => update('bodyPhotos', v)}
             onPrev={goPrev}
             onNext={requestSubmit}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { Plus, X } from 'lucide-react';
 import { prepareImageForAnalysis } from '@/utils/image-resize';
@@ -13,14 +13,37 @@ interface PhotoUploaderProps {
   photos: string[];
   max: number;
   onChange: (next: string[]) => void;
+  /** 서버에서 받은 raw URL → signed GET URL 매핑 (private S3 대비) */
+  displayUrlMap?: Record<string, string>;
 }
 
-export function PhotoUploader({ label, hint, surveyToken, photos, max, onChange }: PhotoUploaderProps) {
+export function PhotoUploader({
+  label,
+  hint,
+  surveyToken,
+  photos,
+  max,
+  onChange,
+  displayUrlMap,
+}: PhotoUploaderProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  // 새로 올린 파일의 raw URL → 로컬 blob URL (서버 signed URL 받기 전까지의 미리보기)
+  const [localBlobUrls, setLocalBlobUrls] = useState<Record<string, string>>({});
   const inputRef = useRef<HTMLInputElement | null>(null);
 
+  // 컴포넌트 unmount 시 blob URL 해제
+  useEffect(() => {
+    return () => {
+      Object.values(localBlobUrls).forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, [localBlobUrls]);
+
   const remaining = Math.max(0, max - photos.length);
+
+  const displayUrl = (rawUrl: string): string => {
+    return localBlobUrls[rawUrl] || displayUrlMap?.[rawUrl] || rawUrl;
+  };
 
   const handleSelect = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -28,13 +51,16 @@ export function PhotoUploader({ label, hint, surveyToken, photos, max, onChange 
     setUploading(true);
     try {
       const filesToUpload = Array.from(files).slice(0, remaining);
-      const urls: string[] = [];
+      const newRawUrls: string[] = [];
+      const newBlobMap: Record<string, string> = {};
       for (const file of filesToUpload) {
         const prepared = await prepareImageForAnalysis(file);
-        const url = await uploadPreSurveyPhoto(surveyToken, prepared.file);
-        urls.push(url);
+        const rawUrl = await uploadPreSurveyPhoto(surveyToken, prepared.file);
+        newRawUrls.push(rawUrl);
+        newBlobMap[rawUrl] = URL.createObjectURL(prepared.file);
       }
-      onChange([...photos, ...urls]);
+      setLocalBlobUrls((prev) => ({ ...prev, ...newBlobMap }));
+      onChange([...photos, ...newRawUrls]);
     } catch (e) {
       setError(e instanceof Error ? e.message : '업로드 실패');
     } finally {
@@ -44,6 +70,15 @@ export function PhotoUploader({ label, hint, surveyToken, photos, max, onChange 
   };
 
   const removeAt = (index: number) => {
+    const rawUrl = photos[index];
+    if (rawUrl && localBlobUrls[rawUrl]) {
+      URL.revokeObjectURL(localBlobUrls[rawUrl]);
+      setLocalBlobUrls((prev) => {
+        const next = { ...prev };
+        delete next[rawUrl];
+        return next;
+      });
+    }
     onChange(photos.filter((_, i) => i !== index));
   };
 
@@ -64,9 +99,19 @@ export function PhotoUploader({ label, hint, surveyToken, photos, max, onChange 
       )}
 
       <div className="grid grid-cols-3 gap-3">
-        {photos.map((url, i) => (
-          <div key={`${url}-${i}`} className="relative aspect-square bg-[#F7F7F5] border border-[#E5E5E5] overflow-hidden">
-            <Image src={url} alt={`업로드 ${i + 1}`} fill className="object-cover" sizes="120px" unoptimized />
+        {photos.map((rawUrl, i) => (
+          <div
+            key={`${rawUrl}-${i}`}
+            className="relative aspect-square bg-[#F7F7F5] border border-[#E5E5E5] overflow-hidden"
+          >
+            <Image
+              src={displayUrl(rawUrl)}
+              alt={`업로드 ${i + 1}`}
+              fill
+              className="object-cover"
+              sizes="120px"
+              unoptimized
+            />
             <button
               type="button"
               onClick={() => removeAt(i)}
