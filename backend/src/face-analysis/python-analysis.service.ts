@@ -90,6 +90,11 @@ export class PythonAnalysisService {
         region,
         credentials:
           accessKeyId && secretAccessKey ? { accessKeyId, secretAccessKey } : undefined,
+        // AWS SDK v3 의 기본 무결성 보호(체크섬 헤더) 비활성화 — 브라우저 PUT 호환성.
+        // 활성화 상태면 presigned URL 에 x-amz-checksum-crc32 가 들어가서
+        // 클라이언트(브라우저)가 동일 헤더를 못 보내 SignatureDoesNotMatch 로 거부됨.
+        requestChecksumCalculation: 'WHEN_REQUIRED',
+        responseChecksumValidation: 'WHEN_REQUIRED',
       });
     } else {
       this.logger.warn('AWS_REGION 미설정 — S3 presigned URL 생성 비활성화');
