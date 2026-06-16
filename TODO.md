@@ -2,30 +2,19 @@
 
 > 남은 작업 + 비즈니스 결정 + 운영 메모. 액션 위주.
 > 제품 정의: [PLANNING.md](./PLANNING.md), 기술 구조: [ARCHITECTURE.md](./ARCHITECTURE.md).
-> 최종 갱신: 2026-06-01.
+> 최종 갱신: 2026-06-09.
 
 ---
 
-## 🚨 배포 안 된 변경분 (origin/main 미반영)
+## ✅ 운영 동기화 상태
 
-**현재 main 이 origin/main 보다 30 커밋 앞서 있음.** 운영에는 아직 아무 변경도 안 반영됨.
+**origin/main 과 동기화 완료.** 마지막 배포(2026-06-08) 시점에 다음이 운영에 반영됨:
+- 사전설문지 기능 (DB 마이그레이션 `003_create_pre_surveys.sql` 운영 DB 실행 완료)
+- S3 presigned URL checksum 헤더 비활성화 (브라우저 PUT 호환)
+- 사전설문 사진 표시 (signed GET URL 매핑 — `photoDisplayUrls`)
+- 고객 상세 컨설팅/사전설문 모달 전환
 
-```
-git log origin/main..HEAD --oneline   # 30개
-```
-
-### 운영 배포 시 반드시 같이 처리해야 할 것
-- [ ] **DB 마이그레이션 1건 추가** — `backend/migrations/003_create_pre_surveys.sql` 운영 DB 수동 실행
-- [ ] **S3 버킷** — pre-survey 사진은 `pre-surveys/<customer_id>/<uuid>.<ext>` 키 사용 (기존 face-analysis 와 같은 버킷 재사용, 별도 작업 불필요)
-- [ ] **운영 도메인 CORS** — 사전설문 공개 링크 `/pre-survey/[token]` 노출 (이미 동작 중일 것)
-- [ ] **카카오톡/문자 전송 안내** — 디자이너용 매뉴얼에 "사전설문지 링크 생성 후 카톡으로 전송" 흐름 공유
-
-### 주요 배포 그룹 (30 커밋 의미)
-1. **사전설문지 기능** (1) — `feat(pre-survey)`
-2. **3WAY 상단 디자인 정리** (3) — BrandHeader 제거, ProgressBar 통합, step5 버튼 통일
-3. **고객 상세/선택 UX 대개편** (10+) — URL 기반 라우팅, AppHeader 공통, 고객 선택 다이얼로그, 페이지네이션, 직업 표시, 사전설문 탭
-4. **얼굴 분석 admin/UX** (8) — admin 테스트 페이지, presigned GET, source 컬럼, 자동 크롭, MediaPipe 가이드, 이미지 리사이즈
-5. **문서 재정리** (1) — PLANNING/ARCHITECTURE/README/TODO 분리
+다음 push 시 매번 확인할 항목은 하단 [운영 배포 체크리스트](#-운영-배포-체크리스트) 참조.
 
 ---
 
@@ -127,11 +116,6 @@ git log origin/main..HEAD --oneline   # 30개
 - [/(app)/3way/consulting/page.tsx:184](frontend/user/src/app/(app)/3way/consulting/page.tsx#L184) default 가 '1WAY'
 - 알 수 없는 코스는 빈 문자열 또는 에러 처리
 
-### F7. 사전설문지 — 사진 표시 디자이너 화면
-- 고객이 업로드한 `facePhotos`/`preferredHairPhotos`/`dislikedHairPhotos`/`bodyPhotos` 가 jsonb 에는 저장되지만
-- 고객 상세 "사전 설문" 탭에서 thumbnail/lightbox 로 노출 안됨
-- presigned GET URL 발급 endpoint 도 추가 필요 (S3 객체가 private 인 경우)
-
 ### F8. 사전설문지 — 자동 저장 실패 시 사용자 알림
 - 현재 autosave 실패는 silent (`catch {}`) → 사용자가 모르는 채 데이터 손실 가능
 - 상단 토스트나 인디케이터로 "저장 실패, 재시도 중..." 표시
@@ -172,10 +156,18 @@ git log origin/main..HEAD --oneline   # 30개
 
 ---
 
-## ✅ 최근 완료 (이번 세션)
+## ✅ 최근 완료 (운영 반영)
 
+### 2026-06-08 ~ 06-09 (사전설문지 라운드 2 + 모달화)
+- **사전설문 사진 디자이너 화면 표시** (구 F7) — backend `findByToken`/`findOneByIdForOwner` 가 raw S3 URL → signed GET URL 매핑(`photoDisplayUrls`) 도 반환, 프론트 PhotoUploader 가 `displayUrlMap` 으로 렌더 + 새 업로드는 로컬 blob URL 즉시 미리보기
+- **S3 presigned URL checksum 헤더 비활성화** — `requestChecksumCalculation: 'WHEN_REQUIRED'` + `responseChecksumValidation: 'WHEN_REQUIRED'`. 브라우저 PUT 호환성. face-analysis 카메라 업로드에도 동일하게 적용됨
+- **PhotoUploader next/image → `<img>` 전환** — `<Image fill unoptimized>` 가 fail-silently 하던 이슈, blob URL cleanup 버그(다음 업로드 직전에 이전 blob revoke) 함께 수정
+- **컨설팅 히스토리 / 사전설문 인라인 expand → 모달 전환** — 공통 [Modal](frontend/user/src/components/ui/Modal.tsx) 컴포넌트 추가, 펼침 영역이 길어 다음 row 보기 불편하던 UX 개선
+- **고객 상세 사전설문 탭 재설계** — 컨설팅 히스토리 패턴으로 통일, 행 클릭 → 모달에 `PreSurveyDetailView`(기본정보 / 이미지선호도 / 상세고민 / 첨부사진 그리드, 사진 클릭 시 새 탭 원본)
+
+### 2026-06-01 ~ 06-08 (사전설문지 라운드 1)
 - **사전설문지 기능 전체 구현** — backend `pre_surveys` 테이블 + 공개 토큰 발급/조회/저장/제출 + 공개 업로드 (S3 presigned) + 프론트 8페이지 figma 디자인 + PhotoUploader + 제출 확인 다이얼로그 + 제출 완료/이미 완료 분기
-- **고객 상세에 사전설문지 링크 생성** — 새 컨설팅 카드 + 사전 설문 탭 양쪽에 버튼, 발급 링크 목록 + 답변 요약
+- **고객 상세에 사전설문지 링크 생성** — 새 컨설팅 카드 + 사전 설문 탭 양쪽에 버튼
 - **3WAY 상단 디자인 통일** — 9개 step 컴포넌트의 자체 BrandHeader 제거, step5 이전 버튼 NavigationButtons 패턴으로 교체
 - **/3way/consulting 통합 ProgressBar** — 코스별 visibleSteps 빌더로 정확한 단계 표시
 
@@ -187,10 +179,10 @@ backend / frontend / Python 서버 변경분 운영 배포 시 매번 확인.
 
 ### 사전 (코드 push 전)
 - [ ] DB 마이그레이션 필요한가? → [backend/migrations/](backend/migrations/) 확인
-  - **이번 push 시 003_create_pre_surveys.sql 운영 DB 수동 실행 필요**
+  - 현재 운영 반영 완료: `001_create_face_analysis_results.sql`, `002_add_source_to_face_analysis_results.sql`, `003_create_pre_surveys.sql`
 - [ ] 필요하면 운영 DB 에 SQL 수동 실행
-- [ ] 새 환경변수 추가? → EB Configuration 에 추가 (이번 push 는 추가 없음)
-- [ ] face_landmark Python 서버 변경? → 별도 배포 필요 (이번 push 는 변경 없음)
+- [ ] 새 환경변수 추가? → EB Configuration 에 추가
+- [ ] face_landmark Python 서버 변경? → 별도 배포 필요
 
 ### Push (자동 배포 트리거)
 - [ ] `git push origin main`

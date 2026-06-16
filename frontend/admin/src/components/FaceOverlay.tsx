@@ -31,7 +31,7 @@ interface FaceOverlayProps {
   alt?: string;
 }
 
-const DEFAULT_STROKE = '#A52A2A';
+const DEFAULT_STROKE = '#FFFFFF';
 const DEFAULT_STROKE_WIDTH = 2;
 const DEFAULT_FONT_SIZE = 16;
 

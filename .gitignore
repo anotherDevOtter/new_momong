@@ -41,3 +41,4 @@ coverage/
 # Figma prototype (not for deployment)
 figma/
 .playwright-mcp/
+.gstack/

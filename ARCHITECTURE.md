@@ -83,6 +83,10 @@ new_momong/
 │  │  ├─ customers/               고객 정보
 │  │  ├─ consultations/           컨설팅 기록 (FIT/3WAY 공용)
 │  │  ├─ shares/                  공유 링크
+│  │  ├─ pre-surveys/             사전설문지 (공개 토큰 기반)
+│  │  │  ├─ pre-surveys.entity.ts        (table: pre_surveys)
+│  │  │  ├─ pre-surveys.service.ts       (토큰 생성/조회/저장 + photoDisplayUrls 매핑)
+│  │  │  └─ pre-surveys.controller.ts    (인증 + 공개 토큰 endpoint)
 │  │  ├─ feature-settings/        기능 플래그
 │  │  ├─ face-analysis/           얼굴 분석 (Python 호출 + S3 + DB)
 │  │  │  ├─ face-analysis.entity.ts        (table: face_analysis_results)
@@ -92,18 +96,28 @@ new_momong/
 │  │  └─ common/                  미들웨어/필터
 │  ├─ migrations/                 운영 DB 수동 마이그레이션 SQL
 │  │  ├─ 001_create_face_analysis_results.sql
-│  │  └─ 002_add_source_to_face_analysis_results.sql
+│  │  ├─ 002_add_source_to_face_analysis_results.sql
+│  │  └─ 003_create_pre_surveys.sql
 │  └─ Procfile                    EB 실행 (web: node dist/main)
 ├─ frontend/
 │  ├─ user/                       디자이너용 (3100)
 │  │  └─ src/
-│  │     ├─ app/                  /, /3way, /login, /signup, /share/[token] 등
+│  │     ├─ app/
+│  │     │  ├─ (app)/             공통 AppHeader layout (인증 필요)
+│  │     │  │  ├─ /3way, /3way/consulting
+│  │     │  │  ├─ /fit
+│  │     │  │  ├─ /consulting/start
+│  │     │  │  └─ /customers, /customers/[id]
+│  │     │  ├─ login, signup, find-id, reset-password
+│  │     │  ├─ share/[token]      컨설팅 결과 공유 (공개, 비밀번호)
+│  │     │  └─ pre-survey/[token] 사전설문지 작성 (공개, 토큰만)
 │  │     ├─ components/
 │  │     │  ├─ steps/             FIT 컨설팅 step 컴포넌트
 │  │     │  ├─ 3way/              3WAY 컨설팅 화면 (28+ 컴포넌트)
-│  │     │  └─ ui/                공용 UI (FIT 출처)
+│  │     │  ├─ pre-survey/        사전설문 8섹션 + PageLayout + PhotoUploader
+│  │     │  └─ ui/                공용 UI (Modal, ProgressBar 등)
 │  │     ├─ contexts/             AuthContext, FeaturesContext
-│  │     └─ utils/                api.ts, 3way-api.ts, face-analysis-api.ts, image-resize.ts
+│  │     └─ utils/                api.ts, 3way-api.ts, face-analysis-api.ts, pre-survey-api.ts, image-resize.ts
 │  └─ admin/                      운영자용 (3200)
 │     └─ src/
 │        ├─ app/                  /dashboard, /users, /features, /face-analysis-test
@@ -134,6 +148,7 @@ new_momong/
 | `admin_accounts` | id, email, password_hash | 디자이너 users 와 별도 |
 | `feature_settings` | id(=1), fit_enabled, three_way_enabled, course_*_enabled | 싱글톤 |
 | `face_analysis_results` | id, user_id, customer_id, detection_type(WNC/SNH), source(consultation/admin_test), face_image_url, python_analysis_result(jsonb), client_provided_data(jsonb), detected_at | 한 분석 = WNC + SNH 2행 |
+| `pre_surveys` | id, user_id, customer_id, token(unique), answers(jsonb), filled_at, created_at, updated_at | 디자이너 발급 토큰으로 고객이 방문 전 작성. 사진 URL 도 answers 안에 raw S3 URL 로 저장 |
 
 ### 4-1. consultation 에서 얼굴 분석 결과 참조
 
@@ -203,6 +218,18 @@ new_momong/
   - `GET  /api/face-analysis/admin/:id` — 단건 상세
   - `DELETE /api/face-analysis/admin/:id` — 짝 삭제
 
+### 5-5. 사전설문지
+- **디자이너 흐름** (JwtAuthGuard, owner 확인):
+  - `POST /api/pre-surveys` — 토큰 발급 (body: `{ customerId }`)
+  - `GET  /api/pre-surveys/by-customer/:customerId` — 고객별 설문 목록
+  - `GET  /api/pre-surveys/:id` — 단건 상세 (answers + photoDisplayUrls 매핑)
+  - `DELETE /api/pre-surveys/:id`
+- **고객 (공개)** — 인증 없음, 토큰 자체가 권한:
+  - `GET  /api/pre-surveys/token/:token` — 설문 + 작성중 답변 + `photoDisplayUrls`(signed GET) 반환
+  - `PATCH /api/pre-surveys/token/:token` — `{ answers, submit? }`. submit=true 면 `filled_at` 세팅 (제출 후 수정 불가)
+  - `POST /api/pre-surveys/token/:token/upload-url` — 사진 업로드용 S3 PUT presigned URL (5MB 제한, 제출된 설문은 거부)
+- 토큰은 `crypto.randomBytes(24).toString('base64url')` (192 bit), 만료 없음, 재발급 무제한
+
 ### 5-4. Admin
 - `POST /api/admin/auth/login`
 - `GET  /api/admin/users`, `/api/admin/stats`
@@ -255,7 +282,20 @@ frontend `FaceOverlay` 가 그릴 수 있는 도형:
 ### S3 키 구조
 - 사용자 얼굴 사진: `face-analysis/<userId>/<uuid>.<ext>`
 - admin 테스트: `face-analysis/admin/<uuid>.<ext>`
+- 사전설문 사진: `pre-surveys/<customerId>/<uuid>.<ext>`
 - backend 배포 아티팩트: `elasticbeanstalk-artifacts/fit-hair-deploy-<sha>.zip`
+
+### S3Client 옵션 (브라우저 PUT 호환)
+`PythonAnalysisService` 의 `S3Client` 인스턴스는 다음 옵션 필수:
+```ts
+new S3Client({
+  region,
+  credentials,
+  requestChecksumCalculation: 'WHEN_REQUIRED',   // presigned URL 에 x-amz-checksum-* 자동 추가 끄기
+  responseChecksumValidation: 'WHEN_REQUIRED',
+})
+```
+AWS SDK v3 가 기본으로 추가하는 CRC32 체크섬 헤더 때문에 브라우저 fetch PUT 이 SignatureDoesNotMatch 로 거부되던 문제를 해결. face-analysis 와 pre-surveys 양쪽 모두에 영향.
 
 ### CORS 정책 (`momong-staging`)
 ```json
@@ -288,6 +328,7 @@ AllowedMethods: ["PUT", "POST", "GET", "HEAD"]
 - 운영: `backend/migrations/*.sql` 을 psql/pgAdmin 으로 수동 실행
   - `001_create_face_analysis_results.sql` (테이블 생성)
   - `002_add_source_to_face_analysis_results.sql` (source 컬럼)
+  - `003_create_pre_surveys.sql` (pre_surveys 테이블 + 인덱스 3개)
 
 ---
 
