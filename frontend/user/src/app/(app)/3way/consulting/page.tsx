@@ -12,8 +12,8 @@ import { FaceAnalysisCapture } from '@/components/3way/FaceAnalysisCapture';
 import { FaceAnalysisProcessing } from '@/components/3way/FaceAnalysisProcessing';
 import { FaceAnalysisResult, type FaceResultData } from '@/components/3way/FaceAnalysisResult';
 import type { AnalyzeResponse } from '@/utils/face-analysis-api';
-import { PersonalColorAnalysis } from '@/components/3way/PersonalColorAnalysis';
-import { SkeletonImageAnalysis } from '@/components/3way/SkeletonImageAnalysis';
+import { PersonalColorAnalysis, type PersonalColorData } from '@/components/3way/PersonalColorAnalysis';
+import { SkeletonImageAnalysis, type SkeletonData } from '@/components/3way/SkeletonImageAnalysis';
 import { ImageDirectionSetting, type ImageDirectionData } from '@/components/3way/ImageDirectionSetting';
 import { HairDesignProposal, type HairDesignData } from '@/components/3way/HairDesignProposal';
 import { HairTextureAnalysis, type HairTextureData } from '@/components/3way/HairTextureAnalysis';
@@ -79,6 +79,8 @@ function Inner() {
   const [imageDirectionData, setImageDirectionData] = useState<ImageDirectionData | null>(null);
   const [hairDesignData, setHairDesignData] = useState<HairDesignData | null>(null);
   const [hairTextureData, setHairTextureData] = useState<HairTextureData | null>(null);
+  const [personalColorData, setPersonalColorData] = useState<PersonalColorData | null>(null);
+  const [skeletonData, setSkeletonData] = useState<SkeletonData | null>(null);
   const [hydrating, setHydrating] = useState(true);
 
   useEffect(() => {
@@ -226,6 +228,8 @@ function Inner() {
               }
             : null,
           // B1: 이전에 저장 누락되던 디자이너 입력값들
+          personalColor: personalColorData,
+          skeleton: skeletonData,
           imageDirection: imageDirectionData,
           hairDesign: hairDesignData,
           hairTexture: hairTextureData,
@@ -272,8 +276,8 @@ function Inner() {
     if (currentPage === 'faceAnalysis') return <FaceAnalysisCapture onBack={handleFaceAnalysisBack} onNext={handleFaceAnalysisNext} />;
     if (currentPage === 'faceProcessing') return <FaceAnalysisProcessing onComplete={handleFaceProcessingComplete} />;
     if (currentPage === 'faceResult') return <FaceAnalysisResult analysisResult={faceAnalysisResult} onBack={handleFaceResultBack} onNext={handleFaceResultNext} />;
-    if (currentPage === 'personalColor') return <PersonalColorAnalysis onBack={handlePersonalColorBack} onNext={handlePersonalColorNext} />;
-    if (currentPage === 'skeletonImage') return <SkeletonImageAnalysis onBack={handleSkeletonImageBack} onNext={handleSkeletonImageNext} />;
+    if (currentPage === 'personalColor') return <PersonalColorAnalysis onBack={handlePersonalColorBack} onNext={handlePersonalColorNext} onChange={setPersonalColorData} />;
+    if (currentPage === 'skeletonImage') return <SkeletonImageAnalysis onBack={handleSkeletonImageBack} onNext={handleSkeletonImageNext} onChange={setSkeletonData} />;
     if (currentPage === 'imageDirection') return <ImageDirectionSetting onBack={handleImageDirectionBack} onNext={handleImageDirectionNext} currentType={currentImageType} onChange={setImageDirectionData} />;
     if (currentPage === 'hairDesign') return <HairDesignProposal onBack={handleHairDesignBack} onNext={handleHairDesignNext} imageTypeLabel={imageTypeLabel} onChange={setHairDesignData} />;
     if (currentPage === 'hairTexture') return <HairTextureAnalysis onBack={handleHairTextureBack} onNext={handleHairTextureNext} onChange={setHairTextureData} />;

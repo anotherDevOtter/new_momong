@@ -1,13 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { NavigationButtons } from './NavigationButtons';
+
+// 디자이너가 선택한 퍼스널컬러 결과 — 부모로 끌어올려 저장 (B1)
+export interface PersonalColorData {
+  season: string; // spring | summer | autumn | winter
+  seasonName: string; // Spring | Summer | Autumn | Winter
+}
 
 interface PersonalColorAnalysisProps {
   onBack: () => void;
   onNext: () => void;
+  onChange?: (data: PersonalColorData) => void;
 }
 
-export function PersonalColorAnalysis({ onBack, onNext }: PersonalColorAnalysisProps) {
+export function PersonalColorAnalysis({ onBack, onNext, onChange }: PersonalColorAnalysisProps) {
   const [selectedSeason, setSelectedSeason] = useState<string>('');
 
   const seasons = [
@@ -60,6 +67,15 @@ export function PersonalColorAnalysis({ onBack, onNext }: PersonalColorAnalysisP
       ],
     },
   ];
+
+  // 선택값 변경 시 부모로 전달 (B1: 저장 누락 방지)
+  useEffect(() => {
+    if (!selectedSeason) return;
+    const name = seasons.find((s) => s.id === selectedSeason)?.name ?? '';
+    onChange?.({ season: selectedSeason, seasonName: name });
+    // seasons 는 컴포넌트 내 상수라 deps 불필요
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedSeason]);
 
   return (
     <div className="min-h-screen bg-white px-8 pt-24 pb-40">

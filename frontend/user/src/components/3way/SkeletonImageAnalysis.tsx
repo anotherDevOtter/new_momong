@@ -1,13 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { NavigationButtons } from './NavigationButtons';
+
+// 디자이너가 선택한 골격 타입 결과 — 부모로 끌어올려 저장 (B1)
+export interface SkeletonData {
+  type: string; // straight | wave | natural
+  typeName: string; // Straight | Wave | Natural
+}
 
 interface SkeletonImageAnalysisProps {
   onBack: () => void;
   onNext: () => void;
+  onChange?: (data: SkeletonData) => void;
 }
 
-export function SkeletonImageAnalysis({ onBack, onNext }: SkeletonImageAnalysisProps) {
+export function SkeletonImageAnalysis({ onBack, onNext, onChange }: SkeletonImageAnalysisProps) {
   const [selectedType, setSelectedType] = useState<string>('');
 
   const skeletonTypes = [
@@ -76,6 +83,15 @@ export function SkeletonImageAnalysis({ onBack, onNext }: SkeletonImageAnalysisP
       ],
     },
   ];
+
+  // 선택값 변경 시 부모로 전달 (B1: 저장 누락 방지)
+  useEffect(() => {
+    if (!selectedType) return;
+    const name = skeletonTypes.find((s) => s.id === selectedType)?.name ?? '';
+    onChange?.({ type: selectedType, typeName: name });
+    // skeletonTypes 는 컴포넌트 내 상수라 deps 불필요
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedType]);
 
   return (
     <div className="min-h-screen bg-white px-8 pt-24 pb-40">
