@@ -25,21 +25,20 @@ interface FaceAnalysisResultProps {
 const WNC_KEY_BY_LABEL: Record<string, string> = {
   '피부톤': '1',
   '페이스라인': '2',
-  '윤곽라인': '4',
-  '눈썹': '5',
-  '눈': '6',
-  '코': '8',
-  '입술': '9',
+  '광대 발달 정도': '3',
+  '눈썹 형태': '5',
+  '눈 형태': '6',
+  '코 형태': '8',
+  '입술 형태': '9',
 };
 
 const SNH_KEY_BY_LABEL: Record<string, string> = {
-  '피부톤': '1',
-  '얼굴 밸런스': '9',
-  '가로 비율': '5',
-  '세로 비율': '2',
-  '눈썹 밀도': '3',
-  '코 폭': '8',
-  '입술 폭': '11',
+  '얼굴 길이': '2',
+  '눈썹과 눈 거리': '4',
+  '눈과 눈사이 거리': '5',
+  '중안부': '11',
+  '코 폭': '10',
+  '입 폭': '13',
 };
 
 // Python 응답의 각 모듈은 `grade` (또는 `type`) 필드로 W/N/C, S/N/H 를 가짐
@@ -74,11 +73,11 @@ export function FaceAnalysisResult({ onBack, onNext, analysisResult }: FaceAnaly
     const base: AnalysisRow[] = [
       { label: '피부톤', warm: '', neutral: 'Neutral', cool: '', selectedType: 'neutral' },
       { label: '페이스라인', warm: '', neutral: '중간', cool: '', selectedType: 'neutral' },
-      { label: '윤곽라인', warm: '', neutral: '중간', cool: '', selectedType: 'neutral' },
-      { label: '눈썹', warm: '', neutral: '중간', cool: '', selectedType: 'neutral' },
-      { label: '눈', warm: '', neutral: '중간', cool: '', selectedType: 'neutral' },
-      { label: '코', warm: '', neutral: '중간', cool: '', selectedType: 'neutral' },
-      { label: '입술', warm: '', neutral: '중간', cool: '', selectedType: 'neutral' },
+      { label: '광대 발달 정도', warm: '', neutral: '중간', cool: '', selectedType: 'neutral' },
+      { label: '눈썹 형태', warm: '', neutral: '중간', cool: '', selectedType: 'neutral' },
+      { label: '눈 형태', warm: '', neutral: '중간', cool: '', selectedType: 'neutral' },
+      { label: '코 형태', warm: '', neutral: '중간', cool: '', selectedType: 'neutral' },
+      { label: '입술 형태', warm: '', neutral: '중간', cool: '', selectedType: 'neutral' },
     ];
     const results = analysisResult?.wnc?.results;
     if (!results) return base;
@@ -91,13 +90,12 @@ export function FaceAnalysisResult({ onBack, onNext, analysisResult }: FaceAnaly
 
   const initSoftHard = (): SoftHardRow[] => {
     const base: SoftHardRow[] = [
-      { label: '피부톤', soft: '', neutral: '중간', hard: '', selectedType: 'neutral' },
-      { label: '얼굴 밸런스', soft: '', neutral: '균형형', hard: '', selectedType: 'neutral' },
-      { label: '가로 비율', soft: '', neutral: '중간', hard: '', selectedType: 'neutral' },
-      { label: '세로 비율', soft: '', neutral: '중간', hard: '', selectedType: 'neutral' },
-      { label: '눈썹 밀도', soft: '', neutral: '중간', hard: '', selectedType: 'neutral' },
+      { label: '얼굴 길이', soft: '', neutral: '중간', hard: '', selectedType: 'neutral' },
+      { label: '눈썹과 눈 거리', soft: '', neutral: '중간', hard: '', selectedType: 'neutral' },
+      { label: '눈과 눈사이 거리', soft: '', neutral: '중간', hard: '', selectedType: 'neutral' },
+      { label: '중안부', soft: '', neutral: '중간', hard: '', selectedType: 'neutral' },
       { label: '코 폭', soft: '', neutral: '중간', hard: '', selectedType: 'neutral' },
-      { label: '입술 폭', soft: '', neutral: '중간', hard: '', selectedType: 'neutral' },
+      { label: '입 폭', soft: '', neutral: '중간', hard: '', selectedType: 'neutral' },
     ];
     const results = analysisResult?.snh?.results;
     if (!results) return base;
