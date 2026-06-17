@@ -42,7 +42,6 @@ export function FaceAnalysisProcessing({ onComplete }: FaceAnalysisProcessingPro
         transition={{ duration: 0.6, delay: 0.2 }}
         className="mb-3 text-center"
       >
-        <p className="text-xs text-gray-500 font-light tracking-wider mb-2">Step 7 of 12</p>
         <p className="text-xs tracking-[0.25em] text-gray-500 font-light uppercase">
           AI Face Analysis
         </p>

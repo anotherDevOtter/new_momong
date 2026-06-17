@@ -3,24 +3,39 @@ import { motion } from 'motion/react';
 import { Check, AlertCircle } from 'lucide-react';
 import { NavigationButtons } from './NavigationButtons';
 
-interface HairTextureAnalysisProps {
-  onBack: () => void;
-  onNext: () => void;
-}
-
 type DamageLevel = 'healthy' | 'light' | 'medium' | 'heavy' | 'extreme' | 'severe';
 type HairType = 'straight' | 'wavy' | 'curly';
 type Thickness = 'thin' | 'normal' | 'thick';
 type Density = 'low' | 'normal' | 'high';
 type CurlCoverage = 'none' | 'partial' | 'full';
 
-export function HairTextureAnalysis({ onBack, onNext }: HairTextureAnalysisProps) {
+export interface HairTextureData {
+  damageLevel: DamageLevel;
+  hairType: HairType;
+  thickness: Thickness;
+  density: Density;
+  curlCoverage: CurlCoverage;
+}
+
+interface HairTextureAnalysisProps {
+  onBack: () => void;
+  onNext: () => void;
+  onChange?: (data: HairTextureData) => void;
+}
+
+export function HairTextureAnalysis({ onBack, onNext, onChange }: HairTextureAnalysisProps) {
   const [damageLevel, setDamageLevel] = useState<DamageLevel>('light');
   const [hairType, setHairType] = useState<HairType>('wavy');
   const [thickness, setThickness] = useState<Thickness>('normal');
   const [density, setDensity] = useState<Density>('normal');
   const [curlCoverage, setCurlCoverage] = useState<CurlCoverage>('partial');
   const [interpretation, setInterpretation] = useState<string[]>([]);
+
+  // 선택 변경 시 상위로 보고 (저장용)
+  useEffect(() => {
+    onChange?.({ damageLevel, hairType, thickness, density, curlCoverage });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [damageLevel, hairType, thickness, density, curlCoverage]);
 
   // 손상도 옵션
   const damageLevels: { id: DamageLevel; label: string; description: string; warning?: boolean }[] = [

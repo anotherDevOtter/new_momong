@@ -123,7 +123,6 @@ export function ConsultingSummary({
             transition={{ duration: 0.6 }}
             className="text-center mb-12"
           >
-            <p className="text-xs text-gray-500 font-normal tracking-wider mb-2">Step 5 of 12</p>
             <h1 className="text-2xl md:text-3xl font-normal tracking-wide text-black mb-3">
               컨설팅 요약 대시보드
             </h1>

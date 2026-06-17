@@ -1,24 +1,41 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Check, Sparkles } from 'lucide-react';
 import { NavigationButtons } from './NavigationButtons';
-
-interface HairDesignProposalProps {
-  onBack: () => void;
-  onNext: () => void;
-}
 
 type LengthOption = 'above-chin' | 'chin-collarbone' | 'collarbone' | 'below-collarbone';
 type BangsOption = 'none' | 'see-through' | 'full' | 'side' | 'straight' | 'choppy';
 type CurlOption = 'straight' | 'c-curl' | 's-curl' | 'cs-curl' | 'wave';
 type ColorOption = 'tone-down' | 'tone-up' | 'root' | 'bleach' | 'maintain';
 
-export function HairDesignProposal({ onBack, onNext }: HairDesignProposalProps) {
+export interface HairDesignData {
+  length: LengthOption;
+  bangs: BangsOption;
+  curl: CurlOption;
+  color: ColorOption;
+  memo: string;
+}
+
+interface HairDesignProposalProps {
+  onBack: () => void;
+  onNext: () => void;
+  // 얼굴 분석에서 도출된 이미지 타입 라벨 (예: 'Neutral / Neutral'). 없으면 기본 표기.
+  imageTypeLabel?: string;
+  onChange?: (data: HairDesignData) => void;
+}
+
+export function HairDesignProposal({ onBack, onNext, imageTypeLabel, onChange }: HairDesignProposalProps) {
   const [selectedLength, setSelectedLength] = useState<LengthOption>('collarbone');
   const [selectedBangs, setSelectedBangs] = useState<BangsOption>('see-through');
   const [selectedCurl, setSelectedCurl] = useState<CurlOption>('c-curl');
   const [selectedColor, setSelectedColor] = useState<ColorOption>('tone-down');
   const [memo, setMemo] = useState('');
+
+  // 선택 변경 시 상위로 보고 (저장용)
+  useEffect(() => {
+    onChange?.({ length: selectedLength, bangs: selectedBangs, curl: selectedCurl, color: selectedColor, memo });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedLength, selectedBangs, selectedCurl, selectedColor, memo]);
 
   // 길이 옵션
   const lengthOptions: { id: LengthOption; label: string; recommended: boolean; description: string }[] = [
@@ -92,7 +109,7 @@ export function HairDesignProposal({ onBack, onNext }: HairDesignProposalProps) 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <p className="text-xs text-gray-500 font-light mb-1">현재 이미지 타입:</p>
-                <p className="text-sm text-black font-light">Neutral / Neutral</p>
+                <p className="text-sm text-black font-light">{imageTypeLabel || 'Neutral / Neutral'}</p>
               </div>
               <div>
                 <p className="text-xs text-gray-500 font-light mb-1">추천 전략:</p>

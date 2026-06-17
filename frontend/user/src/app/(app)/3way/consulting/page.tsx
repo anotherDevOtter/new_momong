@@ -10,13 +10,13 @@ import { FashionPreferenceDiagnosis, FashionPreferenceData } from '@/components/
 import { ConsultingSummary } from '@/components/3way/ConsultingSummary';
 import { FaceAnalysisCapture } from '@/components/3way/FaceAnalysisCapture';
 import { FaceAnalysisProcessing } from '@/components/3way/FaceAnalysisProcessing';
-import { FaceAnalysisResult } from '@/components/3way/FaceAnalysisResult';
+import { FaceAnalysisResult, type FaceResultData } from '@/components/3way/FaceAnalysisResult';
 import type { AnalyzeResponse } from '@/utils/face-analysis-api';
 import { PersonalColorAnalysis } from '@/components/3way/PersonalColorAnalysis';
 import { SkeletonImageAnalysis } from '@/components/3way/SkeletonImageAnalysis';
-import { ImageDirectionSetting } from '@/components/3way/ImageDirectionSetting';
-import { HairDesignProposal } from '@/components/3way/HairDesignProposal';
-import { HairTextureAnalysis } from '@/components/3way/HairTextureAnalysis';
+import { ImageDirectionSetting, type ImageDirectionData } from '@/components/3way/ImageDirectionSetting';
+import { HairDesignProposal, type HairDesignData } from '@/components/3way/HairDesignProposal';
+import { HairTextureAnalysis, type HairTextureData } from '@/components/3way/HairTextureAnalysis';
 import { NextDirection, CycleData } from '@/components/3way/NextDirection';
 import { PremiumReport } from '@/components/3way/PremiumReport';
 import { CompletionPage } from '@/components/3way/CompletionPage';
@@ -74,6 +74,11 @@ function Inner() {
   const [cycleData, setCycleData] = useState<CycleData | null>(null);
   const [faceAnalysisResult, setFaceAnalysisResult] = useState<AnalyzeResponse | null>(null);
   const [faceImageUrl, setFaceImageUrl] = useState<string | null>(null);
+  // 디자이너가 확정/수정한 다운스트림 입력값 (저장 + step 간 연동)
+  const [faceResultData, setFaceResultData] = useState<FaceResultData | null>(null);
+  const [imageDirectionData, setImageDirectionData] = useState<ImageDirectionData | null>(null);
+  const [hairDesignData, setHairDesignData] = useState<HairDesignData | null>(null);
+  const [hairTextureData, setHairTextureData] = useState<HairTextureData | null>(null);
   const [hydrating, setHydrating] = useState(true);
 
   useEffect(() => {
@@ -146,11 +151,21 @@ function Inner() {
   const handleFaceProcessingComplete = () => setCurrentPage('faceResult');
 
   const handleFaceResultBack = () => setCurrentPage('faceAnalysis');
-  const handleFaceResultNext = () => {
+  const handleFaceResultNext = (data: FaceResultData) => {
+    setFaceResultData(data);
     if (selectedCourse === '2way-personal') setCurrentPage('personalColor');
     else if (selectedCourse === '2way-skeleton') setCurrentPage('skeletonImage');
     else setCurrentPage('imageDirection');
   };
+
+  // 얼굴 분석에서 도출된 현재 이미지 타입 (디자이너 수정 반영). 분석 전이면 N/N.
+  const currentImageType = {
+    warmCool: faceResultData?.wncFinal ?? 'N',
+    softHard: faceResultData?.snhFinal ?? 'N',
+  } as const;
+  const toneLabel = { W: 'Warm', N: 'Neutral', C: 'Cool' } as const;
+  const balanceLabel = { S: 'Soft', N: 'Neutral', H: 'Hard' } as const;
+  const imageTypeLabel = `${toneLabel[currentImageType.warmCool]} / ${balanceLabel[currentImageType.softHard]}`;
 
   const handlePersonalColorBack = () => setCurrentPage('faceResult');
   const handlePersonalColorNext = () => setCurrentPage('imageDirection');
@@ -177,11 +192,14 @@ function Inner() {
   const handleReportClose = () => {
     setShowReport(false);
     if (customerData.phone) {
-      const courseName =
-        selectedCourse === '3way' ? '3WAY'
-        : selectedCourse === '2way-personal' ? '2WAY (Personal Color)'
-        : selectedCourse === '2way-skeleton' ? '2WAY (Skeleton Image)'
-        : '1WAY';
+      const COURSE_NAMES: Record<string, string> = {
+        '3way': '3WAY',
+        '2way-personal': '2WAY (Personal Color)',
+        '2way-skeleton': '2WAY (Skeleton Image)',
+        '1way': '1WAY',
+      };
+      // F6: 알 수 없는 코스는 '1WAY' 로 단정하지 않고 받은 값 그대로 보존
+      const courseName = COURSE_NAMES[selectedCourse] || selectedCourse;
 
       saveConsult({
         phone: customerData.phone,
@@ -196,12 +214,21 @@ function Inner() {
             ? {
                 wncId: faceAnalysisResult.wncId,
                 snhId: faceAnalysisResult.snhId,
-                wncFinal: faceAnalysisResult.wnc.final,
-                snhFinal: faceAnalysisResult.snh.final,
-                imageType: `${faceAnalysisResult.wnc.final} / ${faceAnalysisResult.snh.final}`,
+                // 디자이너가 수정한 최종값 우선, 없으면 원본 분석값
+                wncFinal: faceResultData?.wncFinal ?? faceAnalysisResult.wnc.final,
+                snhFinal: faceResultData?.snhFinal ?? faceAnalysisResult.snh.final,
+                imageType: `${faceResultData?.wncFinal ?? faceAnalysisResult.wnc.final} / ${faceResultData?.snhFinal ?? faceAnalysisResult.snh.final}`,
+                ratios: faceResultData?.ratios,
+                summaryItems: faceResultData?.summaryItems,
+                warmCool: faceResultData?.warmCool,
+                softHard: faceResultData?.softHard,
                 faceImageUrl,
               }
             : null,
+          // B1: 이전에 저장 누락되던 디자이너 입력값들
+          imageDirection: imageDirectionData,
+          hairDesign: hairDesignData,
+          hairTexture: hairTextureData,
           cycleData,
           imagePreferenceData,
           fashionPreferenceData,
@@ -247,9 +274,9 @@ function Inner() {
     if (currentPage === 'faceResult') return <FaceAnalysisResult analysisResult={faceAnalysisResult} onBack={handleFaceResultBack} onNext={handleFaceResultNext} />;
     if (currentPage === 'personalColor') return <PersonalColorAnalysis onBack={handlePersonalColorBack} onNext={handlePersonalColorNext} />;
     if (currentPage === 'skeletonImage') return <SkeletonImageAnalysis onBack={handleSkeletonImageBack} onNext={handleSkeletonImageNext} />;
-    if (currentPage === 'imageDirection') return <ImageDirectionSetting onBack={handleImageDirectionBack} onNext={handleImageDirectionNext} />;
-    if (currentPage === 'hairDesign') return <HairDesignProposal onBack={handleHairDesignBack} onNext={handleHairDesignNext} />;
-    if (currentPage === 'hairTexture') return <HairTextureAnalysis onBack={handleHairTextureBack} onNext={handleHairTextureNext} />;
+    if (currentPage === 'imageDirection') return <ImageDirectionSetting onBack={handleImageDirectionBack} onNext={handleImageDirectionNext} currentType={currentImageType} onChange={setImageDirectionData} />;
+    if (currentPage === 'hairDesign') return <HairDesignProposal onBack={handleHairDesignBack} onNext={handleHairDesignNext} imageTypeLabel={imageTypeLabel} onChange={setHairDesignData} />;
+    if (currentPage === 'hairTexture') return <HairTextureAnalysis onBack={handleHairTextureBack} onNext={handleHairTextureNext} onChange={setHairTextureData} />;
     if (currentPage === 'nextDirection') {
       return (
         <>
@@ -266,6 +293,8 @@ function Inner() {
               designerName={customerData.designerName || '디자이너'}
               cycleData={cycleData}
               selectedCourse={selectedCourse}
+              imageType={currentImageType}
+              ratios={faceResultData?.ratios}
             />
           )}
         </>
@@ -282,10 +311,27 @@ function Inner() {
   const stepIndex = visibleSteps.indexOf(currentPage);
   const showProgress = stepIndex >= 0;
 
+  // F5: 디자이너가 현재 코스를 인지할 수 있도록 칩 표시
+  const COURSE_CHIP: Record<string, string> = {
+    '3way': '3WAY',
+    '2way-personal': '2WAY 퍼스널컬러',
+    '2way-skeleton': '2WAY 골격',
+    '1way': '1WAY',
+  };
+  const courseChipLabel = COURSE_CHIP[selectedCourse] || selectedCourse;
+
   return (
     <>
       {showProgress && (
-        <ProgressBar currentStep={stepIndex + 1} totalSteps={visibleSteps.length + 1} />
+        <ProgressBar
+          currentStep={stepIndex + 1}
+          totalSteps={visibleSteps.length + 1}
+          leftSlot={
+            <span className="shrink-0 inline-flex items-center rounded-full bg-[#111111] text-white text-xs font-medium px-3 py-1 tracking-wide">
+              {courseChipLabel}
+            </span>
+          }
+        />
       )}
       {renderPage()}
     </>

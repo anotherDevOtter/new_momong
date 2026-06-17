@@ -5,9 +5,19 @@ import { NavigationButtons } from './NavigationButtons';
 import type { AnalyzeResponse } from '@/utils/face-analysis-api';
 const faceImage = '/3way/face-image.png';
 
+// 디자이너가 (필요 시 수정한) 최종 얼굴 분석 결과 — 다운스트림 step 으로 전달 + 저장
+export interface FaceResultData {
+  wncFinal: 'W' | 'N' | 'C';
+  snhFinal: 'S' | 'N' | 'H';
+  ratios: { vertical: string; face: string; midSection: string };
+  summaryItems: string[];
+  warmCool: { label: string; selectedType: 'warm' | 'neutral' | 'cool' }[];
+  softHard: { label: string; selectedType: 'soft' | 'neutral' | 'hard' }[];
+}
+
 interface FaceAnalysisResultProps {
   onBack: () => void;
-  onNext: () => void;
+  onNext: (data: FaceResultData) => void;
   analysisResult?: AnalyzeResponse | null;
 }
 
@@ -180,7 +190,6 @@ export function FaceAnalysisResult({ onBack, onNext, analysisResult }: FaceAnaly
             transition={{ duration: 0.6 }}
             className="text-center mb-12"
           >
-            <p className="text-xs text-gray-500 font-medium tracking-wider mb-2">Step 8 of 12</p>
             <h2 className="text-2xl font-bold text-[#111111] tracking-[-0.01em] mb-3">
               Face Precision Result
             </h2>
@@ -554,7 +563,20 @@ export function FaceAnalysisResult({ onBack, onNext, analysisResult }: FaceAnaly
           </div>
 
           {/* 하단 버튼 */}
-          <NavigationButtons onBack={onBack} onNext={onNext} nextLabel="다음" />
+          <NavigationButtons
+            onBack={onBack}
+            onNext={() =>
+              onNext({
+                wncFinal: finalWarmCool,
+                snhFinal: finalSoftHard,
+                ratios,
+                summaryItems,
+                warmCool: warmCoolAnalysis.map((r) => ({ label: r.label, selectedType: r.selectedType })),
+                softHard: softHardAnalysis.map((r) => ({ label: r.label, selectedType: r.selectedType })),
+              })
+            }
+            nextLabel="다음"
+          />
         </div>
       </div>
     </div>

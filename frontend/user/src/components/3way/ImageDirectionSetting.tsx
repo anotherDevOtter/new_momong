@@ -1,13 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Check, Image as ImageIcon } from 'lucide-react';
 import { NavigationButtons } from './NavigationButtons';
 import { HairImageMapReference } from './HairImageMapReference';
-
-interface ImageDirectionSettingProps {
-  onBack: () => void;
-  onNext: () => void;
-}
 
 type ImageType = {
   warmCool: 'W' | 'N' | 'C';
@@ -16,11 +11,39 @@ type ImageType = {
 
 type Strategy = 'enhance' | 'utilize' | 'neutralize';
 
-export function ImageDirectionSetting({ onBack, onNext }: ImageDirectionSettingProps) {
-  // 현재 고객 타입 (분석 결과에서 가져온 데이터)
-  const currentType: ImageType = { warmCool: 'N', softHard: 'N' };
+export interface ImageDirectionData {
+  currentType: ImageType;
+  strategy: Strategy;
+}
+
+interface ImageDirectionSettingProps {
+  onBack: () => void;
+  onNext: () => void;
+  // 얼굴 분석에서 도출된 현재 고객 타입. 없으면 N/N.
+  currentType?: ImageType;
+  onChange?: (data: ImageDirectionData) => void;
+}
+
+const TONE_LABEL: Record<'W' | 'N' | 'C', string> = { W: 'Warm', N: 'Neutral', C: 'Cool' };
+const BALANCE_LABEL: Record<'S' | 'N' | 'H', string> = { S: 'Soft', N: 'Neutral', H: 'Hard' };
+
+export function ImageDirectionSetting({
+  onBack,
+  onNext,
+  currentType = { warmCool: 'N', softHard: 'N' },
+  onChange,
+}: ImageDirectionSettingProps) {
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy>('enhance');
   const [showImageMapReference, setShowImageMapReference] = useState(false);
+
+  // 현재 타입 키 (예: 'N/N') — hairImageMap 조회용
+  const currentKey = `${currentType.warmCool}/${currentType.softHard}`;
+
+  // 선택/타입 변경 시 상위로 보고 (저장용)
+  useEffect(() => {
+    onChange?.({ currentType, strategy: selectedStrategy });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedStrategy, currentType.warmCool, currentType.softHard]);
 
   // 3x3 그리드 타입
   const typeGrid: ImageType[][] = [
@@ -149,7 +172,6 @@ export function ImageDirectionSetting({ onBack, onNext }: ImageDirectionSettingP
             transition={{ duration: 0.6 }}
             className="text-center mb-12"
           >
-            <p className="text-xs text-gray-500 font-normal tracking-wider mb-2">Step 9 of 12</p>
             <h2 className="text-2xl font-bold text-[#111111] tracking-[-0.01em] mb-3">
               이미지 키워드 설정
             </h2>
@@ -216,13 +238,15 @@ export function ImageDirectionSetting({ onBack, onNext }: ImageDirectionSettingP
                   <div>
                     <p className="text-xs text-gray-500 font-normal mb-1">현재 타입:</p>
                     <p className="text-sm text-black font-normal">
-                      Neutral Tone / Neutral Balance (N/N)
+                      {TONE_LABEL[currentType.warmCool]} Tone / {BALANCE_LABEL[currentType.softHard]} Balance ({currentKey})
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 font-normal mb-1">기본 이미지 성향:</p>
                     <p className="text-sm text-black font-normal">
-                      자연스러운 / 담백한 / 단아한
+                      {(hairImageMap[currentKey as keyof typeof hairImageMap]?.details
+                        ?? hairImageMap[currentKey as keyof typeof hairImageMap]?.keywords
+                        ?? []).join(' / ')}
                     </p>
                   </div>
                   <div>
@@ -314,7 +338,7 @@ export function ImageDirectionSetting({ onBack, onNext }: ImageDirectionSettingP
 
                   {/* 키워드 배치 */}
                   {coordinateKeywords.map((item, index) => {
-                    const isCurrentPosition = item.type === 'N/N';
+                    const isCurrentPosition = item.type === currentKey;
                     return (
                       <div
                         key={index}
@@ -339,12 +363,16 @@ export function ImageDirectionSetting({ onBack, onNext }: ImageDirectionSettingP
                     );
                   })}
 
-                  {/* 고객 위치 표시 (중앙) */}
+                  {/* 고객 위치 표시 — 현재 타입 좌표 */}
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: 0.6, type: 'spring', stiffness: 200 }}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                    className="absolute -translate-x-1/2 -translate-y-1/2"
+                    style={{
+                      left: `${hairImageMap[currentKey as keyof typeof hairImageMap]?.position.x ?? 50}%`,
+                      top: `${hairImageMap[currentKey as keyof typeof hairImageMap]?.position.y ?? 50}%`,
+                    }}
                   >
                     {/* 점선 원 */}
                     <div className="absolute inset-0 w-12 h-12 -translate-x-6 -translate-y-6">

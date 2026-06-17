@@ -1,8 +1,19 @@
-import { useState } from 'react';
+import { useState, cloneElement, isValidElement } from 'react';
+import type { ReactElement } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, ChevronRight, Download, X } from 'lucide-react';
 import { CycleData } from './NextDirection';
 import { saveConsult } from '@/utils/3way-api';
+
+interface ReportImageType {
+  warmCool: 'W' | 'N' | 'C';
+  softHard: 'S' | 'N' | 'H';
+}
+interface ReportRatios {
+  vertical: string;
+  face: string;
+  midSection: string;
+}
 
 interface PremiumReportProps {
   onClose: () => void;
@@ -12,7 +23,13 @@ interface PremiumReportProps {
   cycleData: CycleData | null;
   selectedCourse?: string;
   customerPhone?: string;
+  // 얼굴 분석에서 도출된 이미지 타입 / 비율 (디자이너 수정 반영)
+  imageType?: ReportImageType;
+  ratios?: ReportRatios;
 }
+
+const TONE_LABEL: Record<'W' | 'N' | 'C', string> = { W: 'Warm', N: 'Neutral', C: 'Cool' };
+const BALANCE_LABEL: Record<'S' | 'N' | 'H', string> = { S: 'Soft', N: 'Neutral', H: 'Hard' };
 
 export function PremiumReport({
   onClose,
@@ -22,10 +39,37 @@ export function PremiumReport({
   cycleData,
   selectedCourse,
   customerPhone,
+  imageType = { warmCool: 'N', softHard: 'N' },
+  ratios,
 }: PremiumReportProps) {
   const [currentPage, setCurrentPage] = useState(0);
   const [editedDesignerName, setEditedDesignerName] = useState(designerName);
-  const totalPages = 11;
+
+  // Q2: 코스별 노출 페이지 분기. 퍼스널컬러 페이지는 퍼스널컬러를 분석하는 코스에서만.
+  const showPersonalColor = selectedCourse === '3way' || selectedCourse === '2way-personal';
+
+  // 노출할 페이지를 순서대로 빌드 → 페이지 번호 / 인디케이터 / 네비게이션이 일관되게 동작
+  const pages: React.ReactNode[] = [
+    <CoverPage key="cover" pageNumber={0} customerName={customerName} consultDate={consultDate} designerName={editedDesignerName} onDesignerNameChange={setEditedDesignerName} />,
+    <FaceStructurePage key="face-structure" pageNumber={0} ratios={ratios} />,
+    <ImageAxisPage key="image-axis" pageNumber={0} imageType={imageType} />,
+    ...(showPersonalColor ? [<PersonalColorPage key="personal-color" pageNumber={0} />] : []),
+    <HairTexturePage key="hair-texture" pageNumber={0} />,
+    <TodayDesignPage key="today-design" pageNumber={0} />,
+    <ImageMovementPage key="image-movement" pageNumber={0} />,
+    <DesignCycleMasterPlanPage key="design-cycle" pageNumber={0} cycleData={cycleData} />,
+    <NextDirectionSummaryPage key="next-direction" pageNumber={0} />,
+    <PersonalNotePage key="personal-note" pageNumber={0} designerName={editedDesignerName} />,
+    <ClosingPage key="closing" pageNumber={0} />,
+  ];
+  const totalPages = pages.length;
+  // 현재 페이지가 범위를 벗어나면 마지막으로 보정 (코스 전환 등 방어)
+  const safePage = Math.min(currentPage, totalPages - 1);
+  const activePage = pages[safePage];
+  // 실제 노출 순번으로 페이지 번호 주입
+  const activePageWithNumber = isValidElement(activePage)
+    ? cloneElement(activePage as ReactElement<{ pageNumber: number }>, { pageNumber: safePage + 1 })
+    : activePage;
 
   const nextPage = () => {
     if (currentPage < totalPages - 1) {
@@ -56,7 +100,7 @@ export function PremiumReport({
           <div className="flex items-center gap-4">
             <h2 className="text-sm font-light text-black tracking-wide">MERCI MOMONG</h2>
             <span className="text-xs text-gray-500 font-light">
-              {currentPage + 1} / {totalPages}
+              {safePage + 1} / {totalPages}
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -81,17 +125,7 @@ export function PremiumReport({
         <div className="flex-1 overflow-y-auto bg-gray-50">
           <div className="max-w-3xl mx-auto py-8 px-6">
             <AnimatePresence mode="wait">
-              {currentPage === 0 && <CoverPage key="cover" pageNumber={1} customerName={customerName} consultDate={consultDate} designerName={editedDesignerName} onDesignerNameChange={setEditedDesignerName} />}
-              {currentPage === 1 && <FaceStructurePage key="face-structure" pageNumber={2} />}
-              {currentPage === 2 && <ImageAxisPage key="image-axis" pageNumber={3} />}
-              {currentPage === 3 && <PersonalColorPage key="personal-color" pageNumber={4} />}
-              {currentPage === 4 && <HairTexturePage key="hair-texture" pageNumber={5} />}
-              {currentPage === 5 && <TodayDesignPage key="today-design" pageNumber={6} />}
-              {currentPage === 6 && <ImageMovementPage key="image-movement" pageNumber={7} />}
-              {currentPage === 7 && <DesignCycleMasterPlanPage key="design-cycle" pageNumber={8} cycleData={cycleData} />}
-              {currentPage === 8 && <NextDirectionSummaryPage key="next-direction" pageNumber={9} />}
-              {currentPage === 9 && <PersonalNotePage key="personal-note" pageNumber={10} designerName={editedDesignerName} />}
-              {currentPage === 10 && <ClosingPage key="closing" pageNumber={11} />}
+              {activePageWithNumber}
             </AnimatePresence>
           </div>
         </div>
@@ -120,7 +154,7 @@ export function PremiumReport({
                   key={index}
                   onClick={() => goToPage(index)}
                   className={`w-2 h-2 rounded-full transition-all ${
-                    index === currentPage ? 'bg-black w-6' : 'bg-gray-300 hover:bg-gray-400'
+                    index === safePage ? 'bg-black w-6' : 'bg-gray-300 hover:bg-gray-400'
                   }`}
                 />
               ))}
@@ -157,14 +191,14 @@ function CoverPage({ pageNumber, customerName, consultDate, designerName, onDesi
     >
       {/* 페이지 번호 */}
       <div className="text-right mb-4">
-        <span className="text-xs text-gray-400 font-light">Page {pageNumber} of 11</span>
+        <span className="text-xs text-gray-400 font-light">Page {pageNumber}</span>
       </div>
       
       <div>
         <h1 className="text-3xl md:text-4xl font-light tracking-wider text-black mb-12">
           3WAY
           <br />
-          HIAR REPORT
+          HAIR REPORT
         </h1>
 
         <div className="space-y-3 text-sm font-light text-gray-700">
@@ -198,7 +232,9 @@ function CoverPage({ pageNumber, customerName, consultDate, designerName, onDesi
   );
 }
 
-function FaceStructurePage({ pageNumber }: { pageNumber: number }) {
+function FaceStructurePage({ pageNumber, ratios }: { pageNumber: number; ratios?: ReportRatios }) {
+  const faceRatio = ratios?.face ?? '1 : 1.6';
+  const verticalRatio = ratios?.vertical ?? '1 : 1 : 1';
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -208,7 +244,7 @@ function FaceStructurePage({ pageNumber }: { pageNumber: number }) {
     >
       {/* 페이지 번호 */}
       <div className="text-right mb-4">
-        <span className="text-xs text-gray-400 font-light">Page {pageNumber} of 11</span>
+        <span className="text-xs text-gray-400 font-light">Page {pageNumber}</span>
       </div>
       
       <h2 className="text-2xl font-light tracking-[0.05em] text-black mb-8 pb-4 border-b border-gray-200">
@@ -222,7 +258,7 @@ function FaceStructurePage({ pageNumber }: { pageNumber: number }) {
             <div className="w-48 h-64 border-2 border-gray-300 rounded-full mx-auto mb-4 relative">
               {/* 가로세로 비율 표시 */}
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <p className="text-xs font-light text-gray-600">1 : 1.6</p>
+                <p className="text-xs font-light text-gray-600">{faceRatio}</p>
               </div>
               {/* 상중하 구분선 */}
               <div className="absolute top-1/3 left-0 right-0 h-px bg-gray-300"></div>
@@ -234,8 +270,8 @@ function FaceStructurePage({ pageNumber }: { pageNumber: number }) {
 
         {/* 수치 데이터 */}
         <div className="space-y-4">
-          <DataRow label="얼굴 가로세로 비율" value="1 : 1.6" status="균형" />
-          <DataRow label="상중하 비율" value="1 : 1 : 1" status="표준" />
+          <DataRow label="얼굴 가로세로 비율" value={faceRatio} status="균형" />
+          <DataRow label="상중하 비율" value={verticalRatio} status="표준" />
           <DataRow label="중안부 길이" value="32.5mm" status="보통" />
           <DataRow label="좌우 대칭" value="95%" status="우수" />
           <DataRow label="윤곽 강도" value="중간" status="안정" />
@@ -252,7 +288,12 @@ function FaceStructurePage({ pageNumber }: { pageNumber: number }) {
   );
 }
 
-function ImageAxisPage({ pageNumber }: { pageNumber: number }) {
+function ImageAxisPage({ pageNumber, imageType = { warmCool: 'N', softHard: 'N' } }: { pageNumber: number; imageType?: ReportImageType }) {
+  const toneLabel = TONE_LABEL[imageType.warmCool];
+  const balanceLabel = BALANCE_LABEL[imageType.softHard];
+  // 가로축 Soft(좌)~Hard(우), 세로축 Cool(상)~Warm(하)
+  const posX = imageType.softHard === 'S' ? '25%' : imageType.softHard === 'H' ? '75%' : '50%';
+  const posY = imageType.warmCool === 'C' ? '25%' : imageType.warmCool === 'W' ? '75%' : '50%';
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -262,7 +303,7 @@ function ImageAxisPage({ pageNumber }: { pageNumber: number }) {
     >
       {/* 페이지 번호 */}
       <div className="text-right mb-4">
-        <span className="text-xs text-gray-400 font-light">Page {pageNumber} of 11</span>
+        <span className="text-xs text-gray-400 font-light">Page {pageNumber}</span>
       </div>
       
       <h2 className="text-2xl font-light tracking-[0.05em] text-black mb-8 pb-4 border-b border-gray-200">
@@ -292,10 +333,10 @@ function ImageAxisPage({ pageNumber }: { pageNumber: number }) {
             </div>
 
             {/* 현재 위치 */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="absolute transform -translate-x-1/2 -translate-y-1/2" style={{ left: posX, top: posY }}>
               <div className="w-4 h-4 bg-black rounded-full"></div>
               <p className="text-xs font-light text-black mt-2 whitespace-nowrap">
-                Neutral / Neutral
+                {toneLabel} / {balanceLabel}
               </p>
             </div>
           </div>
@@ -305,11 +346,11 @@ function ImageAxisPage({ pageNumber }: { pageNumber: number }) {
       <div className="space-y-4 mb-8">
         <div className="flex justify-between items-center py-3 border-b border-gray-200">
           <span className="text-sm font-light text-gray-600">Tone Axis</span>
-          <span className="text-sm font-light text-black">Neutral</span>
+          <span className="text-sm font-light text-black">{toneLabel}</span>
         </div>
         <div className="flex justify-between items-center py-3 border-b border-gray-200">
           <span className="text-sm font-light text-gray-600">Balance Axis</span>
-          <span className="text-sm font-light text-black">Neutral</span>
+          <span className="text-sm font-light text-black">{balanceLabel}</span>
         </div>
       </div>
 
@@ -332,7 +373,7 @@ function PersonalColorPage({ pageNumber }: { pageNumber: number }) {
     >
       {/* 페이지 번호 */}
       <div className="text-right mb-4">
-        <span className="text-xs text-gray-400 font-light">Page {pageNumber} of 11</span>
+        <span className="text-xs text-gray-400 font-light">Page {pageNumber}</span>
       </div>
       
       <h2 className="text-2xl font-light tracking-[0.05em] text-black mb-8 pb-4 border-b border-gray-200">
@@ -397,7 +438,7 @@ function HairTexturePage({ pageNumber }: { pageNumber: number }) {
     >
       {/* 페이지 번호 */}
       <div className="text-right mb-4">
-        <span className="text-xs text-gray-400 font-light">Page {pageNumber} of 11</span>
+        <span className="text-xs text-gray-400 font-light">Page {pageNumber}</span>
       </div>
       
       <h2 className="text-2xl font-light tracking-[0.05em] text-black mb-8 pb-4 border-b border-gray-200">
@@ -459,7 +500,7 @@ function TodayDesignPage({ pageNumber }: { pageNumber: number }) {
     >
       {/* 페이지 번호 */}
       <div className="text-right mb-4">
-        <span className="text-xs text-gray-400 font-light">Page {pageNumber} of 11</span>
+        <span className="text-xs text-gray-400 font-light">Page {pageNumber}</span>
       </div>
       
       <h2 className="text-2xl font-light tracking-[0.05em] text-black mb-8 pb-4 border-b border-gray-200">
@@ -509,7 +550,7 @@ function ImageMovementPage({ pageNumber }: { pageNumber: number }) {
     >
       {/* 페이지 번호 */}
       <div className="text-right mb-4">
-        <span className="text-xs text-gray-400 font-light">Page {pageNumber} of 11</span>
+        <span className="text-xs text-gray-400 font-light">Page {pageNumber}</span>
       </div>
       
       <h2 className="text-2xl font-light tracking-[0.05em] text-black mb-8 pb-4 border-b border-gray-200">
@@ -601,7 +642,7 @@ function PersonalNotePage({ pageNumber, designerName }: { pageNumber: number; de
     >
       {/* 페이지 번호 */}
       <div className="text-right mb-4">
-        <span className="text-xs text-gray-400 font-light">Page {pageNumber} of 11</span>
+        <span className="text-xs text-gray-400 font-light">Page {pageNumber}</span>
       </div>
       
       <h2 className="text-2xl font-light tracking-[0.05em] text-black mb-8 pb-4 border-b border-gray-200">
@@ -655,7 +696,7 @@ function ClosingPage({ pageNumber }: { pageNumber: number }) {
     >
       {/* 페이지 번호 */}
       <div className="absolute top-12 right-12">
-        <span className="text-xs text-gray-400 font-light">Page {pageNumber} of 11</span>
+        <span className="text-xs text-gray-400 font-light">Page {pageNumber}</span>
       </div>
       
       <h1 className="text-4xl font-light tracking-[0.15em] text-black mb-12">MERCI MOMONG</h1>
@@ -744,7 +785,7 @@ function DesignCycleMasterPlanPage({ pageNumber, cycleData }: { pageNumber: numb
     >
       {/* 페이지 번호 */}
       <div className="text-right mb-4">
-        <span className="text-xs text-gray-400 font-light">Page {pageNumber} of 11</span>
+        <span className="text-xs text-gray-400 font-light">Page {pageNumber}</span>
       </div>
       
       <h2 className="text-2xl font-light tracking-[0.05em] text-black mb-3 pb-4 border-b border-gray-200">
@@ -804,7 +845,7 @@ function NextDirectionSummaryPage({ pageNumber }: { pageNumber: number }) {
     >
       {/* 페이지 번호 */}
       <div className="text-right mb-4">
-        <span className="text-xs text-gray-400 font-light">Page {pageNumber} of 11</span>
+        <span className="text-xs text-gray-400 font-light">Page {pageNumber}</span>
       </div>
       
       <h2 className="text-2xl font-light tracking-[0.05em] text-black mb-8 pb-4 border-b border-gray-200">
