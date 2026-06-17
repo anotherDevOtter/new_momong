@@ -47,31 +47,31 @@
 
 ---
 
-## 🟠 3WAY 컨설팅 로직 결함 (이번 세션 발견 — 미수정)
+## 🟠 3WAY 컨설팅 로직 결함 (이번 세션 발견)
 
-### B1. **저장 누락 — 디자이너 입력의 절반 이상이 버려짐**
-[/(app)/3way/consulting/page.tsx:186-210](frontend/user/src/app/(app)/3way/consulting/page.tsx#L186-L210) 의 `saveConsult` 호출이 다음 단계 데이터를 포함하지 않음:
+### B1. ✅ **저장 누락 — 디자이너 입력의 절반 이상이 버려짐** (2026-06-17 완료)
+모든 단계 입력값이 `saveConsult` 의 `consultData` 에 포함되도록 수정 완료.
 
 | 단계 | 입력값 | 저장됨? |
 |------|--------|--------|
-| `PersonalColorAnalysis` (2way-personal) | 웜/쿨 결과 | ❌ |
-| `SkeletonImageAnalysis` (2way-skeleton) | 골격 타입 | ❌ |
-| `ImageDirectionSetting` | 내추럴/모던/페미닌 | ❌ |
-| `HairDesignProposal` | 길이/앞머리/컬/컬러 | ❌ |
-| `HairTextureAnalysis` | 손상도/모질/숱 | ❌ |
-| `NextDirection` | `cycleData` 만 ✅, 그 외 선택값 | 부분 |
+| `PersonalColorAnalysis` (2way-personal) | 웜/쿨(season) 결과 | ✅ `personalColor` |
+| `SkeletonImageAnalysis` (2way-skeleton) | 골격 타입 | ✅ `skeleton` |
+| `ImageDirectionSetting` | 내추럴/모던/페미닌 | ✅ `imageDirection` |
+| `HairDesignProposal` | 길이/앞머리/컬/컬러 | ✅ `hairDesign` |
+| `HairTextureAnalysis` | 손상도/모질/숱 | ✅ `hairTexture` |
+| `NextDirection` | `cycleData` | ✅ |
 
-**원인**: 위 컴포넌트들이 `onNext()` 만 받고 데이터 콜백 prop 이 없음.
-**조치**: 각 컴포넌트에 `onChange`/`onComplete` 콜백 추가 → page state 로 끌어올린 뒤 `consultData` 에 포함.
+각 컴포넌트에 `onChange` 콜백 추가 → page state 로 끌어올려 저장. (3WAY 경로 `cd1f110`, 2WAY 경로 `70a526a`)
 
-### B2. **저장 타이밍 — 마지막 한 번만**
+### B2. **저장 타이밍 — 마지막 한 번만** 🔴 미수정 (백엔드 묶음)
 - `saveConsult` 가 `handleReportClose`(PremiumReport 닫기) 에서만 호출
 - 중간 이탈/새로고침/네트워크 끊김 → **전부 손실**
 - **조치**: backend 에 draft consultation API 추가 → 단계별 PATCH 로 누적 저장
 
-### B3. **전화번호 없는 고객은 저장 스킵**
-[page.tsx:179](frontend/user/src/app/(app)/3way/consulting/page.tsx#L179) `if (customerData.phone)` 가드 때문에 전화 없는 고객은 컨설팅 끝까지 진행해도 DB 행 0건.
-- **조치**: `customerId` 가 있으면 phone 없어도 저장하도록 가드 수정 + `saveConsult` API 가 customerId 받게 확장
+### B3. **전화번호 없는 고객은 저장 스킵** 🔴 미수정 (백엔드 묶음 — B2 와 함께)
+[page.tsx](frontend/user/src/app/(app)/3way/consulting/page.tsx) `if (customerData.phone)` 가드 때문에 전화 없는 고객은 컨설팅 끝까지 진행해도 DB 행 0건.
+- ⚠️ **프론트 가드만 풀면 안 됨**: 컨설팅↔고객 연결이 **전화번호 기준**(`/consultations/by-customer/{phone}`). phone 없이 저장하면 어느 고객에도 매칭 안 되는 미아 레코드.
+- **조치**: backend 가 `customerId` 연결을 지원하도록 확장 (저장 시 customerId 보존 + 조회를 customerId 기준으로) → 그 후 프론트 가드를 customerId 기준으로 변경. B2 의 draft API 설계와 함께 진행.
 
 ### B4. **상태 복원 안 됨**
 - 모든 step 컴포넌트가 자체 `useState` → 뒤로 갔다 다시 들어오면 입력 초기화
