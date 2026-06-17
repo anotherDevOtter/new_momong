@@ -68,10 +68,13 @@
 - 중간 이탈/새로고침/네트워크 끊김 → **전부 손실**
 - **조치**: backend 에 draft consultation API 추가 → 단계별 PATCH 로 누적 저장
 
-### B3. **전화번호 없는 고객은 저장 스킵** 🔴 미수정 (백엔드 묶음 — B2 와 함께)
-[page.tsx](frontend/user/src/app/(app)/3way/consulting/page.tsx) `if (customerData.phone)` 가드 때문에 전화 없는 고객은 컨설팅 끝까지 진행해도 DB 행 0건.
-- ⚠️ **프론트 가드만 풀면 안 됨**: 컨설팅↔고객 연결이 **전화번호 기준**(`/consultations/by-customer/{phone}`). phone 없이 저장하면 어느 고객에도 매칭 안 되는 미아 레코드.
-- **조치**: backend 가 `customerId` 연결을 지원하도록 확장 (저장 시 customerId 보존 + 조회를 customerId 기준으로) → 그 후 프론트 가드를 customerId 기준으로 변경. B2 의 draft API 설계와 함께 진행.
+### B3. ✅ **전화번호 없는 고객은 저장 스킵** (2026-06-17 완료, `8e62538`)
+컨설팅↔고객 연결을 **전화번호 → customerId** 로 전환.
+- 백엔드: DTO `customerId` 추가, `create()` 가 customerId(소유 검증)로 직접 연결 + 전화번호 upsert 폴백 유지
+- 프론트 저장: `saveConsult` 에 customerId 전송, 가드 `if(phone)` → `if(customerId)`
+- 프론트 조회: 고객 상세 이력을 `by-customer-id` 로 전환 (번호 변경/미입력에도 유지)
+- 운영 데이터: 170건 중 168 정상, 1건 백필, 복구불가 미아 2건(`yqrxwd0`/`tsncitp`) NULL 유지
+- ⚠️ **배포 주의**: 백엔드+프론트 동시 배포 필요 (조회 경로가 새 API `by-customer-id` 사용). 백엔드 먼저 배포 권장.
 
 ### B4. **상태 복원 안 됨**
 - 모든 step 컴포넌트가 자체 `useState` → 뒤로 갔다 다시 들어오면 입력 초기화
