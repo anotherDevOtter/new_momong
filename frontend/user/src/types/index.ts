@@ -70,6 +70,7 @@ export interface DesignCycleGuide {
 
 export interface ConsultationData {
   id?: string;
+  customerId?: string;
   createdAt?: string;
   clientInfo: ClientInfo;
   todayKeyword: TodayKeyword;

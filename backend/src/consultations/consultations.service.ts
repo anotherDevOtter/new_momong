@@ -40,16 +40,25 @@ export class ConsultationsService {
     const id = dto.id || this.generateId();
     const { clientInfo } = dto;
 
-    // 고객 upsert
-    let customer: { id: string } | null = null;
-    if (clientInfo?.name) {
+    // 고객 연결: customerId 가 오면 그대로 사용(소유 검증), 없으면 레거시로 전화번호 upsert
+    let customerId: string | undefined;
+    if (dto.customerId) {
       try {
-        customer = await this.customersService.upsertByPhone(userId, {
+        const owned = await this.customersService.findOne(userId, dto.customerId);
+        customerId = owned.id;
+      } catch {
+        // 내 고객이 아니거나 없는 id → 아래 전화번호 폴백
+      }
+    }
+    if (!customerId && clientInfo?.name) {
+      try {
+        const customer = await this.customersService.upsertByPhone(userId, {
           name: clientInfo.name,
           phone: clientInfo.phone,
           gender: clientInfo.gender,
           age_group: clientInfo.ageGroup,
         });
+        customerId = customer.id;
       } catch (err) {
         console.warn('Customer upsert failed (non-fatal):', err);
       }
@@ -58,7 +67,7 @@ export class ConsultationsService {
     const consultation = this.repo.create({
       id,
       user_id: userId,
-      customer_id: customer?.id || undefined,
+      customer_id: customerId,
       visit_date: dto.visitDate || new Date().toLocaleDateString('ko-KR'),
       designer_name: dto.designerName,
       after_note: dto.afterNote,

@@ -193,7 +193,8 @@ function Inner() {
 
   const handleReportClose = () => {
     setShowReport(false);
-    if (customerData.phone) {
+    // customerId 는 진입 시 항상 존재(없으면 입장 거부) → 전화번호 유무와 무관하게 저장
+    if (customerId) {
       const COURSE_NAMES: Record<string, string> = {
         '3way': '3WAY',
         '2way-personal': '2WAY (Personal Color)',
@@ -204,6 +205,7 @@ function Inner() {
       const courseName = COURSE_NAMES[selectedCourse] || selectedCourse;
 
       saveConsult({
+        customerId,
         phone: customerData.phone,
         name: customerData.name,
         course: courseName,

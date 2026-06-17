@@ -7,6 +7,11 @@ export class CreateConsultationDto {
   @IsString()
   id?: string;
 
+  @ApiPropertyOptional({ description: '고객 UUID (있으면 전화번호 대신 이걸로 연결)' })
+  @IsOptional()
+  @IsString()
+  customerId?: string;
+
   @ApiProperty({ description: '고객 기본 정보' })
   @IsObject()
   clientInfo: Record<string, any>;

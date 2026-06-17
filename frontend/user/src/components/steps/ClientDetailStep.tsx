@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, User, Calendar, Phone, Clock, Scissors, Copy, Check, Eye, EyeOff, Download, Pencil, Trash2, Briefcase, ClipboardList, Link2 } from 'lucide-react';
 import QRCode from 'react-qr-code';
-import { getConsultationsByCustomerPhone, getShareByConsultation, deleteConsultation } from '@/utils/api';
+import { getConsultationsByCustomerId, getShareByConsultation, deleteConsultation } from '@/utils/api';
 import { Modal } from '@/components/ui/Modal';
 import {
   createPreSurvey,
@@ -101,14 +101,15 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
   };
 
   useEffect(() => {
-    if (client.phone && token) {
+    if (client.id && token) {
       setIsLoading(true);
-      getConsultationsByCustomerPhone(token, client.phone)
+      // 전화번호 대신 고객 UUID 로 조회 (번호 변경·미입력에도 이력 유지)
+      getConsultationsByCustomerId(token, client.id)
         .then(setConsultations)
         .catch(console.error)
         .finally(() => setIsLoading(false));
     }
-  }, [client.phone, token]);
+  }, [client.id, token]);
 
   useEffect(() => {
     if (!token) return;

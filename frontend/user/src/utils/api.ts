@@ -98,6 +98,16 @@ export const getConsultationsByCustomerPhone = async (token: string, phone: stri
   return json.data.consultations;
 };
 
+// 고객 UUID 로 컨설팅 이력 조회 (전화번호 변경·미입력에도 안정적으로 연결)
+export const getConsultationsByCustomerId = async (token: string, customerId: string): Promise<ConsultationRecord[]> => {
+  const res = await fetch(`${API_BASE}/consultations/by-customer-id/${encodeURIComponent(customerId)}`, {
+    headers: authHeaders(token),
+  });
+  if (!res.ok) throw new Error('컨설팅 이력 조회 실패');
+  const json = await res.json();
+  return json.data.consultations;
+};
+
 export const updateConsultation = async (token: string, id: string, data: ConsultationData): Promise<ConsultationRecord> => {
   const json = await apiFetch<{ data: { consultation: ConsultationRecord } }>(
     `${API_BASE}/consultations/${id}`,

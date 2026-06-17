@@ -97,6 +97,7 @@ export async function getConsults(phone: string): Promise<{ consults: ThreeWayCo
 }
 
 export interface SaveConsultPayload {
+  customerId?: string;
   phone: string;
   name: string;
   course: string;
@@ -119,6 +120,7 @@ export async function saveConsult(payload: SaveConsultPayload): Promise<{ succes
   const token = getToken();
 
   const data: ConsultationData = {
+    ...(payload.customerId ? { customerId: payload.customerId } : {}),
     clientInfo: {
       name: payload.name,
       phone: payload.phone,
