@@ -9,11 +9,13 @@ import { FaceAnalysisService } from './face-analysis.service';
 import { FaceAnalysisController } from './face-analysis.controller';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminGuard } from '../admin/admin.guard';
+import { ModuleConfigsModule } from '../module-configs/module-configs.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([ImageDetectionResult]),
     HttpModule,
+    ModuleConfigsModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

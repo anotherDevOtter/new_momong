@@ -11,6 +11,7 @@ import { AdminModule } from './admin/admin.module';
 import { FeatureSettingsModule } from './feature-settings/feature-settings.module';
 import { FaceAnalysisModule } from './face-analysis/face-analysis.module';
 import { PreSurveysModule } from './pre-surveys/pre-surveys.module';
+import { ModuleConfigsModule } from './module-configs/module-configs.module';
 import { User } from './auth/users.entity';
 import { Customer } from './customers/customers.entity';
 import { Consultation } from './consultations/consultations.entity';
@@ -19,6 +20,7 @@ import { AdminAccount } from './admin/admin-account.entity';
 import { FeatureSettings } from './feature-settings/feature-settings.entity';
 import { ImageDetectionResult } from './face-analysis/face-analysis.entity';
 import { PreSurvey } from './pre-surveys/pre-surveys.entity';
+import { ModuleConfig } from './module-configs/module-config.entity';
 import { RequestLoggerMiddleware } from './common/middleware/request-logger.middleware';
 
 @Module({
@@ -34,7 +36,7 @@ import { RequestLoggerMiddleware } from './common/middleware/request-logger.midd
         username: config.get('DB_USERNAME', 'postgres'),
         password: config.get('DB_PASSWORD', 'password'),
         database: config.get('DB_DATABASE', 'fit_hair'),
-        entities: [User, Customer, Consultation, ConsultationShare, AdminAccount, FeatureSettings, ImageDetectionResult, PreSurvey],
+        entities: [User, Customer, Consultation, ConsultationShare, AdminAccount, FeatureSettings, ImageDetectionResult, PreSurvey, ModuleConfig],
         synchronize: config.get('NODE_ENV') !== 'production',
         logging: config.get('NODE_ENV') === 'development',
         ssl: config.get('NODE_ENV') !== 'development' ? { rejectUnauthorized: false } : false,
@@ -53,6 +55,7 @@ import { RequestLoggerMiddleware } from './common/middleware/request-logger.midd
     FeatureSettingsModule,
     FaceAnalysisModule,
     PreSurveysModule,
+    ModuleConfigsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
