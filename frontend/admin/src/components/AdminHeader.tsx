@@ -20,6 +20,7 @@ export default function AdminHeader({ currentPath }: AdminHeaderProps) {
     { href: '/dashboard', label: '대시보드' },
     { href: '/users', label: '유저 관리' },
     { href: '/features', label: '기능 설정' },
+    { href: '/face-modules', label: '얼굴분석 모듈' },
     { href: '/face-analysis-test', label: '얼굴 분석 테스트' },
   ];
 

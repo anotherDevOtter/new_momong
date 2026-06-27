@@ -97,3 +97,36 @@ export const updateFeatureSettings = async (
   const json = await res.json();
   return json.data;
 };
+
+// ── 얼굴분석 모듈 표시 설정 (전역) ──
+export type ModuleConfig = {
+  id: string;
+  axis: 'WNC' | 'SNH';
+  moduleKey: string;
+  label: string;
+  order: number;
+  display: boolean;
+  unit: string | null;
+};
+
+export const getModuleConfigs = async (): Promise<ModuleConfig[]> => {
+  const res = await fetch(`${API_BASE}/module-configs`);
+  if (!res.ok) throw new Error('모듈 설정 조회 실패');
+  const json = await res.json();
+  return json.data;
+};
+
+export const updateModuleConfig = async (
+  token: string,
+  id: string,
+  patch: Partial<Pick<ModuleConfig, 'label' | 'order' | 'display' | 'unit'>>,
+): Promise<ModuleConfig> => {
+  const res = await fetch(`${API_BASE}/admin/module-configs/${id}`, {
+    method: 'PATCH',
+    headers: authHeaders(token),
+    body: JSON.stringify(patch),
+  });
+  if (!res.ok) throw new Error('모듈 설정 수정 실패');
+  const json = await res.json();
+  return json.data;
+};
