@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Check, Edit2 } from 'lucide-react';
 import { NavigationButtons } from './NavigationButtons';
-import type { AnalyzeResponse } from '@/utils/face-analysis-api';
+import { getModuleConfigs, type AnalyzeResponse, type ModuleConfig } from '@/utils/face-analysis-api';
 const faceImage = '/3way/face-image.png';
 
 // 디자이너가 (필요 시 수정한) 최종 얼굴 분석 결과 — 다운스트림 step 으로 전달 + 저장
@@ -21,10 +21,11 @@ interface FaceAnalysisResultProps {
   analysisResult?: AnalyzeResponse | null;
 }
 
-// 표시할 모듈: key = 서버 모듈번호(SSOT), label = 표시 라벨. 순서 = 배열 순서.
-// 바인딩을 모듈번호(key)로 직접 하므로, 라벨 역조회로 인한 "죽은 모듈" 버그가 구조적으로 불가능.
-// ⚠️ P2 에서 서버 display/order 메타로 이관 예정 — 지금은 프론트 화이트리스트.
-const WNC_ROWS: { key: string; label: string }[] = [
+type RowCfg = { key: string; label: string };
+
+// 표시는 서버 module-configs(SSOT)가 결정. 아래는 조회 실패 시 안전망(폴백).
+// 바인딩은 모듈번호(key)로 직접 → 라벨 역조회로 인한 "죽은 모듈" 버그 구조적으로 불가능.
+const WNC_FALLBACK: RowCfg[] = [
   { key: '1', label: '피부톤' },
   { key: '2', label: '페이스라인' },
   { key: '3', label: '광대 발달 정도' },
@@ -34,7 +35,7 @@ const WNC_ROWS: { key: string; label: string }[] = [
   { key: '9', label: '입술 형태' },
 ];
 
-const SNH_ROWS: { key: string; label: string }[] = [
+const SNH_FALLBACK: RowCfg[] = [
   { key: '2', label: '얼굴 길이' },
   { key: '4', label: '눈썹과 눈 거리' },
   { key: '5', label: '눈과 눈사이 거리' },
@@ -42,6 +43,13 @@ const SNH_ROWS: { key: string; label: string }[] = [
   { key: '10', label: '코 폭' },
   { key: '13', label: '입 폭' },
 ];
+
+// module-configs[] → 축별 표시행 (display 필터 + order 정렬)
+const rowCfgsFromConfigs = (configs: ModuleConfig[], axis: 'WNC' | 'SNH'): RowCfg[] =>
+  configs
+    .filter((c) => c.axis === axis && c.display)
+    .sort((a, b) => a.order - b.order)
+    .map((c) => ({ key: c.moduleKey, label: c.label }));
 
 // Python 응답의 각 모듈은 `grade` (또는 `type`) 필드로 W/N/C, S/N/H 를 가짐
 const moduleGrade = (m: { type?: string; grade?: string } | null | undefined) =>
@@ -67,36 +75,52 @@ interface SoftHardRow {
   selectedType: 'soft' | 'neutral' | 'hard';
 }
 
+// rowCfgs + 분석 results → 표 행 (selectedType 초기값 = 서버 grade, 모듈번호로 직접 조회)
+type GradeModule = { grade?: string; type?: string };
+function buildWarmCool(rowCfgs: RowCfg[], results?: Record<string, GradeModule>): AnalysisRow[] {
+  return rowCfgs.map(({ key, label }) => {
+    const m = results?.[key];
+    return { key, label, neutral: '중간', selectedType: m ? wncTypeToSelected(moduleGrade(m)) : 'neutral' };
+  });
+}
+
+function buildSoftHard(rowCfgs: RowCfg[], results?: Record<string, GradeModule>): SoftHardRow[] {
+  return rowCfgs.map(({ key, label }) => {
+    const m = results?.[key];
+    return { key, label, neutral: '중간', selectedType: m ? snhTypeToSelected(moduleGrade(m)) : 'neutral' };
+  });
+}
+
 export function FaceAnalysisResult({ onBack, onNext, analysisResult }: FaceAnalysisResultProps) {
-  // 서버 응답(results)을 모듈번호(key)로 직접 조회해 각 행의 초기 선택값 결정 (없으면 neutral)
-  const initWarmCool = (): AnalysisRow[] => {
-    const results = analysisResult?.wnc?.results;
-    return WNC_ROWS.map(({ key, label }) => {
-      const module = results?.[key];
-      return {
-        key,
-        label,
-        neutral: '중간',
-        selectedType: module ? wncTypeToSelected(moduleGrade(module)) : 'neutral',
-      };
-    });
-  };
+  const wncResults = analysisResult?.wnc?.results;
+  const snhResults = analysisResult?.snh?.results;
 
-  const initSoftHard = (): SoftHardRow[] => {
-    const results = analysisResult?.snh?.results;
-    return SNH_ROWS.map(({ key, label }) => {
-      const module = results?.[key];
-      return {
-        key,
-        label,
-        neutral: '중간',
-        selectedType: module ? snhTypeToSelected(moduleGrade(module)) : 'neutral',
-      };
-    });
-  };
+  // 초기엔 폴백으로 그리고, module-configs 로드되면 서버 설정 기준으로 교체
+  const [warmCoolAnalysis, setWarmCoolAnalysis] = useState<AnalysisRow[]>(
+    () => buildWarmCool(WNC_FALLBACK, wncResults),
+  );
+  const [softHardAnalysis, setSoftHardAnalysis] = useState<SoftHardRow[]>(
+    () => buildSoftHard(SNH_FALLBACK, snhResults),
+  );
 
-  const [warmCoolAnalysis, setWarmCoolAnalysis] = useState<AnalysisRow[]>(initWarmCool);
-  const [softHardAnalysis, setSoftHardAnalysis] = useState<SoftHardRow[]>(initSoftHard);
+  // module-configs 조회 → 표시/순서/라벨을 서버 설정 기준으로 재구성. 실패 시 폴백 유지.
+  useEffect(() => {
+    let cancelled = false;
+    getModuleConfigs()
+      .then((configs) => {
+        if (cancelled || !configs.length) return;
+        setWarmCoolAnalysis(buildWarmCool(rowCfgsFromConfigs(configs, 'WNC'), wncResults));
+        setSoftHardAnalysis(buildSoftHard(rowCfgsFromConfigs(configs, 'SNH'), snhResults));
+      })
+      .catch(() => {
+        /* 폴백 유지 */
+      });
+    return () => {
+      cancelled = true;
+    };
+    // 분석 결과는 마운트 시 고정(재분석 시 재마운트) → 1회만 로드
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [ratios, setRatios] = useState({
     vertical: '1:1:1',
