@@ -874,7 +874,7 @@ function SurveySection({
   // 3WAY 컨설팅에서 preInterviewData (faceConcerns/hairConcerns 등) 만 추출
   const surveys = consultations
     .map((c) => {
-      const tw = (c as unknown as { threeWay?: { preInterviewData?: unknown } }).threeWay;
+      const tw = (c.clientInfo as unknown as { threeWay?: { preInterviewData?: unknown } })?.threeWay;
       const pre = tw?.preInterviewData as
         | { selectedFaceAreas?: string[]; selectedHairConcerns?: string[]; faceAreasMemo?: string; hairConcernsMemo?: string }
         | undefined;
