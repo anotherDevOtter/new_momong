@@ -122,10 +122,15 @@ export function FaceAnalysisResult({ onBack, onNext, analysisResult }: FaceAnaly
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const [ratios, setRatios] = useState({
-    vertical: '1:1:1',
-    face: '1:1.4',
-    midSection: '1:2'
+  // 비율: 얼굴비율=SNH_2(세로/가로), 중안부=SNH_11 의 서버 value 를 표기(X : 1).
+  // 상중하는 서버 측정 모듈이 없어 수동 입력 유지. 값이 없으면 '- : 1'.
+  const [ratios, setRatios] = useState(() => {
+    const fmt = (v?: number | null) => (v != null ? `${v.toFixed(2)} : 1` : '- : 1');
+    return {
+      vertical: '1 : 1 : 1',
+      face: fmt(snhResults?.['2']?.value),
+      midSection: fmt(snhResults?.['11']?.value),
+    };
   });
 
   const [summaryItems, setSummaryItems] = useState([
