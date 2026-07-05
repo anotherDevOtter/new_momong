@@ -129,6 +129,9 @@ export async function saveConsult(payload: SaveConsultPayload): Promise<{ succes
       // 추가 메타는 jsonb 라 자유롭게 — course, occupation 함께 보존
       ...(payload.course ? { course: payload.course } : {}),
       ...(payload.occupation ? { occupation: payload.occupation } : {}),
+      // 3way 전체 페이로드는 clientInfo(jsonb) 안에 보존.
+      // ⚠️ 최상위에 두면 백엔드 ValidationPipe(whitelist:true)가 잘라버림 → client_info.threeWay 로 저장.
+      ...(payload.consultData ? { threeWay: payload.consultData } : {}),
     } as ConsultationData['clientInfo'],
     todayKeyword: { faceConcerns: [], faceConcernsMemo: '', hairConcerns: [], hairConcernsMemo: '', imageKeywords: [] },
     fashionStyle: { selected: [] },
@@ -141,8 +144,6 @@ export async function saveConsult(payload: SaveConsultPayload): Promise<{ succes
     designerName: payload.designerName || '',
     visitDate: new Date().toLocaleDateString('ko-KR'),
     afterNote: '',
-    // 3way 전체 페이로드를 별도 키에 보존
-    ...(payload.consultData ? ({ threeWay: payload.consultData } as unknown as Partial<ConsultationData>) : {}),
   };
 
   const saved = await saveConsultation(token, data);

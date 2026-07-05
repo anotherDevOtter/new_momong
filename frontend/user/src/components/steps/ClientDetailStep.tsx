@@ -16,6 +16,7 @@ import {
 import { describeApiError } from '@/utils/api-error';
 import { PreSurveyLinkDialog } from '@/components/PreSurveyLinkDialog';
 import { PreSurveyDetailView } from '@/components/pre-survey/PreSurveyDetailView';
+import { FaceAnalysisSummary, type SavedFaceAnalysis } from '@/components/3way/FaceAnalysisSummary';
 import { useAuth } from '@/contexts/AuthContext';
 import { Customer, ConsultationRecord } from '@/types';
 
@@ -451,6 +452,13 @@ function ConsultationDetailView({
         </div>
       )}
 
+      {/* 3WAY 얼굴 분석 결과 (client_info.threeWay.faceAnalysis) */}
+      {(() => {
+        const fa = (record.clientInfo as unknown as { threeWay?: { faceAnalysis?: SavedFaceAnalysis } })
+          ?.threeWay?.faceAnalysis;
+        return fa ? <FaceAnalysisSummary fa={fa} /> : null;
+      })()}
+
       {/* 진단 결과 */}
       {(record.faceImageType?.type || record.hairCondition) && (
         <div>
@@ -738,7 +746,7 @@ function SurveySection({
   // 3WAY 컨설팅에서 preInterviewData (faceConcerns/hairConcerns 등) 만 추출
   const surveys = consultations
     .map((c) => {
-      const tw = (c as unknown as { threeWay?: { preInterviewData?: unknown } }).threeWay;
+      const tw = (c.clientInfo as unknown as { threeWay?: { preInterviewData?: unknown } })?.threeWay;
       const pre = tw?.preInterviewData as
         | { selectedFaceAreas?: string[]; selectedHairConcerns?: string[]; faceAreasMemo?: string; hairConcernsMemo?: string }
         | undefined;
