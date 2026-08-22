@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Check, Edit2 } from 'lucide-react';
 import { NavigationButtons } from './NavigationButtons';
-import type { AnalyzeResponse } from '@/utils/face-analysis-api';
+import { getModuleConfigs, type AnalyzeResponse, type ModuleConfig } from '@/utils/face-analysis-api';
 const faceImage = '/3way/face-image.png';
 
 // 디자이너가 (필요 시 수정한) 최종 얼굴 분석 결과 — 다운스트림 step 으로 전달 + 저장
@@ -21,25 +21,35 @@ interface FaceAnalysisResultProps {
   analysisResult?: AnalyzeResponse | null;
 }
 
-// Python 응답의 results 키 (1~10, 1~12 문자열) ↔ UI 행 매핑
-const WNC_KEY_BY_LABEL: Record<string, string> = {
-  '피부톤': '1',
-  '페이스라인': '2',
-  '광대 발달 정도': '3',
-  '눈썹 형태': '5',
-  '눈 형태': '6',
-  '코 형태': '8',
-  '입술 형태': '9',
-};
+type RowCfg = { key: string; label: string };
 
-const SNH_KEY_BY_LABEL: Record<string, string> = {
-  '얼굴 길이': '2',
-  '눈썹과 눈 거리': '4',
-  '눈과 눈사이 거리': '5',
-  '중안부': '11',
-  '코 폭': '10',
-  '입 폭': '13',
-};
+// 표시는 서버 module-configs(SSOT)가 결정. 아래는 조회 실패 시 안전망(폴백).
+// 바인딩은 모듈번호(key)로 직접 → 라벨 역조회로 인한 "죽은 모듈" 버그 구조적으로 불가능.
+const WNC_FALLBACK: RowCfg[] = [
+  { key: '1', label: '피부톤' },
+  { key: '2', label: '페이스라인' },
+  { key: '3', label: '광대 발달 정도' },
+  { key: '5', label: '눈썹 형태' },
+  { key: '6', label: '눈 형태' },
+  { key: '8', label: '코 형태' },
+  { key: '9', label: '입술 형태' },
+];
+
+const SNH_FALLBACK: RowCfg[] = [
+  { key: '2', label: '얼굴 길이' },
+  { key: '4', label: '눈썹과 눈 거리' },
+  { key: '5', label: '눈과 눈사이 거리' },
+  { key: '11', label: '중안부' },
+  { key: '10', label: '코 폭' },
+  { key: '13', label: '입 폭' },
+];
+
+// module-configs[] → 축별 표시행 (display 필터 + order 정렬)
+const rowCfgsFromConfigs = (configs: ModuleConfig[], axis: 'WNC' | 'SNH'): RowCfg[] =>
+  configs
+    .filter((c) => c.axis === axis && c.display)
+    .sort((a, b) => a.order - b.order)
+    .map((c) => ({ key: c.moduleKey, label: c.label }));
 
 // Python 응답의 각 모듈은 `grade` (또는 `type`) 필드로 W/N/C, S/N/H 를 가짐
 const moduleGrade = (m: { type?: string; grade?: string } | null | undefined) =>
@@ -52,67 +62,75 @@ const snhTypeToSelected = (t: string): 'soft' | 'neutral' | 'hard' =>
   t === 'S' ? 'soft' : t === 'H' ? 'hard' : 'neutral';
 
 interface AnalysisRow {
+  key: string;
   label: string;
-  warm?: string;
   neutral: string;
-  cool?: string;
   selectedType: 'warm' | 'neutral' | 'cool';
 }
 
 interface SoftHardRow {
+  key: string;
   label: string;
-  soft?: string;
   neutral: string;
-  hard?: string;
   selectedType: 'soft' | 'neutral' | 'hard';
 }
 
+// rowCfgs + 분석 results → 표 행 (selectedType 초기값 = 서버 grade, 모듈번호로 직접 조회)
+type GradeModule = { grade?: string; type?: string };
+function buildWarmCool(rowCfgs: RowCfg[], results?: Record<string, GradeModule>): AnalysisRow[] {
+  return rowCfgs.map(({ key, label }) => {
+    const m = results?.[key];
+    return { key, label, neutral: '중간', selectedType: m ? wncTypeToSelected(moduleGrade(m)) : 'neutral' };
+  });
+}
+
+function buildSoftHard(rowCfgs: RowCfg[], results?: Record<string, GradeModule>): SoftHardRow[] {
+  return rowCfgs.map(({ key, label }) => {
+    const m = results?.[key];
+    return { key, label, neutral: '중간', selectedType: m ? snhTypeToSelected(moduleGrade(m)) : 'neutral' };
+  });
+}
+
 export function FaceAnalysisResult({ onBack, onNext, analysisResult }: FaceAnalysisResultProps) {
-  // 분석 결과의 type 값으로 초기 selectedType 채우기 (없으면 neutral)
-  const initWarmCool = (): AnalysisRow[] => {
-    const base: AnalysisRow[] = [
-      { label: '피부톤', warm: '', neutral: 'Neutral', cool: '', selectedType: 'neutral' },
-      { label: '페이스라인', warm: '', neutral: '중간', cool: '', selectedType: 'neutral' },
-      { label: '광대 발달 정도', warm: '', neutral: '중간', cool: '', selectedType: 'neutral' },
-      { label: '눈썹 형태', warm: '', neutral: '중간', cool: '', selectedType: 'neutral' },
-      { label: '눈 형태', warm: '', neutral: '중간', cool: '', selectedType: 'neutral' },
-      { label: '코 형태', warm: '', neutral: '중간', cool: '', selectedType: 'neutral' },
-      { label: '입술 형태', warm: '', neutral: '중간', cool: '', selectedType: 'neutral' },
-    ];
-    const results = analysisResult?.wnc?.results;
-    if (!results) return base;
-    return base.map((row) => {
-      const key = WNC_KEY_BY_LABEL[row.label];
-      const module = key ? results[key] : null;
-      return module ? { ...row, selectedType: wncTypeToSelected(moduleGrade(module)) } : row;
-    });
-  };
+  const wncResults = analysisResult?.wnc?.results;
+  const snhResults = analysisResult?.snh?.results;
 
-  const initSoftHard = (): SoftHardRow[] => {
-    const base: SoftHardRow[] = [
-      { label: '얼굴 길이', soft: '', neutral: '중간', hard: '', selectedType: 'neutral' },
-      { label: '눈썹과 눈 거리', soft: '', neutral: '중간', hard: '', selectedType: 'neutral' },
-      { label: '눈과 눈사이 거리', soft: '', neutral: '중간', hard: '', selectedType: 'neutral' },
-      { label: '중안부', soft: '', neutral: '중간', hard: '', selectedType: 'neutral' },
-      { label: '코 폭', soft: '', neutral: '중간', hard: '', selectedType: 'neutral' },
-      { label: '입 폭', soft: '', neutral: '중간', hard: '', selectedType: 'neutral' },
-    ];
-    const results = analysisResult?.snh?.results;
-    if (!results) return base;
-    return base.map((row) => {
-      const key = SNH_KEY_BY_LABEL[row.label];
-      const module = key ? results[key] : null;
-      return module ? { ...row, selectedType: snhTypeToSelected(moduleGrade(module)) } : row;
-    });
-  };
+  // 초기엔 폴백으로 그리고, module-configs 로드되면 서버 설정 기준으로 교체
+  const [warmCoolAnalysis, setWarmCoolAnalysis] = useState<AnalysisRow[]>(
+    () => buildWarmCool(WNC_FALLBACK, wncResults),
+  );
+  const [softHardAnalysis, setSoftHardAnalysis] = useState<SoftHardRow[]>(
+    () => buildSoftHard(SNH_FALLBACK, snhResults),
+  );
 
-  const [warmCoolAnalysis, setWarmCoolAnalysis] = useState<AnalysisRow[]>(initWarmCool);
-  const [softHardAnalysis, setSoftHardAnalysis] = useState<SoftHardRow[]>(initSoftHard);
+  // module-configs 조회 → 표시/순서/라벨을 서버 설정 기준으로 재구성. 실패 시 폴백 유지.
+  useEffect(() => {
+    let cancelled = false;
+    getModuleConfigs()
+      .then((configs) => {
+        if (cancelled || !configs.length) return;
+        setWarmCoolAnalysis(buildWarmCool(rowCfgsFromConfigs(configs, 'WNC'), wncResults));
+        setSoftHardAnalysis(buildSoftHard(rowCfgsFromConfigs(configs, 'SNH'), snhResults));
+      })
+      .catch(() => {
+        /* 폴백 유지 */
+      });
+    return () => {
+      cancelled = true;
+    };
+    // 분석 결과는 마운트 시 고정(재분석 시 재마운트) → 1회만 로드
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const [ratios, setRatios] = useState({
-    vertical: '1:1:1',
-    face: '1:1.4',
-    midSection: '1:2'
+  // 비율: 얼굴비율=SNH_2(세로/가로), 중안부=SNH_11 의 서버 value 를 표기(X : 1).
+  // 상중하는 서버 측정 모듈이 없어 수동 입력 유지. 값이 없으면 '- : 1'.
+  const [ratios, setRatios] = useState(() => {
+    const fmt = (v?: number | null) => (v != null ? `${v.toFixed(2)} : 1` : '- : 1');
+    return {
+      vertical: '1 : 1 : 1',
+      face: fmt(snhResults?.['2']?.value),
+      midSection: fmt(snhResults?.['11']?.value),
+    };
   });
 
   const [summaryItems, setSummaryItems] = useState([
@@ -222,7 +240,7 @@ export function FaceAnalysisResult({ onBack, onNext, analysisResult }: FaceAnaly
                 {/* 테이블 본문 */}
                 <div className="space-y-2">
                   {warmCoolAnalysis.map((row, index) => (
-                    <div key={index} className="grid grid-cols-4 gap-2 items-center">
+                    <div key={row.key} className="grid grid-cols-4 gap-2 items-center">
                       <div className="text-xs font-normal text-gray-700">{row.label}</div>
                       <button
                         onClick={() => handleWarmCoolChange(index, 'warm')}
@@ -281,7 +299,7 @@ export function FaceAnalysisResult({ onBack, onNext, analysisResult }: FaceAnaly
                 {/* 테이블 본문 */}
                 <div className="space-y-2">
                   {softHardAnalysis.map((row, index) => (
-                    <div key={index} className="grid grid-cols-4 gap-2 items-center">
+                    <div key={row.key} className="grid grid-cols-4 gap-2 items-center">
                       <div className="text-xs font-normal text-gray-700">{row.label}</div>
                       <button
                         onClick={() => handleSoftHardChange(index, 'soft')}

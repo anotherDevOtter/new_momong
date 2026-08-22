@@ -54,6 +54,25 @@ export interface AnalyzeResponse {
   snhId: string;
 }
 
+// 얼굴분석 모듈 표시 설정 (전역, admin 관리). 표를 이걸로 동적 렌더 (P2b).
+export interface ModuleConfig {
+  id: string;
+  axis: 'WNC' | 'SNH';
+  moduleKey: string;
+  label: string;
+  order: number;
+  display: boolean;
+  unit: string | null;
+}
+
+// 공개 엔드포인트 — 토큰 불필요
+export async function getModuleConfigs(): Promise<ModuleConfig[]> {
+  const res = await fetch(`${API_BASE}/module-configs`);
+  if (!res.ok) throw new Error('모듈 설정 조회 실패');
+  const json = await res.json();
+  return (json.data ?? []) as ModuleConfig[];
+}
+
 /**
  * S3 업로드용 presigned URL 발급 + 결과 publicUrl 반환.
  */

@@ -18,6 +18,7 @@ import { ImageDirectionSetting, type ImageDirectionData } from '@/components/3wa
 import { HairDesignProposal, type HairDesignData } from '@/components/3way/HairDesignProposal';
 import { HairTextureAnalysis, type HairTextureData } from '@/components/3way/HairTextureAnalysis';
 import { NextDirection, CycleData } from '@/components/3way/NextDirection';
+import { PreSurveyReview } from '@/components/3way/PreSurveyReview';
 import { PremiumReport } from '@/components/3way/PremiumReport';
 import { CompletionPage } from '@/components/3way/CompletionPage';
 import { saveConsult } from '@/utils/3way-api';
@@ -29,7 +30,7 @@ type PageKey =
   | 'faceAnalysis' | 'faceProcessing' | 'faceResult'
   | 'personalColor' | 'skeletonImage'
   | 'imageDirection' | 'hairDesign' | 'hairTexture'
-  | 'nextDirection' | 'completion';
+  | 'nextDirection' | 'preSurveyReview' | 'completion';
 
 // 진행률 표시에 포함되는 페이지 (transient 페이지 제외).
 // faceProcessing 은 짧은 전환, completion 은 끝났을 때라 둘 다 ProgressBar 미표시.
@@ -44,7 +45,7 @@ function buildVisibleSteps(course: string): PageKey[] {
   ];
   if (course === '2way-personal') steps.push('personalColor');
   else if (course === '2way-skeleton') steps.push('skeletonImage');
-  steps.push('imageDirection', 'hairDesign', 'hairTexture', 'nextDirection');
+  steps.push('imageDirection', 'hairDesign', 'hairTexture', 'nextDirection', 'preSurveyReview');
   return steps;
 }
 
@@ -189,7 +190,10 @@ function Inner() {
   const handleHairTextureNext = () => setCurrentPage('nextDirection');
 
   const handleNextDirectionBack = () => setCurrentPage('hairTexture');
-  const handleNextDirectionNext = () => setShowReport(true);
+  const handleNextDirectionNext = () => setCurrentPage('preSurveyReview');
+
+  const handlePreSurveyReviewBack = () => setCurrentPage('nextDirection');
+  const handlePreSurveyReviewNext = () => setShowReport(true);
 
   const handleReportClose = () => {
     setShowReport(false);
@@ -285,11 +289,20 @@ function Inner() {
     if (currentPage === 'hairTexture') return <HairTextureAnalysis onBack={handleHairTextureBack} onNext={handleHairTextureNext} onChange={setHairTextureData} />;
     if (currentPage === 'nextDirection') {
       return (
+        <NextDirection
+          onBack={handleNextDirectionBack}
+          onNext={handleNextDirectionNext}
+          onCycleDataChange={setCycleData}
+        />
+      );
+    }
+    if (currentPage === 'preSurveyReview') {
+      return (
         <>
-          <NextDirection
-            onBack={handleNextDirectionBack}
-            onNext={handleNextDirectionNext}
-            onCycleDataChange={setCycleData}
+          <PreSurveyReview
+            customerId={customerId}
+            onBack={handlePreSurveyReviewBack}
+            onNext={handlePreSurveyReviewNext}
           />
           {showReport && (
             <PremiumReport

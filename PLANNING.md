@@ -2,6 +2,7 @@
 
 > 헤어 디자이너용 디지털 컨설팅 도구. **무엇을 만들고 있는가** 의 single source of truth.
 > 기술 구조는 [ARCHITECTURE.md](./ARCHITECTURE.md), 실행 방법은 [README.md](./README.md), 남은 작업은 [TODO.md](./TODO.md).
+> 최종 갱신: 2026-08-22.
 
 ---
 
@@ -23,7 +24,8 @@
 
 ### 2-1. FIT 컨설팅 (legacy)
 - 12 단계 단선형 흐름. 한 화면에 핵심 질문 1~3개씩.
-- 진단 결과를 컨설팅 카드로 정리 → After Note(PDF) 출력.
+- 진단 결과를 컨설팅 카드로 정리 → After Note 화면 출력.
+  - ⚠️ **PDF 출력은 미구현** (계획만 있음). 코드상 PDF 버튼은 `alert()` 뿐 — TODO.md F4 참조.
 - 디자인 시스템의 원형이 되는 흐름.
 
 ### 2-2. 3WAY 컨설팅 (메인)
@@ -37,7 +39,7 @@
 | **2WAY (골격)** | 얼굴 + 골격 이미지 | 얼굴 + 골격 진단 | ⚠️ 동일 |
 | **3WAY** | 풀 진단 | 얼굴 + 컬러 + 골격 | ⚠️ 동일 |
 
-> ⚠️ 코스 분기 로직이 미구현. 모든 코스가 같은 21개 화면을 거침. TODO.md #1, #2 참조.
+> ⚠️ 코스 분기 로직이 미구현. 모든 코스가 같은 화면들을 거침. [TODO.md](./TODO.md) 의 **Q1 · Q2** 참조.
 
 ---
 
@@ -66,7 +68,7 @@
 | 8 | Hair Condition | 손상도, 모질, 두께, 밀도, 웨이브 |
 | 9 | Hair Style Proposal | 길이 + 레퍼런스 이미지 선택 |
 | 10 | Today Design + Next Direction | 결과 + 다음 변화 방향 |
-| 11 | After Note | 사이클 가이드 + 디자이너 메모 + PDF 출력 |
+| 11 | After Note | 사이클 가이드 + 디자이너 메모 (PDF 출력은 미구현) |
 | 12 | Review | 저장 및 공유 링크 발급 |
 
 ### 3-3. 3WAY 컨설팅 (21 화면 — 모든 코스 동일)
@@ -89,7 +91,7 @@
   - 업로드 사진은 3MB / 2048px 초과 시 자동 리사이즈
 - **Step 8 분석** — S3 PUT → backend → Python (face_landmark) 호출
   - WNC 10 모듈 (피부톤/턱각도/광대/윤곽 등) → final = W/N/C
-  - SNH 12 모듈 (피부톤/얼굴길이/눈썹/코 등) → final = S/N/H
+  - SNH 14 모듈 (피부톤/얼굴길이/눈썹/쌍꺼풀/코 등) → final = S/N/H
   - 각 모듈마다 **measurement** (도형 좌표) 동봉 → 원본 이미지 위에 오버레이 가능
 - **Step 9 결과** — WNC/SNH 표 + 최종 imageType ("W / S" 등)
   - 디자이너가 행별로 수정 가능 (수동 보정)
@@ -158,7 +160,7 @@
 - `<Input label required>` — underline only (`border-b`), 박스 없음
 - `<CheckboxGroup variant="button-grid">` — 다중 선택, 선택 시 검정 fill
 - `<RadioGroup variant="button-grid">` — 단일 선택
-- `<ProgressBar>` (FIT) / `<ProgressSteps>` (3WAY)
+- `<ProgressBar>` — FIT / 3WAY 공용 (3WAY 는 코스별 `visibleSteps` 로 단계 수 계산). 구 `<ProgressSteps>` 는 통합되어 제거됨
 
 ### 6-4. 선택 패턴 규칙
 
@@ -166,7 +168,7 @@
 |---|---|---|
 | **button-grid** (작은 옵션) | 다중/단일 선택 텍스트 옵션 | 검정 배경 + 흰 글자 |
 | **대형 카드** (제목+설명) | CourseCard, PersonalColor, Skeleton | 보더만 검정, 우측 체크박스만 채움 |
-| **이미지 카드** | FashionStyleCard | 검정 보더 + 하단 체크 아이콘 |
+| **이미지 카드** | `ui/FitFashionStyleCard` (FIT) · `3way/FashionStyleCard` (3WAY) | 검정 보더 + 하단 체크 아이콘 |
 
 ---
 
@@ -174,7 +176,7 @@
 
 ### 7-1. 확정된 결정
 
-- **얼굴 분석은 실제 AI** — face_landmark Python 서버 (WNC/SNH 22 모듈) 사용. 더미 데이터 X
+- **얼굴 분석은 실제 AI** — face_landmark Python 서버 (WNC 10 + SNH 14 = 24 모듈) 사용. 더미 데이터 X
 - **얼굴 분석 데이터 보존 정책** — `face_analysis_results` 테이블에 영구 저장. consultation 의 jsonb 에 `faceAnalysis: { wncId, snhId, ... }` 로 연결
 - **테스트와 운영 분리** — `face_analysis_results.source` 컬럼으로 `consultation` / `admin_test` 구분
 - **이미지 크기 제한** — 업로드 3MB / 2048px. 초과 시 프론트가 자동 리사이즈 (재압축 X, 디테일 보존)
@@ -194,11 +196,11 @@
 | # | 항목 | 상태 |
 |---|---|---|
 | 1 | 3WAY 코스 분기 로직 미구현 | 모든 코스 동일 21 화면 거침 |
-| 2 | PremiumReport 9 페이지 코스별 분기 X | 1WAY 도 퍼스널컬러 페이지 노출 |
-| 3 | PremiumReport PDF 출력 | alert만, 미구현 |
-| 4 | 얼굴 분석 비율 데이터 (상중하/얼굴비율/중안부) | UI 는 있으나 Python 응답에서 분리되지 않음 (수동 입력) |
-| 5 | ImageDirectionSetting `currentType` | 하드코딩 `N/N` (분석 결과 미연결) |
-| 6 | admin 화면에서 컨설팅의 얼굴 분석 결과 표시 | 미구현. DB 에는 저장됨 |
+| 2 | ~~PremiumReport 코스별 분기 X~~ | ✅ 해결 (`cd1f110`) — 퍼스널컬러 페이지는 3WAY / 2WAY(퍼스널컬러) 에서만 노출 |
+| 3 | PDF 출력 (PremiumReport + 3WAY 완료 화면 + FIT After Note) | 🔴 전부 `alert()` 만, 미구현 |
+| 4 | 얼굴 분석 비율 데이터 | 🟡 부분 해결 (`7f366e5`) — 얼굴비율(SNH_02) · 중안부(SNH_11) 는 서버 value 연결. **상중하만 수동 입력** (측정 모듈 없음) |
+| 5 | ImageDirectionSetting `currentType` | 🔴 하드코딩 `N/N` (분석 결과 미연결) |
+| 6 | admin 프론트에서 컨설팅의 얼굴 분석 결과 표시 | 🟡 **user 고객 상세에는 구현됨** (`79116dd`). admin 프론트에는 아직 없음 |
 | 7 | 기능 플래그 실시간 반영 X | user 프론트는 새로고침 시 갱신 |
 | 8 | 운영 DB 마이그레이션 자동화 X | `backend/migrations/*.sql` 수동 실행 |
 

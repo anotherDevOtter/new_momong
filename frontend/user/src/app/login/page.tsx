@@ -40,13 +40,16 @@ export default function LoginPage() {
     }
   }
 
-  // 로컬 전용: 테스트 계정 자동 로그인
+  // 로컬 전용: 테스트 계정 자동 로그인.
+  // 계정은 .env.local 로 덮어쓴다 (소스 수정 불필요 — 로컬 diff 가 남지 않게).
   const isDev = process.env.NODE_ENV === 'development';
+  const TEST_EMAIL = process.env.NEXT_PUBLIC_TEST_EMAIL || 'test@local.dev';
+  const TEST_PASSWORD = process.env.NEXT_PUBLIC_TEST_PASSWORD || 'test1234';
   async function handleTestLogin() {
     setError('');
     setLoading(true);
     try {
-      await login('test@local.dev', 'test1234');
+      await login(TEST_EMAIL, TEST_PASSWORD);
       router.replace('/');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : '테스트 로그인 실패');
@@ -111,7 +114,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full border border-dashed border-gray-400 text-gray-600 rounded-lg py-2 text-xs font-normal hover:bg-gray-50 disabled:opacity-50 transition-colors"
             >
-              🧪 테스트 계정 로그인 (test@local.dev)
+              🧪 테스트 계정 로그인 ({TEST_EMAIL})
             </button>
           )}
         </form>

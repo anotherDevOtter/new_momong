@@ -114,6 +114,10 @@ admin `/features` 토글. user 프론트는 **새로고침해야 반영**.
 2. "얼굴 분석하기" 탭 — 카메라/파일 업로드 → 분석 → 결과 + 오버레이
 3. "이전 기록 보기" 탭 — 과거 admin 테스트 기록 + 삭제
 
+### 얼굴분석 표 항목 조정 (admin)
+admin `/face-modules` 에서 모듈별 **라벨 / 순서 / 노출 / 단위** 를 편집. 배포 없이 즉시 반영되고,
+user 얼굴분석 결과 표가 이 설정대로 렌더된다. 새 Python 모듈이 추가되면 숨김 상태로 자동 등록되므로 여기서 켜면 된다.
+
 ### 새 어드민 추가
 - Swagger `POST /api/admin/auth/register` (기존 어드민 토큰 필요)
 - 또는 DB 에 직접 bcrypt 해시 INSERT
@@ -133,12 +137,15 @@ admin `/features` 토글. user 프론트는 **새로고침해야 반영**.
 
 ```
 new_momong/
-├─ backend/             NestJS API (3001) — admin/auth/customers/consultations/shares/face-analysis/feature-settings
+├─ backend/             NestJS API (3001)
+│  │                    auth / admin / customers / consultations / shares
+│  │                    pre-surveys / face-analysis / feature-settings / module-configs
+│  └─ migrations/       운영 DB 수동 마이그레이션 SQL (001~004)
 ├─ frontend/
 │  ├─ user/             디자이너용 (3100)
 │  └─ admin/            운영자용 (3200)
-├─ backend/migrations/  운영 DB 수동 마이그레이션 SQL
 ├─ e2e/                 Playwright
+├─ docs/                기능별 상세 설계 노트 (얼굴분석 매핑/동적구조 등)
 ├─ figma/               Figma Make 원본 (참고)
 ├─ PLANNING.md          제품 정의
 ├─ ARCHITECTURE.md      기술 구조

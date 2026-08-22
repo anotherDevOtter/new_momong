@@ -23,9 +23,10 @@ yarn-error.log*
 # OS
 .DS_Store
 
-# IDE
+# IDE / 로컬 툴 설정 (머신별)
 .vscode/
 .idea/
+.claude/
 
 # TypeScript
 *.tsbuildinfo
@@ -40,5 +41,9 @@ coverage/
 
 # Figma prototype (not for deployment)
 figma/
-.playwright-mcp/
 .gstack/
+
+# Playwright 산출물
+playwright-report/
+test-results/
+.playwright-mcp/

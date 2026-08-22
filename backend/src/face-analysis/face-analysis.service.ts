@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { randomUUID } from 'crypto';
 import { ImageDetectionResult, AnalysisSource } from './face-analysis.entity';
 import { PythonAnalysisService, PythonAnalysisResponse } from './python-analysis.service';
+import { ModuleConfigsService } from '../module-configs/module-configs.service';
 
 export interface AdminTestRecord {
   id: string;
@@ -22,7 +23,13 @@ export class FaceAnalysisService {
     @InjectRepository(ImageDetectionResult)
     private readonly resultsRepo: Repository<ImageDetectionResult>,
     private readonly python: PythonAnalysisService,
+    private readonly moduleConfigs: ModuleConfigsService,
   ) {}
+
+  // 응답 results({ key: { name } }) → { key, name }[] 추출 (자동생성용)
+  private moduleItems(group: { results?: Record<string, { name?: string }> } | undefined) {
+    return Object.entries(group?.results ?? {}).map(([key, m]) => ({ key, name: m?.name }));
+  }
 
   /**
    * 클라이언트에서 S3 에 PUT 할 수 있는 presigned URL 발급.
@@ -53,6 +60,10 @@ export class FaceAnalysisService {
   }> {
     const imageId = opts.imageId || randomUUID();
     const response = await this.python.analyzeImage(opts.faceImageUrl, imageId);
+
+    // 응답에 설정 없는 모듈이 오면 표시설정 자동 생성(숨김). 비치명적.
+    await this.moduleConfigs.ensureModules('WNC', this.moduleItems(response.data.wnc));
+    await this.moduleConfigs.ensureModules('SNH', this.moduleItems(response.data.snh));
 
     const baseRow = {
       user_id: opts.userId || null,
