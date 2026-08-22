@@ -27,13 +27,16 @@ export default function LoginPage() {
     }
   };
 
-  // 로컬 전용: 기본 admin 계정 자동 로그인
+  // 로컬 전용: 기본 admin 계정 자동 로그인.
+  // 계정은 .env.local 로 덮어쓴다 (소스 수정 불필요 — 로컬 diff 가 남지 않게).
   const isDev = process.env.NODE_ENV === 'development';
+  const TEST_EMAIL = process.env.NEXT_PUBLIC_TEST_EMAIL || 'admin@momong.com';
+  const TEST_PASSWORD = process.env.NEXT_PUBLIC_TEST_PASSWORD || '!Password1234';
   const handleTestLogin = async () => {
     setError('');
     setLoading(true);
     try {
-      const { token } = await adminLogin('admin@momong.com', '!Password1234');
+      const { token } = await adminLogin(TEST_EMAIL, TEST_PASSWORD);
       setAdminToken(token);
       router.push('/dashboard');
     } catch {
@@ -94,7 +97,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full border border-dashed border-gray-400 text-gray-600 py-2 text-xs hover:bg-gray-50 disabled:opacity-50 transition-colors"
             >
-              🧪 테스트 계정 로그인 (admin@momong.com)
+              🧪 테스트 계정 로그인 ({TEST_EMAIL})
             </button>
           )}
         </form>
