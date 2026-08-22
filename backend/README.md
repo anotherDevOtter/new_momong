@@ -1,98 +1,51 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# MERCI MOMONG — Backend (NestJS)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+FIT / 3WAY 컨설팅 API 서버. 얼굴 분석(Python 서버 호출), 사전설문지, 공유 링크, 어드민을 담당한다.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+> 전체 구조는 [../ARCHITECTURE.md](../ARCHITECTURE.md), 실행 절차는 [../README.md](../README.md).
 
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
+## 실행
 
 ```bash
-$ npm install
+cp .env.example .env     # 처음 한 번만 (AWS 키 / Python 서버 URL 채우기)
+npm install
+npm run start:dev        # http://localhost:3001
 ```
 
-## Compile and run the project
+| 명령 | 설명 |
+|---|---|
+| `npm run start:dev` | watch 모드 개발 서버 |
+| `npm run build` | `dist/` 로 컴파일 |
+| `npm run start:prod` | `node dist/main` (EB 가 Procfile 로 실행) |
+| `npm test` | Jest 단위 테스트 |
+| `npm run test:e2e` | Jest e2e (`test/jest-e2e.json`) |
+| `npm run lint` | ESLint (자동 수정) |
 
-```bash
-# development
-$ npm run start
+## 모듈
 
-# watch mode
-$ npm run start:dev
+| 경로 | 역할 | 라우트 프리픽스 |
+|---|---|---|
+| `src/auth/` | 디자이너 회원가입/로그인/아이디 찾기/비밀번호 재설정 | `/api/auth` |
+| `src/admin/` | 어드민 계정 + 디자이너 승인/거절 + 통계 | `/api/admin` |
+| `src/customers/` | 고객 CRUD | `/api/customers` |
+| `src/consultations/` | 컨설팅 기록 (FIT/3WAY 공용) | `/api/consultations` |
+| `src/shares/` | 컨설팅 결과 공유 링크 (비밀번호 검증) | `/api/shares` |
+| `src/pre-surveys/` | 사전설문지 (공개 토큰 기반) | `/api/pre-surveys` |
+| `src/face-analysis/` | 얼굴 분석 — Python 호출 + S3 presign + DB 저장 | `/api/face-analysis` |
+| `src/feature-settings/` | 기능 플래그 (FIT/3WAY/코스 on-off) | `/api/feature-settings`, `/api/admin/feature-settings` |
+| `src/module-configs/` | 얼굴분석 모듈 표시 설정 (라벨/순서/노출/단위) | `/api/module-configs`, `/api/admin/module-configs` |
+| `src/common/` | 요청 로깅 미들웨어 + 예외 필터 | — |
+| `src/app.controller.ts` | `GET /` — EB 헬스 체크 (전역 프리픽스 제외 대상) | `/` |
 
-# production mode
-$ npm run start:prod
-```
+## API 문서
 
-## Run tests
+`npm run start:dev` 후 http://localhost:3001/api/docs (Basic Auth — `SWAGGER_USER` / `SWAGGER_PASSWORD`, 기본 `admin` / `admin1234`).
 
-```bash
-# unit tests
-$ npm run test
+## DB
 
-# e2e tests
-$ npm run test:e2e
+- **dev**: TypeORM `synchronize: true` — 엔티티 수정이 자동 반영된다. 마이그레이션 불필요.
+- **운영**: `synchronize` OFF. [`migrations/`](./migrations) 의 SQL 을 운영 DB 에 **수동 실행**한 뒤 배포한다.
 
-# test coverage
-$ npm run test:cov
-```
+## 환경 변수
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+`.env.example` 참조. 운영(EB) 값 매트릭스는 [../ARCHITECTURE.md §9](../ARCHITECTURE.md#9-환경-변수-운영-eb).

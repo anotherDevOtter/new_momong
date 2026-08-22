@@ -2,13 +2,17 @@
 
 > 남은 작업 + 비즈니스 결정 + 운영 메모. 액션 위주.
 > 제품 정의: [PLANNING.md](./PLANNING.md), 기술 구조: [ARCHITECTURE.md](./ARCHITECTURE.md).
-> 최종 갱신: 2026-06-09.
+> 최종 갱신: 2026-08-22.
 
 ---
 
-## ✅ 운영 동기화 상태
+## 🚧 운영 동기화 상태
 
-**origin/main 과 동기화 완료.** 마지막 배포(2026-06-08) 시점에 다음이 운영에 반영됨:
+⚠️ **현재 작업 브랜치 `feat/face-analysis-dynamic` 는 origin 에 push 되지 않았다.**
+얼굴분석 동적구조(P1~P4) + 사전설문 리뷰 step 11 + 저장 누락 근본수정이 **로컬에만 있다.**
+배포하려면 `main` 병합 후 push 필요 — **`004_create_module_configs.sql` 운영 DB 선실행 필수.**
+
+마지막으로 운영에 반영된 것(2026-06-08 배포):
 - 사전설문지 기능 (DB 마이그레이션 `003_create_pre_surveys.sql` 운영 DB 실행 완료)
 - S3 presigned URL checksum 헤더 비활성화 (브라우저 PUT 호환)
 - 사전설문 사진 표시 (signed GET URL 매핑 — `photoDisplayUrls`)
@@ -63,6 +67,35 @@
 
 각 컴포넌트에 `onChange` 콜백 추가 → page state 로 끌어올려 저장. (3WAY 경로 `cd1f110`, 2WAY 경로 `70a526a`)
 
+### B7. 🔴 **3WAY 가 퍼스널컬러·골격 단계를 건너뛴다** (2026-08-22 발견)
+`/3way/consulting/page.tsx` 의 코스 분기가 **2WAY 두 종류만** 해당 단계를 태운다:
+
+```ts
+if (selectedCourse === '2way-personal') setCurrentPage('personalColor');
+else if (selectedCourse === '2way-skeleton') setCurrentPage('skeletonImage');
+else setCurrentPage('imageDirection');        // ← 3way 와 1way 가 여기로
+```
+
+| 코스 | 퍼스널컬러 단계 | 골격 단계 |
+|---|:--:|:--:|
+| 1WAY | ✗ | ✗ |
+| 2WAY 퍼스널컬러 | ✅ | ✗ |
+| 2WAY 골격 | ✗ | ✅ |
+| **3WAY (풀 진단)** | **✗** | **✗** |
+
+→ PLANNING 상 3WAY 는 "얼굴 + 컬러 + 골격" 풀 진단인데 **둘 다 안 거친다.**
+   `buildVisibleSteps` 도 같은 조건이라 ProgressBar 단계 수도 동일하게 빠져 있다.
+
+**결과적으로 생기는 모순**: `PremiumReport` 는 `showPersonalColor = selectedCourse === '3way' || '2way-personal'`
+이라 **3WAY 리포트에 퍼스널컬러 페이지를 띄운다.** 그런데 그 데이터를 모으는 단계를 안 거쳐서
+`personalColorData` 는 항상 `null` → **빈 퍼스널컬러 페이지가 나간다.**
+저장도 `personalColor: null` / `skeleton: null` 로 들어간다.
+
+- **조치**: 3WAY 분기를 `personalColor → skeletonImage → imageDirection` 순서로 태우기
+  (`buildVisibleSteps` 도 같이 수정). Q1/Q2 결정과 묶여 있음.
+
+---
+
 ### B2. **저장 타이밍 — 마지막 한 번만** 🔴 미수정 (백엔드 묶음)
 - `saveConsult` 가 `handleReportClose`(PremiumReport 닫기) 에서만 호출
 - 중간 이탈/새로고침/네트워크 끊김 → **전부 손실**
@@ -93,31 +126,37 @@
 
 ## 🟡 핵심 기능 미완성
 
-### F1. 얼굴 분석 결과 비율 데이터 연동
-- [FaceAnalysisResult.tsx](frontend/user/src/components/3way/FaceAnalysisResult.tsx) 의 `ratios` 가 하드코딩 (`1:1:1`, `1:1.4`, `1:2`)
-- Python 응답에서 `measurement.value` 또는 별도 필드로 분리 후 프론트 사용
-- 영향 모듈: SNH_02 (얼굴비율), SNH_11 (중안부), 상중하 계산
+### F1. 🟡 **부분 완료** — 얼굴 분석 결과 비율 데이터 연동 (`7f366e5`)
+- ✅ **얼굴비율** = SNH_02 서버 `value`, **중안부** = SNH_11 서버 `value` 로 연결됨 (`X : 1` 표기, 값 없으면 `- : 1`)
+- 🔴 **상중하(`vertical`)만 `'1 : 1 : 1'` 하드코딩 유지** — 대응하는 Python 측정 모듈이 아직 없어 수동 입력
+- **남은 조치**: 상중하 측정 모듈을 face_landmark 에 추가하거나, 수동 입력으로 확정하고 UI 문구 정리
 
-### F2. ImageDirectionSetting `currentType` 분석 결과 연결
-- [ImageDirectionSetting.tsx](frontend/user/src/components/3way/ImageDirectionSetting.tsx) 의 `{ warmCool: 'N', softHard: 'N' }` 하드코딩
-- 부모에서 `faceAnalysisResult.wnc.final` / `snh.final` prop 전달
+### F2. ✅ **완료** — ImageDirectionSetting `currentType` 분석 결과 연결
+부모(`/3way/consulting/page.tsx`)가 `currentType={currentImageType}` 으로 전달한다.
+`currentImageType = { warmCool: faceResultData?.wncFinal ?? 'N', softHard: faceResultData?.snhFinal ?? 'N' }`
+→ 얼굴분석 결과 + **디자이너 수정분(faceResultData)** 까지 반영. 분석 전에만 `N/N` 폴백.
+(컴포넌트 쪽 `N/N` 은 prop 미전달 시 기본값일 뿐 하드코딩 아님)
 
-### F3. admin 화면에서 컨설팅의 얼굴 분석 결과 표시
-- jsonb `client_info.threeWay.faceAnalysis.imageType` 미사용
-- admin 컨설팅 목록/상세에 imageType 컬럼/뱃지 추가
-- 상세에서 `wncId`/`snhId` 로 `face_analysis_results` 의 모듈별 상세 조회 + 표시
+### F3. ✅ **완료** — 컨설팅 상세에 얼굴 분석 결과 표시 (2026-07-06, `79116dd`)
+`FaceAnalysisSummary` 컴포넌트 추가 + `ClientDetailStep` 에서 컨설팅 상세에 표시.
+- ⚠️ **구현 위치 주의**: 원래 문서엔 "admin 화면"이라 적었지만, 실제 구현은 **user 프론트의 고객 상세**
+  ([ClientDetailStep.tsx](frontend/user/src/components/steps/ClientDetailStep.tsx))다. admin 프론트에는 아직 없다.
+- admin 컨설팅 목록/상세에도 필요하면 별도 항목으로 다시 올릴 것.
 
-### F4. PremiumReport PDF 출력
-- 현재 alert 만 표시
-- html2canvas + jsPDF (FIT 의 AfterNote 패턴 참고)
+### F4. PDF 출력 (PremiumReport + 3WAY 완료 화면)
+- 현재 **두 곳 다 `alert()` 만** 표시:
+  - [PremiumReport.tsx:108](frontend/user/src/components/3way/PremiumReport.tsx#L108) — "서버 연동이 필요합니다"
+  - [/(app)/3way/consulting/page.tsx:252](frontend/user/src/app/(app)/3way/consulting/page.tsx#L252) — "추후 연동 예정입니다"
+- ⚠️ **FIT 의 AfterNote 에도 PDF 구현은 없다** (참고할 기존 패턴이 없음 — 문서에 잘못 적혀 있던 것)
+- ⚠️ `html2canvas` / `jspdf` 는 **미사용이라 2026-08-22 정리 때 제거됨.** 착수 시 재설치 필요
 
-### F5. 1WAY 헤더 코스 라벨
-- 컨설팅 진행 중 디자이너가 현재 코스 인지할 수 있는 표시 없음
-- ProgressBar 또는 AppHeader 옆에 코스 칩 표시
+### F5. ✅ **완료** — 컨설팅 중 코스 라벨 표시
+`ProgressBar` 의 `leftSlot` 에 코스 칩(검정 pill) 렌더.
+`COURSE_CHIP` 맵 — `3WAY` / `2WAY 퍼스널컬러` / `2WAY 골격` / `1WAY`, 미등록 코스는 값 그대로 표시.
 
-### F6. 1WAY 저장 시 코스명 default fallback
-- [/(app)/3way/consulting/page.tsx:184](frontend/user/src/app/(app)/3way/consulting/page.tsx#L184) default 가 '1WAY'
-- 알 수 없는 코스는 빈 문자열 또는 에러 처리
+### F6. ✅ **완료** — 저장 시 코스명 fallback
+`COURSE_NAMES[selectedCourse] || selectedCourse` — 알 수 없는 코스를 `'1WAY'` 로 단정하지 않고
+받은 값을 그대로 보존한다.
 
 ### F8. 사전설문지 — 자동 저장 실패 시 사용자 알림
 - 현재 autosave 실패는 silent (`catch {}`) → 사용자가 모르는 채 데이터 손실 가능
@@ -128,7 +167,14 @@
 - 한 고객이 여러 토큰 발급 가능 → 디자이너 화면에서 어느 게 최신인지 헷갈림
 - 정책 결정 후: 발급 시 기존 미제출 토큰 무효화 OR 최신 1건만 표시
 
-### F10. 얼굴 분석 결과(Step 6/FaceAnalysisResult) 분석 항목 제목 수정
+### F10. ✅ **완료 — module_configs 로 대체** (`36eb5d2` + P2a~c)
+라벨은 이제 **코드가 아니라 DB(`module_configs`)가 소유**한다. admin `/face-modules` 에서
+개발/배포 없이 라벨·순서·노출·단위를 바꾼다. 아래 표는 당시 논의 기록으로만 남긴다.
+
+<details>
+<summary>당시 라벨 변경 논의 (기록용)</summary>
+
+### (구) 얼굴 분석 결과 분석 항목 제목 수정
 [FaceAnalysisResult.tsx](frontend/user/src/components/3way/FaceAnalysisResult.tsx) WNC/SNH 표의 행 라벨이 실제 측정 모듈 의미와 안 맞음. 디자이너 요청으로 아래로 변경.
 
 > ⚠️ **단순 라벨 교체 아님**: `WNC_KEY_BY_LABEL`/`SNH_KEY_BY_LABEL` 이 **라벨 문자열을 키로** 서버 모듈번호(`results[key]`)를 조회함. 라벨을 바꾸면 이 두 맵의 키도 **같이** 바꿔야 서버 분석값 바인딩이 유지됨 (안 그러면 해당 행이 중립값 고정).
@@ -157,14 +203,16 @@
 
 - 확정 후: base 배열 `label` + 해당 KEY_BY_LABEL 키 동시 수정. 행 삭제 시 KEY_BY_LABEL 엔트리도 제거.
 
+</details>
+
 ---
 
 ## 🟢 점진적 확장
 
-### E1. 미매핑 분석 모듈 (FaceAnalysisResult UI)
-- 현재 UI 표에 매핑된 모듈: WNC 7개, SNH 7개 = 14개
-- Python 응답에는 WNC 10 + SNH 12 = 22개
-- 미매핑: WNC #3, #7, #10 / SNH #4, #6, #7, #10, #12 → UI 확장 또는 의도적 숨김 결정
+### E1. ✅ **완료 — module_configs 토글로 해결** (P2a~c)
+24개 모듈 전부 `module_configs` 에 시드됨. 쓰는 13개는 `display:true`, 나머지 11개는 `display:false`.
+admin `/face-modules` 에서 켜고 끈다. 새 Python 모듈은 숨김 상태로 **자동 등록**되므로
+"미매핑 모듈" 개념 자체가 사라졌다.
 
 ### E2. 1WAY E2E 테스트
 - `e2e/` 에 1WAY 전용 시나리오 없음
@@ -188,7 +236,36 @@
 
 ---
 
-## ✅ 최근 완료 (운영 반영)
+## ✅ 최근 완료
+
+### 2026-08-22 (face_landmark — 죽은 모듈 2개 복구)
+- **SNH 7 쌍꺼풀 형태 · SNH 8 눈 밑 지방 레지스트리 등록 복구** — 파일은 있었으나 `analyze_face.py` 의
+  `snh_modules` dict 에 없어 실행되지 않던 모듈. **WNC 10 + SNH 12 = 22 → WNC 10 + SNH 14 = 24개**
+  - 두 모듈이 `{'grade'}` 만 반환하던 것을 나머지 22개와 동일하게 `value` / `description` / `measurement` 까지 반환하도록 보강
+  - `SNH_TYPE_08` 파일 헤더 docstring 이 `SNH_TYPE_07` 로 잘못 적혀 있던 것 수정
+  - `module_configs` 시드에 `display:false` 로 추가 → 노출하려면 admin `/face-modules` 에서 켤 것
+  - 실제 이미지로 분석 실행 검증 완료 (SNH #7 `H`/66.14, #8 `S`/2.0px, measurement 정상)
+- **🐛 `circle` 오버레이 크래시 버그 수정** — Python 6곳이 `'center'` 키를 보내는데
+  `FaceOverlay` 는 `shape.point.x` 를 읽어 **TypeError 로 렌더가 터지던 문제** (SNH_04 · SNH_13 해당).
+  Python 을 `'point'` 로 통일 + `FaceOverlay` 는 과거 저장분 호환 위해 `point ?? center` 둘 다 수용.
+
+### 2026-08-22 (프로젝트 정리 — 운영 반영 없음, 코드/문서만)
+- **죽은 코드 제거** — `BrandHeader` · `ProgressSteps` · `ConcernsCheck` · `CustomerHistory(+Detail)` ·
+  `CompletionStep` · `PrintableAfterNote` · admin `AdminFaceCapture` · 미사용 asset 1개 · 임시 `demo-presurvey` 페이지
+- **미사용 의존성 제거** — user: `@radix-ui/*` 8개 + `class-variance-authority` + `html2canvas` + `jspdf` / admin: `clsx` + `tailwind-merge`
+- **`GET /` 헬스 체크 개선** — `'Hello World!'` → `{ status, uptime, timestamp }` (+ 테스트 갱신)
+- **이름 충돌 해소** — FIT 전용 `ui/FashionStyleCard` → `ui/FitFashionStyleCard` (3WAY 쪽과 동명이인이었음)
+- **레거시 repo 정리** — 루트의 `momong_web` · `momong_backend` · 빈 `momong` 폴더 삭제 (GitHub 에 원본 보존)
+- **문서 동기화** — ARCHITECTURE §5 API 전면 재작성, module-configs/004 마이그레이션 반영, PLANNING 의 미구현 PDF 표기 수정
+
+### 2026-06-17 ~ 07-06 (얼굴분석 동적구조 — ⚠️ 아직 미배포, `feat/face-analysis-dynamic`)
+- **P1** 얼굴분석 표 동적 렌더링 (`7da995f`) — 라벨→모듈 하드코딩 맵 제거
+- **P2a** `module_configs` 테이블 + 조회/수정 API + 22개 시드 + 새 모듈 자동생성 (`5fe95da`)
+- **P2b** user 프론트가 화이트리스트 대신 DB 설정 조회로 렌더 (`fcdfecc`)
+- **P2c** admin `/face-modules` — 토글/순서/라벨/단위 편집 화면 (`860a787`)
+- **P4/F3** 컨설팅 상세에 얼굴분석 결과 표시 + threeWay 저장 누락 근본수정 (`79116dd`)
+- **step 11** 사전설문 리뷰 단계 + `PreSurveyDetailView` 공용화 (`c19b0cf`)
+- **B1/B3** 단계별 입력 저장 누락 수정 + 컨설팅↔고객 연결을 customerId 로 전환
 
 ### 2026-06-08 ~ 06-09 (사전설문지 라운드 2 + 모달화)
 - **사전설문 사진 디자이너 화면 표시** (구 F7) — backend `findByToken`/`findOneByIdForOwner` 가 raw S3 URL → signed GET URL 매핑(`photoDisplayUrls`) 도 반환, 프론트 PhotoUploader 가 `displayUrlMap` 으로 렌더 + 새 업로드는 로컬 blob URL 즉시 미리보기
@@ -211,7 +288,11 @@ backend / frontend / Python 서버 변경분 운영 배포 시 매번 확인.
 
 ### 사전 (코드 push 전)
 - [ ] DB 마이그레이션 필요한가? → [backend/migrations/](backend/migrations/) 확인
-  - 현재 운영 반영 완료: `001_create_face_analysis_results.sql`, `002_add_source_to_face_analysis_results.sql`, `003_create_pre_surveys.sql`
+  - 운영 반영 완료: `001_create_face_analysis_results.sql`, `002_add_source_to_face_analysis_results.sql`, `003_create_pre_surveys.sql`
+  - 🔴 **미반영**: `004_create_module_configs.sql` — `feat/face-analysis-dynamic` 배포 시 **push 전에 운영 DB 에 먼저 실행**해야 함
+    (첫 부팅 때 `ModuleConfigsService.onModuleInit` 이 24개 시드를 자동 삽입한다)
+  - ℹ️ **이미 22행이 들어있는 DB** 는 시드가 다시 돌지 않는다. SNH 7·8 은 다음 분석 때
+    `ensureModules` 가 숨김(`display:false`)으로 **자동 추가**하므로 수동 INSERT 불필요.
 - [ ] 필요하면 운영 DB 에 SQL 수동 실행
 - [ ] 새 환경변수 추가? → EB Configuration 에 추가
 - [ ] face_landmark Python 서버 변경? → 별도 배포 필요
@@ -222,7 +303,9 @@ backend / frontend / Python 서버 변경분 운영 배포 시 매번 확인.
 - [ ] Amplify user/admin 빌드 성공 확인 (Amplify 콘솔)
 
 ### 검증 (배포 직후)
-- [ ] backend `/api/docs` 접근 (새 endpoint `pre-surveys/*` 보이는지)
+- [ ] backend `/api/docs` 접근 (새 endpoint `pre-surveys/*`, `module-configs` 보이는지)
+- [ ] backend `GET /` 가 `{ status: 'ok', uptime, timestamp }` 반환 (EB 헬스 체크)
+- [ ] admin `/face-modules` 진입 → 모듈 24개 목록 보이고 토글/저장 되는지 (SNH 7·8 은 숨김 상태로 존재)
 - [ ] user 메인 페이지 로드 OK
 - [ ] admin 로그인 + 페이지 로드 OK
 - [ ] 3WAY 끝까지 한 번 진행 (얼굴 분석 포함)
@@ -231,6 +314,7 @@ backend / frontend / Python 서버 변경분 운영 배포 시 매번 확인.
   ```sql
   SELECT count(*) FROM face_analysis_results;        -- 새 2건
   SELECT count(*) FROM pre_surveys;                  -- 새 1건
+  SELECT count(*) FROM module_configs;               -- 22 (첫 부팅 시드)
   SELECT client_info->'threeWay'->'faceAnalysis' FROM consultations ORDER BY created_at DESC LIMIT 1;
   ```
 

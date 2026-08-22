@@ -87,7 +87,11 @@ new_momong/
 │  │  │  ├─ pre-surveys.entity.ts        (table: pre_surveys)
 │  │  │  ├─ pre-surveys.service.ts       (토큰 생성/조회/저장 + photoDisplayUrls 매핑)
 │  │  │  └─ pre-surveys.controller.ts    (인증 + 공개 토큰 endpoint)
-│  │  ├─ feature-settings/        기능 플래그
+│  │  ├─ feature-settings/        기능 플래그 (FIT/3WAY/코스 on-off)
+│  │  ├─ module-configs/         얼굴분석 모듈 표시 설정 (라벨/순서/노출/단위)
+│  │  │  ├─ module-config.entity.ts      (table: module_configs)
+│  │  │  ├─ module-configs.service.ts    (조회/수정 + 24개 시드 + 새 모듈 자동생성)
+│  │  │  └─ module-configs.controller.ts (공개 조회 + admin 수정)
 │  │  ├─ face-analysis/           얼굴 분석 (Python 호출 + S3 + DB)
 │  │  │  ├─ face-analysis.entity.ts        (table: face_analysis_results)
 │  │  │  ├─ python-analysis.service.ts     (Python 호출 + S3 presign)
@@ -97,7 +101,8 @@ new_momong/
 │  ├─ migrations/                 운영 DB 수동 마이그레이션 SQL
 │  │  ├─ 001_create_face_analysis_results.sql
 │  │  ├─ 002_add_source_to_face_analysis_results.sql
-│  │  └─ 003_create_pre_surveys.sql
+│  │  ├─ 003_create_pre_surveys.sql
+│  │  └─ 004_create_module_configs.sql
 │  └─ Procfile                    EB 실행 (web: node dist/main)
 ├─ frontend/
 │  ├─ user/                       디자이너용 (3100)
@@ -120,18 +125,41 @@ new_momong/
 │  │     └─ utils/                api.ts, 3way-api.ts, face-analysis-api.ts, pre-survey-api.ts, image-resize.ts
 │  └─ admin/                      운영자용 (3200)
 │     └─ src/
-│        ├─ app/                  /dashboard, /users, /features, /face-analysis-test
+│        ├─ app/                  /dashboard, /users, /features, /face-analysis-test, /face-modules
 │        ├─ components/           AdminHeader, AdminFaceAnalysisCapture, FaceOverlay, useFaceDetector
-│        └─ utils/                api.ts, face-analysis-api.ts, image-resize.ts
+│        └─ utils/                api.ts, auth.ts, face-analysis-api.ts, image-resize.ts
 ├─ .github/workflows/             deploy-backend.yml (GitHub Actions → EB)
 ├─ amplify.yml                    Amplify 빌드 설정 (user/admin 동시 정의)
 ├─ e2e/                           Playwright E2E
 ├─ figma/                         Figma Make 원본 (참고용)
+├─ docs/                          기능별 상세 설계 노트 (얼굴분석 매핑/동적구조, 3WAY 디자인방향 로직, 디자이너 폼)
 ├─ PLANNING.md                    제품 정의
 ├─ ARCHITECTURE.md                본 문서
 ├─ README.md                      실행/운영
 └─ TODO.md                        남은 작업
 ```
+
+### 3-1. 프론트 공통 코드 중복 (의도된 것 — 합칠 수 없음)
+
+`user` 와 `admin` 은 **완전히 독립된 두 Next.js 앱**이다. `amplify.yml` 이 각 앱의
+`appRoot` 안에서 따로 `npm ci` 를 돌리므로, `frontend/` 상위에는 `node_modules` 가 없다.
+
+그래서 아래 두 파일은 **양쪽에 동일한 복사본으로 존재한다.**
+
+| 파일 | user | admin |
+|---|---|---|
+| `useFaceDetector.ts` | `src/components/3way/` | `src/components/` |
+| `image-resize.ts` | `src/utils/` | `src/utils/` |
+
+`frontend/shared/` 로 빼는 방법은 **검증 결과 실패한다** — Turbopack 이 프로젝트 루트
+바깥 경로를 해석하지 못하고(`Module not found: Can't resolve '@shared/...'`),
+TypeScript 도 `react` / `@mediapipe/tasks-vision` 을 해석하지 못한다.
+
+> **합치려면**: `frontend/` 를 npm workspaces 로 전환 + `amplify.yml` 의 `npm ci` 를
+> repo 루트로 이동 (또는 `next.config.ts` 에 `turbopack.root` 지정).
+> 배포 구조 변경이라 보류 중.
+>
+> **그때까지**: 두 파일 상단에 동기화 경고 주석이 달려 있다. **한쪽을 고치면 반드시 나머지도 같이 고칠 것.**
 
 ---
 
@@ -149,6 +177,7 @@ new_momong/
 | `feature_settings` | id(=1), fit_enabled, three_way_enabled, course_*_enabled | 싱글톤 |
 | `face_analysis_results` | id, user_id, customer_id, detection_type(WNC/SNH), source(consultation/admin_test), face_image_url, python_analysis_result(jsonb), client_provided_data(jsonb), detected_at | 한 분석 = WNC + SNH 2행 |
 | `pre_surveys` | id, user_id, customer_id, token(unique), answers(jsonb), filled_at, created_at, updated_at | 디자이너 발급 토큰으로 고객이 방문 전 작성. 사진 URL 도 answers 안에 raw S3 URL 로 저장 |
+| `module_configs` | id, axis(WNC/SNH), module_key, label, sort_order, display, unit, updated_at | 얼굴분석 모듈의 **표시** 설정 (전역). `(axis, module_key)` unique. 측정값(Python)과 분리된 표시 SSOT — 상세는 [docs/face-analysis-dynamic-architecture.md](./docs/face-analysis-dynamic-architecture.md) |
 
 ### 4-1. consultation 에서 얼굴 분석 결과 참조
 
@@ -195,46 +224,103 @@ new_momong/
 
 ## 5. API 구조
 
+> 전역 프리픽스 `/api` (`main.ts` 의 `setGlobalPrefix('api', { exclude: ['/'] })`).
 > 정확한 시그니처/스키마는 Swagger 가 자동 생성: `http://localhost:3001/api/docs` (Basic Auth)
 
-### 5-1. 인증/유저
-- `POST /api/auth/signup`, `/login`, `/find-id`, `/reset-password`
-- 디자이너 status: `pending` → admin 승인 → `approved`
+가드 표기: **J** = `JwtAuthGuard` (디자이너 토큰) · **A** = `AdminGuard` (어드민 토큰) · **공개** = 인증 없음
 
-### 5-2. 컨설팅
-- `POST /api/consultations` — 저장
-- `GET  /api/consultations/:id` — 조회
-- `POST /api/shares` — 공유 링크 발급
-- `GET  /api/shares/:token` — 공유 링크 조회
+### 5-0. 헬스 체크
+| 메서드 | 경로 | 가드 | 설명 |
+|---|---|---|---|
+| GET | `/` | 공개 | EB 헬스 체크. `{ status, uptime, timestamp }` (프리픽스 제외 대상) |
 
-### 5-3. 얼굴 분석
-- **user 흐름** (JwtAuthGuard):
-  - `POST /api/face-analysis/upload-url` — PUT presigned URL 발급
-  - `POST /api/face-analysis/analyze` — Python 호출 + DB 저장 (source=consultation)
-- **admin 흐름** (AdminGuard):
-  - `POST /api/face-analysis/admin/upload-url`
-  - `POST /api/face-analysis/analyze-test` — source=admin_test
-  - `GET  /api/face-analysis/admin/history?limit=N` — admin_test 기록 목록
-  - `GET  /api/face-analysis/admin/:id` — 단건 상세
-  - `DELETE /api/face-analysis/admin/:id` — 짝 삭제
+### 5-1. 인증/유저 (`/api/auth`)
+| 메서드 | 경로 | 가드 | 설명 |
+|---|---|---|---|
+| POST | `/signup` | 공개 | 디자이너 가입 (`status: pending`) |
+| POST | `/login` | 공개 | 로그인 |
+| POST | `/find-id` | 공개 | 아이디(이메일) 찾기 |
+| POST | `/reset-password` | 공개 | 비밀번호 재설정 |
+| GET | `/me` | J | 내 정보 |
 
-### 5-5. 사전설문지
-- **디자이너 흐름** (JwtAuthGuard, owner 확인):
-  - `POST /api/pre-surveys` — 토큰 발급 (body: `{ customerId }`)
-  - `GET  /api/pre-surveys/by-customer/:customerId` — 고객별 설문 목록
-  - `GET  /api/pre-surveys/:id` — 단건 상세 (answers + photoDisplayUrls 매핑)
-  - `DELETE /api/pre-surveys/:id`
-- **고객 (공개)** — 인증 없음, 토큰 자체가 권한:
-  - `GET  /api/pre-surveys/token/:token` — 설문 + 작성중 답변 + `photoDisplayUrls`(signed GET) 반환
-  - `PATCH /api/pre-surveys/token/:token` — `{ answers, submit? }`. submit=true 면 `filled_at` 세팅 (제출 후 수정 불가)
-  - `POST /api/pre-surveys/token/:token/upload-url` — 사진 업로드용 S3 PUT presigned URL (5MB 제한, 제출된 설문은 거부)
+- 디자이너 status: `pending` → admin 승인 → `approved` (거절 시 `rejected`)
+
+### 5-2. 고객 (`/api/customers`) — 전부 **J**
+`GET /` · `GET /:id` · `POST /` · `PATCH /:id` · `DELETE /:id`
+
+### 5-3. 컨설팅 (`/api/consultations`) — 전부 **J**
+| 메서드 | 경로 | 설명 |
+|---|---|---|
+| POST | `/` | 저장 (body 의 `customerId` 로 고객 연결, 전화번호 upsert 폴백) |
+| GET | `/` | 내 컨설팅 목록 |
+| GET | `/by-customer/:phone` | 전화번호로 조회 (레거시 경로) |
+| GET | `/by-customer-id/:customerId` | **고객 ID 로 조회 (현재 프론트가 쓰는 경로)** |
+| GET | `/:id` | 단건 조회 |
+| PATCH | `/:id` | 수정 |
+| DELETE | `/:id` | 삭제 |
+
+### 5-4. 공유 링크 (`/api/shares`)
+| 메서드 | 경로 | 가드 | 설명 |
+|---|---|---|---|
+| POST | `/:consultationId` | J | 공유 링크 발급 (비밀번호 지정) |
+| GET | `/by-consultation/:consultationId` | J | 해당 컨설팅의 발급된 링크 조회 |
+| POST | `/:token/verify` | 공개 | 비밀번호 검증 후 컨설팅 내용 반환 |
+
+> 공유 페이지는 비밀번호를 **POST body 로** 보내 검증한다. 토큰만으로 조회하는 `GET /:token` 은 **없다.**
+
+### 5-5. 얼굴 분석 (`/api/face-analysis`)
+| 메서드 | 경로 | 가드 | 설명 |
+|---|---|---|---|
+| POST | `/upload-url` | J | PUT presigned URL 발급 |
+| POST | `/analyze` | J | Python 호출 + DB 저장 (`source=consultation`) |
+| POST | `/admin/upload-url` | A | admin 테스트용 presigned URL |
+| POST | `/analyze-test` | A | `source=admin_test` |
+| GET | `/admin/history?limit=N` | A | admin_test 기록 목록 |
+| GET | `/admin/:id` | A | 단건 상세 |
+| DELETE | `/admin/:id` | A | WNC/SNH 짝 삭제 |
+
+### 5-6. 사전설문지 (`/api/pre-surveys`)
+**디자이너** (J, owner 확인)
+| 메서드 | 경로 | 설명 |
+|---|---|---|
+| POST | `/` | 토큰 발급 (body: `{ customerId }`) |
+| GET | `/by-customer/:customerId` | 고객별 설문 목록 |
+| GET | `/:id` | 단건 상세 (answers + `photoDisplayUrls` 매핑) |
+| DELETE | `/:id` | 삭제 |
+
+**고객** (공개 — 토큰 자체가 권한)
+| 메서드 | 경로 | 설명 |
+|---|---|---|
+| GET | `/token/:token` | 설문 + 작성중 답변 + `photoDisplayUrls`(signed GET) |
+| PATCH | `/token/:token` | `{ answers, submit? }`. `submit=true` 면 `filled_at` 세팅 (제출 후 수정 불가) |
+| POST | `/token/:token/upload-url` | 사진 업로드용 S3 PUT presigned URL (5MB 제한, 제출된 설문은 거부) |
+
 - 토큰은 `crypto.randomBytes(24).toString('base64url')` (192 bit), 만료 없음, 재발급 무제한
 
-### 5-4. Admin
-- `POST /api/admin/auth/login`
-- `GET  /api/admin/users`, `/api/admin/stats`
-- `PATCH /api/admin/users/:id/status` — 승인/거절
-- `PATCH /api/admin/feature-settings` — 기능 토글
+### 5-7. 기능 플래그
+| 메서드 | 경로 | 가드 | 설명 |
+|---|---|---|---|
+| GET | `/api/feature-settings` | 공개 | FIT/3WAY/코스 on-off 조회 (user 프론트가 부팅 시 조회) |
+| PATCH | `/api/admin/feature-settings` | A | 토글 수정 (admin `/features`) |
+
+### 5-8. 얼굴분석 모듈 표시 설정
+| 메서드 | 경로 | 가드 | 설명 |
+|---|---|---|---|
+| GET | `/api/module-configs` | 공개 | 모듈 라벨/순서/노출/단위 조회 (user 얼굴분석 표가 이걸로 렌더) |
+| PATCH | `/api/admin/module-configs/:id` | A | 라벨/순서/노출/단위 수정 (admin `/face-modules`) |
+
+> 분석 응답에 설정에 없는 `module_key` 가 오면 백엔드가 행을 **자동 생성**(`display:false`)한다.
+> 설계 배경: [docs/face-analysis-dynamic-architecture.md](./docs/face-analysis-dynamic-architecture.md)
+
+### 5-9. Admin (`/api/admin`)
+| 메서드 | 경로 | 가드 | 설명 |
+|---|---|---|---|
+| POST | `/auth/login` | 공개 | 어드민 로그인 |
+| POST | `/auth/register` | 조건부 | 어드민 계정 추가. **어드민이 하나도 없으면 인증 불필요, 있으면 Bearer 토큰 필요** (부트스트랩용) |
+| GET | `/users` | A | 전체 디자이너 목록 |
+| GET | `/stats` | A | 가입/승인 통계 |
+| PATCH | `/users/:id/approve` | A | 디자이너 승인 |
+| PATCH | `/users/:id/reject` | A | 디자이너 거절 |
 
 ---
 
@@ -244,8 +330,12 @@ new_momong/
 
 ### 6-1. 구조
 - FastAPI 앱 (`application.py`) — `/analyze`, `/analyze-url`, `/analyze-base64`, `/health`
-- `analyze_face.py` — subprocess 진입점, 모듈 22개 호출
-- `modules/` — WNC 10 + SNH 12 = 22 모듈 (`WNC_TYPE_01_skin_tone.py` 등)
+- `analyze_face.py` — subprocess 진입점, 모듈 24개 호출
+- `modules/` — **24개 = WNC 10 + SNH 14** (`WNC_TYPE_01_skin_tone.py` 등). 디렉토리 파일 수 = 레지스트리 등록 수
+  - `SNH_TYPE_07_eyelid.py`(쌍꺼풀 형태) · `SNH_TYPE_08_eye_fat.py`(눈 밑 지방) 는 파일만 있고
+    `snh_modules` dict 에 등록되지 않아 오래 실행되지 않았다. **2026-08-22 에 등록 복구** —
+    동시에 나머지 22개와 동일한 반환 규격(`value` / `description` / `measurement`)으로 맞췄다.
+  - 두 모듈은 `module_configs` 에 `display:false` 로 시드된다. 노출하려면 admin `/face-modules` 에서 켠다.
 - MediaPipe Face Mesh 468 landmarks + OpenCV 영상 분석
 
 ### 6-2. 분석 모듈 분류
@@ -254,10 +344,10 @@ new_momong/
 1 피부톤 · 2 턱각도 · 3 광대발달 · 4 윤곽라인 · 5 눈썹형태
 6 눈형태 · 7 눈꼬리각도 · 8 코형태 · 9 입술두께 · 10 입술산형태
 
-**SNH (Soft / Neutral / Hard) — 12 모듈**
+**SNH (Soft / Neutral / Hard) — 14 모듈**
 1 피부톤밝기 · 2 얼굴길이 · 3 눈썹두께 · 4 눈썹-눈거리
-5 눈사이거리 · 6 눈바깥여백 · 9 코길이 · 10 코너비
-11 중안부비율 · 12 인중길이 · 13 입너비 · 14 턱길이
+5 눈사이거리 · 6 눈바깥여백 · **7 쌍꺼풀형태** · **8 눈밑지방**
+9 코길이 · 10 코너비 · 11 중안부비율 · 12 인중길이 · 13 입너비 · 14 턱길이
 
 각 모듈은 `{grade, value, description, measurement}` 반환. measurement 는 오버레이 좌표 데이터.
 
@@ -267,6 +357,17 @@ frontend `FaceOverlay` 가 그릴 수 있는 도형:
 - `point`, `line`, `polyline`, `polygon`, `rectangle`, `circle`, `text`
 - 좌표는 원본 이미지 절대 픽셀 (image_size 기준)
 - 색상/두께/dashed 등 스타일 옵션 포함
+
+**좌표 키 규약** (2026-08-22 정리)
+
+| 도형 | 좌표 키 |
+|---|---|
+| `point` · `circle` · `text` | `point: {x, y}` (+ `circle` 은 `radius`) |
+| `line` · `polyline` · `polygon` · `rectangle` | `points: [{x, y}, ...]` |
+
+> ⚠️ 과거 일부 모듈(SNH_04 · SNH_13)이 `circle` 에 `center` 키를 보내
+> `FaceOverlay` 가 `shape.point.x` 에서 터지던 버그가 있었다. Python 쪽을 `point` 로 통일했고,
+> `FaceOverlay` 는 이미 저장된 과거 jsonb 호환을 위해 `point ?? center` 둘 다 받는다.
 
 ---
 
@@ -329,6 +430,7 @@ AllowedMethods: ["PUT", "POST", "GET", "HEAD"]
   - `001_create_face_analysis_results.sql` (테이블 생성)
   - `002_add_source_to_face_analysis_results.sql` (source 컬럼)
   - `003_create_pre_surveys.sql` (pre_surveys 테이블 + 인덱스 3개)
+  - `004_create_module_configs.sql` (module_configs 테이블 — 첫 부팅 시 24개 시드 자동 삽입)
 
 ---
 

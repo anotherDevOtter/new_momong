@@ -11,7 +11,8 @@
 ## 0. 현황 (이 설계의 출발점)
 
 - 서버 응답(`AnalyzeResponse`)은 이미 모듈별 `{ name, grade, value, description, measurement }` + 그룹별 `{ final, counts, results }` 를 보냄. → [face-analysis-api.ts](../frontend/user/src/utils/face-analysis-api.ts)
-- **모듈 레지스트리**는 [face_landmark/analyze_face.py](../../face_landmark/analyze_face.py) 의 dict (key → name + module 경로). WNC 10개, SNH 12개(7·8 결번).
+- **모듈 레지스트리**는 [face_landmark/analyze_face.py](../../face_landmark/analyze_face.py) 의 dict (key → name + module 경로). WNC 10개, SNH 14개.
+  - (이 문서 작성 시점엔 SNH 12개 + 7·8 결번이었다. 2026-08-22 에 7 쌍꺼풀 · 8 눈밑지방 등록 복구 → 결번 없음)
 - **문제**: 프론트 [FaceAnalysisResult.tsx](../frontend/user/src/components/3way/FaceAnalysisResult.tsx) 가 `WNC_KEY_BY_LABEL`·base 배열에 **라벨·모듈번호·표시여부를 하드코딩** → 모듈 추가/라벨변경마다 프론트 수정. ("코 폭이 죽은 모듈에 묶임" 류 버그의 근원)
 - **원본 저장**: `face_analysis_results`(jsonb, 모듈번호 키) — 모듈 추가에 스키마 무손상.
 - **컨설팅 저장**: `consultation.client_info.threeWay.faceAnalysis = { wncId, snhId, wncFinal, snhFinal, ratios, summaryItems, warmCool[], softHard[] }`.
@@ -37,10 +38,12 @@
 
 - **범위 = 전역** (제품 공통, user_id 없음. admin이 관리).
 - **자동 생성** — 분석 응답에 **설정에 없는 module_key** 가 오면 백엔드가 `module_configs` 행을 **자동 생성**(`display:false`, `label`=서버 name, `order`=뒤). → admin에서 켜면 노출. 모듈 추가 시 프론트·운영 무수정.
-- **초기 시드**: 현재 22개 모듈을 마이그레이션으로 삽입 (쓰는 13개 `display:true` + 현재 라벨/순서, 나머지 9개 `display:false`).
+- **초기 시드**: 현재 **24개** 모듈을 첫 부팅 시 삽입 (쓰는 13개 `display:true` + 현재 라벨/순서, 나머지 11개 `display:false`).
+  - 최초 설계 시점엔 22개였다. 2026-08-22 에 SNH 7·8 이 레지스트리에 복구되며 24개가 됨.
 
 ### 번호 정책 (불변)
-- **모듈 번호는 재배열하지 않는다.** 번호 = Python·프론트·`face_analysis_results` 과거 데이터의 공통 키(contract). 결번(7·8)도 그대로 둔다.
+- **모듈 번호는 재배열하지 않는다.** 번호 = Python·프론트·`face_analysis_results` 과거 데이터의 공통 키(contract).
+  - 이 정책 덕분에 SNH 7·8 을 나중에 **원래 번호 그대로** 되살릴 수 있었다 (2026-08-22). 결번은 메꿔도 되지만 **기존 번호의 의미는 바꾸지 않는다.**
 
 ---
 
@@ -111,15 +114,22 @@ faceAnalysis: {
 |:--:|------|------|:--:|:--:|
 | **P0** ✅ | 설계 확정 (B안 + 아래 결정 합의 완료) | — | 🟢 | — |
 | **P1** ✅ | 프론트 표 **동적 렌더링** (모듈번호 바인딩, 하드코딩 맵 제거). 표시/순서는 임시 프론트 화이트리스트 | user FE | 🟡 중 | ✅ |
-| **P2a** | `module_configs` 테이블 + 마이그레이션 + 22개 시드 + 조회/수정 API + 새 모듈 자동생성 | 백엔드 | 🟡 중 | ✅ |
-| **P2b** | 프론트(user)가 화이트리스트 대신 **DB 설정 조회해 렌더** | user FE | 🟢 소 | ✅ |
-| **P2c** | admin에서 모듈 설정 편집 (토글/순서 숫자/라벨/단위) | admin FE | 🟡 중 | ✅ |
-| **P3** | **오버레이 저장**: 백엔드 저장/조회 + 프론트 수정→override 반영 + final 재계산 | BE + FE | 🟡 중 | ✅ |
-| **P4** | admin 컨설팅 상세에서 동일 렌더링 재사용 (TODO F3) | admin FE | 🟢 소 | ✅ |
+| **P2a** ✅ | `module_configs` 테이블 + 마이그레이션 + 22개 시드 + 조회/수정 API + 새 모듈 자동생성 | 백엔드 | 🟡 중 | ✅ |
+| **P2b** ✅ | 프론트(user)가 화이트리스트 대신 **DB 설정 조회해 렌더** | user FE | 🟢 소 | ✅ |
+| **P2c** ✅ | admin에서 모듈 설정 편집 (토글/순서 숫자/라벨/단위) | admin FE | 🟡 중 | ✅ |
+| **P3** 🔴 | **오버레이 저장**: 백엔드 저장/조회 + 프론트 수정→override 반영 + final 재계산 | BE + FE | 🟡 중 | ✅ |
+| **P4** ✅ | 컨설팅 상세에서 동일 렌더링 재사용 (TODO F3) | user FE | 🟢 소 | ✅ |
 
-- **P0·P1 완료.** 다음 = **P2a(백엔드 설정 테이블)**.
-- P2a→P2b 는 함께 배포해야 의미 (조회 경로 전환). P2c(admin)는 그 뒤 독립.
-- ⚠️ **P2a 부터 DB 마이그레이션 동반** (배포 시 운영 DB에 `module_configs` 생성 + 시드).
+### 진행 상황 (2026-08-22 기준)
+
+- **P0 · P1 · P2a · P2b · P2c · P4 완료.** 남은 것 = **P3 (오버레이 저장) 하나.**
+  - P2a `5fe95da` / P2b `fcdfecc` / P2c `860a787` / P4 `79116dd`
+  - P3 는 **미착수** — 코드에 `overrides` 가 아직 없다 (`faceAnalysis` 는 여전히 `warmCool[]`/`softHard[]` 스냅샷 저장).
+  - ⚠️ 커밋 `7f366e5` 이 `feat(p3):` 로 시작하지만 실제 내용은 **F1(비율 value 연결)** 이다. P3 아님.
+- **P4 구현 위치 정정**: 표에 "admin FE" 로 적었으나 실제로는 **user 프론트 고객 상세**
+  (`ClientDetailStep` + `FaceAnalysisSummary`)에 들어갔다. admin 프론트에는 아직 없다.
+- ⚠️ **전부 `feat/face-analysis-dynamic` 브랜치에만 있고 아직 배포되지 않았다.**
+  배포 시 운영 DB 에 `004_create_module_configs.sql` 선실행 필요 (첫 부팅에 24개 시드 자동 삽입).
 
 ---
 
