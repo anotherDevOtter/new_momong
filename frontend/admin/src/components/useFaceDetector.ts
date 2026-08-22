@@ -1,5 +1,9 @@
 'use client';
 
+// ⚠️ 이 파일은 frontend/user 와 frontend/admin 에 동일한 복사본으로 존재한다.
+//    한쪽을 고치면 반드시 나머지도 같이 고칠 것.
+//    (합칠 수 없는 이유: ARCHITECTURE.md §3-1 '프론트 공통 코드 중복')
+
 import { useEffect, useRef, useState } from 'react';
 import type { FaceDetector } from '@mediapipe/tasks-vision';
 
