@@ -8,9 +8,19 @@
 
 ## 🚧 운영 동기화 상태
 
-⚠️ **현재 작업 브랜치 `feat/face-analysis-dynamic` 는 origin 에 push 되지 않았다.**
-얼굴분석 동적구조(P1~P4) + 사전설문 리뷰 step 11 + 저장 누락 근본수정이 **로컬에만 있다.**
-배포하려면 `main` 병합 후 push 필요 — **`004_create_module_configs.sql` 운영 DB 선실행 필수.**
+**로컬 `main` = 정리 완료 상태.** `feat/face-analysis-dynamic` 는 2026-08-22 에 `main` 으로
+병합했고 working tree 는 깨끗하다. 다음 작업은 여기서 시작하면 된다.
+
+⚠️ **단, `main` 자체가 origin 에 push 되지 않았다.** 2026-06-08 이후 아무것도 배포되지 않았고
+아래가 전부 로컬에만 있다:
+- 얼굴분석 동적구조 P1 · P2a · P2b · P2c · P4 (`module_configs` 기반 표시 SSOT)
+- 사전설문 리뷰 step 11
+- B1 / B3 / threeWay 저장 누락 수정
+- 2026-08-22 프로젝트 정리 (죽은 코드·의존성 제거, 문서 동기화)
+
+**배포 시 반드시**: push 전에 운영 DB 에 `backend/migrations/004_create_module_configs.sql`
+선실행. 첫 부팅 때 `ModuleConfigsService.onModuleInit` 이 24개 시드를 자동 삽입한다.
+`main` push = 자동 배포(GitHub Actions 백엔드 EB + Amplify 프론트)이므로 준비되기 전엔 push 금지.
 
 마지막으로 운영에 반영된 것(2026-06-08 배포):
 - 사전설문지 기능 (DB 마이그레이션 `003_create_pre_surveys.sql` 운영 DB 실행 완료)
