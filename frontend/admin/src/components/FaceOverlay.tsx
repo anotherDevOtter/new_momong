@@ -15,7 +15,8 @@ export interface Point {
 export type MeasurementShape =
   | { type: 'point'; point: Point; color?: string; label?: string }
   | { type: 'line' | 'polyline' | 'polygon' | 'rectangle'; points: Point[]; stroke?: string; stroke_width?: number; fill?: string; dashed?: boolean; label?: string }
-  | { type: 'circle'; point: Point; radius: number; stroke?: string; stroke_width?: number; fill?: string; dashed?: boolean; label?: string }
+  // circle: 좌표 키가 `point` 인 모듈과 `center` 인 모듈이 섞여 있었다. 과거 저장분 호환을 위해 둘 다 받는다.
+  | { type: 'circle'; point?: Point; center?: Point; radius: number; stroke?: string; stroke_width?: number; fill?: string; dashed?: boolean; label?: string }
   | { type: 'text'; point: Point; text: string; color?: string; font_size?: number };
 
 export interface Measurement {
@@ -132,11 +133,13 @@ function Shape({ shape }: { shape: MeasurementShape }) {
       );
     }
 
-    case 'circle':
+    case 'circle': {
+      const c = shape.point ?? shape.center;
+      if (!c) return null;
       return (
         <circle
-          cx={shape.point.x}
-          cy={shape.point.y}
+          cx={c.x}
+          cy={c.y}
           r={shape.radius}
           fill={fill}
           stroke={stroke}
@@ -144,6 +147,7 @@ function Shape({ shape }: { shape: MeasurementShape }) {
           strokeDasharray={dashArray}
         />
       );
+    }
 
     case 'text':
       return (
