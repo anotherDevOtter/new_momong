@@ -2,14 +2,14 @@
 
 import { Check } from 'lucide-react';
 
-interface FashionStyleCardProps {
+interface FitFashionStyleCardProps {
   title: string;
   images: string[];
   selected: boolean;
   onClick: () => void;
 }
 
-export const FashionStyleCard = ({ title, images, selected, onClick }: FashionStyleCardProps) => {
+export const FitFashionStyleCard = ({ title, images, selected, onClick }: FitFashionStyleCardProps) => {
   return (
     <button
       type="button"

@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/Button';
-import { FashionStyleCard } from '@/components/ui/FashionStyleCard';
+import { FitFashionStyleCard } from '@/components/ui/FitFashionStyleCard';
 import { FashionStyle } from '@/types';
 
 interface FashionStyleStepProps {
@@ -93,7 +93,7 @@ export const FashionStyleStep = ({ data, gender, onChange, onNext, onBack }: Fas
 
       <div className="grid grid-cols-3 gap-6">
         {styleKeys.map((style) => (
-          <FashionStyleCard
+          <FitFashionStyleCard
             key={style}
             title={style}
             images={fashionStyles[style]}
