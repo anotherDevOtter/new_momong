@@ -18,9 +18,34 @@
 - B1 / B3 / threeWay 저장 누락 수정
 - 2026-08-22 프로젝트 정리 (죽은 코드·의존성 제거, 문서 동기화)
 
-**배포 시 반드시**: push 전에 운영 DB 에 `backend/migrations/004_create_module_configs.sql`
+### 배포 보류 결정 (2026-08-22)
+
+**개편이 끝날 때까지 배포하지 않는다.** 사유 — 지금 고친 것을 개편에서 또 고치게 되므로,
+중간 배포는 같은 코드를 두 번 내보내는 셈.
+
+- 작업은 로컬 `main` 에서 진행. 개편 착수 전 지점은 태그 `backup/2026-08-22-pre-overhaul` 에 보존.
+- `main` push = 자동 배포(GitHub Actions 백엔드 EB + Amplify 프론트)라 **준비되기 전엔 push 금지.**
+  단 `main` 이외 브랜치 push 는 배포를 트리거하지 않는다 (`deploy-backend.yml` 이 `branches: [main]`).
+
+**나중에 배포할 때 반드시**: push 전에 운영 DB 에 `backend/migrations/004_create_module_configs.sql`
 선실행. 첫 부팅 때 `ModuleConfigsService.onModuleInit` 이 24개 시드를 자동 삽입한다.
-`main` push = 자동 배포(GitHub Actions 백엔드 EB + Amplify 프론트)이므로 준비되기 전엔 push 금지.
+
+### ⚠️ 운영에 살아있는 데이터 유실 버그
+
+현재 운영(`origin/main`, 2026-06-09 배포)은 3WAY 컨설팅 데이터를 **저장하지 못한다.**
+
+| 구성요소 | 운영 상태 |
+|---|---|
+| 프론트 `3way-api.ts` | `threeWay` 를 payload **최상위**로 전송 |
+| 백엔드 `main.ts` | `ValidationPipe({ whitelist: true, forbidNonWhitelisted: false })` |
+| 백엔드 `CreateConsultationDto` | `threeWay` 필드 **없음** |
+
+→ whitelist 가 `threeWay` 를 잘라내고 **에러도 나지 않는다.** 프론트는 저장 성공으로 처리.
+얼굴분석·퍼스널컬러·골격·이미지방향·헤어디자인·모질이 전부 버려지고 고객 기본정보만 남는다.
+
+수정은 로컬에 있으나(`8cb8ac1`·`cd1f110`·`70a526a`·`8e62538`) **미배포**.
+→ 실사용 중이라면 admin `/features` 에서 3WAY 토글을 끄면 배포 없이 유실을 멈출 수 있다.
+   실사용 전이라면 무시해도 된다.
 
 마지막으로 운영에 반영된 것(2026-06-08 배포):
 - 사전설문지 기능 (DB 마이그레이션 `003_create_pre_surveys.sql` 운영 DB 실행 완료)
