@@ -57,10 +57,10 @@
 
 | 영역 | 기술 | 비고 |
 |---|---|---|
-| Backend | NestJS 11 + TypeORM | port 3001 (local) |
+| Backend | NestJS 11 + TypeORM | port 3200 (local) |
 | DB | PostgreSQL 15 | RDS (운영), 로컬 자체 설치 |
-| Frontend (user) | Next.js 16 + React 19 + Tailwind v4 | port 3100 (local) |
-| Frontend (admin) | Next.js 16 + React 19 + Tailwind v4 | port 3200 (local) |
+| Frontend (user) | Next.js 16 + React 19 + Tailwind v4 | port 3203 (local) |
+| Frontend (admin) | Next.js 16 + React 19 + Tailwind v4 | port 3202 (local) |
 | 인증 | JWT (HS256) | secret = `JWT_SECRET` env |
 | 얼굴 분석 | FastAPI + MediaPipe + OpenCV | 별도 repo `face_landmark/` |
 | 클라이언트 얼굴 검출 | `@mediapipe/tasks-vision` | CDN 모델, 픽스된 버전 0.10.35 |
@@ -105,7 +105,7 @@ new_momong/
 │  │  └─ 004_create_module_configs.sql
 │  └─ Procfile                    EB 실행 (web: node dist/main)
 ├─ frontend/
-│  ├─ user/                       디자이너용 (3100)
+│  ├─ user/                       디자이너용 (3203)
 │  │  └─ src/
 │  │     ├─ app/
 │  │     │  ├─ (app)/             공통 AppHeader layout (인증 필요)
@@ -123,7 +123,7 @@ new_momong/
 │  │     │  └─ ui/                공용 UI (Modal, ProgressBar 등)
 │  │     ├─ contexts/             AuthContext, FeaturesContext
 │  │     └─ utils/                api.ts, 3way-api.ts, face-analysis-api.ts, pre-survey-api.ts, image-resize.ts
-│  └─ admin/                      운영자용 (3200)
+│  └─ admin/                      운영자용 (3202)
 │     └─ src/
 │        ├─ app/                  /dashboard, /users, /features, /face-analysis-test, /face-modules
 │        ├─ components/           AdminHeader, AdminFaceAnalysisCapture, FaceOverlay, useFaceDetector
@@ -225,7 +225,7 @@ TypeScript 도 `react` / `@mediapipe/tasks-vision` 을 해석하지 못한다.
 ## 5. API 구조
 
 > 전역 프리픽스 `/api` (`main.ts` 의 `setGlobalPrefix('api', { exclude: ['/'] })`).
-> 정확한 시그니처/스키마는 Swagger 가 자동 생성: `http://localhost:3001/api/docs` (Basic Auth)
+> 정확한 시그니처/스키마는 Swagger 가 자동 생성: `http://localhost:3200/api/docs` (Basic Auth)
 
 가드 표기: **J** = `JwtAuthGuard` (디자이너 토큰) · **A** = `AdminGuard` (어드민 토큰) · **공개** = 인증 없음
 
@@ -326,7 +326,7 @@ TypeScript 도 `react` / `@mediapipe/tasks-vision` 을 해석하지 못한다.
 
 ## 6. face_landmark Python 서버
 
-별도 repo: `/Users/won/Development Project/momong/face_landmark/`
+별도 repo: `/Users/won/Development Project/NAS-Projects/02-Work/W007-MerciMomong/face_landmark/`
 
 ### 6-1. 구조
 - FastAPI 앱 (`application.py`) — `/analyze`, `/analyze-url`, `/analyze-base64`, `/health`
@@ -467,10 +467,10 @@ AllowedMethods: ["PUT", "POST", "GET", "HEAD"]
 | 항목 | 로컬 | 운영 |
 |---|---|---|
 | DB | localhost PostgreSQL | RDS |
-| backend | `npm run start:dev` (3001) | EB (auto deploy) |
-| user frontend | `PORT=3100 npm run dev` | Amplify |
-| admin frontend | `PORT=3200 npm run dev` | Amplify |
-| Python 서버 | `cd face_landmark && python application.py` (8000) | 별도 EB |
+| backend | `npm run start:dev` (3200) | EB (auto deploy) |
+| user frontend | `PORT=3203 npm run dev` | Amplify |
+| admin frontend | `PORT=3202 npm run dev` | Amplify |
+| Python 서버 | `cd face_landmark && python application.py` (3201) | 별도 EB |
 | S3 | `momong-dev` (CORS: localhost) | `momong-staging` (CORS: `*.merci-momong.com`) |
 | 인증 | 자동 시드 admin (`admin@momong.com` / `!Password1234`) | env 통한 강한 시드 |
 

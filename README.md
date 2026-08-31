@@ -22,6 +22,34 @@
 
 ---
 
+## 로컬 포트 (고정)
+
+이 프로젝트는 로컬에서 **3200번대**를 쓴다. 다른 포트로 띄우지 말 것 —
+CORS(`ALLOWED_ORIGINS`) · 공유링크(`FRONTEND_URL`) · Python 호출(`PYTHON_SERVER_URL`) 이
+전부 이 값에 맞춰져 있다.
+
+| 포트 | 서비스 | 실행 |
+|:--:|---|---|
+| **3200** | backend (NestJS) | `cd backend && npm run start:dev` |
+| **3201** | Python 얼굴분석 (FastAPI) | `cd face_landmark && python application.py` |
+| **3202** | admin 프론트 (Next.js) | `cd frontend/admin && PORT=3202 npm run dev` |
+| **3203** | user 프론트 (Next.js) | `cd frontend/user && PORT=3203 npm run dev` |
+
+> ℹ️ **3200 번대를 고른 이유** — 3000·3001·3002·4000·4001·4002 는 개발 머신에서
+> 다른 프로젝트가 흔히 점유하고, **5000·7000 은 macOS AirPlay 수신 모드가 잡는다.**
+> 3200~3203 은 충돌이 없다.
+
+> ℹ️ Python 서버 포트는 `PORT` 환경변수로 바뀐다 (기본 3201).
+> 운영 EB 는 `face_landmark/Procfile` 이 8000 으로 바인딩하므로 이 변경과 무관하다.
+
+포트가 비었는지 확인:
+```bash
+for p in 3200 3201 3202 3203; do lsof -nP -iTCP:$p -sTCP:LISTEN >/dev/null 2>&1 \
+  && echo "$p 점유중" || echo "$p 사용가능"; done
+```
+
+---
+
 ## 빠른 시작
 
 4개 터미널 (얼굴 분석 미사용 시 Python 생략 가능):
@@ -31,35 +59,35 @@
 cd backend
 cp .env.example .env       # 처음 한 번만 (그리고 AWS 키/Python URL 채우기)
 npm install
-npm run start:dev          # http://localhost:3001
+npm run start:dev          # http://localhost:3200
 
 # 2) user frontend
 cd frontend/user
 cp .env.example .env.local
 npm install
-PORT=3100 npm run dev      # http://localhost:3100
+PORT=3203 npm run dev      # http://localhost:3203
 
 # 3) admin frontend
 cd frontend/admin
 cp .env.example .env.local
 npm install
-PORT=3200 npm run dev      # http://localhost:3200
+PORT=3202 npm run dev      # http://localhost:3202
 
 # 4) Python 얼굴 분석 서버 (선택 — 분석 기능 안 쓰면 생략)
 cd ../face_landmark
 source venv/bin/activate
-python application.py      # http://localhost:8000
+python application.py      # http://localhost:3201
 ```
 
 ### 접속
 
 | 서비스 | URL |
 |---|---|
-| API 서버 | http://localhost:3001 |
-| Swagger | http://localhost:3001/api/docs (`admin` / `admin1234`) |
-| User 프론트 | http://localhost:3100 |
-| Admin 프론트 | http://localhost:3200 |
-| Python 분석 | http://localhost:8000 |
+| API 서버 | http://localhost:3200 |
+| Swagger | http://localhost:3200/api/docs (`admin` / `admin1234`) |
+| User 프론트 | http://localhost:3203 |
+| Admin 프론트 | http://localhost:3202 |
+| Python 분석 | http://localhost:3201 |
 
 ### 기본 계정
 
@@ -78,14 +106,14 @@ python application.py      # http://localhost:8000
 
 | 키 | 기본 | 설명 |
 |---|---|---|
-| `PORT` | 3001 | API 포트 |
+| `PORT` | 3200 | API 포트 |
 | `NODE_ENV` | development | `production` 이면 synchronize OFF + SSL ON |
 | `DB_*` | localhost/postgres/password/fit_hair | PostgreSQL |
 | `JWT_SECRET` | (default) | 토큰 서명 키 (운영 변경 필수) |
-| `ALLOWED_ORIGINS` | `http://localhost:3100,3200` | CORS |
-| `FRONTEND_URL` | http://localhost:3100 | 공유 링크 base |
+| `ALLOWED_ORIGINS` | `http://localhost:3203,3202` | CORS |
+| `FRONTEND_URL` | http://localhost:3203 | 공유 링크 base |
 | `ADMIN_SEED_EMAIL` / `_PASSWORD` | `admin@momong.com` / `!Password1234` | 부팅 시 자동 어드민 |
-| `PYTHON_SERVER_URL` | http://localhost:8000 | face_landmark 서버 |
+| `PYTHON_SERVER_URL` | http://localhost:3201 | face_landmark 서버 |
 | `AWS_REGION` | ap-northeast-2 | S3 region |
 | `AWS_S3_BUCKET` | momong-dev | dev 전용 버킷 (CORS: localhost) |
 | `AWS_ACCESS_KEY_ID` / `_SECRET_ACCESS_KEY` | (자체 발급) | S3 접근 |
@@ -96,7 +124,7 @@ python application.py      # http://localhost:8000
 
 | 키 | 예 |
 |---|---|
-| `NEXT_PUBLIC_API_URL` | `http://localhost:3001/api` |
+| `NEXT_PUBLIC_API_URL` | `http://localhost:3200/api` |
 
 ---
 
@@ -137,13 +165,13 @@ user 얼굴분석 결과 표가 이 설정대로 렌더된다. 새 Python 모듈
 
 ```
 new_momong/
-├─ backend/             NestJS API (3001)
+├─ backend/             NestJS API (3200)
 │  │                    auth / admin / customers / consultations / shares
 │  │                    pre-surveys / face-analysis / feature-settings / module-configs
 │  └─ migrations/       운영 DB 수동 마이그레이션 SQL (001~004)
 ├─ frontend/
-│  ├─ user/             디자이너용 (3100)
-│  └─ admin/            운영자용 (3200)
+│  ├─ user/             디자이너용 (3203)
+│  └─ admin/            운영자용 (3202)
 ├─ e2e/                 Playwright
 ├─ docs/                기능별 상세 설계 노트 (얼굴분석 매핑/동적구조 등)
 ├─ figma/               Figma Make 원본 (참고)
@@ -169,8 +197,10 @@ new_momong/
 | 기능 토글 변경 안 보임 | user 프론트 새로고침 |
 | 카메라 권한 거부됨 | HTTPS 또는 localhost 에서만 동작. 권한 거부 후엔 브라우저 주소창 자물쇠 → 카메라 재허용 |
 | 얼굴 분석 호출 시 ECONNREFUSED | Python 서버 (`python application.py`) 실행 중인지 확인 |
-| S3 PUT 403 | `momong-dev` 버킷의 CORS 에 `http://localhost:3100` 포함되어 있는지 확인 |
-| `EADDRINUSE: :::3100` | `lsof -ti:3100 \| xargs kill -9` |
+| S3 PUT 403 | `momong-dev` 버킷의 CORS 에 `http://localhost:3203` 포함되어 있는지 확인 |
+| `EADDRINUSE: :::3203` | `lsof -ti:3203 \| xargs kill -9` |
+| backend 가 3200 에서 안 뜸 | 다른 프로세스가 점유 중인지 확인 (`lsof -ti:3200`). 포트를 옮기면 프론트 `NEXT_PUBLIC_API_URL` 도 같이 변경할 것 |
+| 프론트가 엉뚱한 응답을 받음 | 해당 포트에 다른 프로젝트가 떠 있는지 확인 — `lsof -nP -iTCP -sTCP:LISTEN \| grep 320` |
 
 ---
 

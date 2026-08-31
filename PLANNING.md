@@ -210,5 +210,5 @@
 
 - 코드 자체가 single source of truth
 - 데이터 모델 정확한 정의: `backend/src/**/*.entity.ts`
-- API 정확한 시그니처: `http://localhost:3001/api/docs` (Swagger, dev 모드)
+- API 정확한 시그니처: `http://localhost:3200/api/docs` (Swagger, dev 모드)
 - 인프라/배포 흐름: [ARCHITECTURE.md](./ARCHITECTURE.md)
