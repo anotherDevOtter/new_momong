@@ -32,21 +32,63 @@ type PageKey =
   | 'imageDirection' | 'hairDesign' | 'hairTexture'
   | 'nextDirection' | 'preSurveyReview' | 'completion';
 
-// 진행률 표시에 포함되는 페이지 (transient 페이지 제외).
-// faceProcessing 은 짧은 전환, completion 은 끝났을 때라 둘 다 ProgressBar 미표시.
+// ─────────────────────────────────────────────────────────────────────────
+// 코스별 단계 구성. 배열 순서 = 진행 순서.
+//
+// 흐름을 바꾸려면 여기만 고친다. 이전/다음/진행률이 전부 이 표에서 파생되므로
+// 예전처럼 분기 조건이 여러 곳에 흩어져 서로 어긋나는 일이 생기지 않는다.
+//
+// N-WAY = 진단 축의 개수 (코스 선택 카드 문구와 동일한 약속):
+//   1WAY 얼굴 / 2WAY 얼굴+1개 / 3WAY 얼굴+2개(퍼스널컬러·골격)
+// ─────────────────────────────────────────────────────────────────────────
+const BASE_STEPS: PageKey[] = [
+  'preInterview',
+  'imagePreference',
+  'fashionPreference',
+  'summary',
+  'faceAnalysis',
+  'faceProcessing',
+  'faceResult',
+];
+const TAIL_STEPS: PageKey[] = [
+  'imageDirection',
+  'hairDesign',
+  'hairTexture',
+  'nextDirection',
+  'preSurveyReview',
+];
+
+const COURSE_STEPS: Record<string, PageKey[]> = {
+  '1way':          [...BASE_STEPS, ...TAIL_STEPS],
+  '2way-personal': [...BASE_STEPS, 'personalColor', ...TAIL_STEPS],
+  '2way-skeleton': [...BASE_STEPS, 'skeletonImage', ...TAIL_STEPS],
+  '3way':          [...BASE_STEPS, 'personalColor', 'skeletonImage', ...TAIL_STEPS],
+};
+
+// 짧은 전환 화면 — 진행률에 세지 않고, "이전" 으로 되돌아가지도 않는다.
+const TRANSIENT_STEPS: PageKey[] = ['faceProcessing'];
+
+function stepsFor(course: string): PageKey[] {
+  return COURSE_STEPS[course] ?? COURSE_STEPS['3way'];
+}
+
+function stepAfter(course: string, current: PageKey): PageKey | null {
+  const steps = stepsFor(course);
+  const i = steps.indexOf(current);
+  return i >= 0 && i < steps.length - 1 ? steps[i + 1] : null;
+}
+
+function stepBefore(course: string, current: PageKey): PageKey | null {
+  const steps = stepsFor(course);
+  let i = steps.indexOf(current) - 1;
+  while (i >= 0 && TRANSIENT_STEPS.includes(steps[i])) i--;   // 전환 화면은 건너뛴다
+  return i >= 0 ? steps[i] : null;
+}
+
+// 진행률 표시에 포함되는 페이지 (transient 제외).
+// completion 은 흐름이 끝난 뒤라 애초에 구성표에 없다.
 function buildVisibleSteps(course: string): PageKey[] {
-  const steps: PageKey[] = [
-    'preInterview',
-    'imagePreference',
-    'fashionPreference',
-    'summary',
-    'faceAnalysis',
-    'faceResult',
-  ];
-  if (course === '2way-personal') steps.push('personalColor');
-  else if (course === '2way-skeleton') steps.push('skeletonImage');
-  steps.push('imageDirection', 'hairDesign', 'hairTexture', 'nextDirection', 'preSurveyReview');
-  return steps;
+  return stepsFor(course).filter((s) => !TRANSIENT_STEPS.includes(s));
 }
 
 export default function ThreeWayConsultingPage() {
@@ -120,6 +162,16 @@ function Inner() {
   }
   if (!user || !customerData) return null;
 
+  // 구성표에서 파생되는 이동. 코스별 분기를 여기서 따로 하지 않는다.
+  const goNext = (from: PageKey) => {
+    const next = stepAfter(selectedCourse, from);
+    if (next) setCurrentPage(next);
+  };
+  const goBack = (from: PageKey) => {
+    const prev = stepBefore(selectedCourse, from);
+    if (prev) setCurrentPage(prev);
+  };
+
   const handlePreInterviewBack = () => {
     // 사전 인터뷰의 "이전" → 컨설팅 시작 (CustomerConfirm) 으로
     const q = new URLSearchParams({ type: '3way', course: selectedCourse, customerId: customerId! });
@@ -127,38 +179,36 @@ function Inner() {
   };
   const handlePreInterviewNext = (data: PreInterviewData) => {
     setPreInterviewData(data);
-    setCurrentPage('imagePreference');
+    goNext('preInterview');
   };
 
-  const handleImagePreferenceBack = () => setCurrentPage('preInterview');
+  const handleImagePreferenceBack = () => goBack('imagePreference');
   const handleImagePreferenceNext = (data: ImagePreferenceData) => {
     setImagePreferenceData(data);
-    setCurrentPage('fashionPreference');
+    goNext('imagePreference');
   };
 
-  const handleFashionPreferenceBack = () => setCurrentPage('imagePreference');
+  const handleFashionPreferenceBack = () => goBack('fashionPreference');
   const handleFashionPreferenceNext = (data: FashionPreferenceData) => {
     setFashionPreferenceData(data);
-    setCurrentPage('summary');
+    goNext('fashionPreference');
   };
 
-  const handleSummaryBack = () => setCurrentPage('fashionPreference');
-  const handleSummaryNext = () => setCurrentPage('faceAnalysis');
+  const handleSummaryBack = () => goBack('summary');
+  const handleSummaryNext = () => goNext('summary');
 
-  const handleFaceAnalysisBack = () => setCurrentPage('summary');
+  const handleFaceAnalysisBack = () => goBack('faceAnalysis');
   const handleFaceAnalysisNext = (result: AnalyzeResponse, imageUrl: string) => {
     setFaceAnalysisResult(result);
     setFaceImageUrl(imageUrl);
-    setCurrentPage('faceProcessing');
+    goNext('faceAnalysis');
   };
-  const handleFaceProcessingComplete = () => setCurrentPage('faceResult');
+  const handleFaceProcessingComplete = () => goNext('faceProcessing');
 
-  const handleFaceResultBack = () => setCurrentPage('faceAnalysis');
+  const handleFaceResultBack = () => goBack('faceResult');
   const handleFaceResultNext = (data: FaceResultData) => {
     setFaceResultData(data);
-    if (selectedCourse === '2way-personal') setCurrentPage('personalColor');
-    else if (selectedCourse === '2way-skeleton') setCurrentPage('skeletonImage');
-    else setCurrentPage('imageDirection');
+    goNext('faceResult');
   };
 
   // 얼굴 분석에서 도출된 현재 이미지 타입 (디자이너 수정 반영). 분석 전이면 N/N.
@@ -170,29 +220,25 @@ function Inner() {
   const balanceLabel = { S: 'Soft', N: 'Neutral', H: 'Hard' } as const;
   const imageTypeLabel = `${toneLabel[currentImageType.warmCool]} / ${balanceLabel[currentImageType.softHard]}`;
 
-  const handlePersonalColorBack = () => setCurrentPage('faceResult');
-  const handlePersonalColorNext = () => setCurrentPage('imageDirection');
+  const handlePersonalColorBack = () => goBack('personalColor');
+  const handlePersonalColorNext = () => goNext('personalColor');
 
-  const handleSkeletonImageBack = () => setCurrentPage('faceResult');
-  const handleSkeletonImageNext = () => setCurrentPage('imageDirection');
+  const handleSkeletonImageBack = () => goBack('skeletonImage');
+  const handleSkeletonImageNext = () => goNext('skeletonImage');
 
-  const handleImageDirectionBack = () => {
-    if (selectedCourse === '2way-personal') setCurrentPage('personalColor');
-    else if (selectedCourse === '2way-skeleton') setCurrentPage('skeletonImage');
-    else setCurrentPage('faceResult');
-  };
-  const handleImageDirectionNext = () => setCurrentPage('hairDesign');
+  const handleImageDirectionBack = () => goBack('imageDirection');
+  const handleImageDirectionNext = () => goNext('imageDirection');
 
-  const handleHairDesignBack = () => setCurrentPage('imageDirection');
-  const handleHairDesignNext = () => setCurrentPage('hairTexture');
+  const handleHairDesignBack = () => goBack('hairDesign');
+  const handleHairDesignNext = () => goNext('hairDesign');
 
-  const handleHairTextureBack = () => setCurrentPage('hairDesign');
-  const handleHairTextureNext = () => setCurrentPage('nextDirection');
+  const handleHairTextureBack = () => goBack('hairTexture');
+  const handleHairTextureNext = () => goNext('hairTexture');
 
-  const handleNextDirectionBack = () => setCurrentPage('hairTexture');
-  const handleNextDirectionNext = () => setCurrentPage('preSurveyReview');
+  const handleNextDirectionBack = () => goBack('nextDirection');
+  const handleNextDirectionNext = () => goNext('nextDirection');
 
-  const handlePreSurveyReviewBack = () => setCurrentPage('nextDirection');
+  const handlePreSurveyReviewBack = () => goBack('preSurveyReview');
   const handlePreSurveyReviewNext = () => setShowReport(true);
 
   const handleReportClose = () => {
