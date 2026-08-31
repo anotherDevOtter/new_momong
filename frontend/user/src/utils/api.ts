@@ -1,7 +1,7 @@
 import { Customer, ConsultationData, ConsultationRecord } from '@/types';
 import { apiFetch } from './api-error';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3200/api';
 
 function authHeaders(token?: string | null): HeadersInit {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };

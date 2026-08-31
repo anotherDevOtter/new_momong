@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3200/api';
 
 function getToken(): string {
   if (typeof window === 'undefined') throw new Error('localStorage unavailable');

@@ -4,8 +4,8 @@ import * as path from 'path';
 
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
-const USER_BASE_URL = process.env.USER_BASE_URL || 'http://localhost:3000';
-const ADMIN_BASE_URL = process.env.ADMIN_BASE_URL || 'http://localhost:3002';
+const USER_BASE_URL = process.env.USER_BASE_URL || 'http://localhost:3203';
+const ADMIN_BASE_URL = process.env.ADMIN_BASE_URL || 'http://localhost:3202';
 
 export default defineConfig({
   testDir: './tests',
