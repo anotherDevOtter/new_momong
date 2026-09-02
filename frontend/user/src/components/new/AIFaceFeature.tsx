@@ -670,10 +670,19 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                         {(() => {
                           // 자동 분석 모듈이 없는 항목은 처음엔 '—'.
                           // 디자이너가 슬라이더로 잡고 '측정 완료' 를 누르면 그때부터 등급을 보여준다.
-                          const pending = isUnmeasured(it.id) && !done[it.id];
+                          // '—' 는 실제로 값이 없을 때만 띄운다 (버튼의 '미측정 N개' 와 같은 기준).
+                          // 예전에는 매핑표(ANALYZED_ITEM_IDS)만 봐서, 모듈은 있는데 등급을 못 받은 항목이
+                          // 등급 글자를 달고도 미측정으로 세어졌다.
+                          const pending = posMap[it.id] == null;
                           return (
                             <span className="text-[9px] w-5 text-center shrink-0 ml-1 rounded-sm py-0.5"
-                              title={pending ? '자동 분석 모듈 없음 — 슬라이더로 조정 후 측정 완료' : undefined}
+                              title={
+                                pending
+                                  ? (isUnmeasured(it.id)
+                                      ? '자동 분석 모듈이 없는 항목 — 슬라이더로 조정 후 측정 완료'
+                                      : '분석이 이 항목의 등급을 내지 못했습니다 — 슬라이더로 조정 후 측정 완료')
+                                  : undefined
+                              }
                               style={{
                                 fontFamily: MONO,
                                 background: isSel ? 'rgba(255,255,255,0.15)' : '#F0F0EE',
@@ -732,21 +741,26 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                       </p>
 
                       {/* 자동 분석 대상이 아닌 항목임을 분명히 알린다 — 값이 실측이 아니라 기본값이다 */}
-                      {isUnmeasured(current.id) && (
-                        done[current.id] ? (
-                          <div className="mb-3 px-2.5 py-2 rounded-sm border border-[#DDE6DD] bg-[#F3F7F3]">
-                            <p className="text-[10px] text-[#4C7A55] leading-relaxed">
-                              디자이너가 직접 정한 값입니다. 자동 분석 결과가 아닙니다.
-                            </p>
-                          </div>
-                        ) : (
-                          <div className="mb-3 px-2.5 py-2 rounded-sm border border-[#E8E4D8] bg-[#FBF8F0]">
-                            <p className="text-[10px] text-[#8A7645] leading-relaxed">
-                              자동 분석 모듈이 없는 항목입니다. 아래 값은 측정값이 아닌 기본값이므로
-                              슬라이더로 조정한 뒤 <b>측정 완료</b>를 눌러주세요.
-                            </p>
-                          </div>
-                        )
+                      {/* 값이 없는 항목 안내. 이유가 둘이라 문구를 나눈다 —
+                          (1) 우리 분석에 대응 모듈이 아예 없는 항목
+                          (2) 모듈은 있는데 이 사진에서 등급이 안 나온 항목 */}
+                      {posMap[current.id] == null && (
+                        <div className="mb-3 px-2.5 py-2 rounded-sm border border-[#E8E4D8] bg-[#FBF8F0]">
+                          <p className="text-[10px] text-[#8A7645] leading-relaxed">
+                            {isUnmeasured(current.id)
+                              ? '자동 분석 모듈이 없는 항목입니다.'
+                              : '이 사진에서는 자동 분석이 등급을 내지 못했습니다.'}
+                            {' '}아래 값은 측정값이 아닌 기본값이므로 슬라이더로 조정한 뒤{' '}
+                            <b>측정 완료</b>를 눌러주세요.
+                          </p>
+                        </div>
+                      )}
+                      {posMap[current.id] != null && isUnmeasured(current.id) && (
+                        <div className="mb-3 px-2.5 py-2 rounded-sm border border-[#DDE6DD] bg-[#F3F7F3]">
+                          <p className="text-[10px] text-[#4C7A55] leading-relaxed">
+                            디자이너가 직접 정한 값입니다. 자동 분석 결과가 아닙니다.
+                          </p>
+                        </div>
                       )}
 
                       <AdjustSlider pos={pos} l={current.l} r={current.r}
