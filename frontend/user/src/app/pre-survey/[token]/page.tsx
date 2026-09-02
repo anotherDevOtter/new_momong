@@ -16,6 +16,7 @@ import { DetailedConcerns } from '@/components/pre-survey/sections/DetailedConce
 import { Summary } from '@/components/pre-survey/sections/Summary';
 import { HairGuide } from '@/components/pre-survey/sections/HairGuide';
 import { BodyGuide } from '@/components/pre-survey/sections/BodyGuide';
+import { FashionStyle } from '@/components/pre-survey/sections/FashionStyle';
 
 type Step =
   | 'cover'
@@ -23,11 +24,13 @@ type Step =
   | 'notice'
   | 'intro'
   | 'concerns'
+  | 'fashion'
   | 'summary'
   | 'hair'
   | 'body';
 
-const STEPS: Step[] = ['cover', 'programs', 'notice', 'intro', 'concerns', 'summary', 'hair', 'body'];
+// 'fashion' 은 고민 입력 뒤, 요약 앞. 성별에 맞는 사진 세트를 보여준다.
+const STEPS: Step[] = ['cover', 'programs', 'notice', 'intro', 'concerns', 'fashion', 'summary', 'hair', 'body'];
 
 function emptyAnswers(): PreSurveyAnswers {
   return {
@@ -63,6 +66,8 @@ export default function PreSurveyPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [customerName, setCustomerName] = useState('');
+  // 고객 등록 때 받은 성별. 없으면 패션 화면에서 직접 고르게 한다.
+  const [customerGender, setCustomerGender] = useState<'female' | 'male' | null>(null);
   const [filled, setFilled] = useState<string | null>(null);
   const [justSubmitted, setJustSubmitted] = useState(false);
   const [answers, setAnswers] = useState<PreSurveyAnswers>(emptyAnswers());
@@ -77,6 +82,7 @@ export default function PreSurveyPage() {
       try {
         const view = await fetchPreSurveyByToken(surveyToken);
         setCustomerName(view.customer.name);
+        setCustomerGender(view.customer.gender ?? null);
         setFilled(view.filled_at);
         setAnswers({ ...emptyAnswers(), ...view.answers });
         setPhotoDisplayUrls(view.photoDisplayUrls ?? {});
@@ -255,6 +261,20 @@ export default function PreSurveyPage() {
             onChangeOtherFace={(v) => update('otherFaceConcern', v)}
             onChangeOtherHair={(v) => update('otherHairConcern', v)}
             onChangeTreatment={(v) => update('treatmentPreference', v)}
+            onPrev={goPrev}
+            onNext={goNext}
+          />
+        );
+      case 'fashion':
+        return (
+          <FashionStyle
+            gender={customerGender}
+            genderFallback={answers.genderFallback}
+            onChangeGenderFallback={(g) => setAnswers((prev) => ({ ...prev, genderFallback: g }))}
+            preferredStyles={answers.preferredStyles ?? []}
+            dislikedStyles={answers.dislikedStyles ?? []}
+            onTogglePreferred={toggle('preferredStyles')}
+            onToggleDisliked={toggle('dislikedStyles')}
             onPrev={goPrev}
             onNext={goNext}
           />

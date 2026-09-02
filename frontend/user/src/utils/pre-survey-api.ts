@@ -20,6 +20,11 @@ export interface PreSurveyAnswers {
   preferredHairPhotos?: string[];
   dislikedHairPhotos?: string[];
   bodyPhotos?: string[];
+  /** 선호 / 비선호 패션 스타일 (한글 라벨). 성별에 맞는 사진 세트에서 고른다. */
+  preferredStyles?: string[];
+  dislikedStyles?: string[];
+  /** 고객 정보에 성별이 없어 이 화면에서 직접 고른 경우에만 채워진다 */
+  genderFallback?: 'female' | 'male';
 }
 
 export interface PreSurveyRecord {
@@ -70,7 +75,7 @@ export interface PreSurveyPublicView {
   token: string;
   answers: PreSurveyAnswers;
   filled_at: string | null;
-  customer: { name: string };
+  customer: { name: string; gender: 'female' | 'male' | null };
   photoDisplayUrls: Record<string, string>;
 }
 

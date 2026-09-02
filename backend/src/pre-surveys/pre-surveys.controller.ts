@@ -58,7 +58,9 @@ export class PreSurveysController {
         token: survey.token,
         answers: survey.answers,
         filled_at: survey.filled_at,
-        customer: { name: customer.name },
+        // 성별은 고객 등록 때 이미 받은 값. 패션 문항의 사진 세트를 고르는 데 쓴다.
+        // (비어 있으면 프론트가 그 화면에서만 물어본다)
+        customer: { name: customer.name, gender: customer.gender ?? null },
         photoDisplayUrls,
       },
     };
