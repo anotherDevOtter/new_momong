@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>메르시모몽 3WAY 분석 알고리즘 v4</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;background:#fff;color:#1a1a1a;padding:2rem 1.5rem;max-width:760px;margin:0 auto}
+
+/* BASE */
+.sec{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#999;margin-bottom:.5rem;margin-top:2rem}
+.sec:first-child{margin-top:0}
+h1{font-size:19px;font-weight:500;margin-bottom:.25rem;letter-spacing:-.01em}
+.sub{font-size:12px;color:#666;margin-bottom:1.75rem;line-height:1.7}
+.divider{height:.5px;background:#e8e8e8;margin:2rem 0}
+
+/* NOTE */
+.note{border-left:2px solid #ccc;border-radius:0 6px 6px 0;padding:8px 12px;font-size:11px;color:#555;line-height:1.6;margin-bottom:1rem;background:#f9f9f7}
+.note.red{border-left-color:#c84040;background:#fdf5f5}
+.note.green{border-left-color:#1a6040;background:#f4faf7}
+.note.blue{border-left-color:#204080;background:#f4f6ff}
+.note.pink{border-left-color:#c04070;background:#fdf4f8}
+.note.amber{border-left-color:#a06010;background:#fdf8f0}
+.note b{font-weight:600;color:#1a1a1a}
+
+/* CONCEPT RULE */
+.rule-box{border:.5px solid #e0e0e0;border-radius:8px;padding:12px 14px;margin-bottom:1rem;background:#fafafa}
+.rule-title{font-size:11px;font-weight:600;color:#1a1a1a;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.rule-badge{font-size:9px;padding:1px 7px;border-radius:8px;font-weight:700}
+.rb-id{background:#1a1a1a;color:#fff}
+.rb-ex{background:#204080;color:#fff}
+.rb-mod{background:#305020;color:#fff}
+.rb-sen{background:#802048;color:#fff}
+.rule-list{display:flex;flex-direction:column;gap:4px}
+.rule-item{font-size:11px;color:#444;line-height:1.5;padding:3px 0;border-bottom:.5px solid #f0f0f0}
+.rule-item:last-child{border-bottom:none}
+.rule-item b{color:#1a1a1a}
+
+/* PIPELINE */
+.pipe{display:flex;flex-direction:column;gap:2px;margin-bottom:1.5rem}
+.pipe-step{display:flex;gap:12px;align-items:stretch}
+.pipe-left{display:flex;flex-direction:column;align-items:center;width:28px;flex-shrink:0}
+.pipe-circle{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.pc-1{background:#d0a878;color:#fff}
+.pc-2{background:#6878c0;color:#fff}
+.pc-3{background:#508040;color:#fff}
+.pc-4{background:#c04878;color:#fff}
+.pipe-line{width:1.5px;flex:1;min-height:8px;margin:2px 0}
+.pl-1{background:#d0a878}.pl-2{background:#6878c0}.pl-3{background:#508040}.pl-4{background:#c04878}
+.pipe-body{flex:1;border-radius:8px;padding:10px 14px;margin-bottom:8px;border:.5px solid}
+.pb-1{background:#fff8f2;border-color:#d0a878}
+.pb-2{background:#f4f6ff;border-color:#8898d8}
+.pb-3{background:#f4f8f2;border-color:#70a060}
+.pb-4{background:#fdf4f8;border-color:#d070a0}
+.pipe-layer{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px}
+.pb-1 .pipe-layer{color:#9a5010}
+.pb-2 .pipe-layer{color:#2040a0}
+.pb-3 .pipe-layer{color:#305020}
+.pb-4 .pipe-layer{color:#802048}
+.pipe-title{font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:3px}
+.pipe-desc{font-size:11px;color:#555;line-height:1.5;margin-bottom:4px}
+.pipe-in{font-size:10px;color:#999;font-family:monospace}
+.pipe-out{font-size:10px;font-family:monospace;margin-top:4px;padding:4px 8px;border-radius:4px}
+.pb-1 .pipe-out{background:#f0e8d8;color:#7a4010}
+.pb-2 .pipe-out{background:#e0e8f8;color:#1040a0}
+.pb-3 .pipe-out{background:#d8ecd0;color:#284020}
+.pb-4 .pipe-out{background:#f0d8e8;color:#801040}
+.pipe-rule{font-size:10px;color:#c84040;font-weight:600;margin-top:4px}
+
+/* TABLES */
+table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:.75rem}
+th{padding:7px 8px;font-weight:500;font-size:10px;border-bottom:.5px solid #e0e0e0;text-align:left;color:#666}
+td{padding:6px 8px;border-bottom:.5px solid #eee;color:#444;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+td:first-child{font-size:11px;color:#222;width:120px}
+.wc{color:#9a3010;background:#fff0eb;border-radius:3px;padding:2px 6px;font-size:10px;display:inline-block}
+.nc{color:#505050;background:#f2f2ee;border-radius:3px;padding:2px 6px;font-size:10px;display:inline-block}
+.cc{color:#1040a0;background:#eef2ff;border-radius:3px;padding:2px 6px;font-size:10px;display:inline-block}
+.sc{color:#1a6040;background:#eefaf4;border-radius:3px;padding:2px 6px;font-size:10px;display:inline-block}
+.hc{color:#502090;background:#f2eeff;border-radius:3px;padding:2px 6px;font-size:10px;display:inline-block}
+.new-row td:first-child::after{content:' +';font-size:8px;color:#e08040;font-weight:700;margin-left:2px}
+
+/* GRADE */
+.grade-wrap{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
+.grade-card{border:.5px solid #e0e0e0;border-radius:8px;padding:12px}
+.grade-title{font-size:11px;font-weight:500;color:#222;margin-bottom:8px}
+.grade-row{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px;color:#555}
+.ge{min-width:90px;font-family:monospace;font-size:11px;color:#888}
+.gb{font-size:10px;font-weight:600;padding:2px 9px;border-radius:10px}
+.gbw{background:#fff0eb;color:#9a3010}.gbc{background:#eef2ff;color:#1040a0}.gbn{background:#f2f2ee;color:#505050}
+.grade-note{font-size:10px;color:#999;line-height:1.5;margin-top:8px}
+
+/* 3×3 MAP */
+.map-wrap{border:.5px solid #e0e0e0;border-radius:8px;overflow:hidden;margin-bottom:.75rem}
+.map-header{display:grid;grid-template-columns:48px 1fr 1fr 1fr;background:#f8f8f6;border-bottom:.5px solid #e0e0e0}
+.mh{padding:7px 6px;font-size:10px;color:#888;text-align:center;border-right:.5px solid #e0e0e0}
+.mh:last-child{border-right:none}
+.map-body{display:flex}
+.map-sides{width:48px;flex-shrink:0;display:flex;flex-direction:column;background:#f8f8f6;border-right:.5px solid #e0e0e0}
+.ms{flex:1;display:flex;align-items:center;justify-content:center;font-size:10px;color:#888;border-bottom:.5px solid #e0e0e0;writing-mode:vertical-rl;transform:rotate(180deg);padding:6px 0}
+.ms:last-child{border-bottom:none}
+.map-grid{flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr}
+.mc{padding:9px 8px;border-right:.5px solid #eee;border-bottom:.5px solid #eee;min-height:72px}
+.mc:nth-child(3n){border-right:none}
+.mc:nth-child(n+7){border-bottom:none}
+.mc-en{font-size:13px;font-weight:700;color:#1a1a1a;margin-bottom:0px;letter-spacing:.01em}
+.mc-kr{font-size:10px;color:#999;margin-bottom:3px}
+.mc-coord{font-size:9px;color:#ccc;font-family:monospace}
+.mc-center{background:#f8f8f6}
+
+/* VECTOR MAPPING TABLE */
+.vmap-wrap{overflow-x:auto;margin-bottom:.75rem}
+.vmap{width:100%;border-collapse:collapse;font-size:10px;min-width:600px}
+.vmap th{padding:6px 5px;font-weight:600;font-size:9px;border-bottom:1px solid #ddd;text-align:center;color:#666;background:#f8f8f8;white-space:nowrap}
+.vmap th.var-col{text-align:left;width:110px;background:#f8f8f8}
+.vmap th.ax-col{font-size:8px;color:#999;font-weight:500}
+.vmap td{padding:5px 5px;border-bottom:.5px solid #f0f0f0;text-align:center;vertical-align:middle}
+.vmap td.var-name{text-align:left;font-weight:500;color:#222;font-size:10px;white-space:nowrap}
+.vmap td.ax-tag{font-size:8px;color:#888}
+.vmap tr:last-child td{border-bottom:none}
+.vmap tr:hover td{background:#fafafa}
+
+/* 수치 셀 */
+.cn{display:inline-block;min-width:28px;padding:2px 4px;border-radius:3px;font-size:10px;font-weight:600;font-family:monospace;text-align:center}
+.cn-h2{background:#1a1a1a;color:#fff}   /* +2 강 */
+.cn-h1{background:#606060;color:#fff}   /* +1 중 */
+.cn-z{background:#f0f0ee;color:#aaa}    /* 0 */
+.cn-n1{background:#fbeaf0;color:#9a2048} /* -1 */
+.cn-n2{background:#f0b8c8;color:#7a1030} /* -2 */
+
+/* MODIFIER TABLE */
+.mod-wrap{overflow-x:auto;margin-bottom:.75rem}
+.mtbl{width:100%;border-collapse:collapse;font-size:10px;min-width:580px}
+.mtbl th{padding:6px 6px;font-weight:600;font-size:9px;border-bottom:1px solid #ddd;text-align:center;color:#666;background:#f8f8f8;white-space:nowrap}
+.mtbl th.type-col{text-align:left;width:90px}
+.mtbl td{padding:6px 6px;border-bottom:.5px solid #f0f0f0;text-align:center;vertical-align:middle}
+.mtbl td.type-name{text-align:left;font-weight:600;color:#222;font-size:10px}
+.mtbl tr:last-child td{border-bottom:none}
+.mtbl tr:hover td{background:#fafafa}
+
+/* SENSUAL */
+.sensual-wrap{border:.5px solid #e0c0d0;border-radius:8px;padding:14px;background:#fdf7f9;margin-bottom:.75rem}
+.s-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.s-title{font-size:12px;font-weight:600;color:#9a2048}
+.s-badge{font-size:9px;background:#c04070;color:#fff;padding:1px 8px;border-radius:10px;font-weight:700}
+.s-row{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:.5px solid #f0dde6}
+.s-row:last-child{border-bottom:none}
+.s-num{width:20px;height:20px;border-radius:50%;background:#fbeaf0;color:#9a2048;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.s-info{flex:1}
+.s-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.s-label{font-size:11px;font-weight:600;color:#1a1a1a}
+.s-pts{font-size:11px;font-weight:700;color:#9a2048;font-family:monospace}
+.s-pct{font-size:10px;color:#c080a0;font-family:monospace;margin-left:3px}
+.s-bar-bg{height:4px;background:#f0dde6;border-radius:2px;overflow:hidden;margin-bottom:5px}
+.s-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#e898b8,#c04070)}
+.s-note{font-size:10px;color:#a05070;line-height:1.5}
+.s-note .sep-box{display:inline-block;background:#fbeaf0;border:.5px solid #e0b0c0;border-radius:4px;padding:1px 5px;font-size:9px;color:#9a2048;font-weight:600;margin-left:4px}
+.s-total{background:#fff;border:.5px solid #e0c0d0;border-radius:6px;padding:10px 12px;margin-top:10px}
+.st-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;font-size:11px}
+.st-lbl{color:#555;font-weight:500}.st-val{color:#9a2048;font-weight:700;font-family:monospace}
+.total-bg{height:5px;background:#f0dde6;border-radius:3px;overflow:hidden;margin-bottom:4px}
+.total-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#e898b8,#c04070)}
+.total-marks{display:flex;justify-content:space-between;font-size:9px;color:#c0a0b0}
+.s-formula-box{margin-top:10px;background:#fff;border:.5px solid #e0c0d0;border-radius:6px;padding:10px 12px;font-size:10px;color:#802048;line-height:1.8}
+
+/* SEPARATION TABLE */
+.sep-tbl{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:.75rem}
+.sep-tbl th{padding:7px 10px;font-size:10px;font-weight:600;border-bottom:1px solid #ddd;color:#666;text-align:left;background:#f8f8f8}
+.sep-tbl td{padding:7px 10px;border-bottom:.5px solid #f0f0f0;vertical-align:top;line-height:1.5}
+.sep-tbl tr:last-child td{border-bottom:none}
+.sep-tbl td:first-child{font-weight:600;width:100px;color:#1a1a1a}
+
+/* FLOW */
+.flow{display:flex;flex-direction:column}
+.fstep{display:flex;gap:10px}
+.fleft{display:flex;flex-direction:column;align-items:center;width:24px;flex-shrink:0}
+.fnum{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+.fline{width:.5px;flex:1;background:#e0e0e0;min-height:8px}
+.fbody{flex:1;padding-bottom:14px}
+.ftitle{font-size:12px;font-weight:500;color:#222;margin-bottom:3px}
+.fdesc{font-size:11px;color:#555;line-height:1.6}
+.formula{background:#f8f8f6;border-radius:5px;padding:5px 10px;font-size:11px;color:#222;margin-top:5px;font-family:monospace;line-height:1.6}
+.formula.bl{background:#eef2ff;color:#1040a0}
+.formula.gr{background:#eefaf4;color:#1a6040}
+.formula.pk{background:#fdf2f7;color:#9a2048}
+.formula.dk{background:#f0f0f0;color:#1a1a1a}
+
+/* OUTPUT BLOCK */
+.output-ex{border:.5px solid #ddd;border-radius:8px;padding:12px 14px;background:#fafafa;font-size:11px;font-family:monospace;color:#444;line-height:2.2;margin-top:6px}
+.ok{color:#1040a0;font-weight:700}
+.ov{color:#1a1a1a}
+.ov.w{color:#9a3010}.ov.b{color:#1040a0}.ov.g{color:#1a6040}.ov.pk{color:#9a2048}
+
+/* CHANGELOG */
+.chg-list{display:flex;flex-direction:column;gap:5px;margin-bottom:1rem}
+.chg-row{display:flex;gap:8px;padding:7px 10px;border-radius:6px;font-size:11px;align-items:flex-start;border:.5px solid}
+.chg-fix{border-color:#e0b8c0;background:#fdf5f8}
+.chg-keep{border-color:#b8d8c0;background:#f4faf6}
+.chg-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px;flex-shrink:0;margin-top:1px}
+.cb-fix{background:#c04070;color:#fff}
+.cb-keep{background:#1a6040;color:#fff}
+.chg-text{color:#444;line-height:1.5}
+.chg-text b{color:#1a1a1a}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="sec">메르시모몽 · Algorithm v4</div>
+<h1>3WAY 분석 알고리즘</h1>
+<div class="sub">
+  Layer 1 타입 확정(불변) → Layer 2 이미지 벡터 산출 → Layer 3 Modifier 벡터 보정 → Layer 4 Sensual 독립 점수<br>
+  각 레이어는 역할이 완전히 분리된다. 하위 레이어는 타입을 절대 변경하지 않는다.
+</div>
+
+<!-- ── 개념 분리 원칙 ── -->
+<div class="sec">핵심 개념 분리 — Identity vs Expression</div>
+<div class="note red"><b>타입(Identity)과 이미지 벡터(Expression)는 완전히 다른 개념이다.</b> 이름이 유사해도 절대 혼용하지 않는다. 예) 타입 "CUTE(귀여운)"과 벡터 "귀여움"은 별개다. 타입은 Layer 1에서 확정되며 이후 어떤 레이어도 변경할 수 없다.</div>
+
+<table class="sep-tbl">
+  <tr>
+    <th>구분</th>
+    <th>개념</th>
+    <th>결정 레이어</th>
+    <th>값의 종류</th>
+    <th>변경 가능 여부</th>
+  </tr>
+  <tr>
+    <td>Identity</td>
+    <td>이미지 타입 — 얼굴의 전체 이미지 방향. 9개 중 1개.</td>
+    <td>Layer 1 전용</td>
+    <td>CUTE / CHIC / PURE 등 9개 중 1개 (고정값)</td>
+    <td style="color:#c84040;font-weight:600">불변. 절대 변경 불가.</td>
+  </tr>
+  <tr>
+    <td>Expression</td>
+    <td>이미지 벡터 — 얼굴 인상의 구성 속성. 8개 각각 수치.</td>
+    <td>Layer 2·3에서 산출</td>
+    <td>귀여움 72 / 세련됨 58 / ... (연속 수치)</td>
+    <td style="color:#1a6040;font-weight:600">Layer 2·3에서 산출·보정 가능.</td>
+  </tr>
+</table>
+
+<div class="divider"></div>
+
+<!-- ── PIPELINE ── -->
+<div class="sec">알고리즘 파이프라인 — 4 Layer 직렬 구조</div>
+<div class="pipe">
+
+  <div class="pipe-step">
+    <div class="pipe-left">
+      <div class="pipe-circle pc-1">L1</div>
+      <div class="pipe-line pl-1"></div>
+    </div>
+    <div class="pipe-body pb-1">
+      <div class="pipe-layer">Layer 1 · Identity</div>
+      <div class="pipe-title">이미지 타입 확정</div>
+      <div class="pipe-desc">축1(Warm/Neutral/Cool) × 축2(Soft/Natural/Hard) 교차 → 9개 타입 중 1개 확정.</div>
+      <div class="pipe-out">OUT → Identity: CUTE / FRESH / PURE / SOFT / NATURAL / CHIC / FEMININE / ELEGANT / MODERN</div>
+      <div class="pipe-rule">⚠ 이후 어떤 레이어도 Identity를 변경하지 않는다.</div>
+    </div>
+  </div>
+
+  <div class="pipe-step">
+    <div class="pipe-left">
+      <div class="pipe-circle pc-2">L2</div>
+      <div class="pipe-line pl-2"></div>
+    </div>
+    <div class="pipe-body pb-2">
+      <div class="pipe-layer">Layer 2 · Expression</div>
+      <div class="pipe-title">이미지 벡터 산출</div>
+      <div class="pipe-desc">핵심변수 7개를 매핑 테이블에 대입 → 8개 벡터 점수 산출. 타입 점수를 다시 계산하지 않는다.</div>
+      <div class="pipe-in">IN → 핵심변수 7개 측정값 (눈꼬리 각도, 눈썹~눈 거리, 눈 가로:세로, 눈 사이 간격, 입술 세로비율, 얼굴 가로:세로, 코 높이)</div>
+      <div class="pipe-out">OUT → Vec[귀여움, 청순함, 발랄함, 단아함, 우아함, 세련됨, 도회적, 지적임] = 각 수치</div>
+      <div class="pipe-rule">⚠ 타입 점수 계산 없음. 벡터만 출력.</div>
+    </div>
+  </div>
+
+  <div class="pipe-step">
+    <div class="pipe-left">
+      <div class="pipe-circle pc-3">L3</div>
+      <div class="pipe-line pl-3"></div>
+    </div>
+    <div class="pipe-body pb-3">
+      <div class="pipe-layer">Layer 3 · Modifier</div>
+      <div class="pipe-title">쌍꺼풀 형태 벡터 보정</div>
+      <div class="pipe-desc">쌍꺼풀 형태(무쌍/속쌍/세미아웃/아웃라인) → 이미지 벡터 수치를 미세 조정. 타입 변경 없음.</div>
+      <div class="pipe-in">IN → Layer 2의 Vec + 쌍꺼풀 형태 체크값</div>
+      <div class="pipe-out">OUT → Vec_adj = Vec + Modifier_delta (타입은 그대로)</div>
+      <div class="pipe-rule">⚠ 벡터만 조정. 타입(Identity)에 관여 없음.</div>
+    </div>
+  </div>
+
+  <div class="pipe-step">
+    <div class="pipe-left">
+      <div class="pipe-circle pc-4">L4</div>
+    </div>
+    <div class="pipe-body pb-4">
+      <div class="pipe-layer">Layer 4 · Sensual</div>
+      <div class="pipe-title">Sensual 독립 점수</div>
+      <div class="pipe-desc">타입에도 관여하지 않고, 이미지 벡터에도 관여하지 않는다. 별도의 속성으로 항상 독립 산출.</div>
+      <div class="pipe-in">IN → 눈꼬리 올라감 정도 / 입술 볼륨·입꼬리 / 삼백안 정도 (3개 전용 변수)</div>
+      <div class="pipe-out">OUT → Sensual % (0~100. 타입·벡터와 무관한 독립값)</div>
+      <div class="pipe-rule">⚠ 타입 변경 없음. 벡터 조정 없음. 독립 출력.</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="divider"></div>
+
+<!-- ── LAYER 1 ── -->
+<div class="sec">Layer 1 — 이미지 타입 확정 (Identity)</div>
+<div class="note green">축1·축2는 각각 이목구비의 <b>형태</b>와 <b>공간 배치</b>를 측정한다. 두 축을 교차하면 3×3 = 9개 타입 좌표가 결정된다. 이 결과는 이후 모든 레이어에서 불변이다.</div>
+
+<div class="sec" style="margin-top:1rem">축 1 — 형태 Warm · Neutral · Cool (8항목)</div>
+<table>
+  <tr><th>측정 항목</th><th style="color:#9a3010">Warm</th><th style="color:#505050">Neutral</th><th style="color:#1040a0">Cool</th></tr>
+  <tr><td>페이스라인</td><td><span class="wc">둥근</span></td><td><span class="nc">균형</span></td><td><span class="cc">각진</span></td></tr>
+  <tr><td>광대 발달</td><td><span class="wc">미발달</span></td><td><span class="nc">균형</span></td><td><span class="cc">발달</span></td></tr>
+  <tr><td>눈썹 방향</td><td><span class="wc">동글·내려감</span></td><td><span class="nc">균형</span></td><td><span class="cc">각지고 올라감</span></td></tr>
+  <tr><td>눈 형태</td><td><span class="wc">둥근 눈</span></td><td><span class="nc">균형</span></td><td><span class="cc">가로로 긴 눈</span></td></tr>
+  <tr><td>눈꼬리</td><td><span class="wc">내려간</span></td><td><span class="nc">수평</span></td><td><span class="cc">올라간</span></td></tr>
+  <tr class="new-row"><td>눈 앞머리</td><td><span class="wc">부드러운</span></td><td><span class="nc">균형</span></td><td><span class="cc">날카로운</span></td></tr>
+  <tr><td>코 너비</td><td><span class="wc">넓다</span></td><td><span class="nc">중간</span></td><td><span class="cc">좁다</span></td></tr>
+  <tr><td>입술 두께</td><td><span class="wc">도톰</span></td><td><span class="nc">평균</span></td><td><span class="cc">얇음</span></td></tr>
+</table>
+
+<div class="grade-wrap">
+  <div class="grade-card">
+    <div class="grade-title">등급 산출 — W개수 − C개수</div>
+    <div class="grade-row"><span class="ge">W5 N2 C1</span><span>→ 5−1 =</span><span class="gb gbw">W4</span></div>
+    <div class="grade-row"><span class="ge">W3 N2 C3</span><span>→ 3−3 =</span><span class="gb gbn">N(0)</span></div>
+    <div class="grade-row"><span class="ge">W1 N2 C5</span><span>→ 1−5 =</span><span class="gb gbc">C4</span></div>
+  </div>
+  <div class="grade-card">
+    <div class="grade-title">등급 역할</div>
+    <div class="grade-row"><span class="gb gbw">W1~W8</span><span style="font-size:10px;color:#888;margin-left:6px">맵 내 warm 방향 강도</span></div>
+    <div class="grade-row" style="margin-top:3px"><span class="gb gbn">N(0)</span><span style="font-size:10px;color:#888;margin-left:6px">중립 · 경계 좌표</span></div>
+    <div class="grade-row" style="margin-top:3px"><span class="gb gbc">C1~C8</span><span style="font-size:10px;color:#888;margin-left:6px">맵 내 cool 방향 강도</span></div>
+    <div class="grade-note">헤어 제안 방향·강도에 사용. 타입 확정 계산에는 직접 사용 안 함.</div>
+  </div>
+</div>
+
+<div class="sec" style="margin-top:1rem">축 2 — 비율 Soft · Natural · Hard (8항목)</div>
+<table>
+  <tr><th>측정 항목</th><th style="color:#1a6040">Soft</th><th style="color:#505050">Natural</th><th style="color:#502090">Hard</th></tr>
+  <tr><td>얼굴 길이</td><td><span class="sc">짧음</span></td><td><span class="nc">평균</span></td><td><span class="hc">김</span></td></tr>
+  <tr><td>눈썹~눈 거리</td><td><span class="sc">멀다</span></td><td><span class="nc">중간</span></td><td><span class="hc">가까움</span></td></tr>
+  <tr><td>눈 사이 거리</td><td><span class="sc">넓다</span></td><td><span class="nc">평균</span></td><td><span class="hc">좁다</span></td></tr>
+  <tr><td>상중하안부 비율</td><td><span class="sc">상↑ 하↓</span></td><td><span class="nc">균형</span></td><td><span class="hc">중↑ 하↑</span></td></tr>
+  <tr><td>중안부</td><td><span class="sc">짧음</span></td><td><span class="nc">평균</span></td><td><span class="hc">길다</span></td></tr>
+  <tr><td>인중 길이</td><td><span class="sc">짧음</span></td><td><span class="nc">평균</span></td><td><span class="hc">김</span></td></tr>
+  <tr><td>입 폭</td><td><span class="sc">작음</span></td><td><span class="nc">평균</span></td><td><span class="hc">큼</span></td></tr>
+  <tr><td>턱 길이</td><td><span class="sc">짧음</span></td><td><span class="nc">평균</span></td><td><span class="hc">김</span></td></tr>
+</table>
+
+<div class="sec" style="margin-top:1rem">9개 이미지 타입 — 3×3 결과 맵 (Identity)</div>
+<div class="map-wrap">
+  <div class="map-header">
+    <div class="mh"></div>
+    <div class="mh" style="color:#9a3010">← Warm</div>
+    <div class="mh">Neutral</div>
+    <div class="mh" style="color:#1040a0">Cool →</div>
+  </div>
+  <div class="map-body">
+    <div class="map-sides">
+      <div class="ms">Soft ↑</div>
+      <div class="ms">Natural</div>
+      <div class="ms">↓ Hard</div>
+    </div>
+    <div class="map-grid">
+      <div class="mc"><div class="mc-en">CUTE</div><div class="mc-kr">귀여운</div><div class="mc-coord">W · S</div></div>
+      <div class="mc"><div class="mc-en">FRESH</div><div class="mc-kr">산뜻한</div><div class="mc-coord">N · S</div></div>
+      <div class="mc"><div class="mc-en">PURE</div><div class="mc-kr">청초한</div><div class="mc-coord">C · S</div></div>
+      <div class="mc"><div class="mc-en">SOFT</div><div class="mc-kr">부드러운</div><div class="mc-coord">W · N</div></div>
+      <div class="mc mc-center"><div class="mc-en">NATURAL</div><div class="mc-kr">자연스러운</div><div class="mc-coord">N · N</div></div>
+      <div class="mc"><div class="mc-en">CHIC</div><div class="mc-kr">세련된</div><div class="mc-coord">C · N</div></div>
+      <div class="mc"><div class="mc-en">FEMININE</div><div class="mc-kr">여성스러운</div><div class="mc-coord">W · H</div></div>
+      <div class="mc"><div class="mc-en">ELEGANT</div><div class="mc-kr">우아한</div><div class="mc-coord">N · H</div></div>
+      <div class="mc"><div class="mc-en">MODERN</div><div class="mc-kr">도회적인</div><div class="mc-coord">C · H</div></div>
+    </div>
+  </div>
+</div>
+<div class="note amber">타입(Identity)은 이 단계에서 확정된다. 이 셀의 이름(CUTE·CHIC 등)은 고유 타입명이며, Layer 2의 이미지 벡터(귀여움·세련됨 등)와 이름이 유사해도 별개 개념이다.</div>
+
+<div class="divider"></div>
+
+<!-- ── LAYER 2 ── -->
+<div class="sec">Layer 2 — 이미지 벡터 산출 (Expression)</div>
+<div class="note blue"><b>Layer 2는 타입 점수를 다시 계산하지 않는다.</b> 핵심변수 7개는 사람 얼굴이 주는 <b>인상(impression)</b>의 강도를 8개 벡터 수치로 변환한다. 벡터 점수가 타입 방향과 달라도 Identity는 변경하지 않는다.</div>
+
+<div class="sec" style="margin-top:1rem">핵심변수 7개 → 이미지 벡터 8개 매핑 테이블</div>
+<div class="note">측정 방향 기준: 각 변수의 <b>"높은/올라간/넓은/긴/도톰한"</b> 방향일 때의 벡터 기여값. 반대 방향이면 부호가 반전된다.<br>
+수치 범위: <span style="display:inline-block;background:#1a1a1a;color:#fff;border-radius:3px;padding:1px 5px;font-size:9px;font-weight:600">+2</span> 강기여 &nbsp;<span style="display:inline-block;background:#606060;color:#fff;border-radius:3px;padding:1px 5px;font-size:9px;font-weight:600">+1</span> 약기여 &nbsp;<span style="display:inline-block;background:#f0f0ee;color:#aaa;border-radius:3px;padding:1px 5px;font-size:9px;font-weight:600">0</span> 무기여 &nbsp;<span style="display:inline-block;background:#fbeaf0;color:#9a2048;border-radius:3px;padding:1px 5px;font-size:9px;font-weight:600">−1</span> 약역방향 &nbsp;<span style="display:inline-block;background:#f0b8c8;color:#7a1030;border-radius:3px;padding:1px 5px;font-size:9px;font-weight:600">−2</span> 강역방향</div>
+
+<div class="vmap-wrap">
+<table class="vmap">
+  <tr>
+    <th class="var-col">핵심변수</th>
+    <th class="ax-col">축</th>
+    <th>귀여움</th>
+    <th>청순함</th>
+    <th>발랄함</th>
+    <th>단아함</th>
+    <th>우아함</th>
+    <th>세련됨</th>
+    <th>도회적</th>
+    <th>지적임</th>
+  </tr>
+  <tr>
+    <td class="var-name">눈꼬리 각도<br><span style="font-size:9px;color:#999">(올라갈수록 →)</span></td>
+    <td class="ax-tag">W축</td>
+    <td><span class="cn cn-n2">−2</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-n1">−1</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-h2">+2</span></td>
+    <td><span class="cn cn-h1">+1</span></td>
+    <td><span class="cn cn-z">0</span></td>
+  </tr>
+  <tr>
+    <td class="var-name">눈썹~눈 거리<br><span style="font-size:9px;color:#999">(좁을수록 →)</span></td>
+    <td class="ax-tag">S축</td>
+    <td><span class="cn cn-n2">−2</span></td>
+    <td><span class="cn cn-n1">−1</span></td>
+    <td><span class="cn cn-n1">−1</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-h2">+2</span></td>
+    <td><span class="cn cn-h1">+1</span></td>
+    <td><span class="cn cn-h2">+2</span></td>
+  </tr>
+  <tr>
+    <td class="var-name">눈 가로:세로 비율<br><span style="font-size:9px;color:#999">(가로길수록 →)</span></td>
+    <td class="ax-tag">W축</td>
+    <td><span class="cn cn-n2">−2</span></td>
+    <td><span class="cn cn-h1">+1</span></td>
+    <td><span class="cn cn-n1">−1</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-h1">+1</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-h2">+2</span></td>
+  </tr>
+  <tr>
+    <td class="var-name">눈 사이 간격<br><span style="font-size:9px;color:#999">(넓을수록 →)</span></td>
+    <td class="ax-tag">S축</td>
+    <td><span class="cn cn-h2">+2</span></td>
+    <td><span class="cn cn-h2">+2</span></td>
+    <td><span class="cn cn-h1">+1</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-n1">−1</span></td>
+    <td><span class="cn cn-n1">−1</span></td>
+    <td><span class="cn cn-n2">−2</span></td>
+  </tr>
+  <tr>
+    <td class="var-name">입술 세로 비율<br><span style="font-size:9px;color:#999">(도톰할수록 →)</span></td>
+    <td class="ax-tag">W축</td>
+    <td><span class="cn cn-h1">+1</span></td>
+    <td><span class="cn cn-n1">−1</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-h2">+2</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+  </tr>
+  <tr>
+    <td class="var-name">얼굴 가로:세로<br><span style="font-size:9px;color:#999">(길수록 →)</span></td>
+    <td class="ax-tag">S축</td>
+    <td><span class="cn cn-n2">−2</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-n1">−1</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-h2">+2</span></td>
+    <td><span class="cn cn-h1">+1</span></td>
+    <td><span class="cn cn-h2">+2</span></td>
+    <td><span class="cn cn-h1">+1</span></td>
+  </tr>
+  <tr>
+    <td class="var-name">코 높이<br><span style="font-size:9px;color:#999">(높을수록 →)</span></td>
+    <td class="ax-tag">W축</td>
+    <td><span class="cn cn-n1">−1</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-h1">+1</span></td>
+    <td><span class="cn cn-h1">+1</span></td>
+    <td><span class="cn cn-h2">+2</span></td>
+    <td><span class="cn cn-z">0</span></td>
+  </tr>
+</table>
+</div>
+
+<div class="note blue">
+<b>읽는 법:</b> 눈꼬리가 올라간 사람 → 귀여움 −2, 청순함 −1, 세련됨 +2, 도회적 +1 적용.<br>
+눈꼬리가 내려간 사람 → 부호 반전 → 귀여움 +2, 청순함 +1, 세련됨 −2, 도회적 −1 적용.<br>
+<b>수치는 현재 가-설계 기준이며, 실제 케이스 데이터 축적 후 검증·보정 예정.</b>
+</div>
+
+<div class="sec" style="margin-top:1rem">벡터 계산 예시</div>
+<div class="formula bl">
+눈꼬리 내려감: 귀여움 +2, 청순함 +1, 세련됨 −2, 도회적 −1<br>
+눈 사이 넓음:  귀여움 +2, 청순함 +2, 발랄함 +1, 세련됨 −1, 도회적 −1<br>
+입술 도톰:     귀여움 +1, 청순함 −1, 단아함 +2<br>
+────────────────────────────<br>
+귀여움 합산:  +2 +2 +1 = +5  /  세련됨 합산: −2 −1 +0 = −3  /  단아함: +2
+</div>
+
+<div class="divider"></div>
+
+<!-- ── LAYER 3 MODIFIER ── -->
+<div class="sec">Layer 3 — Modifier · 쌍꺼풀 형태 벡터 보정</div>
+<div class="note green"><b>Modifier는 이미지 벡터만 미세 조정한다.</b> 쌍꺼풀 형태는 Layer 1 타입 판정 변수에 포함되지 않으므로 독립 보정자로 분리. 타입(Identity) 변경 없음.</div>
+
+<div class="sec" style="margin-top:1rem">Modifier → 이미지 벡터 수치 테이블</div>
+<div class="mod-wrap">
+<table class="mtbl">
+  <tr>
+    <th class="type-col">쌍꺼풀 형태</th>
+    <th>귀여움</th>
+    <th>청순함</th>
+    <th>발랄함</th>
+    <th>단아함</th>
+    <th>우아함</th>
+    <th>세련됨</th>
+    <th>도회적</th>
+    <th>지적임</th>
+    <th style="width:80px">근거</th>
+  </tr>
+  <tr>
+    <td class="type-name">무쌍</td>
+    <td><span class="cn cn-n2">−2</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-h2">+2</span></td>
+    <td><span class="cn cn-h1">+1</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td style="font-size:9px;color:#888">눈매 라인 드러나 날카롭고 선명</td>
+  </tr>
+  <tr>
+    <td class="type-name">속쌍 (인라인)</td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td style="font-size:9px;color:#888">자연스러운 기준형. 보정 없음.</td>
+  </tr>
+  <tr>
+    <td class="type-name">세미아웃</td>
+    <td><span class="cn cn-n1">−1</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-h1">+1</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-h1">+1</span></td>
+    <td style="font-size:9px;color:#888">입체감·존재감 추가, 다소 또렷</td>
+  </tr>
+  <tr>
+    <td class="type-name">아웃라인</td>
+    <td><span class="cn cn-h1">+1</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-h2">+2</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-n1">−1</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td><span class="cn cn-z">0</span></td>
+    <td style="font-size:9px;color:#888">넓은 쌍꺼풀, 눈 볼륨·화려함↑</td>
+  </tr>
+</table>
+</div>
+<div class="note green">Modifier 수치는 Layer 2 벡터 합산값에 가산된다. 예) Layer 2 세련됨 = +3, 무쌍 Modifier = +2 → 최종 세련됨 = +5.</div>
+
+<div class="divider"></div>
+
+<!-- ── LAYER 4 SENSUAL ── -->
+<div class="sec">Layer 4 — Sensual · 완전 독립 점수</div>
+<div class="note pink"><b>Sensual은 타입에 관여하지 않고 이미지 벡터에도 관여하지 않는다.</b> 8개 이미지 벡터 중 어떤 것도 조정하지 않는다. 얼굴이 가지는 관능적 인상 강도를 별도 속성으로 독립 산출한다.</div>
+
+<div class="note amber" style="margin-bottom:1rem">
+<b>Layer 2와 변수 공유 여부:</b> 눈꼬리 각도와 입술 세로 비율은 Layer 2(이미지 벡터)에서도 사용된다. 이것이 중복 계산이 아닌 이유는 <b>역할이 다르기 때문</b>이다.<br>
+· Layer 2에서 눈꼬리 각도 → 세련됨/도회적/귀여움 벡터에 기여 (인상의 구성 요소)<br>
+· Layer 4에서 눈꼬리 각도 → Sensual 강도 점수에 기여 (관능적 속성의 강도)<br>
+같은 얼굴 특징이지만 측정 목적이 다르다. 두 레이어는 출력값이 다르며 서로 영향을 주지 않는다.
+</div>
+
+<div class="sensual-wrap">
+  <div class="s-head">
+    <div class="s-title">Sensual Score</div>
+    <div class="s-badge">3개 전용 변수 · 가중치 합산 ÷ 4.5 = %</div>
+  </div>
+
+  <div class="s-row">
+    <div class="s-num">①</div>
+    <div class="s-info">
+      <div class="s-top">
+        <span class="s-label">눈꼬리 올라감 정도</span>
+        <div><span class="s-pts">2.0pt</span><span class="s-pct">/ 44%</span></div>
+      </div>
+      <div class="s-bar-bg"><div class="s-bar-fill" style="width:44%"></div></div>
+      <div class="s-note">0(내려감) ~ 2.0(강하게 올라감) 연속값. Sensual에서 가장 강한 신호.<span class="sep-box">Layer 2와 공유 — 목적 다름</span></div>
+    </div>
+  </div>
+
+  <div class="s-row">
+    <div class="s-num">②</div>
+    <div class="s-info">
+      <div class="s-top">
+        <span class="s-label">입술 볼륨·입꼬리</span>
+        <div><span class="s-pts">1.5pt</span><span class="s-pct">/ 33%</span></div>
+      </div>
+      <div class="s-bar-bg"><div class="s-bar-fill" style="width:33%"></div></div>
+      <div class="s-note">0(얇고 평평) ~ 1.5(두껍고 입꼬리 올라감) 연속값. 하안부 관능 지표.<span class="sep-box">Layer 2와 공유 — 목적 다름</span></div>
+    </div>
+  </div>
+
+  <div class="s-row">
+    <div class="s-num">③</div>
+    <div class="s-info">
+      <div class="s-top">
+        <span class="s-label">삼백안 정도</span>
+        <div><span class="s-pts">1.0pt</span><span class="s-pct">/ 22%</span></div>
+      </div>
+      <div class="s-bar-bg"><div class="s-bar-fill" style="width:22%"></div></div>
+      <div class="s-note">없음(0) / 약간(0.5) / 뚜렷(1.0) — 육안 체크 3단계. Layer 2 미사용. 중복 없음.</div>
+    </div>
+  </div>
+
+  <div class="s-total">
+    <div class="st-head"><span class="st-lbl">최대 합산</span><span class="st-val">4.5pt = 100%</span></div>
+    <div class="total-bg"><div class="total-fill" style="width:100%"></div></div>
+    <div class="total-marks"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+  </div>
+
+  <div class="s-formula-box">
+    <b>산출식:</b> Sensual % = (눈꼬리 + 입술볼륨 + 삼백안) ÷ 4.5 × 100<br>
+    <b>출력:</b> 타입·벡터와 별개로 항상 독립 출력<br>
+    <b>예시:</b> 눈꼬리 1.5 + 입술볼륨 1.0 + 삼백안 0.5 = 3.0 ÷ 4.5 × 100 = <b>67%</b>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ── FLOW ── -->
+<div class="sec">계산 흐름 — 순서 정의</div>
+<div class="flow">
+  <div class="fstep">
+    <div class="fleft"><div class="fnum" style="background:#f0e8d8;color:#9a5010">1</div><div class="fline"></div></div>
+    <div class="fbody">
+      <div class="ftitle">측정 입력</div>
+      <div class="fdesc">50개 랜드마크 감지 → 축1 8항목 + 축2 8항목 수치 산출. 쌍꺼풀·삼백안 육안 체크 병행.</div>
+      <div class="formula dk">기준: 얼굴비율 1:1.4 / 상중하 1:1:1 / 눈 세로:가로 1:3 / 눈사이 = 얼굴폭 1/5</div>
+    </div>
+  </div>
+  <div class="fstep">
+    <div class="fleft"><div class="fnum" style="background:#f0e0c8;color:#9a5010">2</div><div class="fline"></div></div>
+    <div class="fbody">
+      <div class="ftitle">Layer 1 — Identity 확정</div>
+      <div class="fdesc">축1 다수결(W/N/C) + 축2 다수결(S/N/H) → 교차 좌표 → 9개 타입 중 1개 확정. 이후 절대 변경 없음.</div>
+      <div class="formula gr">Identity = 축1(W·N·C) × 축2(S·N·H) — 확정 후 고정</div>
+    </div>
+  </div>
+  <div class="fstep">
+    <div class="fleft"><div class="fnum" style="background:#dce4f8;color:#2040a0">3</div><div class="fline"></div></div>
+    <div class="fbody">
+      <div class="ftitle">Layer 2 — Expression 산출 (타입 재계산 없음)</div>
+      <div class="fdesc">핵심변수 7개 측정값 → 매핑 테이블 대입 → 이미지 벡터 8개 수치 산출. 타입 점수·타입 확률 계산 없음.</div>
+      <div class="formula bl">Vec[v] = Σ (변수_i 측정값 × 매핑테이블[i][v])  ← v: 8개 벡터 각각</div>
+    </div>
+  </div>
+  <div class="fstep">
+    <div class="fleft"><div class="fnum" style="background:#dcecd8;color:#305020">4</div><div class="fline"></div></div>
+    <div class="fbody">
+      <div class="ftitle">Layer 3 — Modifier 보정</div>
+      <div class="fdesc">쌍꺼풀 형태 → Modifier 테이블 조회 → Layer 2 벡터에 가산. Identity 변경 없음.</div>
+      <div class="formula gr">Vec_adj[v] = Vec[v] + Modifier_delta[v]</div>
+    </div>
+  </div>
+  <div class="fstep">
+    <div class="fleft"><div class="fnum" style="background:#f0d8e8;color:#802048">5</div><div class="fline"></div></div>
+    <div class="fbody">
+      <div class="ftitle">Layer 4 — Sensual 독립 산출</div>
+      <div class="fdesc">눈꼬리 올라감·입술볼륨·삼백안 3개 전용 변수 → 가중치 합산 → % 변환. 타입·벡터에 관여 없음.</div>
+      <div class="formula pk">Sensual % = (눈꼬리 + 입술볼륨 + 삼백안) ÷ 4.5 × 100</div>
+    </div>
+  </div>
+  <div class="fstep">
+    <div class="fleft"><div class="fnum" style="background:#faeeda;color:#633806">6</div></div>
+    <div class="fbody">
+      <div class="ftitle">최종 출력</div>
+      <div class="fdesc">4개 레이어 결과를 순서대로 통합 출력. Identity → Expression → Modifier → Sensual.</div>
+      <div class="output-ex">
+<span class="ok">Identity  </span><span class="ov">PURE (C · S)  ·  등급 C3</span>
+<span class="ok">Expression</span><span class="ov g">청순함 +8 / 지적임 +6 / 세련됨 +4 / 우아함 +2 / ...</span>
+<span class="ok">Modifier  </span><span class="ov">속쌍(인라인)  →  전 벡터 ±0</span>
+<span class="ok">Sensual   </span><span class="ov pk">42%</span>
+<span class="ok">Hair      </span><span class="ov b">C계열 · 청순 방향 · 강도 C3</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ── 수정 로그 ── -->
+<div class="sec">v4 수정 사항</div>
+<div class="chg-list">
+  <div class="chg-row chg-fix"><span class="chg-badge cb-fix">수정</span><div class="chg-text"><b>Layer 2에서 타입 점수 재계산 구조 완전 제거.</b> 기존 "확률 분포로 Primary/Secondary 타입 결정" 로직 삭제. Layer 2는 벡터만 출력.</div></div>
+  <div class="chg-row chg-fix"><span class="chg-badge cb-fix">수정</span><div class="chg-text"><b>Identity(타입명)와 Expression(벡터명) 개념 분리 명시.</b> "CUTE(타입)"와 "귀여움(벡터)"을 명확히 구분하는 개념 분리 테이블 추가.</div></div>
+  <div class="chg-row chg-fix"><span class="chg-badge cb-fix">수정</span><div class="chg-text"><b>핵심변수 × 벡터 매핑 테이블 수치화.</b> 기호(●●/▼) 대신 −2/−1/0/+1/+2 수치로 대체. 측정 방향 기준 명시.</div></div>
+  <div class="chg-row chg-fix"><span class="chg-badge cb-fix">수정</span><div class="chg-text"><b>Modifier 벡터 수치 테이블 작성.</b> 4가지 형태 × 8개 벡터의 가감 수치 정의. 속쌍(인라인)은 기준형(±0) 명시.</div></div>
+  <div class="chg-row chg-fix"><span class="chg-badge cb-fix">수정</span><div class="chg-text"><b>Layer 순서 재정의.</b> 1(Identity) → 2(Expression) → 3(Modifier) → 4(Sensual). 이전 Modifier가 Layer 3과 Sensual 사이에 삽입된 구조 정리.</div></div>
+  <div class="chg-row chg-fix"><span class="chg-badge cb-fix">수정</span><div class="chg-text"><b>Sensual 변수 공유 관련 역할 분리 설명 명시.</b> 눈꼬리·입술 변수가 Layer 2와 Sensual에 모두 사용되는 이유를 "측정 목적 다름"으로 설명. 중복 계산이 아님을 구조적으로 명시.</div></div>
+  <div class="chg-row chg-keep"><span class="chg-badge cb-keep">유지</span><div class="chg-text"><b>축1(W·N·C) 8항목 / 축2(S·N·H) 8항목 / 9개 타입 / 3×3 맵 구조 변경 없음.</b></div></div>
+  <div class="chg-row chg-keep"><span class="chg-badge cb-keep">유지</span><div class="chg-text"><b>Sensual 가중치 합산 % 방식 유지.</b> 눈꼬리 2.0 / 입술볼륨 1.5 / 삼백안 1.0 → 합계 4.5pt = 100%.</div></div>
+</div>
+
+</body>
+</html>
