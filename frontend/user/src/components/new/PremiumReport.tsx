@@ -24,6 +24,8 @@ interface PremiumReportProps {
   hairCondition?: HairConsultingData['condition'] | null;
   /** 헤어질감 화면에서 고른 모질 5항목 — 시안 리포트의 모질 페이지가 이 값을 쓴다 */
   hairTexture?: HairTextureData | null;
+  /** 페이지 안에 그대로 얹을 때 (공유 페이지). 어둡게 덮지 않고 닫기 버튼도 없앤다 */
+  embedded?: boolean;
   /** 얼굴 항목별 실측 표시값 (Python 이 준 값). 없는 항목은 리포트에 '미측정'. */
   faceValues?: Record<string, string>;
   /** 얼굴 항목별 최종 위치값 0~1 — 디자이너가 화면에서 조정한 결과가 반영된 값. */
@@ -53,6 +55,7 @@ export function PremiumReport({
   hairStyle,
   hairCondition,
   hairTexture,
+  embedded,
   faceValues,
   facePosMap,
   faceNumbers,
@@ -153,12 +156,16 @@ export function PremiumReport({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div className={embedded
+      ? 'w-full flex items-start justify-center p-4'
+      : 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4'}>
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
+        className={embedded
+          ? 'bg-white rounded-2xl shadow-sm w-full max-w-4xl flex flex-col'
+          : 'bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col'}
       >
         {/* 상단 툴바 */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
@@ -178,13 +185,15 @@ export function PremiumReport({
               <Download className="w-5 h-5 text-gray-700" strokeWidth={2} />
             </button>
             {printing && <span className="text-xs text-gray-500 font-light">PDF 만드는 중…</span>}
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              title="닫기"
-            >
-              <X className="w-5 h-5 text-gray-700" strokeWidth={2} />
-            </button>
+            {!embedded && (
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                title="닫기"
+              >
+                <X className="w-5 h-5 text-gray-700" strokeWidth={2} />
+              </button>
+            )}
           </div>
         </div>
 
@@ -250,20 +259,26 @@ export function PremiumReport({
             </div>
 
             {/* 다음 / 마지막 장에서는 완료 — 누르면 리포트를 닫고 완료 화면으로 간다 */}
-            {safePage === totalPages - 1 ? (
-              <button
-                onClick={onClose}
-                className="flex items-center gap-2 px-5 py-2 rounded-lg bg-[#111111] text-white hover:bg-[#2A2A2A] transition-colors"
-              >
-                <span className="text-sm font-light">완료</span>
-                <ChevronRight className="w-5 h-5" strokeWidth={2} />
-              </button>
-            ) : (
+            {/* 마지막 장에서만 '완료'. 공유 페이지(embedded)는 닫을 곳이 없어 비활성 '다음' 으로 둔다 */}
+            {safePage < totalPages - 1 ? (
               <button
                 onClick={nextPage}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-black hover:bg-gray-100 transition-colors"
               >
                 <span className="text-sm font-light">다음</span>
+                <ChevronRight className="w-5 h-5" strokeWidth={2} />
+              </button>
+            ) : embedded ? (
+              <span className="flex items-center gap-2 px-4 py-2 text-sm font-light text-gray-300">
+                다음
+                <ChevronRight className="w-5 h-5" strokeWidth={2} />
+              </span>
+            ) : (
+              <button
+                onClick={onClose}
+                className="flex items-center gap-2 px-5 py-2 rounded-lg bg-[#111111] text-white hover:bg-[#2A2A2A] transition-colors"
+              >
+                <span className="text-sm font-light">완료</span>
                 <ChevronRight className="w-5 h-5" strokeWidth={2} />
               </button>
             )}

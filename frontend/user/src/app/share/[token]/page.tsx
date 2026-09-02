@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { verifyShare } from '@/utils/api';
 import { ConsultationData } from '@/types';
+import { PremiumReport as NewPremiumReport } from '@/components/new/PremiumReport';
 import { Lock, Eye, EyeOff } from 'lucide-react';
 
 export default function SharePage() {
@@ -34,6 +35,12 @@ export default function SharePage() {
   };
 
   if (consultation) {
+    // 개편 코스(new/1WAY)로 저장된 상담은 리포트 그대로 보여준다.
+    // 판별 기준은 이목구비 위치값 — 그 코스에서만 저장된다.
+    const three = (consultation.clientInfo as unknown as { threeWay?: SharedThreeWay })?.threeWay;
+    if (three?.faceItemPositions && Object.keys(three.faceItemPositions).length > 0) {
+      return <SharedReportView data={consultation} three={three} />;
+    }
     return <AfterNoteView data={consultation} />;
   }
 
@@ -81,6 +88,43 @@ export default function SharePage() {
 
         <p className="text-center text-[11px] tracking-[0.2em] text-[#BBBBBB] uppercase">MERCI MOMONG</p>
       </div>
+    </div>
+  );
+}
+
+/** 개편 코스가 저장하는 값 (client_info.threeWay) 중 리포트를 그리는 데 쓰는 것들 */
+type SharedThreeWay = {
+  faceItemPositions?: Record<string, number>;
+  faceValues?: Record<string, string>;
+  faceNumbers?: Record<string, number>;
+  finalImageType?: { en?: string; ko?: string } | null;
+  hairConsulting?: { style?: Record<string, string | null>; targetType?: { en: string; ko: string } | null } | null;
+  hairTexture?: Record<string, string | null> | null;
+  cycleData?: { selectedMonths?: unknown[]; directions?: string[]; changeLevel?: number } | null;
+};
+
+/**
+ * 공유 링크로 열리는 리포트.
+ * 로그인 없이 열리므로 분석을 다시 조회할 수 없다 → 저장해 둔 값만으로 그린다.
+ */
+function SharedReportView({ data, three }: { data: ConsultationData; three: SharedThreeWay }) {
+  return (
+    <div className="min-h-screen bg-[#F5F5F7] py-8">
+      <NewPremiumReport
+        embedded
+        onClose={() => undefined}
+        customerName={data.clientInfo?.name || ''}
+        consultDate={data.visitDate || (data.createdAt ? new Date(data.createdAt).toLocaleDateString('ko-KR') : '')}
+        designerName={data.designerName || '디자이너'}
+        selectedCourse="new"
+        cycleData={(three.cycleData ?? null) as never}
+        hairStyle={(three.hairConsulting?.style ?? null) as never}
+        hairTexture={(three.hairTexture ?? null) as never}
+        hairTargetType={three.hairConsulting?.targetType ?? null}
+        faceValues={three.faceValues ?? {}}
+        faceNumbers={three.faceNumbers ?? {}}
+        facePosMap={three.faceItemPositions ?? {}}
+      />
     </div>
   );
 }

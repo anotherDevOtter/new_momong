@@ -442,6 +442,10 @@ function Inner() {
                 newPreInterview: newPreInterviewData,
                 // 이목구비 20개 항목의 최종 위치값 — 디자이너가 슬라이더로 고친 결과가 반영된 값
                 faceItemPositions: faceResultPosMap,
+                // 항목별 실측 표시값·숫자. 공유 페이지는 로그인 없이 열리므로 분석 결과를
+                // 다시 조회할 수 없다 → 리포트를 그리는 데 필요한 값을 함께 저장한다
+                faceValues: faceAnalysisToValues(faceAnalysisResult),
+                faceNumbers: faceAnalysisToNumbers(faceAnalysisResult),
                 // 위 위치값에서 나온 최종 이미지타입 (화면과 같은 계산)
                 finalImageType: Object.keys(faceResultPosMap).length
                   ? deriveImageType(faceResultPosMap)
