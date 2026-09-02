@@ -526,7 +526,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
           >
             <div
               ref={previewRef}
-              className="relative w-full max-w-md mx-auto aspect-[4/5] rounded-3xl overflow-hidden bg-gray-100"
+              className="relative w-full max-w-md mx-auto aspect-[4/5] rounded-3xl overflow-hidden bg-[#F6F6F4]"
               onPointerDown={handleImgPointerDown}
               onPointerMove={handleImgPointerMove}
               onPointerUp={handleImgPointerUp}
@@ -563,7 +563,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
                 </>
               ) : !cameraStarted ? (
                 /* 카메라 시작 전 플레이스홀더 */
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#F6F6F4]">
                   <Camera className="w-16 h-16 text-gray-400 mb-4" strokeWidth={1} />
                   <p className="text-sm text-gray-600 font-normal text-center px-6 mb-6">
                     카메라로 촬영하거나
@@ -593,7 +593,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
 
                   {/* 카메라 에러 시 플레이스홀더 */}
                   {cameraError && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 px-6">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#F6F6F4] px-6">
                       <Camera className="w-12 h-12 text-gray-400 mb-3" strokeWidth={1} />
                       <p className="text-sm text-gray-700 font-medium text-center mb-2">
                         카메라를 시작할 수 없습니다
@@ -612,7 +612,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
 
                   {/* 카메라가 준비되지 않았을 때 로딩 */}
                   {!isCameraReady && !cameraError && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
+                    <div className="absolute inset-0 flex items-center justify-center bg-[#F6F6F4]">
                       <Camera className="w-16 h-16 text-gray-400 animate-pulse" strokeWidth={1} />
                     </div>
                   )}

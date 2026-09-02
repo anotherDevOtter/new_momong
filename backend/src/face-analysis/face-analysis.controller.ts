@@ -72,7 +72,11 @@ export class FaceAnalysisController {
       clientProvidedData: body.clientProvidedData || null,
       source: 'consultation',
     });
-    return { data };
+    // 버킷이 비공개라 업로드에 쓴 publicUrl 로는 이미지를 못 읽는다.
+    // 프론트가 촬영본을 화면에 표시할 수 있도록 GET presigned URL 을 함께 준다
+    // (admin 의 analyze-test 는 이미 같은 값을 반환하고 있었다).
+    const faceImageDownloadUrl = await this.python.createDownloadPresignedUrl(body.faceImageUrl);
+    return { data: { ...data, faceImageDownloadUrl } };
   }
 
   @Post('analyze-test')

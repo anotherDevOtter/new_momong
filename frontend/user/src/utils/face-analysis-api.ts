@@ -16,7 +16,8 @@ export interface Point {
 export type MeasurementShape =
   | { type: 'point'; point: Point; color?: string; label?: string }
   | { type: 'line' | 'polyline' | 'polygon' | 'rectangle'; points: Point[]; stroke?: string; stroke_width?: number; fill?: string; dashed?: boolean; label?: string }
-  | { type: 'circle'; point: Point; radius: number; stroke?: string; stroke_width?: number; fill?: string; dashed?: boolean; label?: string }
+  // circle: 좌표 키가 `point` 인 모듈과 `center` 인 모듈이 섞여 있다. 과거 저장분 호환을 위해 둘 다 받는다.
+  | { type: 'circle'; point?: Point; center?: Point; radius: number; stroke?: string; stroke_width?: number; fill?: string; dashed?: boolean; label?: string }
   | { type: 'text'; point: Point; text: string; color?: string; font_size?: number };
 
 export interface Measurement {
@@ -52,6 +53,9 @@ export interface AnalyzeResponse {
   metadata: { image_id: string; total_modules: number };
   wncId: string;
   snhId: string;
+  /** 촬영본을 화면에 표시하기 위한 GET presigned URL.
+   *  버킷이 비공개라 업로드용 publicUrl 로는 읽을 수 없다. */
+  faceImageDownloadUrl?: string;
 }
 
 // 얼굴분석 모듈 표시 설정 (전역, admin 관리). 표를 이걸로 동적 렌더 (P2b).
@@ -151,3 +155,4 @@ export function dataUrlToFile(dataUrl: string, filename = 'face.jpg'): File {
   for (let i = 0; i < binary.length; i++) arr[i] = binary.charCodeAt(i);
   return new File([arr], filename, { type: mime });
 }
+
