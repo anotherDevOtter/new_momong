@@ -379,7 +379,8 @@ function FaceStructurePage({ pageNumber, totalPages, values, posMap, numbers }: 
   ];
 
   const measured = rows.filter((r) => r.value !== '미측정').length;
-  const faceRatio = values['facelen'] ?? null;
+  // 그림 안에는 비율만 적는다 (분석이 준 문장에는 '(S)' 같은 등급이 붙어 있다)
+  const faceRatio = numbers['facelen'] != null ? `1 : ${numbers['facelen'].toFixed(2)}` : null;
 
   return (
     <motion.div

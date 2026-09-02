@@ -40,7 +40,7 @@ import { faceAnalysisToPosMap, faceAnalysisToMeasurements, faceAnalysisToValues,
 import { designScreenRecommendation, strategyOf } from '@/components/new/hairPrescription';
 import { FORM, PROP, dominantIdx } from '@/components/new/faceAnalysisData';
 import { listPreSurveysByCustomer, getPreSurvey } from '@/utils/pre-survey-api';
-import { createShare, getShareByConsultation } from '@/utils/api';
+import { ShareLinkModal } from '@/components/ShareLinkModal';
 
 type PageKey =
   | 'preInterview' | 'imagePreference' | 'fashionPreference' | 'summary'
@@ -200,6 +200,7 @@ function Inner() {
   const [showReport, setShowReport] = useState(false);
   // 저장된 상담 id — 완료 화면의 '링크 공유' 가 이걸로 공유 링크를 만든다
   const [savedConsultId, setSavedConsultId] = useState<string | null>(null);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
   const [customerData, setCustomerData] = useState<CustomerData | null>(null);
   const [preInterviewData, setPreInterviewData] = useState<PreInterviewData | null>(null);
   const [imagePreferenceData, setImagePreferenceData] = useState<ImagePreferenceData | null>(null);
@@ -462,42 +463,18 @@ function Inner() {
     alert('PDF 다운로드 기능은 추후 연동 예정입니다.');
   };
   /**
-   * 결과 공유 링크를 만든다.
-   * 예전에는 지금 보고 있는 주소(컨설팅 진행 화면)를 그대로 복사해서, 받는 사람이 결과가 아니라
-   * 검사 화면으로 들어갔다. 이제 /share/<토큰> 링크를 만들고 비밀번호와 함께 복사한다.
+   * 결과 공유 — 앱에 이미 있는 ShareLinkModal 을 연다.
+   * (비밀번호 입력 · QR · 링크 복사가 그 모달에 들어 있다. 예전에는 window.prompt 로 물어서
+   *  화면 톤과 맞지 않았고, 그전에는 전화 뒤 4자리로 몰래 만들고 있었다)
    */
-  const handleShareLink = async () => {
-    if (!token || !savedConsultId) {
+  const handleShareLink = () => {
+    if (!savedConsultId) {
       alert('상담 저장이 끝난 뒤에 공유할 수 있습니다.');
       return;
     }
-    try {
-      // 공유 페이지는 비밀번호를 물어본다 → 디자이너가 직접 정하게 한다.
-      // (예전에는 전화 뒤 4자리로 몰래 만들어서, 링크를 받은 쪽이 모르는 비밀번호를 요구받았다)
-      const exist = await getShareByConsultation(token, savedConsultId);
-      let password = exist?.password || '';
-      if (!password) {
-        const phone = (customerData?.phone || '').replace(/\D/g, '');
-        const suggested = phone.slice(-4) || '';
-        const input = window.prompt(
-          '공유 링크에 걸 비밀번호를 정해주세요.\n고객에게 링크와 함께 알려주면 됩니다.',
-          suggested,
-        );
-        if (input === null) return;              // 취소
-        password = input.trim();
-        if (!password) { alert('비밀번호를 입력해야 링크를 만들 수 있습니다.'); return; }
-      }
-      const shareToken = exist?.token || (await createShare(token, savedConsultId, password)).token;
-      const url = `${window.location.origin}/share/${shareToken}`;
-      await navigator.clipboard.writeText(`${url}\n비밀번호: ${password}`);
-      alert(
-        (exist ? '이미 만들어 둔 공유 링크입니다.' : '결과 공유 링크를 만들었습니다.') +
-        `\n링크와 비밀번호를 함께 복사했습니다.\n\n${url}\n비밀번호: ${password}`,
-      );
-    } catch {
-      alert('공유 링크를 만들지 못했습니다.');
-    }
+    setShareModalOpen(true);
   };
+
   const handleGoHome = () => router.push('/');
 
   // 페이지 렌더링
@@ -645,6 +622,15 @@ function Inner() {
             onGoHome={handleGoHome}
             courseLabel={courseChipLabel}
           />
+          {shareModalOpen && savedConsultId && (
+            <ShareLinkModal
+              consultationId={savedConsultId}
+              clientName={customerData.name}
+              visitDate={new Date().toLocaleDateString('ko-KR')}
+              designerName={customerData.designerName || undefined}
+              onClose={() => setShareModalOpen(false)}
+            />
+          )}
           {/* 완료 화면에서 'PDF 저장' 을 누르면 리포트를 다시 열어 거기서 내려받는다 */}
           {showReport && (
             <NewPremiumReport
