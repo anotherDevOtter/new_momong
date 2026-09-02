@@ -9,10 +9,12 @@ type CurlOption = 'straight' | 'c-curl' | 's-curl' | 'cs-curl' | 'wave';
 type ColorOption = 'tone-down' | 'tone-up' | 'root' | 'bleach' | 'maintain';
 
 export interface HairDesignData {
-  length: LengthOption;
-  bangs: BangsOption;
-  curl: CurlOption;
-  color: ColorOption;
+  // 안 고른 축은 null 이다. 예전에는 쇄골·시스루·C컬·톤다운이 기본으로 박혀 있어서,
+  // 디자이너가 이 화면을 그냥 지나쳐도 그 값이 저장됐다.
+  length: LengthOption | null;
+  bangs: BangsOption | null;
+  curl: CurlOption | null;
+  color: ColorOption | null;
   memo: string;
 }
 
@@ -21,14 +23,39 @@ interface HairDesignProposalProps {
   onNext: () => void;
   // 얼굴 분석에서 도출된 이미지 타입 라벨 (예: 'Neutral / Neutral'). 없으면 기본 표기.
   imageTypeLabel?: string;
+  /**
+   * 8.10 헤어 처방에서 나온 추천 옵션 id 들. 주면 코드에 박힌 recommended 대신 이걸 쓴다.
+   * (예전에는 쇄골·시스루·C컬·톤다운이 항상 추천으로 떴다)
+   */
+  recommendedIds?: { length: string[]; bangs: string[]; curl: string[]; color: string[] };
+  /** 고유미 → 추구미 관계로 나온 전략. 없으면 표시하지 않는다 */
+  strategy?: string | null;
+  /** 처방표의 이미지 문구 */
+  directionKeyword?: string | null;
+  /** 처방이 헤어 시트로 검증된 칸인가. false 면 추천을 아예 표시하지 않는다 */
+  prescriptionVerified?: boolean;
+  /** true 면 아무것도 선택하지 않은 상태로 시작한다 (기존 코스는 예전처럼 기본값이 찍혀 있다) */
+  startEmpty?: boolean;
   onChange?: (data: HairDesignData) => void;
 }
 
-export function HairDesignProposal({ onBack, onNext, imageTypeLabel, onChange }: HairDesignProposalProps) {
-  const [selectedLength, setSelectedLength] = useState<LengthOption>('collarbone');
-  const [selectedBangs, setSelectedBangs] = useState<BangsOption>('see-through');
-  const [selectedCurl, setSelectedCurl] = useState<CurlOption>('c-curl');
-  const [selectedColor, setSelectedColor] = useState<ColorOption>('tone-down');
+export function HairDesignProposal({
+  onBack, onNext, imageTypeLabel, onChange,
+  recommendedIds, strategy, directionKeyword, prescriptionVerified, startEmpty,
+}: HairDesignProposalProps) {
+  // 처방을 받았으면 그걸로 추천을 정한다.
+  // 안 받은 코스(기존 1WAY 등)는 예전처럼 코드에 박힌 recommended 를 그대로 쓴다 — 동작을 바꾸지 않는다.
+  // 헤어 시트로 확정된 칸에서만 추천을 띄운다 (문서가 미검증이라고 표시한 칸은 표시 없음).
+  // 처방을 아예 안 받은 코스(기존 1WAY 등)는 예전처럼 코드에 박힌 recommended 를 쓴다.
+  const isRec = (axis: 'length' | 'bangs' | 'curl' | 'color', id: string, fallback: boolean) =>
+    recommendedIds
+      ? prescriptionVerified !== false && recommendedIds[axis].includes(id)
+      : fallback;
+  const recLabel = 'Recommended';
+  const [selectedLength, setSelectedLength] = useState<LengthOption | null>(startEmpty ? null : 'collarbone');
+  const [selectedBangs, setSelectedBangs] = useState<BangsOption | null>(startEmpty ? null : 'see-through');
+  const [selectedCurl, setSelectedCurl] = useState<CurlOption | null>(startEmpty ? null : 'c-curl');
+  const [selectedColor, setSelectedColor] = useState<ColorOption | null>(startEmpty ? null : 'tone-down');
   const [memo, setMemo] = useState('');
 
   // 선택 변경 시 상위로 보고 (저장용)
@@ -73,7 +100,8 @@ export function HairDesignProposal({ onBack, onNext, imageTypeLabel, onChange }:
     { id: 'maintain', label: '현재 상태 유지', recommended: false, description: '기존 컬러를 유지하며 컨디션만 개선합니다.' },
   ];
 
-  const getSelectedOption = <T extends { id: string }>(options: T[], selectedId: string): T | undefined => {
+  const getSelectedOption = <T extends { id: string }>(options: T[], selectedId: string | null): T | undefined => {
+    if (!selectedId) return undefined;
     return options.find((opt) => opt.id === selectedId);
   };
 
@@ -83,7 +111,7 @@ export function HairDesignProposal({ onBack, onNext, imageTypeLabel, onChange }:
 
       {/* 메인 콘텐츠 */}
       <div className="pt-20 px-6 pb-16">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-3xl mx-auto">
           {/* Step 표시 */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -91,10 +119,10 @@ export function HairDesignProposal({ onBack, onNext, imageTypeLabel, onChange }:
             transition={{ duration: 0.4 }}
             className="text-center mb-8"
           >
-            <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em] mb-3">
-              헤어디자인 제안
-            </h2>
-            <p className="text-sm text-[#999999]">
+            <h1 className="text-xl md:text-2xl font-light tracking-wide text-black mb-2">
+              Personalized Hair Design Proposal
+            </h1>
+            <p className="text-sm text-gray-600 font-light">
               오늘의 디자인 제안을 확인해주세요.
             </p>
           </motion.div>
@@ -113,11 +141,11 @@ export function HairDesignProposal({ onBack, onNext, imageTypeLabel, onChange }:
               </div>
               <div>
                 <p className="text-xs text-gray-500 font-light mb-1">추천 전략:</p>
-                <p className="text-sm text-black font-light">이미지 강조</p>
+                <p className="text-sm text-black font-light">{strategy || '—'}</p>
               </div>
               <div>
                 <p className="text-xs text-gray-500 font-light mb-1">디자인 방향 키워드:</p>
-                <p className="text-sm text-black font-light">Natural 기반 + Fresh 요소 강화</p>
+                <p className="text-sm text-black font-light">{directionKeyword || '—'}</p>
               </div>
             </div>
           </motion.div>
@@ -140,18 +168,18 @@ export function HairDesignProposal({ onBack, onNext, imageTypeLabel, onChange }:
               {lengthOptions.map((option) => (
                 <button
                   key={option.id}
-                  onClick={() => setSelectedLength(option.id)}
+                  onClick={() => setSelectedLength(startEmpty && selectedLength === option.id ? null : option.id)}
                   className={`relative rounded-xl p-4 border-2 transition-all ${
                     selectedLength === option.id
                       ? 'border-black bg-white'
                       : 'border-gray-200 bg-gray-50 hover:border-gray-300'
                   }`}
                 >
-                  {option.recommended && (
+                  {isRec('length', option.id, option.recommended) && (
                     <div className="absolute -top-2 -right-2">
                       <div className="bg-black text-white text-[10px] px-2 py-0.5 rounded-full font-light flex items-center gap-1">
                         <Sparkles className="w-2.5 h-2.5" strokeWidth={2} />
-                        <span>Recommended</span>
+                        <span>{recLabel}</span>
                       </div>
                     </div>
                   )}
@@ -191,18 +219,18 @@ export function HairDesignProposal({ onBack, onNext, imageTypeLabel, onChange }:
               {bangsOptions.map((option) => (
                 <button
                   key={option.id}
-                  onClick={() => setSelectedBangs(option.id)}
+                  onClick={() => setSelectedBangs(startEmpty && selectedBangs === option.id ? null : option.id)}
                   className={`relative rounded-xl p-4 border-2 transition-all ${
                     selectedBangs === option.id
                       ? 'border-black bg-white'
                       : 'border-gray-200 bg-gray-50 hover:border-gray-300'
                   }`}
                 >
-                  {option.recommended && (
+                  {isRec('bangs', option.id, option.recommended) && (
                     <div className="absolute -top-2 -right-2">
                       <div className="bg-black text-white text-[10px] px-2 py-0.5 rounded-full font-light flex items-center gap-1">
                         <Sparkles className="w-2.5 h-2.5" strokeWidth={2} />
-                        <span>Recommended</span>
+                        <span>{recLabel}</span>
                       </div>
                     </div>
                   )}
@@ -243,18 +271,18 @@ export function HairDesignProposal({ onBack, onNext, imageTypeLabel, onChange }:
                 {curlOptions.map((option) => (
                   <button
                     key={option.id}
-                    onClick={() => setSelectedCurl(option.id)}
+                    onClick={() => setSelectedCurl(startEmpty && selectedCurl === option.id ? null : option.id)}
                     className={`relative rounded-xl p-4 border-2 transition-all ${
                       selectedCurl === option.id
                         ? 'border-black bg-white'
                         : 'border-gray-200 bg-gray-50 hover:border-gray-300'
                     }`}
                   >
-                    {option.recommended && (
+                    {isRec('curl', option.id, option.recommended) && (
                       <div className="absolute -top-2 -right-2">
                         <div className="bg-black text-white text-[10px] px-2 py-0.5 rounded-full font-light flex items-center gap-1">
                           <Sparkles className="w-2.5 h-2.5" strokeWidth={2} />
-                          <span>Recommended</span>
+                          <span>{recLabel}</span>
                         </div>
                       </div>
                     )}
@@ -303,18 +331,18 @@ export function HairDesignProposal({ onBack, onNext, imageTypeLabel, onChange }:
               {colorOptions.map((option) => (
                 <button
                   key={option.id}
-                  onClick={() => setSelectedColor(option.id)}
+                  onClick={() => setSelectedColor(startEmpty && selectedColor === option.id ? null : option.id)}
                   className={`relative rounded-xl p-4 border-2 transition-all ${
                     selectedColor === option.id
                       ? 'border-black bg-white'
                       : 'border-gray-200 bg-gray-50 hover:border-gray-300'
                   }`}
                 >
-                  {option.recommended && (
+                  {isRec('color', option.id, option.recommended) && (
                     <div className="absolute -top-2 -right-2">
                       <div className="bg-black text-white text-[10px] px-2 py-0.5 rounded-full font-light flex items-center gap-1">
                         <Sparkles className="w-2.5 h-2.5" strokeWidth={2} />
-                        <span>Recommended</span>
+                        <span>{recLabel}</span>
                       </div>
                     </div>
                   )}

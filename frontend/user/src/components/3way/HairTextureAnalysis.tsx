@@ -9,26 +9,65 @@ type Thickness = 'thin' | 'normal' | 'thick';
 type Density = 'low' | 'normal' | 'high';
 type CurlCoverage = 'none' | 'partial' | 'full';
 
+/** 리포트가 같은 이름표를 쓰도록 내보낸다 (화면과 리포트 문구가 갈라지지 않게) */
+export const TEXTURE_LABELS: Record<string, Record<string, string>> = {
+  damageLevel:  { healthy: '건강모', light: '약손상', medium: '중손상', heavy: '강손상', extreme: '극손상', severe: '초극손상' },
+  hairType:     { straight: '직모', wavy: '반곱슬', curly: '곱슬' },
+  thickness:    { thin: '가늘다', normal: '보통', thick: '굵다' },
+  density:      { low: '적다', normal: '보통', high: '많다' },
+  curlCoverage: { none: '없음', partial: '부분', full: '전체' },
+};
+
+/** 항목별 해석 문구 — 리포트의 '시술 방향' 에 그대로 쓴다 */
+export const TEXTURE_NOTES: Record<string, Record<string, string>> = {
+  damageLevel: {
+    healthy: '모든 시술 가능 / 유지력 우수', light: '컬 유지 가능 / 과도한 탈색은 주의',
+    medium: '트리트먼트 병행 필수 / 고열 주의', heavy: '컬러 단계 제한 / 케어 집중 필요',
+    extreme: '시술 최소화 / 재생 프로그램 권장', severe: '추가 시술 불가 / 커트만 가능',
+  },
+  hairType: {
+    straight: '스트레이트 유지력 우수 / 볼륨 설계 필요', wavy: '직선 유지력 낮음 / 자연스러운 S컬 적합',
+    curly: '웨이브 형태 적합 / 수분 관리 중요',
+  },
+  thickness: {
+    thin: '볼륨 설계 중요 / 가벼운 질감 추천', normal: '다양한 디자인 가능 / 균형형',
+    thick: '무게감 필요 / 단단한 스타일 적합',
+  },
+  density: {
+    low: '풍성함 연출 필요 / 레이어 최소화', normal: '다양한 레이어 가능 / 균형형',
+    high: '무게 제거 설계 필요 / 숱 조절 중요',
+  },
+  curlCoverage: {
+    none: '스트레이트 유지 용이 / 자유로운 디자인', partial: '앞머리/겉면 제어 설계 / 자연스러운 웨이브 추천',
+    full: '직선 디자인 어려움 / 곱슬 활용형 스타일 적합',
+  },
+};
+
 export interface HairTextureData {
-  damageLevel: DamageLevel;
-  hairType: HairType;
-  thickness: Thickness;
-  density: Density;
-  curlCoverage: CurlCoverage;
+  // 안 고른 항목은 null 이다 (예전에는 약손상·반곱슬·보통·보통·부분이 기본으로 저장됐다)
+  damageLevel: DamageLevel | null;
+  hairType: HairType | null;
+  thickness: Thickness | null;
+  density: Density | null;
+  curlCoverage: CurlCoverage | null;
 }
 
 interface HairTextureAnalysisProps {
   onBack: () => void;
   onNext: () => void;
   onChange?: (data: HairTextureData) => void;
+  /** true 면 아무것도 선택하지 않은 상태로 시작한다 (기존 코스는 예전처럼 기본값이 찍혀 있다) */
+  startEmpty?: boolean;
 }
 
-export function HairTextureAnalysis({ onBack, onNext, onChange }: HairTextureAnalysisProps) {
-  const [damageLevel, setDamageLevel] = useState<DamageLevel>('light');
-  const [hairType, setHairType] = useState<HairType>('wavy');
-  const [thickness, setThickness] = useState<Thickness>('normal');
-  const [density, setDensity] = useState<Density>('normal');
-  const [curlCoverage, setCurlCoverage] = useState<CurlCoverage>('partial');
+export function HairTextureAnalysis({ onBack, onNext, onChange, startEmpty }: HairTextureAnalysisProps) {
+  // startEmpty 면 아무것도 안 고른 상태로 시작한다 — 디자이너가 지나쳐도 기본값이 저장되지 않게.
+  // (기존 코스는 예전처럼 기본값이 찍혀 있다)
+  const [damageLevel, setDamageLevel] = useState<DamageLevel | null>(startEmpty ? null : 'light');
+  const [hairType, setHairType] = useState<HairType | null>(startEmpty ? null : 'wavy');
+  const [thickness, setThickness] = useState<Thickness | null>(startEmpty ? null : 'normal');
+  const [density, setDensity] = useState<Density | null>(startEmpty ? null : 'normal');
+  const [curlCoverage, setCurlCoverage] = useState<CurlCoverage | null>(startEmpty ? null : 'partial');
   const [interpretation, setInterpretation] = useState<string[]>([]);
 
   // 선택 변경 시 상위로 보고 (저장용)

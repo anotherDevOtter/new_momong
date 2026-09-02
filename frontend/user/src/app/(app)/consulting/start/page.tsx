@@ -66,7 +66,17 @@ function ConsultingStartInner() {
   if (loading) return null;
   if (!user) return null;
 
-  const title = type === 'fit' ? 'FIT 컨설팅 시작' : '3WAY 컨설팅 시작';
+  // type 은 라우트 계열('fit' | '3way')이지 코스가 아니다 — 1WAY·2WAY·3WAY 가 전부 '3way' 로 들어온다.
+  // 그래서 코스 값이 있으면 그걸로 제목을 만든다 (1WAY 로 시작했는데 3WAY 라고 뜨던 문제).
+  const COURSE_TITLE: Record<string, string> = {
+    '1way': '1WAY',
+    '2way-personal': '2WAY 퍼스널컬러',
+    '2way-skeleton': '2WAY 골격',
+    '3way': '3WAY',
+    'new': '1WAY · 신규',
+  };
+  const title =
+    type === 'fit' ? 'FIT 컨설팅 시작' : `${COURSE_TITLE[course] || '3WAY'} 컨설팅 시작`;
 
   const handleSelectExisting = async (c: CustomerSummary) => {
     if (!token) return;

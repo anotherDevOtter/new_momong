@@ -18,6 +18,11 @@ export function CourseSelection({ onNext, onBack }: CourseSelectionProps) {
   const twoWayAvailable =
     features.courses['2way-personal'] || features.courses['2way-skeleton'];
 
+  // 시안 이식본('new' 코스) 카드.
+  // 스테이징에서 내부 테스트를 하기로 해서 운영 빌드에서도 보이게 열어뒀다 (2026-09-02).
+  // 기존 1WAY 를 이 코스로 교체하는 시점에 이 카드와 'new' 코스를 함께 지운다.
+  const devCourse = true;
+
   const courses = [
     {
       id: '3way',
@@ -47,6 +52,13 @@ export function CourseSelection({ onNext, onBack }: CourseSelectionProps) {
       title: '1WAY 헤어컨설팅',
       description: '얼굴 정밀 분석 기반 헤어컨설팅',
       services: 'CUT + 스타일 코칭 + 3WAY HAIR REPORT 제공',
+    },
+    // 개발 전용 — 시안 이식본. devCourse 가 false 면 아래 filter 에서 걸러진다.
+    {
+      id: 'new',
+      title: '1WAY 헤어컨설팅 (신규)',
+      description: '개편 시안 적용본 — 내부 테스트용',
+      services: '사전인터뷰 통합 · 이목구비/이미지타입 분리 · 헤어컨설팅 통합',
     },
   ];
 
@@ -97,6 +109,7 @@ export function CourseSelection({ onNext, onBack }: CourseSelectionProps) {
               if (course.id === '3way') return features.courses['3way'];
               if (course.id === '2way') return twoWayAvailable;
               if (course.id === '1way') return features.courses['1way'];
+              if (course.id === 'new') return devCourse;   // 개발 모드에서만
               return true;
             })
             .map((course, index) => (

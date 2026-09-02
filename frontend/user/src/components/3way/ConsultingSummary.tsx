@@ -26,6 +26,7 @@ export function ConsultingSummary({
     '3way': '3WAY 헤어컨설팅',
     '2way': '2WAY 헤어컨설팅',
     '1way': '1WAY 헤어컨설팅',
+    'new': '1WAY 헤어컨설팅 (신규 이식)',
   };
 
   // 이미지 선호 자동 해석
