@@ -472,14 +472,28 @@ function Inner() {
       return;
     }
     try {
-      // 이미 만든 링크가 있으면 그대로 쓰고, 없으면 새로 만든다 (비밀번호는 고객 전화 뒤 4자리)
+      // 공유 페이지는 비밀번호를 물어본다 → 디자이너가 직접 정하게 한다.
+      // (예전에는 전화 뒤 4자리로 몰래 만들어서, 링크를 받은 쪽이 모르는 비밀번호를 요구받았다)
       const exist = await getShareByConsultation(token, savedConsultId);
-      const phone = (customerData?.phone || '').replace(/\D/g, '');
-      const password = exist?.password || (phone.slice(-4) || '0000');
+      let password = exist?.password || '';
+      if (!password) {
+        const phone = (customerData?.phone || '').replace(/\D/g, '');
+        const suggested = phone.slice(-4) || '';
+        const input = window.prompt(
+          '공유 링크에 걸 비밀번호를 정해주세요.\n고객에게 링크와 함께 알려주면 됩니다.',
+          suggested,
+        );
+        if (input === null) return;              // 취소
+        password = input.trim();
+        if (!password) { alert('비밀번호를 입력해야 링크를 만들 수 있습니다.'); return; }
+      }
       const shareToken = exist?.token || (await createShare(token, savedConsultId, password)).token;
       const url = `${window.location.origin}/share/${shareToken}`;
       await navigator.clipboard.writeText(`${url}\n비밀번호: ${password}`);
-      alert(`결과 공유 링크를 복사했습니다.\n\n${url}\n비밀번호: ${password}`);
+      alert(
+        (exist ? '이미 만들어 둔 공유 링크입니다.' : '결과 공유 링크를 만들었습니다.') +
+        `\n링크와 비밀번호를 함께 복사했습니다.\n\n${url}\n비밀번호: ${password}`,
+      );
     } catch {
       alert('공유 링크를 만들지 못했습니다.');
     }

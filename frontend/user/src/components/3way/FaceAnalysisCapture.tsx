@@ -64,6 +64,27 @@ function fileToDataUrl(file: File): Promise<string> {
   });
 }
 
+/**
+ * 분석 실패 메시지를 사람이 읽을 수 있게 바꾼다.
+ * 파이썬/OpenCV 원문이 화면에 그대로 뜨던 문제(2026-09-02) 때문에 넣었다.
+ */
+function friendlyAnalyzeError(raw: string): string {
+  const m = raw.toLowerCase();
+  if (m.includes('detectmultiscale') || m.includes('!empty()') || m.includes('cascade')) {
+    return '얼굴 분석 서버에 문제가 있어 분석하지 못했습니다. 잠시 후 다시 시도하거나 담당자에게 알려주세요.';
+  }
+  if (m.includes('얼굴을 감지') || m.includes('no face') || m.includes('face not')) {
+    return '사진에서 얼굴을 찾지 못했습니다. 정면으로, 얼굴이 화면에 크게 담기도록 다시 촬영해주세요.';
+  }
+  if (m.includes('timeout') || m.includes('timed out') || m.includes('network') || m.includes('fetch')) {
+    return '분석 서버에 연결하지 못했습니다. 인터넷 연결을 확인하고 다시 시도해주세요.';
+  }
+  if (m.includes('413') || m.includes('too large')) {
+    return '사진 용량이 너무 큽니다. 다시 촬영해주세요.';
+  }
+  return '분석에 실패했습니다. 다시 시도해주세요. 계속되면 담당자에게 알려주세요.';
+}
+
 export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps) {
   const [cameraStarted, setCameraStarted] = useState(false);
   const [isCameraReady, setIsCameraReady] = useState(false);
@@ -375,8 +396,11 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
       // 5) 결과 + 업로드된 S3 URL 을 상위로 전달 → consultation 저장 시 함께 보관
       onNext(result, publicUrl);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : '분석 중 오류가 발생했습니다';
-      setAnalyzeError(msg);
+      // 서버·라이브러리 원문(OpenCV assertion 등)을 그대로 띄우면 고객 앞에서 보게 된다.
+      // 사람이 읽을 수 있는 안내로 바꾸고, 원문은 콘솔에만 남긴다.
+      const raw = e instanceof Error ? e.message : String(e);
+      console.error('[face-analysis]', raw);
+      setAnalyzeError(friendlyAnalyzeError(raw));
     } finally {
       setIsAnalyzing(false);
     }
