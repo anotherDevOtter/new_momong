@@ -110,53 +110,53 @@ export function ConsultingSummary({
               Image Keyword
             </p>
 
-            {/* 시안 그대로 — 칸이 붙은 3×3 표.
+            {/* 사전인터뷰와 같은 카드 그리드. 예전엔 칸이 맞붙은 표라 답답하고
+                선호/비선호 표시도 눈에 안 들어왔다 (2026-09-08).
                 (Soft 행 cute·pure·fresh / Neutral 행 casual·natural·chic / Hard 행 feminine·classic·modern) */}
-            <div className="border border-[#DDDDDD] rounded-xl overflow-hidden">
-              {[
-                ['cute', 'pure', 'fresh'],
-                ['casual', 'natural', 'chic'],
-                ['feminine', 'classic', 'modern'],
-              ].map((row, rowIdx) => (
-                <div key={rowIdx} className={`flex ${rowIdx < 2 ? 'border-b border-[#EEEEEE]' : ''}`}>
-                  {row.map((cardId, colIdx) => {
-                    const card = IMAGE_CARDS.find((c) => c.id === cardId);
-                    if (!card) return null;
-                    const isPreferred = preferredImageIds.includes(card.id);
-                    const isDisliked = dislikedImageIds.includes(card.id);
+            <div className="grid grid-cols-3 gap-5">
+              {['cute', 'pure', 'fresh', 'casual', 'natural', 'chic', 'feminine', 'classic', 'modern'].map((cardId) => {
+                const card = IMAGE_CARDS.find((c) => c.id === cardId);
+                if (!card) return null;
+                const isPreferred = preferredImageIds.includes(card.id);
+                const isDisliked = dislikedImageIds.includes(card.id);
 
-                    return (
-                      <div
-                        key={cardId}
-                        className={`flex-1 flex flex-col items-center justify-center py-3 px-1 text-center relative
-                          ${colIdx < 2 ? 'border-r border-[#EEEEEE]' : ''}
-                          ${isPreferred ? 'bg-[#F2F2F2]' : isDisliked ? 'bg-white opacity-40' : 'bg-white'}
-                        `}
-                      >
-                        {isPreferred && (
-                          <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 bg-[#111111] text-white text-[8px] flex items-center justify-center">✓</span>
-                        )}
-                        {isDisliked && (
-                          <span className="absolute top-1.5 right-1.5 w-3.5 h-3.5 border border-[#AAAAAA] text-[#AAAAAA] text-[8px] flex items-center justify-center">✕</span>
-                        )}
-                        <p
-                          className="text-[12px] mb-1.5 tracking-wide"
-                          style={{ fontWeight: isPreferred ? 600 : 400, color: isPreferred ? '#111111' : '#555555' }}
-                        >
-                          {card.en.toLowerCase()}
+                return (
+                  <div
+                    key={cardId}
+                    className={`relative flex flex-col items-center py-6 px-4 text-center ${
+                      isPreferred
+                        ? 'border-2 border-[#111111] bg-[#FAFAFA]'
+                        : isDisliked
+                        ? 'border-2 border-[#AAAAAA] bg-[#F0F0F0] opacity-60'
+                        : 'border border-[#EAEAEA] bg-white'
+                    }`}
+                  >
+                    {isPreferred && (
+                      <span className="absolute top-3 right-3 w-5 h-5 bg-[#111111] text-white text-[10px] flex items-center justify-center">✓</span>
+                    )}
+                    {isDisliked && (
+                      <span className="absolute top-3 right-3 w-5 h-5 bg-[#888888] text-white text-[10px] flex items-center justify-center">✕</span>
+                    )}
+
+                    <p className="text-[10px] text-[#CCCCCC] uppercase mb-2 tracking-[0.12em]" style={{ fontWeight: 300 }}>
+                      {card.en}
+                    </p>
+                    <p
+                      className={`text-[15px] mb-4 ${isDisliked ? 'text-[#AAAAAA]' : 'text-[#111111]'}`}
+                      style={{ fontWeight: 400 }}
+                    >
+                      {card.ko}
+                    </p>
+                    <div className="flex flex-col items-center gap-1">
+                      {card.keywords.map((kw) => (
+                        <p key={kw} className="text-[10px] text-[#DDDDDD] leading-tight" style={{ fontWeight: 300 }}>
+                          {kw}
                         </p>
-                        <div className="space-y-0.5">
-                          {card.keywords.map((kw) => (
-                            <p key={kw} className="text-[9px] leading-tight" style={{ color: '#AAAAAA', fontWeight: 300 }}>
-                              {kw}
-                            </p>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             <div className="flex items-center gap-4 mt-4">
@@ -165,7 +165,7 @@ export function ConsultingSummary({
                 <span className="text-[11px] text-[#888888]">선호</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-3.5 h-3.5 border border-[#AAAAAA] text-[#AAAAAA] text-[8px] flex items-center justify-center">✕</span>
+                <span className="w-3.5 h-3.5 bg-[#888888] text-white text-[8px] flex items-center justify-center">✕</span>
                 <span className="text-[11px] text-[#888888]">비선호</span>
               </div>
             </div>
