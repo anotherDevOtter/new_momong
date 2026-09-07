@@ -38,9 +38,20 @@ const NOTICES = [
   },
 ];
 
-export function Notice({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
+export function Notice({
+  onPrev,
+  onNext,
+  // 'new' 흐름은 페이지 수가 달라 밖에서 넘긴다
+  pageNumber = 3,
+  totalPages = 8,
+}: {
+  onPrev: () => void;
+  onNext: () => void;
+  pageNumber?: number;
+  totalPages?: number;
+}) {
   return (
-    <PageLayout pageNumber={3} totalPages={8} onPrev={onPrev} onNext={onNext}>
+    <PageLayout pageNumber={pageNumber} totalPages={totalPages} onPrev={onPrev} onNext={onNext}>
       <div className="bg-white px-7 py-16">
         <div className="mb-20 pb-14 border-b border-[#E5E5E5]">
           <h2 className="text-[26px] text-[#111111] tracking-[0.1em]" style={{ fontWeight: 400 }}>
