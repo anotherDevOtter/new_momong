@@ -22,7 +22,7 @@ export const FORM: MItem[] = [
 ];
 
 export const PROP: MItem[] = [
-  { id: 'facelen',    num:  1, title: '얼굴 길이',       l: '짧음',       r: '김',              defaultPos: 0.46, vType: 'Neutral', defaultValue: '비율 1.42',   tags: ['#균형', '#자연스러운'], desc: '세로/가로 비율이 표준 범위로 전체 실루엣의 기준선을 형성합니다.', breakdown: [{ label: 'Neutral', pct: 50 }, { label: 'Soft', pct: 28 }, { label: 'Hard', pct: 22 }] },
+  { id: 'facelen',    num:  1, title: '얼굴 길이',       l: '가로비율',   r: '세로비율',              defaultPos: 0.46, vType: 'Neutral', defaultValue: '비율 1.42',   tags: ['#균형', '#자연스러운'], desc: '세로/가로 비율이 표준 범위로 전체 실루엣의 기준선을 형성합니다.', breakdown: [{ label: 'Neutral', pct: 50 }, { label: 'Soft', pct: 28 }, { label: 'Hard', pct: 22 }] },
   { id: 'thirds',     num:  2, title: '상중하안부 비율',  l: '상↑',        r: '하↑',             defaultPos: 0.54, vType: 'Neutral', defaultValue: '1:0.98:1.04', tags: ['#균형', '#안정적'], desc: '이마·중안부·하안부 세 구간의 균형이 고른 편입니다.', breakdown: [{ label: 'Neutral', pct: 55 }, { label: 'Soft', pct: 25 }, { label: 'Hard', pct: 20 }] },
   { id: 'broweye',    num:  3, title: '눈썹~눈 거리',    l: '멀다',       r: '가까움',          defaultPos: 0.55, vType: 'Neutral', defaultValue: '표준',        tags: ['#자연스러운'], desc: '눈썹과 눈 사이 간격이 표준으로 눈매의 인상 강도를 중립적으로 유지합니다.', breakdown: [{ label: 'Neutral', pct: 52 }, { label: 'Soft', pct: 26 }, { label: 'Hard', pct: 22 }] },
   { id: 'eyelid',     num:  4, title: '쌍꺼풀',          l: '무쌍 · 속쌍', r: '인아웃 · 세미아웃', defaultPos: 0.70, vType: 'Hard',    defaultValue: '인아웃',      tags: ['#선명한', '#또렷한', '#강한'], desc: '쌍꺼풀 라인이 선명하게 눈매의 존재감을 높이는 Hard 성향입니다.', breakdown: [{ label: 'Hard', pct: 48 }, { label: 'Neutral', pct: 32 }, { label: 'Soft', pct: 20 }] },

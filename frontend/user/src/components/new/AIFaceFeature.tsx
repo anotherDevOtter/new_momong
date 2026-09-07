@@ -764,7 +764,11 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                       )}
 
                       <AdjustSlider pos={pos} l={current.l} r={current.r}
-                        onChange={v => setPosMap(m => ({ ...m, [current.id]: v }))} />
+                        onChange={v => {
+                          setPosMap(m => ({ ...m, [current.id]: v }));
+                          // 손으로 움직인 순간부터는 자동 분석값이 아니라 디자이너가 정한 값이다.
+                          setDone(d => ({ ...d, [current.id]: true }));
+                        }} />
 
                       <div className="my-3 h-px bg-[#E8E8E4]" />
 
@@ -795,19 +799,32 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                         {liveBd.map(b => <PctBar key={b.label} {...b} />)}
                       </div>
 
+                      {/* 값이 없는 항목에서만 '측정 완료' 를 띄운다.
+                          값이 이미 있으면(자동 분석 or 디자이너 확정) 버튼 대신 출처만 표시한다 —
+                          슬라이더는 계속 움직일 수 있고, 움직이면 '디자이너 확정' 으로 바뀐다. */}
                       <div className="flex items-center justify-between pt-3 border-t border-[#E8E8E4]">
                         <p className="text-[9px] tracking-[0.16em] text-[#AAAAAA]" style={{ fontFamily: MONO }}>MEASUREMENT</p>
-                        <button
-                          onClick={() => {
-                            // 슬라이더를 안 움직였어도 지금 위치를 값으로 확정한다 —
-                            // 그래야 판정에 들어가고 '미측정 남음' 이 풀린다.
-                            setPosMap(m => ({ ...m, [current.id]: m[current.id] ?? pos }));
-                            setDone(d => ({ ...d, [current.id]: !d[current.id] }));
-                          }}
-                          className="px-3 py-1.5 text-[11px] tracking-[0.06em] rounded-sm transition-colors"
-                          style={{ background: done[current.id] ? '#555555' : '#1A1A1A', color: '#FFFFFF', border: 'none', cursor: 'pointer' }}>
-                          {done[current.id] ? '✓ 완료' : '측정 완료'}
-                        </button>
+                        {posMap[current.id] == null ? (
+                          <button
+                            onClick={() => {
+                              // 슬라이더를 안 움직였어도 지금 위치를 값으로 확정한다 —
+                              // 그래야 판정에 들어가고 '미측정 남음' 이 풀린다.
+                              setPosMap(m => ({ ...m, [current.id]: m[current.id] ?? pos }));
+                              setDone(d => ({ ...d, [current.id]: true }));
+                              // 확정했으면 손이 멈추지 않게 다음 항목으로 넘긴다.
+                              goItem(1);
+                            }}
+                            className="px-3 py-1.5 text-[11px] tracking-[0.06em] rounded-sm transition-colors"
+                            style={{ background: '#1A1A1A', color: '#FFFFFF', border: 'none', cursor: 'pointer' }}>
+                            측정 완료 →
+                          </button>
+                        ) : (
+                          <span
+                            className="px-2.5 py-1.5 text-[10px] tracking-[0.06em] rounded-sm"
+                            style={{ background: '#F2F4F2', color: '#4C7A55' }}>
+                            {done[current.id] || isUnmeasured(current.id) ? '✓ 디자이너 확정' : '✓ 자동 측정됨'}
+                          </span>
+                        )}
                       </div>
                     </motion.div>
                   </AnimatePresence>
