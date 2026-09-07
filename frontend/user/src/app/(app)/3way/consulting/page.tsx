@@ -111,10 +111,11 @@ const COURSE_STEPS: Record<string, PageKey[]> = {
     'aiFaceFeature',
     'aiFaceResultDerived',
     'hairConsulting',
-    // 시안 흐름은 헤어컨설팅 뒤에 헤어 디자인 · 헤어 질감이 이어진다.
-    // 이 두 화면은 시안이 기존 것을 그대로 뒀으므로 우리 컴포넌트를 그대로 쓴다 (저장 배선도 이미 있다).
+    // 시안 흐름은 헤어컨설팅 뒤에 헤어 디자인이 이어진다.
+    // 이 화면은 시안이 기존 것을 그대로 뒀으므로 우리 컴포넌트를 그대로 쓴다 (저장 배선도 이미 있다).
     'hairDesign',
-    'hairTexture',
+    // 헤어 질감(hairTexture) 제외 (2026-09-08) — 헤어컨설팅 화면의 '모질 분석 및 컨디션' 과
+    // 묻는 내용이 겹친다. 리포트의 hairTexture 는 null 로 남고 hairCondition 이 그 자리를 채운다.
     // 시안 흐름은 '다음 방향' 에서 바로 리포트가 뜬다.
     // 사전설문 내용은 첫 화면(요약)이 이미 보여주므로 끝에 다시 확인하지 않는다.
     'nextDirection',
