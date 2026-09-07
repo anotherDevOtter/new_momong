@@ -8,6 +8,12 @@ import { recommendedOptions } from './hairPrescription';
 const stylePhoto = (axis: string, id: string) => `/new/style/${axis}-${id}.png`;
 
 const imgHairMap = '/new/hair-map.png';
+
+// 마커 색 — 고유미는 브랜드 금색, 추구미는 확실히 구분되는 딥틸.
+// 예전엔 둘 다 금색이라 '강조 활용' 일 때 두 마커가 같은 색으로 보였다 (2026-09-06).
+const OWN_COLOR = '#B8963C';
+const TARGET_COLOR = '#1F6F63';
+const TARGET_COLOR_DARK = '#155048';
 const imgHairMap37 = '/new/hair-map-37.png';
 const imgDamage1 = '/new/damage-1.png';
 const imgDamage2 = '/new/damage-2.png';
@@ -209,6 +215,55 @@ export const CONDITION_AXES: { key: string; title: string }[] = [
 ];
 
 // ── Main component ────────────────────────────────────────────────────
+
+/**
+ * 헤어이미지맵(사진 시트) 위에 찍는 위치 표식.
+ * 3×3 이미지맵의 마커와 같은 의미 — 실선은 고유미, 점선 이중링은 추구미.
+ */
+function MapPin({
+  left,
+  top,
+  label,
+  tone,
+}: {
+  left: string;
+  top: string;
+  label: string;
+  tone: 'own' | 'target';
+}) {
+  // 사진 위에 얹히므로 흰 외곽선 + 그림자로 배경과 분리한다.
+  const color = tone === 'own' ? OWN_COLOR : TARGET_COLOR;
+  const size = 46;
+  return (
+    <div
+      className="absolute pointer-events-none"
+      style={{ left, top, transform: 'translate(-50%, -50%)', zIndex: 2 }}
+    >
+      <div
+        className="rounded-full flex items-center justify-center"
+        style={{
+          width: size,
+          height: size,
+          border: `3px ${tone === 'own' ? 'solid' : 'dashed'} ${color}`,
+          outline: '2px solid rgba(255,255,255,0.95)',
+          background: 'rgba(255,255,255,0.35)',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.28)',
+        }}
+      >
+        <div
+          className="rounded-full"
+          style={{ width: 11, height: 11, background: color, boxShadow: '0 0 0 2.5px rgba(255,255,255,0.95)' }}
+        />
+      </div>
+      <div
+        className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-[3px] rounded-sm"
+        style={{ top: size + 6, background: color, boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}
+      >
+        <span style={{ fontSize: 10, letterSpacing: '0.12em', color: '#FFFFFF', fontWeight: 700 }}>{label}</span>
+      </div>
+    </div>
+  );
+}
 
 export function HairConsulting({ posMap, onNext, onBack, onChange }: Props) {
   const formDominant = dominantOf(FORM, posMap);
@@ -457,8 +512,8 @@ export function HairConsulting({ posMap, onNext, onBack, onChange }: Props) {
 
                     {/* 추구미 axis hairlines — dashed */}
                     {targetRow != null && targetCol != null && !(measured && targetRow === row && targetCol === col) && (() => {
-                      const isAcc = approach === 'accentuate';
-                      const c = isAcc ? '#B8963C' : '#3A3A38';
+                      // 접근법(강조/커버)은 화살표가 말해 준다. 추구미 선은 항상 같은 색이다.
+                      const c = TARGET_COLOR;
                       return (
                         <g strokeDasharray="4 7" opacity="0.35">
                           <line x1="0" y1={(targetRow + 0.5) * 100} x2="300" y2={(targetRow + 0.5) * 100} stroke={c} strokeWidth="0.7" />
@@ -516,9 +571,8 @@ export function HairConsulting({ posMap, onNext, onBack, onChange }: Props) {
 
                     {/* 추구미 marker — double ring + center dot + label */}
                     {targetRow != null && targetCol != null && !(measured && targetRow === row && targetCol === col) && (() => {
-                      const isAcc = approach === 'accentuate';
-                      const color = isAcc ? '#B8963C' : '#2A2A28';
-                      const labelColor = isAcc ? '#8A6C28' : '#2A2A28';
+                      const color = TARGET_COLOR;
+                      const labelColor = TARGET_COLOR_DARK;
                       const cx = (targetCol + 0.5) * 100, cy = (targetRow + 0.5) * 100;
                       return (
                         <g>
@@ -561,7 +615,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange }: Props) {
               {/* Keywords strip — below the map */}
               <div className="mt-4 pt-3" style={{ borderTop: '1px solid #EEEEE9' }}>
                 <div className="flex items-center gap-3 mb-2">
-                  <span style={{ fontFamily: MONO, fontSize: 7.5, letterSpacing: '0.18em', color: '#B8963C', flexShrink: 0 }}>고유미</span>
+                  <span style={{ fontFamily: MONO, fontSize: 7.5, letterSpacing: '0.18em', color: OWN_COLOR, flexShrink: 0 }}>고유미</span>
                   <div style={{ width: 1, height: 10, background: '#E0E0DC' }} />
                   <div className="flex gap-2 flex-wrap">
                     {(imageType?.kw ?? []).map(k => (
@@ -571,7 +625,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange }: Props) {
                 </div>
                 {targetRow != null && targetCol != null && !(measured && targetRow === row && targetCol === col) && (
                   <div className="flex items-center gap-3">
-                    <span style={{ fontFamily: MONO, fontSize: 7.5, letterSpacing: '0.18em', color: approach === 'accentuate' ? '#8A6C28' : '#4A4A48', flexShrink: 0 }}>추구미</span>
+                    <span style={{ fontFamily: MONO, fontSize: 7.5, letterSpacing: '0.18em', color: TARGET_COLOR_DARK, flexShrink: 0 }}>추구미</span>
                     <div style={{ width: 1, height: 10, background: '#E0E0DC' }} />
                     <div className="flex gap-2 flex-wrap">
                       {IMAP[targetRow][targetCol].kw.map(k => (
@@ -695,9 +749,31 @@ export function HairConsulting({ posMap, onNext, onBack, onChange }: Props) {
                 <div className="flex-1 w-px" style={{ background: 'linear-gradient(to top, #C4C0BA, transparent)' }} />
               </div>
 
-              {/* Hair photo — editorial floating collage */}
+              {/* Hair photo — editorial floating collage.
+                  3×3 이미지맵과 축(W–C / S–H)이 같아서, 같은 칸 위치에 고유미·추구미를 겹쳐 찍는다.
+                  사진 시트의 축 교차점이 이미지 정중앙(50%, 47.5%)이고 한 칸이 가로 30% · 세로 24% 다. */}
               <div className="flex-1 relative overflow-hidden bg-white">
                 <img src={imgHairMap37} alt="헤어이미지맵" className="w-full h-auto block" />
+
+                {/* 고유미 — 실선 링. 미측정이면 안 그린다 */}
+                {measured && (
+                  <MapPin
+                    left={`${50 + (col - 1) * 30}%`}
+                    top={`${47.5 + (row - 1) * 24}%`}
+                    label="고유미"
+                    tone="own"
+                  />
+                )}
+
+                {/* 추구미 — 칸을 골랐을 때만 */}
+                {targetRow != null && targetCol != null && (
+                  <MapPin
+                    left={`${50 + (targetCol - 1) * 30}%`}
+                    top={`${47.5 + (targetRow - 1) * 24}%`}
+                    label="추구미"
+                    tone="target"
+                  />
+                )}
               </div>
 
               {/* COOL axis */}
