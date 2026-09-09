@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import {
   fetchPreSurveyByToken,
   savePreSurveyAnswers,
@@ -30,7 +30,7 @@ type Step =
   | 'body';
 
 // 'fashion' 은 고민 입력 뒤, 요약 앞. 성별에 맞는 사진 세트를 보여준다.
-const STEPS: Step[] = ['cover', 'programs', 'notice', 'intro', 'concerns', 'fashion', 'summary', 'hair', 'body'];
+const ALL_STEPS: Step[] = ['cover', 'programs', 'notice', 'intro', 'concerns', 'fashion', 'summary', 'hair', 'body'];
 
 function emptyAnswers(): PreSurveyAnswers {
   return {
@@ -61,7 +61,14 @@ function todayString() {
 
 export default function PreSurveyPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const surveyToken = params.token as string;
+
+  // 링크에 ?course=new 가 붙으면 이미지 키워드를 시안식 3×3 카드로 보여준다.
+  // 화면 구성과 문항은 기존과 똑같다 — 키워드 고르는 방식만 다르다.
+  const isNewCourse = searchParams.get('course') === 'new';
+  // 'new' 는 패션 문항이 '고객 기본 정보' 화면으로 올라가서 따로 물을 필요가 없다.
+  const STEPS = isNewCourse ? ALL_STEPS.filter((s) => s !== 'fashion') : ALL_STEPS;
 
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -132,14 +139,14 @@ export default function PreSurveyPage() {
       setStep(STEPS[stepIndex - 1]);
       window.scrollTo(0, 0);
     }
-  }, [stepIndex]);
+  }, [stepIndex, STEPS]);
 
   const goNext = useCallback(() => {
     if (stepIndex < STEPS.length - 1) {
       setStep(STEPS[stepIndex + 1]);
       window.scrollTo(0, 0);
     }
-  }, [stepIndex]);
+  }, [stepIndex, STEPS]);
 
   const requestSubmit = useCallback(() => setSubmitConfirmOpen(true), []);
 
@@ -240,6 +247,14 @@ export default function PreSurveyPage() {
             onChangeJob={(v) => update('job', v)}
             onTogglePreference={toggle('preferences')}
             onToggleDislike={toggle('dislikes')}
+            useImageCards={isNewCourse}
+            gender={customerGender}
+            genderFallback={answers.genderFallback}
+            onChangeGenderFallback={(g) => setAnswers((prev) => ({ ...prev, genderFallback: g }))}
+            preferredStyles={answers.preferredStyles ?? []}
+            onTogglePreferredStyle={toggle('preferredStyles')}
+            dislikedStyles={answers.dislikedStyles ?? []}
+            onToggleDislikedStyle={toggle('dislikedStyles')}
             onPrev={goPrev}
             onNext={goNext}
           />
