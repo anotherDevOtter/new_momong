@@ -163,31 +163,34 @@ export const DAMAGE_DETAIL: Record<string, {
 export const CONDITION_SECTIONS = [
   {
     key: 'thickness',
+    axisLabel: '굵기',
     levels: [
-      { id: 'fine',   label: '가는 모발', desc: '가볍고 볼륨 처지기 쉬움' },
-      { id: 'medium', label: '중간',      desc: '일반적인 굵기' },
-      { id: 'coarse', label: '굵은 모발', desc: '묵직하고 스타일 잡기 힘듦' },
+      { id: 'fine',   label: '가는 모발', tag: '얇음',   photo: '/new/cond-thickness-1.png', desc: '모발이 얇고 힘이 부족해\n볼륨이 쉽게 가라앉는 타입' },
+      { id: 'medium', label: '보통 모발', tag: '보통',   photo: '/new/cond-thickness-2.png', desc: '일반적인 모발 두께로\n밸런스가 좋은 타입' },
+      { id: 'coarse', label: '굵은 모발', tag: '두꺼움', photo: '/new/cond-thickness-3.png', desc: '모발이 두껍고 탄탄해\n무게감이 느껴지는 타입' },
     ],
-    note: '모발 굵기는 볼륨감, 펌 로드 선택, 컷트 기법에 영향을 줍니다. 가는 모발은 레이어드, 굵은 모발은 텍스처 기법이 효과적입니다.',
+    note: '모발 굵기는 볼륨감과 질감 표현에 영향을 줍니다. 가는 모발은 볼륨 펌이나 레이어드 컷, 굵은 모발은 질감 정리나 슬라이싱이 도움이 됩니다.',
   },
   {
     key: 'density',
+    axisLabel: '숱 밀도',
     levels: [
-      { id: 'thin',   label: '적은 숱',  desc: '숱이 적어 볼륨 부족' },
-      { id: 'normal', label: '보통',     desc: '일반적인 숱 밀도' },
-      { id: 'thick',  label: '많은 숱',  desc: '숱이 많아 무거운 느낌' },
+      { id: 'thin',   label: '적은 숱', tag: '낮음', photo: '/new/cond-density-1.png', desc: '두피가 비어 보이고\n모발 사이 간격이 넓은 상태' },
+      { id: 'normal', label: '보통',    tag: '보통', photo: '/new/cond-density-2.png', desc: '일반적인 숱 밀도' },
+      { id: 'thick',  label: '많은 숱', tag: '높음', photo: '/new/cond-density-3.png', desc: '두피가 거의 보이지 않고\n모발이 촘촘한 상태' },
     ],
-    note: '숱의 양은 헤어 실루엣과 무게감을 결정합니다. 숱이 많으면 슬라이딩·틴닝, 숱이 적으면 볼륨 펌이나 레이어드 컷트를 권장합니다.',
+    note: '숱이 적은 경우에는 실루엣과 무게감을 조절합니다. 숱이 많은 경우에는 숱이 적어 보일 수 있는 층내기나 레이어드를 권장합니다.',
   },
   {
     key: 'curl',
+    axisLabel: '곱슬',
+    // 2026-09-10 시안2 기준으로 4단계(직모·부시시·형태·저항성) → 3단계로 정리했다.
     levels: [
-      { id: 'straight',   label: '직모',      desc: '완전한 직모, 웨이브 없음' },
-      { id: 'frizzy',     label: '부시시',    desc: '습도에 의해 부풀고 퍼지는 모발' },
-      { id: 'form',       label: '형태 곱슬', desc: 'S·C자 웨이브가 형태로 나타남' },
-      { id: 'resistant',  label: '저항성 곱슬', desc: '매직·교정에도 복원되는 강한 곱슬' },
+      { id: 'straight', label: '직모',      tag: '낮음', photo: '/new/cond-curl-1.png', desc: '곧고 매끈한 모발로\n차분하고 정돈된 타입' },
+      { id: 'semi',     label: '반곱슬',    tag: '보통', photo: '/new/cond-curl-2.png', desc: '자연스러운 굴곡이 있어\n볼륨과 결이 함께 느껴지는 타입' },
+      { id: 'strong',   label: '강한 곱슬', tag: '높음', photo: '/new/cond-curl-3.png', desc: '굽이침이 뚜렷하고\n부스스함과 볼륨감이 큰 타입' },
     ],
-    note: '곱슬 유형에 따라 시술 방법이 달라집니다. 부시시는 수분 케어, 형태 곱슬은 리본 펌, 저항성 곱슬은 매직·클리닉을 권장합니다.',
+    note: '곱슬 정도는 실루엣과 질감 표현에 큰 영향을 줍니다. 직모는 C컬이나 볼륨펌, 반곱슬은 결 정리, 강한 곱슬은 매직이나 질감 조절이 도움됩니다.',
   },
 ];
 
@@ -264,6 +267,7 @@ function MapPin({
     </div>
   );
 }
+
 
 export function HairConsulting({ posMap, onNext, onBack, onChange }: Props) {
   const formDominant = dominantOf(FORM, posMap);
@@ -994,28 +998,40 @@ export function HairConsulting({ posMap, onNext, onBack, onChange }: Props) {
               );
             })()}
 
-            {/* ── 기타 컨디션 — bar meter layout ── */}
+            {/* ── 기타 컨디션 — 손상도와 같은 카드 형태 (2026-09-10) ── */}
             {activeCondition !== 'damage' && CONDITION_SECTIONS.filter(s => s.key === activeCondition).map(section => (
               <motion.div key={section.key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
-                <div className="mb-6" style={{ display: 'grid', gridTemplateColumns: `repeat(${section.levels.length}, 1fr)`, gap: 8 }}>
+                <div className="mb-5" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
                   {section.levels.map((level, li) => {
                     const isSel = selectedConditions[section.key] === level.id;
                     return (
-                      <button key={level.id} onClick={() => setSelectedConditions(prev => ({ ...prev, [section.key]: isSel ? null : level.id }))}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'center', alignSelf: 'start' }}>
-                        <div style={{ marginBottom: 10, padding: '16px 12px 14px', background: isSel ? '#F5F3EE' : '#FAFAF9', border: isSel ? '1.5px solid #1A1A1A' : '1px solid #EAEAE6', position: 'relative' }}>
+                      <button key={level.id}
+                        onClick={() => setSelectedConditions(prev => ({ ...prev, [section.key]: isSel ? null : level.id }))}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}>
+                        <div style={{
+                          display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
+                          background: isSel ? '#F5F3EE' : '#FAFAF8',
+                          border: isSel ? '2px solid #1A1A1A' : '1px solid #EAEAE6',
+                          position: 'relative', height: '100%',
+                        }}>
+                          <div style={{ flexShrink: 0, width: 68, height: 68, overflow: 'hidden' }}>
+                            <img src={level.photo} alt={level.label}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <p style={{ fontSize: 14, fontWeight: isSel ? 700 : 500, color: '#111111', marginBottom: 5, letterSpacing: '-0.01em' }}>{level.label}</p>
+                            <p style={{ fontSize: 10, color: '#888882', lineHeight: 1.65, fontWeight: 300, whiteSpace: 'pre-line', marginBottom: 8 }}>{level.desc}</p>
+                            <div style={{ width: 24, height: 1, background: '#D8D4CE', marginBottom: 5 }} />
+                            {/* 손상도의 '손상도 0~20%' 자리 */}
+                            <p style={{ fontSize: 10, color: isSel ? '#555550' : '#AAAAAA', fontFamily: MONO, letterSpacing: '0.04em' }}>
+                              {section.axisLabel} {level.tag}
+                            </p>
+                          </div>
                           {isSel && (
-                            <div style={{ position: 'absolute', top: 6, right: 6, width: 16, height: 16, background: '#1A1A1A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <span style={{ color: '#FFF', fontSize: 7, fontWeight: 700 }}>✓</span>
+                            <div style={{ position: 'absolute', top: 8, right: 8, width: 22, height: 22, borderRadius: '50%', background: '#1A1A1A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ color: '#FFF', fontSize: 10, fontWeight: 700 }}>✓</span>
                             </div>
                           )}
-                          <div style={{ display: 'flex', gap: 3, justifyContent: 'center', marginBottom: 10 }}>
-                            {section.levels.map((_, bi) => (
-                              <div key={bi} style={{ height: 3, flex: 1, background: bi <= li ? (isSel ? '#1A1A1A' : '#C4C0BA') : '#E8E8E4', borderRadius: 1 }} />
-                            ))}
-                          </div>
-                          <p style={{ fontSize: 12, fontWeight: isSel ? 600 : 400, color: '#111111', marginBottom: 5, letterSpacing: '-0.01em' }}>{level.label}</p>
-                          <p style={{ fontSize: 9.5, color: '#AAAAAA', lineHeight: 1.6, fontWeight: 300 }}>{level.desc}</p>
                         </div>
                       </button>
                     );
