@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import {
   fetchPreSurveyByToken,
   savePreSurveyAnswers,
@@ -17,7 +17,6 @@ import { Summary } from '@/components/pre-survey/sections/Summary';
 import { HairGuide } from '@/components/pre-survey/sections/HairGuide';
 import { BodyGuide } from '@/components/pre-survey/sections/BodyGuide';
 import { FashionStyle } from '@/components/pre-survey/sections/FashionStyle';
-import { PreInterviewOnePage } from '@/components/pre-survey/PreInterviewOnePage';
 
 type Step =
   | 'cover'
@@ -26,22 +25,12 @@ type Step =
   | 'intro'
   | 'concerns'
   | 'fashion'
-  | 'preInterview'
   | 'summary'
   | 'hair'
   | 'body';
 
-// 기존 사전설문 — 1WAY(기존) 코스가 쓴다. 건드리지 않는다.
 // 'fashion' 은 고민 입력 뒤, 요약 앞. 성별에 맞는 사진 세트를 보여준다.
-const STEPS_LEGACY: Step[] = ['cover', 'programs', 'notice', 'intro', 'concerns', 'fashion', 'summary', 'hair', 'body'];
-
-// 시안 이식본 — 1WAY(신규, 'new' 코스) 가 쓴다. 주소에 ?course=new 를 붙이면 이쪽이다.
-//   · intro · concerns · fashion 세 스텝 → 시안의 한 장짜리 사전인터뷰로 합쳐짐
-//   · programs(프로그램) · notice(안내) 는 시안에 없어 뺐다
-//   · 사진 가이드(hair · body) 도 시안에 없어 뺐다 — 고객이 사진을 못 올린다 (2026-09-06)
-//   · 흐름은 랜딩(cover) → 사전인터뷰 → 확인(summary) 세 장. 제출은 확인 화면이 맡는다.
-//     프로그램을 안 고르므로 selectedProgram 이 빈 값으로 남는다 — 고객 상세에 '-' 로 표시된다.
-const STEPS_NEW: Step[] = ['cover', 'preInterview', 'summary'];
+const STEPS: Step[] = ['cover', 'programs', 'notice', 'intro', 'concerns', 'fashion', 'summary', 'hair', 'body'];
 
 function emptyAnswers(): PreSurveyAnswers {
   return {
@@ -62,10 +51,6 @@ function emptyAnswers(): PreSurveyAnswers {
     preferredHairPhotos: [],
     dislikedHairPhotos: [],
     bodyPhotos: [],
-    preferredImageMemo: '',
-    dislikedImageMemo: '',
-    preferredStylesMemo: '',
-    dislikedStylesMemo: '',
   };
 }
 
@@ -76,13 +61,7 @@ function todayString() {
 
 export default function PreSurveyPage() {
   const params = useParams();
-  const searchParams = useSearchParams();
   const surveyToken = params.token as string;
-
-  // 어느 사전인터뷰를 보여줄지. 링크에 ?course=new 가 붙으면 시안 이식본이다.
-  // 링크는 고객 상세에서 코스에 맞춰 발급한다.
-  const isNewCourse = searchParams.get('course') === 'new';
-  const STEPS = isNewCourse ? STEPS_NEW : STEPS_LEGACY;
 
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -153,14 +132,14 @@ export default function PreSurveyPage() {
       setStep(STEPS[stepIndex - 1]);
       window.scrollTo(0, 0);
     }
-  }, [stepIndex, STEPS]);
+  }, [stepIndex]);
 
   const goNext = useCallback(() => {
     if (stepIndex < STEPS.length - 1) {
       setStep(STEPS[stepIndex + 1]);
       window.scrollTo(0, 0);
     }
-  }, [stepIndex, STEPS]);
+  }, [stepIndex]);
 
   const requestSubmit = useCallback(() => setSubmitConfirmOpen(true), []);
 
@@ -232,11 +211,6 @@ export default function PreSurveyPage() {
     );
   }
 
-  // 'new' 흐름은 7페이지, 기존은 8페이지. 기존은 각 화면에 박힌 기본값을 그대로 쓴다.
-  const pageProps = isNewCourse
-    ? { pageNumber: stepIndex + 1, totalPages: STEPS.length }
-    : {};
-
   const renderStep = () => {
     switch (step) {
       case 'cover':
@@ -244,7 +218,6 @@ export default function PreSurveyPage() {
       case 'programs':
         return (
           <ConsultingPrograms
-            {...pageProps}
             selectedProgram={answers.selectedProgram ?? ''}
             onSelect={(program, hasBodyAnalysis) => {
               setAnswers((prev) => ({ ...prev, selectedProgram: program, hasBodyAnalysis }));
@@ -255,41 +228,7 @@ export default function PreSurveyPage() {
           />
         );
       case 'notice':
-        return <Notice {...pageProps} onPrev={goPrev} onNext={goNext} />;
-      case 'preInterview':
-        return (
-          <PreInterviewOnePage
-            gender={customerGender}
-            genderFallback={answers.genderFallback}
-            faceConcerns={answers.faceConcerns ?? []}
-            otherFaceConcern={answers.otherFaceConcern ?? ''}
-            hairConcerns={answers.hairConcerns ?? []}
-            otherHairConcern={answers.otherHairConcern ?? ''}
-            preferences={answers.preferences ?? []}
-            dislikes={answers.dislikes ?? []}
-            preferredStyles={answers.preferredStyles ?? []}
-            dislikedStyles={answers.dislikedStyles ?? []}
-            preferredImageMemo={answers.preferredImageMemo ?? ''}
-            dislikedImageMemo={answers.dislikedImageMemo ?? ''}
-            preferredStylesMemo={answers.preferredStylesMemo ?? ''}
-            dislikedStylesMemo={answers.dislikedStylesMemo ?? ''}
-            onChangeGenderFallback={(g) => setAnswers((prev) => ({ ...prev, genderFallback: g }))}
-            onToggleFace={toggle('faceConcerns')}
-            onToggleHair={toggle('hairConcerns')}
-            onChangeOtherFace={(v) => update('otherFaceConcern', v)}
-            onChangeOtherHair={(v) => update('otherHairConcern', v)}
-            onTogglePreference={toggle('preferences')}
-            onToggleDislike={toggle('dislikes')}
-            onTogglePreferredStyle={toggle('preferredStyles')}
-            onToggleDislikedStyle={toggle('dislikedStyles')}
-            onChangePreferredImageMemo={(v) => update('preferredImageMemo', v)}
-            onChangeDislikedImageMemo={(v) => update('dislikedImageMemo', v)}
-            onChangePreferredStylesMemo={(v) => update('preferredStylesMemo', v)}
-            onChangeDislikedStylesMemo={(v) => update('dislikedStylesMemo', v)}
-            onPrev={goPrev}
-            onNext={goNext}
-          />
-        );
+        return <Notice onPrev={goPrev} onNext={goNext} />;
       case 'intro':
         return (
           <Intro
@@ -341,20 +280,10 @@ export default function PreSurveyPage() {
           />
         );
       case 'summary':
-        return (
-          <Summary
-            answers={answers}
-            currentDate={todayString()}
-            onPrev={goPrev}
-            // 신규 흐름은 여기가 마지막 화면이라 바로 제출한다
-            onNext={isNewCourse ? requestSubmit : goNext}
-            nextLabel={isNewCourse ? '제출' : 'NEXT'}
-          />
-        );
+        return <Summary answers={answers} currentDate={todayString()} onPrev={goPrev} onNext={goNext} />;
       case 'hair':
         return (
           <HairGuide
-            {...pageProps}
             surveyToken={surveyToken}
             facePhotos={answers.facePhotos ?? []}
             preferredHairPhotos={answers.preferredHairPhotos ?? []}
@@ -371,7 +300,6 @@ export default function PreSurveyPage() {
       case 'body':
         return (
           <BodyGuide
-            {...pageProps}
             surveyToken={surveyToken}
             bodyPhotos={answers.bodyPhotos ?? []}
             photoDisplayUrls={photoDisplayUrls}

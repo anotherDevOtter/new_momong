@@ -15,8 +15,6 @@ interface SummaryProps {
   currentDate: string;
   onPrev: () => void;
   onNext: () => void;
-  /** 'new' 흐름에서는 이 화면이 마지막이라 '제출' 이 된다 */
-  nextLabel?: string;
 }
 
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
@@ -51,10 +49,10 @@ function OtherNote({ label, value }: { label: string; value?: string }) {
   );
 }
 
-export function Summary({ answers, currentDate, onPrev, onNext, nextLabel = 'NEXT' }: SummaryProps) {
+export function Summary({ answers, currentDate, onPrev, onNext }: SummaryProps) {
   const a = answers;
   return (
-    <PageLayout pageNumber={6} totalPages={8} onPrev={onPrev} onNext={onNext} nextLabel={nextLabel} showPageNumber={false}>
+    <PageLayout pageNumber={6} totalPages={8} onPrev={onPrev} onNext={onNext} showPageNumber={false}>
       <div className="bg-white">
         <div className="pt-12 pb-16 px-7">
           <div className="max-w-[600px] mx-auto bg-white border-2 border-[#B88A5A] shadow-xl">

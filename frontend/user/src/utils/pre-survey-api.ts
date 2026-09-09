@@ -25,14 +25,6 @@ export interface PreSurveyAnswers {
   dislikedStyles?: string[];
   /** 고객 정보에 성별이 없어 이 화면에서 직접 고른 경우에만 채워진다 */
   genderFallback?: 'female' | 'male';
-  /**
-   * 시안 사전인터뷰 Section 03~06 의 자유 메모 (2026-09-06 추가).
-   * 'new' 흐름에서만 쓴다. answers 는 백엔드에서 자유형 JSON 이라 스키마 변경은 없다.
-   */
-  preferredImageMemo?: string;
-  dislikedImageMemo?: string;
-  preferredStylesMemo?: string;
-  dislikedStylesMemo?: string;
 }
 
 export interface PreSurveyRecord {

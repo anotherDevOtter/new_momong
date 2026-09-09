@@ -5,9 +5,6 @@ import { PageLayout } from '../PageLayout';
 import { PhotoUploader } from '../PhotoUploader';
 
 interface BodyGuideProps {
-  /** 'new' 흐름은 페이지 수가 달라 밖에서 넘긴다 */
-  pageNumber?: number;
-  totalPages?: number;
   surveyToken: string;
   bodyPhotos: string[];
   photoDisplayUrls: Record<string, string>;
@@ -25,11 +22,9 @@ export function BodyGuide({
   onPrev,
   onNext,
   nextLabel = '제출',
-  pageNumber = 8,
-  totalPages = 8,
 }: BodyGuideProps) {
   return (
-    <PageLayout pageNumber={pageNumber} totalPages={totalPages} onPrev={onPrev} onNext={onNext} nextLabel={nextLabel}>
+    <PageLayout pageNumber={8} totalPages={8} onPrev={onPrev} onNext={onNext} nextLabel={nextLabel}>
       <div className="bg-white px-7 py-16">
         <div className="mb-16 pb-12 border-b border-[#E5E5E5]">
           <h2 className="text-[28px] text-[#111111] mb-8 text-center" style={{ fontWeight: 700, letterSpacing: '0.01em' }}>

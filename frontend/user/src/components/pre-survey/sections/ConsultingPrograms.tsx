@@ -3,9 +3,6 @@
 import { PageLayout } from '../PageLayout';
 
 interface ConsultingProgramsProps {
-  /** 'new' 흐름은 페이지 수가 달라 밖에서 넘긴다 */
-  pageNumber?: number;
-  totalPages?: number;
   selectedProgram: string;
   onSelect: (program: string, hasBodyAnalysis: boolean) => void;
   onPrev: () => void;
@@ -51,16 +48,9 @@ const PROGRAMS = [
   },
 ];
 
-export function ConsultingPrograms({
-  selectedProgram,
-  onSelect,
-  onPrev,
-  onNext,
-  pageNumber = 2,
-  totalPages = 8,
-}: ConsultingProgramsProps) {
+export function ConsultingPrograms({ selectedProgram, onSelect, onPrev, onNext }: ConsultingProgramsProps) {
   return (
-    <PageLayout pageNumber={pageNumber} totalPages={totalPages} onPrev={onPrev} onNext={onNext}>
+    <PageLayout pageNumber={2} totalPages={8} onPrev={onPrev} onNext={onNext}>
       <div className="bg-[#F7F7F5] px-7 py-16">
         <div className="mb-24 text-center">
           <h2 className="text-[26px] text-[#111111] mb-3" style={{ fontWeight: 400, letterSpacing: '0.05em' }}>
