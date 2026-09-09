@@ -759,25 +759,50 @@ export function HairConsulting({ posMap, onNext, onBack, onChange }: Props) {
               <div className="flex-1 relative overflow-hidden bg-white">
                 <img src={imgHairMap37} alt="헤어이미지맵" className="w-full h-auto block" />
 
-                {/* 고유미 — 실선 링. 미측정이면 안 그린다 */}
-                {measured && (
-                  <MapPin
-                    left={`${50 + (col - 1) * 30}%`}
-                    top={`${47.5 + (row - 1) * 24}%`}
-                    label="고유미"
-                    tone="own"
-                  />
-                )}
+                {(() => {
+                  // 3×3 이미지맵과 같은 규칙 — 좌표, 화살표, 같은 칸이면 추구미를 숨기는 것까지 맞춘다.
+                  const x = (c: number) => 50 + (c - 1) * 30;
+                  const y = (r: number) => 47.5 + (r - 1) * 24;
+                  const hasTarget = targetRow != null && targetCol != null;
+                  const sameCell = measured && hasTarget && targetRow === row && targetCol === col;
+                  return (
+                    <>
+                      {/* 고유미 → 추구미 화살표. 둘 다 있고 칸이 다를 때만 */}
+                      {measured && hasTarget && !sameCell && (
+                        <svg
+                          className="absolute inset-0 w-full h-full pointer-events-none"
+                          viewBox="0 0 100 100"
+                          preserveAspectRatio="none"
+                          style={{ zIndex: 1 }}
+                        >
+                          <defs>
+                            <marker id="hairmap-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                              <path d="M0 0.6 L5.4 3 L0 5.4" fill="none" stroke={TARGET_COLOR} strokeWidth="1.1" />
+                            </marker>
+                          </defs>
+                          <line
+                            x1={x(col)} y1={y(row)} x2={x(targetCol!)} y2={y(targetRow!)}
+                            stroke="#FFFFFF" strokeWidth="3.5" opacity="0.55" vectorEffect="non-scaling-stroke"
+                          />
+                          <line
+                            x1={x(col)} y1={y(row)} x2={x(targetCol!)} y2={y(targetRow!)}
+                            stroke={TARGET_COLOR} strokeWidth="1.6" markerEnd="url(#hairmap-arrow)" vectorEffect="non-scaling-stroke"
+                          />
+                        </svg>
+                      )}
 
-                {/* 추구미 — 칸을 골랐을 때만 */}
-                {targetRow != null && targetCol != null && (
-                  <MapPin
-                    left={`${50 + (targetCol - 1) * 30}%`}
-                    top={`${47.5 + (targetRow - 1) * 24}%`}
-                    label="추구미"
-                    tone="target"
-                  />
-                )}
+                      {/* 고유미 — 실선 링. 미측정이면 안 그린다 */}
+                      {measured && (
+                        <MapPin left={`${x(col)}%`} top={`${y(row)}%`} label="고유미" tone="own" />
+                      )}
+
+                      {/* 추구미 — 칸을 골랐을 때만. 고유미와 같은 칸이면 겹치므로 안 그린다 */}
+                      {hasTarget && !sameCell && (
+                        <MapPin left={`${x(targetCol!)}%`} top={`${y(targetRow!)}%`} label="추구미" tone="target" />
+                      )}
+                    </>
+                  );
+                })()}
               </div>
 
               {/* COOL axis */}

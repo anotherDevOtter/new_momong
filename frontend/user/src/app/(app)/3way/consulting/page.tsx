@@ -219,7 +219,19 @@ function Inner() {
   const [skeletonData, setSkeletonData] = useState<SkeletonData | null>(null);
   const [hydrating, setHydrating] = useState(true);
   // 'new' 코스 전용 — 이목구비 분석에서 고른 축 위치를 다음 두 화면이 물려받는다.
-  const [faceResultPosMap, setFaceResultPosMap] = useState<Record<string, number>>({});
+  // 개발용 더미 측정값 — 주소에 &demoFace=1 을 붙이면 얼굴을 찍지 않아도
+  // 고유 이미지타입이 잡힌다. 이미지맵의 고유미 마커·화살표를 눈으로 확인할 때 쓴다.
+  // 개발 모드에서만 동작하고, 운영 빌드에서는 무시된다. (2026-09-10)
+  const demoFace = devJump && searchParams.get('demoFace') === '1';
+  const [faceResultPosMap, setFaceResultPosMap] = useState<Record<string, number>>(() =>
+    demoFace
+      ? Object.fromEntries(
+          // 형태축은 Cool 쪽(0.75), 비율축은 Soft 쪽(0.25) 으로 몰아 NATURAL 이 아닌
+          // 뚜렷한 칸이 잡히게 한다 — 추구미를 아무 칸이나 골라도 화살표가 보인다.
+          [...FORM.map((it) => [it.id, 0.75] as const), ...PROP.map((it) => [it.id, 0.25] as const)],
+        )
+      : {},
+  );
   // 'new' 헤어컨설팅에서 고른 값 (스타일 5축 + 모질 4축 + 목표 이미지타입)
   const [hairConsultingData, setHairConsultingData] = useState<HairConsultingData | null>(null);
   // 'new' 의 사전 인터뷰는 이미지·패션 선호까지 흡수해 필드가 12개다 (기존은 2개).
