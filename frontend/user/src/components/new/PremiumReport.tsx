@@ -2,7 +2,6 @@ import { useState, useRef, isValidElement, cloneElement, type ReactElement } fro
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, ChevronRight, Download, X } from 'lucide-react';
 import { CycleData, DIRECTION_ITEMS, CHANGE_LEVELS } from './NextDirection';
-import { TEXTURE_LABELS, TEXTURE_NOTES, type HairTextureData } from '@/components/3way/HairTextureAnalysis';
 import { FORM, PROP, IMAP, dominantIdx, dominantOf } from './faceAnalysisData';
 import {
   STYLE_AXES, styleOptionOf, type StyleAxis, type HairConsultingData,
@@ -20,10 +19,9 @@ interface PremiumReportProps {
   customerPhone?: string;
   /** 헤어컨설팅에서 고른 스타일 5축. 없으면 리포트에 '—' 로 나온다. */
   hairStyle?: HairConsultingData['style'] | null;
-  /** 헤어컨설팅에서 고른 모질 4축. (지금 리포트는 아래 hairTexture 를 쓴다) */
+  /** 헤어컨설팅에서 고른 모질 4축 — 리포트의 모질 페이지가 이 값을 쓴다.
+   *  예전에는 '헤어질감' 화면의 값을 썼는데 그 화면을 흐름에서 뺐다 (2026-09-10) */
   hairCondition?: HairConsultingData['condition'] | null;
-  /** 헤어질감 화면에서 고른 모질 5항목 — 시안 리포트의 모질 페이지가 이 값을 쓴다 */
-  hairTexture?: HairTextureData | null;
   /** 페이지 안에 그대로 얹을 때 (공유 페이지). 어둡게 덮지 않고 닫기 버튼도 없앤다 */
   embedded?: boolean;
   /** 얼굴 항목별 실측 표시값 (Python 이 준 값). 없는 항목은 리포트에 '미측정'. */
@@ -54,7 +52,6 @@ export function PremiumReport({
   selectedCourse,
   hairStyle,
   hairCondition,
-  hairTexture,
   embedded,
   faceValues,
   facePosMap,
@@ -76,7 +73,7 @@ export function PremiumReport({
     <FaceStructurePage key="face-structure" pageNumber={0} totalPages={0} values={faceValues ?? {}} posMap={facePosMap ?? {}} numbers={faceNumbers ?? {}} />,
     <ImageAxisPage key="image-axis" pageNumber={0} totalPages={0} posMap={facePosMap ?? {}} />,
     ...(showPersonalColor ? [<PersonalColorPage key="personal-color" pageNumber={0} totalPages={0} />] : []),
-    <HairTexturePage key="hair-texture" pageNumber={0} totalPages={0} texture={hairTexture ?? null} />,
+    <HairTexturePage key="hair-texture" pageNumber={0} totalPages={0} condition={hairCondition ?? null} />,
     <TodayDesignPage key="today-design" pageNumber={0} totalPages={0} style={hairStyle ?? null} />,
     <ImageMovementPage key="image-movement" pageNumber={0} totalPages={0} posMap={facePosMap ?? {}} target={hairTargetType ?? null} directions={cycleData?.directions ?? []} />,
     <DesignCycleMasterPlanPage key="design-cycle" pageNumber={0} totalPages={0} cycleData={cycleData} />,
@@ -610,31 +607,36 @@ function PersonalColorPage({ pageNumber, totalPages }: { pageNumber: number; tot
   );
 }
 
-function HairTexturePage({ pageNumber, totalPages, texture }: { pageNumber: number; totalPages: number; texture: HairTextureData | null }) {
-  // 시안 리포트와 같은 5항목. 값은 '헤어질감' 화면에서 디자이너가 고른 것을 그대로 쓴다.
-  // (예전에는 약손상·반곱슬·보통·많다가 박혀 있어서 누구든 같은 모질이 인쇄됐다)
-  const AXES: { key: keyof HairTextureData; label: string }[] = [
-    { key: 'damageLevel',  label: '손상도' },
-    { key: 'hairType',     label: '모질 상태' },
-    { key: 'thickness',    label: '굵기' },
-    { key: 'density',      label: '숱' },
-    { key: 'curlCoverage', label: '곱슬 정도' },
-  ];
-
-  // 점 색은 손상도에서 나온다 — 헤어질감 화면이 강손상 이상을 '주의'로 표시하는 기준과 같다.
+function HairTexturePage({
+  pageNumber,
+  totalPages,
+  condition,
+}: {
+  pageNumber: number;
+  totalPages: number;
+  condition: Record<string, string | null> | null;
+}) {
+  // 값은 헤어컨설팅의 '모질 분석 및 컨디션'(손상도·굵기·숱·곱슬) 에서 그대로 온다.
+  // 예전에는 '헤어질감' 화면을 봤는데, 그 화면을 흐름에서 빼면서 5줄이 전부 '—' 로
+  // 인쇄됐다. 그 화면에만 있던 '모질 상태' 줄은 곱슬 정도와 겹쳐서 뺐다. (2026-09-10)
   const DAMAGE_TONE: Record<string, string> = {
-    healthy: 'bg-green-500', light: 'bg-green-500',
-    medium: 'bg-yellow-500',
-    heavy: 'bg-red-500', extreme: 'bg-red-500', severe: 'bg-red-500',
+    '1': 'bg-green-500', '2': 'bg-green-500',
+    '3': 'bg-yellow-500',
+    '4': 'bg-red-500', '5': 'bg-red-500', '6': 'bg-red-500',
   };
 
-  const rows = AXES.map(({ key, label }) => {
-    const id = texture?.[key];
+  const rows = CONDITION_AXES.map(({ key, title }) => {
+    const id = condition?.[key] ?? null;
+    const opt = conditionOptionOf(key, id);
+    // 손상도는 시술 가능 범위 문구가 따로 있다 — 화면의 상세 패널과 같은 표를 쓴다.
+    const note = key === 'damage'
+      ? (id ? DAMAGE_DETAIL[id]?.guide ?? '' : '')
+      : (opt?.note ?? '').replace(/\n/g, ' ');
     return {
-      label,
-      value: (id && TEXTURE_LABELS[key]?.[id]) || '—',
-      note: (id && TEXTURE_NOTES[key]?.[id]) || '',
-      tone: key === 'damageLevel' && id ? (DAMAGE_TONE[id] ?? 'bg-gray-400') : 'bg-gray-400',
+      label: title,
+      value: opt?.label ?? '—',
+      note,
+      tone: key === 'damage' && id ? (DAMAGE_TONE[id] ?? 'bg-gray-400') : 'bg-gray-400',
     };
   });
   const noneSelected = rows.every((r) => r.value === '—');

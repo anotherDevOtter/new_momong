@@ -98,7 +98,13 @@ type SharedThreeWay = {
   faceValues?: Record<string, string>;
   faceNumbers?: Record<string, number>;
   finalImageType?: { en?: string; ko?: string } | null;
-  hairConsulting?: { style?: Record<string, string | null>; targetType?: { en: string; ko: string } | null } | null;
+  hairConsulting?: {
+    style?: Record<string, string | null>;
+    // 모질 4축(손상도·굵기·숱·곱슬). 리포트의 모질 페이지가 이 값을 쓴다 (2026-09-10)
+    condition?: Record<string, string | null>;
+    targetType?: { en: string; ko: string } | null;
+  } | null;
+  /** 예전 '헤어질감' 화면이 저장하던 값. 화면을 뺀 뒤로는 새로 안 쌓인다 */
   hairTexture?: Record<string, string | null> | null;
   cycleData?: { selectedMonths?: unknown[]; directions?: string[]; changeLevel?: number } | null;
 };
@@ -119,7 +125,7 @@ function SharedReportView({ data, three }: { data: ConsultationData; three: Shar
         selectedCourse="new"
         cycleData={(three.cycleData ?? null) as never}
         hairStyle={(three.hairConsulting?.style ?? null) as never}
-        hairTexture={(three.hairTexture ?? null) as never}
+        hairCondition={(three.hairConsulting?.condition ?? null) as never}
         hairTargetType={three.hairConsulting?.targetType ?? null}
         faceValues={three.faceValues ?? {}}
         faceNumbers={three.faceNumbers ?? {}}

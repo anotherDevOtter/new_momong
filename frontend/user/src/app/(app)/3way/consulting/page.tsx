@@ -609,7 +609,6 @@ function Inner() {
               selectedCourse={selectedCourse}
               hairStyle={hairConsultingData?.style ?? null}
               hairCondition={hairConsultingData?.condition ?? null}
-              hairTexture={hairTextureData}
               faceValues={faceAnalysisToValues(faceAnalysisResult)}
               facePosMap={faceResultPosMap}
               faceNumbers={faceAnalysisToNumbers(faceAnalysisResult)}
@@ -648,7 +647,6 @@ function Inner() {
               selectedCourse={selectedCourse}
               hairStyle={hairConsultingData?.style ?? null}
               hairCondition={hairConsultingData?.condition ?? null}
-              hairTexture={hairTextureData}
               faceValues={faceAnalysisToValues(faceAnalysisResult)}
               facePosMap={faceResultPosMap}
               faceNumbers={faceAnalysisToNumbers(faceAnalysisResult)}
