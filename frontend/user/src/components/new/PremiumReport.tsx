@@ -2,6 +2,7 @@ import { useState, useRef, isValidElement, cloneElement, type ReactElement } fro
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, ChevronRight, Download, X } from 'lucide-react';
 import { CycleData, DIRECTION_ITEMS, CHANGE_LEVELS } from './NextDirection';
+import { TEXTURE_LABELS, TEXTURE_NOTES } from '@/components/3way/HairTextureAnalysis';
 import { FORM, PROP, IMAP, dominantIdx, dominantOf } from './faceAnalysisData';
 import {
   STYLE_AXES, styleOptionOf, type StyleAxis, type HairConsultingData,
@@ -22,6 +23,9 @@ interface PremiumReportProps {
   /** 헤어컨설팅에서 고른 모질 4축 — 리포트의 모질 페이지가 이 값을 쓴다.
    *  예전에는 '헤어질감' 화면의 값을 썼는데 그 화면을 흐름에서 뺐다 (2026-09-10) */
   hairCondition?: HairConsultingData['condition'] | null;
+  /** 헤어질감 화면이 저장하던 옛 값. 그 화면이 있던 시절의 상담 기록만 이걸 갖고 있다.
+   *  hairCondition 이 비었을 때만 읽는다 — 예전 공유 링크가 빈 페이지가 되지 않게. */
+  legacyHairTexture?: Record<string, string | null> | null;
   /** 페이지 안에 그대로 얹을 때 (공유 페이지). 어둡게 덮지 않고 닫기 버튼도 없앤다 */
   embedded?: boolean;
   /** 얼굴 항목별 실측 표시값 (Python 이 준 값). 없는 항목은 리포트에 '미측정'. */
@@ -52,6 +56,7 @@ export function PremiumReport({
   selectedCourse,
   hairStyle,
   hairCondition,
+  legacyHairTexture,
   embedded,
   faceValues,
   facePosMap,
@@ -73,7 +78,7 @@ export function PremiumReport({
     <FaceStructurePage key="face-structure" pageNumber={0} totalPages={0} values={faceValues ?? {}} posMap={facePosMap ?? {}} numbers={faceNumbers ?? {}} />,
     <ImageAxisPage key="image-axis" pageNumber={0} totalPages={0} posMap={facePosMap ?? {}} />,
     ...(showPersonalColor ? [<PersonalColorPage key="personal-color" pageNumber={0} totalPages={0} />] : []),
-    <HairTexturePage key="hair-texture" pageNumber={0} totalPages={0} condition={hairCondition ?? null} />,
+    <HairTexturePage key="hair-texture" pageNumber={0} totalPages={0} condition={hairCondition ?? null} legacy={legacyHairTexture ?? null} />,
     <TodayDesignPage key="today-design" pageNumber={0} totalPages={0} style={hairStyle ?? null} />,
     <ImageMovementPage key="image-movement" pageNumber={0} totalPages={0} posMap={facePosMap ?? {}} target={hairTargetType ?? null} directions={cycleData?.directions ?? []} />,
     <DesignCycleMasterPlanPage key="design-cycle" pageNumber={0} totalPages={0} cycleData={cycleData} />,
@@ -611,10 +616,12 @@ function HairTexturePage({
   pageNumber,
   totalPages,
   condition,
+  legacy,
 }: {
   pageNumber: number;
   totalPages: number;
   condition: Record<string, string | null> | null;
+  legacy: Record<string, string | null> | null;
 }) {
   // 값은 헤어컨설팅의 '모질 분석 및 컨디션'(손상도·굵기·숱·곱슬) 에서 그대로 온다.
   // 예전에는 '헤어질감' 화면을 봤는데, 그 화면을 흐름에서 빼면서 5줄이 전부 '—' 로
@@ -625,7 +632,24 @@ function HairTexturePage({
     '4': 'bg-red-500', '5': 'bg-red-500', '6': 'bg-red-500',
   };
 
-  const rows = CONDITION_AXES.map(({ key, title }) => {
+  // 헤어컨설팅 값이 하나도 없고 옛 기록만 있으면 그쪽을 읽는다 (예전 공유 링크 보호)
+  const hasCondition = CONDITION_AXES.some(({ key }) => condition?.[key]);
+  const legacyRows = !hasCondition && legacy
+    ? ([
+        ['damageLevel', '손상도'], ['hairType', '모질 상태'], ['thickness', '굵기'],
+        ['density', '숱'], ['curlCoverage', '곱슬 정도'],
+      ] as const).map(([key, label]) => {
+        const id = legacy[key];
+        return {
+          label,
+          value: (id && TEXTURE_LABELS[key]?.[id]) || '—',
+          note: (id && TEXTURE_NOTES[key]?.[id]) || '',
+          tone: 'bg-gray-400',
+        };
+      })
+    : null;
+
+  const rows = legacyRows ?? CONDITION_AXES.map(({ key, title }) => {
     const id = condition?.[key] ?? null;
     const opt = conditionOptionOf(key, id);
     // 손상도는 시술 가능 범위 문구가 따로 있다 — 화면의 상세 패널과 같은 표를 쓴다.

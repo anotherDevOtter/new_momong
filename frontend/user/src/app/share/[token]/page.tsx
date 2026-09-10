@@ -126,6 +126,7 @@ function SharedReportView({ data, three }: { data: ConsultationData; three: Shar
         cycleData={(three.cycleData ?? null) as never}
         hairStyle={(three.hairConsulting?.style ?? null) as never}
         hairCondition={(three.hairConsulting?.condition ?? null) as never}
+        legacyHairTexture={three.hairTexture ?? null}
         hairTargetType={three.hairConsulting?.targetType ?? null}
         faceValues={three.faceValues ?? {}}
         faceNumbers={three.faceNumbers ?? {}}
