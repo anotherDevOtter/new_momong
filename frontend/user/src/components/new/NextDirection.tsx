@@ -621,7 +621,10 @@ export function NextDirection({
                     <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.18em', color: isSelected ? '#888880' : '#CCCCCA', width: 70, flexShrink: 0, transition: 'color 0.18s' }}>{dir.en}</span>
                     <div style={{ flex: 1 }}>
                       <p style={{ fontSize: 15, fontWeight: isSelected ? 500 : 300, color: isSelected ? '#111111' : '#777773', letterSpacing: '-0.01em', transition: 'all 0.18s', marginBottom: 2 }}>{dir.label}</p>
-                      
+                      {/* 고른 값은 행을 펼쳐야만 보였다. 접힌 상태에서도 보이게. (2026-09-11) */}
+                      <p style={{ fontSize: 11, fontWeight: 300, color: selectedOpt ? '#8A7B4E' : '#BBBBB6', letterSpacing: '-0.01em' }}>
+                        {selectedOpt ?? dir.sublabel}
+                      </p>
                     </div>
                     <div style={{ display: 'flex', gap: 3, flexShrink: 0 }}>
                       {[1, 2, 3, 4].map(pip => (
