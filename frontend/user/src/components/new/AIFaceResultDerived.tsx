@@ -24,7 +24,7 @@ interface Props {
  * 누구를 촬영하든 같은 오각형이 나왔다. 여기서는 20항목을 이름 그대로 부위에 나눠 담고
  * 실제 위치값으로 계산한다. (부위 구분은 문서에 없다 — 항목 이름을 따른 것이다)
  */
-const AREA_ITEMS: { area: string; ids: string[] }[] = [
+export const AREA_ITEMS: { area: string; ids: string[] }[] = [
   { area: '눈',        ids: ['eyeshape', 'eyetail', 'eyefront', 'broweye', 'intereye', 'eyeouter', 'eyelid'] },
   { area: '코',        ids: ['nosewidth', 'nosehigh', 'noselen'] },
   { area: '입술',      ids: ['lips', 'mouthwidth', 'philtrum'] },
@@ -37,7 +37,7 @@ const AREA_ITEMS: { area: string; ids: string[] }[] = [
  * 벗어날수록 그 부위가 인상을 끌고 간다는 뜻이다.
  * 계산식은 아래 '핵심 해석' 이 쓰는 strength 와 같다 (|pos − 0.5| × 200).
  */
-function areaScores(posMap: Record<string, number>) {
+export function areaScores(posMap: Record<string, number>) {
   return AREA_ITEMS.map(({ area, ids }) => {
     const vals = ids.map(id => posMap[id]).filter((v): v is number => v != null);
     const value = vals.length

@@ -34,6 +34,8 @@ import { AIFaceResultDerived } from '@/components/new/AIFaceResultDerived';
 import { HairConsulting, type HairConsultingData } from '@/components/new/HairConsulting';
 import { NextDirection as NewNextDirection, type CycleData } from '@/components/new/NextDirection';
 import { PremiumReport as NewPremiumReport } from '@/components/new/PremiumReport';
+// 시안3 구조(표지+4장). new 코스만 쓴다 — 공유 링크의 옛 기록은 아직 위쪽 V1 이 그린다.
+import { PremiumReport as NewPremiumReportV2 } from '@/components/new/PremiumReportV2';
 import { CompletionPage as NewCompletionPage } from '@/components/new/CompletionPage';
 import { preSurveyToPreInterview, EMPTY_PRE_INTERVIEW, type PreInterviewData as NewPreInterviewData } from '@/components/new/preSurveyToPreInterview';
 import { faceAnalysisToPosMap, faceAnalysisToMeasurements, faceAnalysisToValues, faceAnalysisToNumbers, deriveImageType } from '@/components/new/faceAnalysisToPosMap';
@@ -631,19 +633,22 @@ function Inner() {
             onAfterPhotoChange={setAfterPhoto}
           />
           {showReport && (
-            <NewPremiumReport
-              onClose={handleReportClose}
+            <NewPremiumReportV2
+              onBack={handleReportClose}
               customerName={customerData.name}
               consultDate={new Date().toLocaleDateString('ko-KR')}
               designerName={customerData.designerName || '디자이너'}
               cycleData={newCycleData}
-              selectedCourse={selectedCourse}
-              hairStyle={hairConsultingData?.style ?? null}
+              hairTargetType={hairConsultingData?.targetType?.en ?? null}
               hairCondition={hairConsultingData?.condition ?? null}
-              faceValues={faceAnalysisToValues(faceAnalysisResult)}
               facePosMap={faceResultPosMap}
-              faceNumbers={faceAnalysisToNumbers(faceAnalysisResult)}
-              hairTargetType={hairConsultingData?.targetType ?? null}
+              facePhotoUrl={faceImageUrl}
+              beforePhoto={beforePhoto}
+              afterPhoto={afterPhoto}
+              onBeforePhotoChange={setBeforePhoto}
+              onAfterPhotoChange={setAfterPhoto}
+              initialSubSel={directionSubSel}
+              selectedCourse={selectedCourse}
             />
           )}
         </>
@@ -669,19 +674,22 @@ function Inner() {
           )}
           {/* 완료 화면에서 'PDF 저장' 을 누르면 리포트를 다시 열어 거기서 내려받는다 */}
           {showReport && (
-            <NewPremiumReport
-              onClose={() => setShowReport(false)}
+            <NewPremiumReportV2
+              onBack={() => setShowReport(false)}
               customerName={customerData.name}
               consultDate={new Date().toLocaleDateString('ko-KR')}
               designerName={customerData.designerName || '디자이너'}
               cycleData={newCycleData}
-              selectedCourse={selectedCourse}
-              hairStyle={hairConsultingData?.style ?? null}
+              hairTargetType={hairConsultingData?.targetType?.en ?? null}
               hairCondition={hairConsultingData?.condition ?? null}
-              faceValues={faceAnalysisToValues(faceAnalysisResult)}
               facePosMap={faceResultPosMap}
-              faceNumbers={faceAnalysisToNumbers(faceAnalysisResult)}
-              hairTargetType={hairConsultingData?.targetType ?? null}
+              facePhotoUrl={faceImageUrl}
+              beforePhoto={beforePhoto}
+              afterPhoto={afterPhoto}
+              onBeforePhotoChange={setBeforePhoto}
+              onAfterPhotoChange={setAfterPhoto}
+              initialSubSel={directionSubSel}
+              selectedCourse={selectedCourse}
             />
           )}
         </>
