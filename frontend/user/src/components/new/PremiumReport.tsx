@@ -10,22 +10,6 @@ import {
 } from './HairConsulting';
 // 저장은 상위 page.tsx 의 saveConsult() 가 담당한다. 시안의 Supabase 헬퍼는 쓰지 않는다.
 
-/** 다른 new 화면들과 같은 라벨용 고정폭 서체 */
-const MONO = "'SF Mono', 'Roboto Mono', Menlo, monospace";
-
-/**
- * 리포트 번호. 상담일 + 고객명에서 만들어 같은 상담이면 항상 같은 번호가 나온다.
- * (백엔드에 일련번호가 없어서 화면에서 만든다) (2026-09-11)
- */
-function reportNoOf(consultDate: string, customerName: string) {
-  const digits = consultDate.replace(/[^0-9]/g, '');
-  const y = digits.slice(0, 4) || String(new Date().getFullYear());
-  const md = digits.slice(4, 8).padStart(4, '0');
-  let h = 0;
-  for (const ch of `${y}${md}${customerName}`) h = (h * 31 + ch.charCodeAt(0)) % 999;
-  return `PH-${y}-${md}-${String(h + 1).padStart(3, '0')}`;
-}
-
 interface PremiumReportProps {
   onClose: () => void;
   customerName: string;
@@ -81,6 +65,7 @@ export function PremiumReport({
   customerPhone,
 }: PremiumReportProps) {
   const [currentPage, setCurrentPage] = useState(0);
+  const [editedDesignerName, setEditedDesignerName] = useState(designerName);
 
   // 퍼스널컬러는 그 축을 진단하는 코스에서만 나온다.
   // 1WAY(이식용 'new' 포함) 는 얼굴 한 축만 보므로 이 페이지 자체가 없어야 한다 —
@@ -89,7 +74,7 @@ export function PremiumReport({
 
   // 노출할 페이지를 순서대로 만든다 → 페이지 번호·인디케이터·네비게이션이 저절로 맞는다.
   const pages: React.ReactNode[] = [
-    <CoverPage key="cover" pageNumber={0} totalPages={0} customerName={customerName} consultDate={consultDate} designerName={designerName} courseLabel={COURSE_TITLE[selectedCourse ?? ""] ?? "1WAY"} />,
+    <CoverPage key="cover" pageNumber={0} totalPages={0} customerName={customerName} consultDate={consultDate} designerName={editedDesignerName} onDesignerNameChange={setEditedDesignerName} courseLabel={COURSE_TITLE[selectedCourse ?? ""] ?? "1WAY"} />,
     <FaceStructurePage key="face-structure" pageNumber={0} totalPages={0} values={faceValues ?? {}} posMap={facePosMap ?? {}} numbers={faceNumbers ?? {}} />,
     <ImageAxisPage key="image-axis" pageNumber={0} totalPages={0} posMap={facePosMap ?? {}} />,
     ...(showPersonalColor ? [<PersonalColorPage key="personal-color" pageNumber={0} totalPages={0} />] : []),
@@ -98,7 +83,7 @@ export function PremiumReport({
     <ImageMovementPage key="image-movement" pageNumber={0} totalPages={0} posMap={facePosMap ?? {}} target={hairTargetType ?? null} directions={cycleData?.directions ?? []} />,
     <DesignCycleMasterPlanPage key="design-cycle" pageNumber={0} totalPages={0} cycleData={cycleData} />,
     <NextDirectionSummaryPage key="next-direction" pageNumber={0} totalPages={0} cycleData={cycleData} />,
-    <PersonalNotePage key="personal-note" pageNumber={0} totalPages={0} designerName={designerName} />,
+    <PersonalNotePage key="personal-note" pageNumber={0} totalPages={0} designerName={editedDesignerName} />,
     <ClosingPage key="closing" pageNumber={0} totalPages={0} />,
   ];
   const totalPages = pages.length;
@@ -307,7 +292,7 @@ export function PremiumReport({
 }
 
 // 페이지 컴포넌트들
-function CoverPage({ pageNumber, totalPages, customerName, consultDate, designerName, courseLabel }: { pageNumber: number; totalPages: number; customerName: string; consultDate: string; designerName: string; courseLabel: string }) {
+function CoverPage({ pageNumber, totalPages, customerName, consultDate, designerName, onDesignerNameChange, courseLabel }: { pageNumber: number; totalPages: number; customerName: string; consultDate: string; designerName: string; onDesignerNameChange: (name: string) => void; courseLabel: string }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -328,30 +313,24 @@ function CoverPage({ pageNumber, totalPages, customerName, consultDate, designer
           HAIR REPORT
         </h1>
 
-        {/* 고객 이름은 크게 한 번 */}
-        <div className="mb-10">
-          <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.28em', color: '#999999', marginBottom: 14 }}>CLIENT</p>
-          <p className="text-3xl font-light text-black leading-tight mb-3" style={{ letterSpacing: '-0.01em' }}>
-            {customerName || '고객 이름 미입력'}
+        <div className="space-y-3 text-sm font-light text-gray-700">
+          <p>
+            <span className="text-gray-500">고객명</span>
+            <span className="ml-8 text-black">{customerName}</span>
           </p>
-          <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.22em', color: '#BBBBBB' }}>
-            {courseLabel} PERSONAL HAIR CONSULTING
+          <p>
+            <span className="text-gray-500">상담일</span>
+            <span className="ml-8 text-black">{consultDate}</span>
           </p>
-        </div>
-
-        {/* 라벨 위 / 값 아래로 한 줄씩 쌓는다. 값은 전부 앞 화면에서 받은 것을
-            그대로 쓴다 — 리포트에서 다시 입력하지 않는다. (2026-09-11) */}
-        <div className="flex flex-col gap-5 border-t border-gray-200 pt-8">
-          {[
-            { label: 'ANALYSIS DATE', value: consultDate },
-            { label: 'REPORT NO.',    value: reportNoOf(consultDate, customerName) },
-            { label: 'DESIGNER',      value: designerName },
-          ].map(({ label, value }) => (
-            <div key={label}>
-              <p style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.24em', color: '#999999', marginBottom: 6 }}>{label}</p>
-              <p className="text-sm font-light text-black">{value || '—'}</p>
-            </div>
-          ))}
+          <p>
+            <span className="text-gray-500">디자이너</span>
+            <input
+              type="text"
+              value={designerName}
+              onChange={(e) => onDesignerNameChange(e.target.value)}
+              className="ml-6 text-black border-b border-gray-300 focus:outline-none focus:border-black"
+            />
+          </p>
         </div>
       </div>
 
