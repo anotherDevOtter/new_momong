@@ -261,10 +261,11 @@ function AdjustSlider({ pos, l, r, onChange }: { pos: number; l: string; r: stri
           style={{ left: `${pos * 100}%`, transform: 'translateX(-50%)' }}
         />
       </div>
-      <div className="flex justify-between mt-1.5">
-        <span className="text-[10px] text-[#AAAAAA]">{l}</span>
-        <span className="text-[10px] text-[#1A1A1A] font-semibold" style={{ fontFamily: MONO }}>{Math.round(pos * 100)}</span>
-        <span className="text-[10px] text-[#AAAAAA]">{r}</span>
+      {/* 양끝 단어와 가운데 수치의 폰트를 맞춘다 — 예전에는 단어만 본문 폰트라 따로 놀았다 (2026-09-11) */}
+      <div className="flex justify-between mt-1.5" style={{ fontFamily: MONO }}>
+        <span className="text-[10px] text-[#AAAAAA]" style={{ letterSpacing: '0.04em' }}>{l}</span>
+        <span className="text-[10px] text-[#1A1A1A] font-semibold" style={{ letterSpacing: '0.04em' }}>{Math.round(pos * 100)}</span>
+        <span className="text-[10px] text-[#AAAAAA]" style={{ letterSpacing: '0.04em' }}>{r}</span>
       </div>
     </div>
   );
