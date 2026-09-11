@@ -412,6 +412,35 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                 title={pendingItems.length ? `아직 값이 없는 항목: ${pendingItems.map(i => i.title).join(', ')}` : ''}>
                 {pendingItems.length ? `미측정 ${pendingItems.length}개 남음 →` : '결과 도출 →'}
               </button>
+
+              {/* 남은 항목을 한 번에 확정 — 항목마다 '측정 완료' 를 누르는 게 번거롭다는 요청.
+                  자동 분석이 값을 주지 못한 항목(눈썹 방향·눈 앞머리·코 높이 등)만 남는다.
+                  각 항목의 현재 슬라이더 위치를 그대로 값으로 확정한다. (2026-09-11) */}
+              {pendingItems.length > 0 && (
+                <button
+                  onClick={() => {
+                    setPosMap(m => {
+                      const next = { ...m };
+                      pendingItems.forEach(it => {
+                        if (next[it.id] == null) next[it.id] = it.defaultPos;
+                      });
+                      return next;
+                    });
+                    setDone(d => {
+                      const next = { ...d };
+                      pendingItems.forEach(it => { next[it.id] = true; });
+                      return next;
+                    });
+                  }}
+                  className="px-3.5 py-2.5 text-[11.5px] tracking-[0.06em] rounded-sm"
+                  style={{
+                    background: '#FFFFFF', color: '#555550',
+                    border: '1px solid #CCCCCA', cursor: 'pointer', fontWeight: 500,
+                  }}
+                  title={`남은 ${pendingItems.length}개를 지금 슬라이더 위치로 한 번에 확정합니다`}>
+                  남은 {pendingItems.length}개 한 번에 확정
+                </button>
+              )}
             </div>
           </div>
 
