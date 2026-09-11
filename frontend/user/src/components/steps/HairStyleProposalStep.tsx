@@ -12,16 +12,16 @@ interface HairStyleProposalStepProps {
 }
 
 const FEMALE_STYLES: Record<string, string> = {
-  '롱': 'https://i.pinimg.com/736x/c8/fd/1a/c8fd1a9f61db26e2fc0638ea232d619a.jpg',
-  '미디움': 'https://i.pinimg.com/736x/0a/ba/5e/0aba5eff53752e11f4cd4c4ed4482a87.jpg',
-  '단발': 'https://i.pinimg.com/736x/0a/03/99/0a0399399b5b778b425d651419e6e9fb.jpg',
-  '숏': 'https://i.pinimg.com/736x/3a/f7/05/3af705f77ef0def02eafe4ebacf2e8c2.jpg',
+  '롱': '/fashion/c8fd1a9f61db26e2fc0638ea232d619a.jpg',
+  '미디움': '/fashion/0aba5eff53752e11f4cd4c4ed4482a87.jpg',
+  '단발': '/fashion/0a0399399b5b778b425d651419e6e9fb.jpg',
+  '숏': '/fashion/3af705f77ef0def02eafe4ebacf2e8c2.jpg',
 };
 
 const MALE_STYLES: Record<string, string> = {
-  '롱': 'https://i.pinimg.com/736x/07/91/9c/07919c0528c8cc0cb710025bfdc1dc8c.jpg',
-  '미디움': 'https://i.pinimg.com/736x/7d/5c/8d/7d5c8d0fd9420a7a03a0e5db7efbd261.jpg',
-  '숏': 'https://i.pinimg.com/736x/1d/51/53/1d5153767367848042db002fcba08c31.jpg',
+  '롱': '/fashion/07919c0528c8cc0cb710025bfdc1dc8c.jpg',
+  '미디움': '/fashion/7d5c8d0fd9420a7a03a0e5db7efbd261.jpg',
+  '숏': '/fashion/1d5153767367848042db002fcba08c31.jpg',
 };
 
 export const HairStyleProposalStep = ({ data, gender, onChange, onNext, onBack }: HairStyleProposalStepProps) => {
