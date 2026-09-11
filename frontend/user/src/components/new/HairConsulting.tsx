@@ -226,48 +226,66 @@ export const CONDITION_AXES: { key: string; title: string }[] = [
 function MapPin({
   left,
   top,
-  label,
   tone,
 }: {
   left: string;
   top: string;
-  label: string;
   tone: 'own' | 'target';
 }) {
-  // 사진 위에 얹히므로 흰 외곽선 + 그림자로 배경과 분리한다.
+  // 사진 위에는 링만 얹는다. 이름표를 사진 위에 두면 얼굴을 가려서
+  // 맵 아래 범례로 뺐다 (2026-09-11).
   const color = tone === 'own' ? OWN_COLOR : TARGET_COLOR;
-  const size = 46;
   return (
     <div
       className="absolute pointer-events-none"
       style={{ left, top, transform: 'translate(-50%, -50%)', zIndex: 2 }}
     >
+      {/* 속이 빈 얇은 링 — 안쪽으로 사진이 그대로 비쳐 얼굴을 가리지 않는다.
+          실선은 고유미, 점선은 추구미. 무엇인지는 맵 아래 범례가 말해 준다. */}
       <div
-        className="rounded-full flex items-center justify-center"
+        className="rounded-full"
         style={{
-          width: size,
-          height: size,
-          border: `3px ${tone === 'own' ? 'solid' : 'dashed'} ${color}`,
-          outline: '2px solid rgba(255,255,255,0.95)',
-          background: 'rgba(255,255,255,0.35)',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.28)',
+          width: 26,
+          height: 26,
+          border: `1px ${tone === 'own' ? 'solid' : 'dashed'} ${color}`,
+          outline: '1px solid rgba(255,255,255,0.75)',
+          opacity: 0.55,
         }}
-      >
-        <div
-          className="rounded-full"
-          style={{ width: 11, height: 11, background: color, boxShadow: '0 0 0 2.5px rgba(255,255,255,0.95)' }}
-        />
-      </div>
-      <div
-        className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-[3px] rounded-sm"
-        style={{ top: size + 6, background: color, boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}
-      >
-        <span style={{ fontSize: 10, letterSpacing: '0.12em', color: '#FFFFFF', fontWeight: 700 }}>{label}</span>
-      </div>
+      />
     </div>
   );
 }
 
+/** 헤어이미지맵 아래 범례 — 어느 링이 무엇인지 여기서 읽는다 */
+function MapLegend({
+  own,
+  target,
+}: {
+  own: { en: string; ko: string } | null;
+  target: { en: string; ko: string } | null;
+}) {
+  const Item = ({ tone, label, type }: { tone: 'own' | 'target'; label: string; type: { en: string; ko: string } | null }) => {
+    const color = tone === 'own' ? OWN_COLOR : TARGET_COLOR;
+    return (
+      <div className="flex items-center gap-2">
+        <span
+          className="rounded-full inline-block"
+          style={{ width: 13, height: 13, border: `1.5px ${tone === 'own' ? 'solid' : 'dashed'} ${color}` }}
+        />
+        <span style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.18em', color: '#AAAAAA' }}>{label}</span>
+        <span style={{ fontSize: 11, color: type ? '#111111' : '#CCCCCC', fontWeight: 500 }}>
+          {type ? `${type.en} · ${type.ko}` : '미선택'}
+        </span>
+      </div>
+    );
+  };
+  return (
+    <div className="flex items-center justify-center gap-7 mt-3">
+      <Item tone="own" label="고유미" type={own} />
+      <Item tone="target" label="추구미" type={target} />
+    </div>
+  );
+}
 
 export function HairConsulting({ posMap, onNext, onBack, onChange }: Props) {
   const formDominant = dominantOf(FORM, posMap);
@@ -777,28 +795,29 @@ export function HairConsulting({ posMap, onNext, onBack, onChange }: Props) {
                         >
                           <defs>
                             <marker id="hairmap-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                              <path d="M0 0.6 L5.4 3 L0 5.4" fill="none" stroke={TARGET_COLOR} strokeWidth="1.1" />
+                              <path d="M0 0.8 L4.6 3 L0 5.2" fill="none" stroke={TARGET_COLOR} strokeWidth="0.9" opacity="0.7" />
                             </marker>
                           </defs>
                           <line
                             x1={x(col)} y1={y(row)} x2={x(targetCol!)} y2={y(targetRow!)}
-                            stroke="#FFFFFF" strokeWidth="3.5" opacity="0.55" vectorEffect="non-scaling-stroke"
+                            stroke="#FFFFFF" strokeWidth="2.4" opacity="0.45" vectorEffect="non-scaling-stroke"
                           />
                           <line
                             x1={x(col)} y1={y(row)} x2={x(targetCol!)} y2={y(targetRow!)}
-                            stroke={TARGET_COLOR} strokeWidth="1.6" markerEnd="url(#hairmap-arrow)" vectorEffect="non-scaling-stroke"
+                            stroke={TARGET_COLOR} strokeWidth="0.9" opacity="0.7" strokeDasharray="3 2.5"
+                            markerEnd="url(#hairmap-arrow)" vectorEffect="non-scaling-stroke"
                           />
                         </svg>
                       )}
 
                       {/* 고유미 — 실선 링. 미측정이면 안 그린다 */}
                       {measured && (
-                        <MapPin left={`${x(col)}%`} top={`${y(row)}%`} label="고유미" tone="own" />
+                        <MapPin left={`${x(col)}%`} top={`${y(row)}%`} tone="own" />
                       )}
 
                       {/* 추구미 — 칸을 골랐을 때만. 고유미와 같은 칸이면 겹치므로 안 그린다 */}
                       {hasTarget && !sameCell && (
-                        <MapPin left={`${x(targetCol!)}%`} top={`${y(targetRow!)}%`} label="추구미" tone="target" />
+                        <MapPin left={`${x(targetCol!)}%`} top={`${y(targetRow!)}%`} tone="target" />
                       )}
                     </>
                   );
@@ -820,6 +839,12 @@ export function HairConsulting({ posMap, onNext, onBack, onChange }: Props) {
               <div className="h-px flex-1" style={{ background: 'linear-gradient(to left, transparent, #C4C0BA)' }} />
               <div style={{ width: 20 }} />
             </div>
+
+            {/* 링이 무엇인지 알려주는 범례 — 사진 위 이름표를 여기로 옮겼다 */}
+            <MapLegend
+              own={measured ? imageType : null}
+              target={targetType}
+            />
 
           </motion.div>
           )}
