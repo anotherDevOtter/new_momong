@@ -1044,7 +1044,9 @@ function Page03({ session, cycleData = null, subSel, setSubSel, beforePhoto = nu
     <motion.div key="p3" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
       <Wrap>
         <SectionLabel>WHAT'S NEXT?</SectionLabel>
-        <h2 style={{ fontSize: 32, fontWeight: 300, color: G1, marginBottom: 48 }}>NEXT DIRECTION</h2>
+        {/* 시안3 코드에는 'NEXT DIRECTION' 이라고 돼 있지만 기획서
+            (personal-hair-report-1.md) 문구가 이쪽이다. (2026-09-11) */}
+        <h2 style={{ fontSize: 32, fontWeight: 300, color: G1, marginBottom: 48 }}>다음에는 무엇을 바꾸고 싶나요?</h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
           <div>
             {NEXT_ITEMS.map(item => (

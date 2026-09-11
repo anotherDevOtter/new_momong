@@ -108,7 +108,7 @@ type SharedThreeWay = {
   } | null;
   /** 예전 '헤어질감' 화면이 저장하던 값. 화면을 뺀 뒤로는 새로 안 쌓인다 */
   hairTexture?: Record<string, string | null> | null;
-  cycleData?: { selectedMonths?: unknown[]; directions?: string[]; changeLevel?: number; todayServices?: string[] } | null;
+  cycleData?: { selectedMonths?: unknown[]; directions?: string[]; changeLevel?: number; todayServices?: string[]; subSelections?: Record<string, string> } | null;
 };
 
 /**
@@ -141,6 +141,7 @@ function SharedReportView({ data, three }: { data: ConsultationData; three: Shar
           hairCondition={(three.hairConsulting?.condition ?? null) as never}
           hairTargetType={three.hairConsulting?.targetType?.en ?? null}
           facePosMap={three.faceItemPositions ?? {}}
+          initialSubSel={three.cycleData?.subSelections ?? {}}
         />
       </div>
     );

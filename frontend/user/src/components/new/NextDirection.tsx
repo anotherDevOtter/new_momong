@@ -41,6 +41,9 @@ export interface CycleData {
   cycleEvents: CycleEvent[];
   /** 홈케어 요약 — 리포트 Page03 의 YOUR HOME CARE 가 쓴다 */
   homeCare?: string[];
+  /** 방향별 세부 선택 (길이→미디움 등). 화면에만 있던 값이라 저장되지 않아
+   *  공유 링크로 열면 리포트에서 사라졌다. (2026-09-11) */
+  subSelections?: Record<string, string>;
   /** ↓ 아래 셋은 지금 리포트가 보는 값. 시안3 리포트로 갈아탈 때 정리한다. */
   selectedMonths: MonthCycleData[];
   directions?: DirectionOption[];
@@ -500,6 +503,7 @@ export function NextDirection({
     onCycleDataChange?.({
       todayServices, todayDetails, gender, nextCare, nextDesign, cycleEvents,
       homeCare: getHomeCare(todayServices),
+      subSelections: dirSubSel,
       // 아래 셋은 아직 시안3 리포트로 갈아타지 않은 페이지들이 본다
       selectedMonths: toMonthPlan(cycleEvents),
       directions: selectedDirections,
@@ -508,7 +512,7 @@ export function NextDirection({
         selectedDirections.length,
       )),
     });
-  }, [todayServices, todayDetails, gender, careOverride, designOverride, selectedDirections]);
+  }, [todayServices, todayDetails, gender, careOverride, designOverride, selectedDirections, dirSubSel]);
 
   const directions = DIRECTION_ITEMS;
 
