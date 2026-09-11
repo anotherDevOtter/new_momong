@@ -64,9 +64,15 @@ export default function PreSurveyPage() {
   const searchParams = useSearchParams();
   const surveyToken = params.token as string;
 
-  // 링크에 ?course=new 가 붙으면 이미지 키워드를 시안식 3×3 카드로 보여준다.
-  // 화면 구성과 문항은 기존과 똑같다 — 키워드 고르는 방식만 다르다.
-  const isNewCourse = searchParams.get('course') === 'new';
+  // 개편본(이미지 키워드 9종 카드 + 패션 문항 통합)이 기본이다.
+  //
+  // 예전에는 ?course=new 가 붙은 링크만 개편본이었는데, 고객 상세의 발급 버튼이
+  // 그 파라미터를 안 붙여서 원장님이 보낸 링크는 늘 옛 10종(어려보이는)이 나왔다.
+  // 컨설팅 화면은 9종(캐주얼)이라 고객이 고른 값과 어긋났다.
+  //
+  // 이미 내보낸 링크까지 한 번에 맞추려고 기본값을 뒤집는다. 옛 문항이 필요하면
+  // ?course=1way 로 연다. (2026-09-11)
+  const isNewCourse = searchParams.get('course') !== '1way';
   // 'new' 는 패션 문항이 '고객 기본 정보' 화면으로 올라가서 따로 물을 필요가 없다.
   const STEPS = isNewCourse ? ALL_STEPS.filter((s) => s !== 'fashion') : ALL_STEPS;
 
