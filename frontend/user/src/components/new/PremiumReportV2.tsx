@@ -532,7 +532,7 @@ function Page01({ session }: { session: CustomerSession }) {
       <Wrap>
 
         {/* ── Client Information Header ────────────────────────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-8 lg:gap-16" style={{ marginBottom: 56, paddingBottom: 52, borderBottom: `1px solid ${G7}` }}>
+        <div className="grid grid-cols-1 sm:grid-cols-[3fr_2fr] gap-8 sm:gap-12 lg:gap-16" style={{ marginBottom: 56, paddingBottom: 52, borderBottom: `1px solid ${G7}` }}>
 
           {/* Left: name block */}
           <div>
