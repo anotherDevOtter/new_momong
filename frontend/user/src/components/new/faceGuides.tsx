@@ -71,7 +71,7 @@ function Line({ a, b, dashed }: { a: P; b: P; dashed?: boolean }) {
   return (
     <line
       x1={a.x} y1={a.y} x2={b.x} y2={b.y}
-      stroke={INK} strokeWidth={3} strokeLinecap="round"
+      stroke={INK} strokeWidth={1} strokeLinecap="round"
       strokeDasharray={dashed ? '6 6' : undefined}
       opacity={dashed ? 0.8 : 1}
       {...STROKE}
@@ -81,7 +81,7 @@ function Line({ a, b, dashed }: { a: P; b: P; dashed?: boolean }) {
 
 function Poly({ pts, close }: { pts: P[]; close?: boolean }) {
   const d = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x} ${p.y}`).join(' ') + (close ? ' Z' : '');
-  return <path d={d} stroke={INK} strokeWidth={3} fill="none" strokeLinecap="round" strokeLinejoin="round" {...STROKE} />;
+  return <path d={d} stroke={INK} strokeWidth={1} fill="none" strokeLinecap="round" strokeLinejoin="round" {...STROKE} />;
 }
 
 /**

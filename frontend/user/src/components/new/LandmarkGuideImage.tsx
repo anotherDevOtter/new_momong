@@ -15,8 +15,8 @@ import { guideFor } from './faceGuides';
 const HALO_CSS = `
 .mm-guide-halo line, .mm-guide-halo path {
   stroke: #000000;
-  stroke-width: 5px;
-  stroke-opacity: 0.3;
+  stroke-width: 3px;
+  stroke-opacity: 0.35;
   fill: none;
   opacity: 1;
 }
