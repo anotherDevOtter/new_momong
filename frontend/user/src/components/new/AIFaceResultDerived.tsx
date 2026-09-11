@@ -324,15 +324,20 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
               const strength = Math.round(Math.abs(pos - 0.5) * 200);
               const side = pos < 0.33 ? it.l : pos > 0.67 ? it.r : '균형';
               return { item: it, type, strength, side, axis: 'form' as const };
-            }).filter(f => f.type === formDominant && f.type !== 'Neutral'),
+            // 판정이 Neutral 이면 항목도 전부 Neutral 로 걸러져 핵심 해석이 통째로 비었다.
+            // 그럴 때는 개별 항목 중 Warm·Cool 로 잡힌 것을 매력 포인트로 보여준다. (2026-09-11)
+            }).filter(f => formDominant === 'Neutral' ? f.type !== 'Neutral' : f.type === formDominant),
             ...PROP.map(it => {
               const pos = posMap[it.id] ?? it.defaultPos;
               const type = pos < 0.33 ? PROP_AXIS[0] : pos < 0.67 ? PROP_AXIS[1] : PROP_AXIS[2];
               const strength = Math.round(Math.abs(pos - 0.5) * 200);
               const side = pos < 0.33 ? it.l : pos > 0.67 ? it.r : '균형';
               return { item: it, type, strength, side, axis: 'prop' as const };
-            }).filter(f => f.type === propDominant && f.type !== 'Neutral'),
-          ].sort((a, b) => b.strength - a.strength);
+            }).filter(f => propDominant === 'Neutral' ? f.type !== 'Neutral' : f.type === propDominant),
+          ]
+            .sort((a, b) => b.strength - a.strength)
+            // 치우친 정도가 큰 상위 5개만. 예전에는 제한이 없어 20개까지 나왔다 (2026-09-11)
+            .slice(0, 5);
 
           const RANKS = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩'];
 
@@ -423,7 +428,12 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
 
                         {/* 타입 결정 이유 */}
                         <p className="text-[9px] pl-4 mb-1" style={{ color: '#C8B89A', fontWeight: 400 }}>
-                          {imageType ? `${imageType.ko} 타입을 결정짓는 특징` : '타입 판정에 쓰이는 특징'}
+                          {/* 합산이 Neutral 이면 '결정짓는 특징' 이 아니라 개별 매력 포인트다 */}
+                          {!imageType
+                            ? '타입 판정에 쓰이는 특징'
+                            : (formDominant === 'Neutral' && f.axis === 'form') || (propDominant === 'Neutral' && f.axis === 'prop')
+                              ? `${f.type} 쪽으로 드러나는 매력 포인트`
+                              : `${imageType.ko} 타입을 결정짓는 특징`}
                         </p>
 
                         {/* 매력 설명 */}

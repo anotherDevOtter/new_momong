@@ -222,13 +222,20 @@ function Inner() {
   // 개발용 더미 측정값 — 주소에 &demoFace=1 을 붙이면 얼굴을 찍지 않아도
   // 고유 이미지타입이 잡힌다. 이미지맵의 고유미 마커·화살표를 눈으로 확인할 때 쓴다.
   // 개발 모드에서만 동작하고, 운영 빌드에서는 무시된다. (2026-09-10)
-  const demoFace = devJump && searchParams.get('demoFace') === '1';
+  //   demoFace=1        형태축 Cool · 비율축 Soft (뚜렷한 칸)
+  //   demoFace=neutral  전 항목 가운데 → Neutral × Neutral (해석이 비는지 볼 때)
+  const demoFaceMode = devJump ? searchParams.get('demoFace') : null;
+  const demoFace = demoFaceMode === '1' || demoFaceMode === 'neutral';
   const [faceResultPosMap, setFaceResultPosMap] = useState<Record<string, number>>(() =>
     demoFace
       ? Object.fromEntries(
           // 형태축은 Cool 쪽(0.75), 비율축은 Soft 쪽(0.25) 으로 몰아 NATURAL 이 아닌
           // 뚜렷한 칸이 잡히게 한다 — 추구미를 아무 칸이나 골라도 화살표가 보인다.
-          [...FORM.map((it) => [it.id, 0.75] as const), ...PROP.map((it) => [it.id, 0.25] as const)],
+          demoFaceMode === 'neutral'
+            // 항목은 한쪽으로 기울지만 개수가 반반이라 합산이 Neutral 이 되는 경우.
+            // 원장님이 지적한 '합산은 Neutral 인데 이목구비는 W·C 로 나오는' 상황이다.
+            ? [...FORM, ...PROP].map((it, i) => [it.id, i % 2 === 0 ? 0.18 : 0.82] as const)
+            : [...FORM.map((it) => [it.id, 0.75] as const), ...PROP.map((it) => [it.id, 0.25] as const)],
         )
       : {},
   );
