@@ -611,11 +611,11 @@ function Page01({ session }: { session: CustomerSession }) {
         <SectionLabel>IMAGE DECISION FACTORS</SectionLabel>
         <h2 style={{ fontSize: 32, fontWeight: 300, color: G1, letterSpacing: '-0.01em', marginBottom: 48 }}>이미지를 결정짓는 요소</h2>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-10 lg:gap-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 sm:gap-10">
           <div>
             {factors.map((f, i) => (
               <div key={f.key}>
-                <div className="hidden lg:flex" style={{ alignItems: 'center', gap: 16, padding: '14px 0', borderBottom: `1px solid ${G8}` }}>
+                <div className="hidden sm:flex" style={{ alignItems: 'center', gap: 12, padding: '14px 0', borderBottom: `1px solid ${G8}` }}>
                   <span style={{ fontFamily: MONO, fontSize: 9, color: i === 0 ? GOLD : G6, width: 22, flexShrink: 0 }}>{String(i + 1).padStart(2, '0')}</span>
                   <div style={{ width: 80, flexShrink: 0 }}>
                     <span style={{ fontSize: 14, fontWeight: 500, color: G2 }}>{f.label}</span>
@@ -626,7 +626,7 @@ function Page01({ session }: { session: CustomerSession }) {
                   </div>
                   <span style={{ fontFamily: MONO, fontSize: 11, color: i === 0 ? G1 : G4, fontWeight: i === 0 ? 700 : 400, width: 36, textAlign: 'right', flexShrink: 0 }}>{f.score}%</span>
                 </div>
-                <div className="block lg:hidden">
+                <div className="block sm:hidden">
                   <button onClick={() => setOpenFactor(openFactor === i ? null : i)} style={{ display: 'flex', width: '100%', alignItems: 'center', gap: 12, padding: '14px 0', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', borderBottom: `1px solid ${G8}`, minHeight: 56 }}>
                     <span style={{ fontFamily: MONO, fontSize: 9, color: i === 0 ? GOLD : G6, width: 20, flexShrink: 0 }}>{String(i + 1).padStart(2, '0')}</span>
                     <div style={{ flex: 1 }}>
@@ -654,7 +654,7 @@ function Page01({ session }: { session: CustomerSession }) {
               </div>
             ))}
           </div>
-          <div className="lg:border-l lg:border-[#E2E2DE] lg:pl-12">
+          <div className="sm:border-l sm:border-[#E2E2DE] sm:pl-8">
             <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.18em', color: G4, marginBottom: 20 }}>CORE INTERPRETATION</p>
             <p style={{ fontSize: 22, fontWeight: 600, color: G1, marginBottom: 16 }}>{ci.headline}</p>
             <p style={{ fontSize: 15, color: G2, lineHeight: 1.85, fontWeight: 300, marginBottom: 32 }}>{ci.body}</p>
