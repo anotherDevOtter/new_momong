@@ -125,41 +125,6 @@ const TL_DEFAULT = [
 
 // Hair style guide options (CURRENT vs DESIRED per category)
 
-type DesignTab = 'bangs' | 'part' | 'length' | 'curl' | 'color';
-
-const DESIGN_OPTIONS: Record<DesignTab, { label: string; options: { value: string; grade: 'BEST' | 'GOOD' | 'CAUTION'; why: string }[] }> = {
-  bangs:  { label: '앞머리', options: [
-    { value: '시스루뱅', grade: 'BEST',    why: '이마와 눈 주변에 가벼운 곡선을 만들어 인상을 부드럽게 조절합니다.' },
-    { value: '사이드뱅', grade: 'GOOD',    why: '얼굴 선을 자연스럽게 감싸 부드러운 여성미를 더합니다.' },
-    { value: '잔머리',   grade: 'GOOD',    why: '이마 라인에 가벼운 잔머리가 자연스러운 움직임을 만들어 줍니다.' },
-    { value: '풀뱅',     grade: 'CAUTION', why: '이마를 완전히 가리는 스타일로 이미지가 무거워질 수 있습니다.' },
-  ]},
-  part:   { label: '가르마', options: [
-    { value: '6:4',       grade: 'BEST',    why: '자연스러운 볼륨과 입체감을 더합니다.' },
-    { value: '5:5',       grade: 'GOOD',    why: '깔끔하고 단정한 인상을 만듭니다.' },
-    { value: '7:3',       grade: 'GOOD',    why: '개성 있는 인상을 연출합니다.' },
-    { value: 'Deep Side', grade: 'CAUTION', why: '얼굴의 각이 더 강하게 보일 수 있습니다.' },
-  ]},
-  length: { label: '길이', options: [
-    { value: 'Medium', grade: 'BEST',    why: '여성스러움과 활동성을 동시에 살립니다.' },
-    { value: 'Long',   grade: 'GOOD',    why: '볼륨 관리와 무게감 조절이 필요합니다.' },
-    { value: 'Bob',    grade: 'GOOD',    why: '선명한 얼굴선과 잘 어울립니다.' },
-    { value: 'Short',  grade: 'CAUTION', why: '얼굴 선이 강하게 드러날 수 있습니다.' },
-  ]},
-  curl:   { label: '컬감', options: [
-    { value: 'Natural C + S', grade: 'BEST',    why: '원하는 내추럴 이미지와 잘 어울립니다.' },
-    { value: 'C Curl',        grade: 'GOOD',    why: '안정감 있는 볼륨을 만들어줍니다.' },
-    { value: 'Natural Wave',  grade: 'GOOD',    why: '부드러운 움직임을 더합니다.' },
-    { value: 'Straight',      grade: 'CAUTION', why: '원하는 부드러운 이미지와 거리가 있습니다.' },
-  ]},
-  color:  { label: '컬러', options: [
-    { value: 'Neutral Brown', grade: 'BEST',    why: 'Cool Neutral 이미지와 자연스럽게 어울립니다.' },
-    { value: 'Dark Brown',    grade: 'GOOD',    why: '피부 톤을 균형 있게 받쳐줍니다.' },
-    { value: 'Ash Brown',     grade: 'GOOD',    why: '시크한 인상을 더욱 선명하게 만들어줍니다.' },
-    { value: 'Jet Black',     grade: 'CAUTION', why: '얼굴의 각과 긴장감이 더 부각될 수 있습니다.' },
-  ]},
-};
-
 const CHAPTERS = [
   { num: '01', title: 'YOUR IMAGE',      ko: '이미지 분석',    items: ['최종 이미지 타입', '이미지를 결정짓는 요소', '핵심 해석'] },
   { num: '02', title: 'HAIR DIRECTION',  ko: '헤어 방향',      items: ['현재 이미지 & 원하는 이미지', '이미지 GAP', '모질 분석'] },
@@ -408,14 +373,6 @@ function HDivider({ mt = 56, mb = 56 }: { mt?: number; mb?: number }) {
 }
 function Chip({ label, muted }: { label: string; muted?: boolean }) {
   return <span style={{ fontSize: 11, padding: '3px 10px', border: `1px solid ${G7}`, color: muted ? G5 : G3, background: muted ? G9 : '#FFFFFF', whiteSpace: 'nowrap' }}>{label}</span>;
-}
-function GradeTag({ grade }: { grade: 'BEST' | 'GOOD' | 'CAUTION' }) {
-  const s: Record<string, React.CSSProperties> = {
-    BEST:    { background: G1, color: '#FFFFFF' },
-    GOOD:    { background: '#FFFFFF', color: G3, border: `1px solid ${G7}` },
-    CAUTION: { background: 'rgba(184,150,60,0.08)', color: GOLD, border: `1px solid rgba(184,150,60,0.3)` },
-  };
-  return <span style={{ fontFamily: MONO, fontSize: 8, padding: '3px 8px', letterSpacing: '0.12em', flexShrink: 0, ...s[grade] }}>{grade}</span>;
 }
 function ScaleBar({ value, leftLabel, rightLabel }: { value: number; leftLabel: string; rightLabel: string }) {
   return (
@@ -1303,9 +1260,8 @@ function Page03({ session, cycleData = null, subSel, setSubSel, beforePhoto = nu
 
 // ── PAGE 04: REPORT COMPLETE ───────────────────────────────────────
 
-function Page04({ session, selectedDesigns, subSel = {}, onBack, onRestart, onDownloadPdf, printing = false, embedded = false }: {
+function Page04({ session, subSel = {}, onBack, onRestart, onDownloadPdf, printing = false, embedded = false }: {
   session: CustomerSession;
-  selectedDesigns: Record<string, string>;
   subSel?: Record<string, string>;
   onBack: () => void;
   onRestart: () => void;
@@ -1318,9 +1274,6 @@ function Page04({ session, selectedDesigns, subSel = {}, onBack, onRestart, onDo
   const { imageDirection, nextVisit } = session;
   const cur = imageDirection.currentImage;
   const des = imageDirection.desiredImage;
-  const selectedDesignEntries = (Object.entries(DESIGN_OPTIONS) as [DesignTab, typeof DESIGN_OPTIONS[DesignTab]][])
-    .filter(([tab]) => selectedDesigns[tab]);
-
   return (
     <motion.div key="p4" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
       <Wrap>
@@ -1457,7 +1410,6 @@ export function PremiumReport({
   hairStyle = null, embedded = false, selectedCourse,
 }: PremiumReportProps) {
   const [page, setPage] = useState(0);
-  const [selectedDesigns, setSelectedDesigns] = useState<Record<string, string>>(initialDesigns);
   const [subSel, setSubSel] = useState<Record<string, string>>(initialSubSel);
 
   const session = buildSession({
@@ -1530,7 +1482,7 @@ export function PremiumReport({
         {page === 1 && <Page01 key="p1" session={session} />}
         {page === 2 && <Page02 key="p2" session={session} hairStyle={hairStyle} guideStyles={guideStyles} />}
         {page === 3 && <Page03 key="p3" session={session} cycleData={cycleData} subSel={subSel} setSubSel={setSubSel} beforePhoto={beforePhoto} afterPhoto={afterPhoto} onBeforePhotoChange={onBeforePhotoChange} onAfterPhotoChange={onAfterPhotoChange} />}
-        {page === 4 && <Page04 key="p4" session={session} selectedDesigns={selectedDesigns} subSel={subSel} onBack={onBack} onRestart={() => goTo(1)} onDownloadPdf={handleDownloadPdf} printing={printing} embedded={embedded} />}
+        {page === 4 && <Page04 key="p4" session={session} subSel={subSel} onBack={onBack} onRestart={() => goTo(1)} onDownloadPdf={handleDownloadPdf} printing={printing} embedded={embedded} />}
       </AnimatePresence>
       {/* PDF 캡쳐용 — 화면에는 안 보이지만 레이아웃은 잡혀 있어야 한다 */}
       <div aria-hidden style={{ position: 'fixed', left: -99999, top: 0, width: 900 }}>
@@ -1538,7 +1490,7 @@ export function PremiumReport({
           <div style={{ background: '#FFFFFF' }}><Page01 session={session} /></div>
           <div style={{ background: '#FFFFFF' }}><Page02 session={session} hairStyle={hairStyle} guideStyles={guideStyles} /></div>
           <div style={{ background: '#FFFFFF' }}><Page03 session={session} cycleData={cycleData} subSel={subSel} setSubSel={() => {}} beforePhoto={beforePhoto} afterPhoto={afterPhoto} /></div>
-          <div style={{ background: '#FFFFFF' }}><Page04 session={session} selectedDesigns={selectedDesigns} subSel={subSel} onBack={() => {}} onRestart={() => {}} /></div>
+          <div style={{ background: '#FFFFFF' }}><Page04 session={session} subSel={subSel} onBack={() => {}} onRestart={() => {}} /></div>
         </div>
       </div>
       {page > 0 && (
