@@ -207,16 +207,14 @@ function Inner() {
   const [preInterviewData, setPreInterviewData] = useState<PreInterviewData | null>(null);
   const [imagePreferenceData, setImagePreferenceData] = useState<ImagePreferenceData | null>(null);
   const [fashionPreferenceData, setFashionPreferenceData] = useState<FashionPreferenceData | null>(null);
-  const [cycleData, setCycleData] = useState<CycleData | null>(null);
-  // 퍼스널 리포트 화면에서 등록하는 시술 전·후 사진과 방향별 세부 선택.
-  // 리포트가 그대로 인쇄한다. (2026-09-11)
+  const [cycleData, setCycleData] = useState<LegacyCycleData | null>(null);
+  // ── new 코스 전용 ──────────────────────────────────────────────
+  // 시안의 '퍼스널 리포트' 화면이 주는 값. 옛 코스의 cycleData 와 모양이 달라
+  // 상태를 따로 둔다 — 1way/3way 배선은 건드리지 않는다. (2026-09-11)
+  const [newCycleData, setNewCycleData] = useState<CycleData | null>(null);
   const [beforePhoto, setBeforePhoto] = useState<string | null>(null);
   const [afterPhoto, setAfterPhoto] = useState<string | null>(null);
   const [directionSubSel, setDirectionSubSel] = useState<Record<string, string>>({});
-
-  // 1way/3way 코스 전용 — 옛 '다음 방향' 화면이 주는 월 단위 계획. new 코스가
-  // 시안3 구조(주 단위 + 오늘의 시술)로 바뀌면서 모양이 갈라졌다. (2026-09-11)
-  const [legacyCycleData, setLegacyCycleData] = useState<LegacyCycleData | null>(null);
   const [faceAnalysisResult, setFaceAnalysisResult] = useState<AnalyzeResponse | null>(null);
   const [faceImageUrl, setFaceImageUrl] = useState<string | null>(null);
   // 디자이너가 확정/수정한 다운스트림 입력값 (저장 + step 간 연동)
@@ -459,7 +457,7 @@ function Inner() {
           imageDirection: imageDirectionData,
           hairDesign: hairDesignData,
           hairTexture: hairTextureData,
-          cycleData: cycleData ?? legacyCycleData,
+          cycleData: selectedCourse === 'new' ? newCycleData : cycleData,
           imagePreferenceData,
           fashionPreferenceData,
           preInterviewData,
@@ -625,7 +623,7 @@ function Inner() {
           <NewNextDirection
             onBack={() => goBack('nextDirection')}
             onNext={() => setShowReport(true)}
-            onCycleDataChange={setCycleData}
+            onCycleDataChange={setNewCycleData}
             onSubSelectionsChange={setDirectionSubSel}
             beforePhoto={beforePhoto}
             afterPhoto={afterPhoto}
@@ -638,7 +636,7 @@ function Inner() {
               customerName={customerData.name}
               consultDate={new Date().toLocaleDateString('ko-KR')}
               designerName={customerData.designerName || '디자이너'}
-              cycleData={cycleData}
+              cycleData={newCycleData}
               selectedCourse={selectedCourse}
               hairStyle={hairConsultingData?.style ?? null}
               hairCondition={hairConsultingData?.condition ?? null}
@@ -676,7 +674,7 @@ function Inner() {
               customerName={customerData.name}
               consultDate={new Date().toLocaleDateString('ko-KR')}
               designerName={customerData.designerName || '디자이너'}
-              cycleData={cycleData}
+              cycleData={newCycleData}
               selectedCourse={selectedCourse}
               hairStyle={hairConsultingData?.style ?? null}
               hairCondition={hairConsultingData?.condition ?? null}
@@ -725,7 +723,7 @@ function Inner() {
         <NextDirection
           onBack={handleNextDirectionBack}
           onNext={handleNextDirectionNext}
-          onCycleDataChange={setLegacyCycleData}
+          onCycleDataChange={setCycleData}
         />
       );
     }
@@ -744,7 +742,7 @@ function Inner() {
               customerName={customerData.name}
               consultDate={new Date().toLocaleDateString('ko-KR')}
               designerName={customerData.designerName || '디자이너'}
-              cycleData={legacyCycleData}
+              cycleData={cycleData}
               selectedCourse={selectedCourse}
               imageType={currentImageType}
               ratios={faceResultData?.ratios}
