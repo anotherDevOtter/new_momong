@@ -59,6 +59,8 @@ interface NextDirectionProps {
   afterPhoto?: string | null;
   onBeforePhotoChange?: (url: string | null) => void;
   onAfterPhotoChange?: (url: string | null) => void;
+  /** 저장된 상담을 다시 열 때 복원할 값 (같은 날 기록만) */
+  initial?: CycleData | null;
 }
 
 export type DirectionOption = 'length' | 'color' | 'bangs' | 'perm' | 'recovery' | 'image';
@@ -461,17 +463,18 @@ function toMonthPlan(events: CycleEvent[]): MonthCycleData[] {
 export function NextDirection({
   onBack, onNext, onCycleDataChange, onSubSelectionsChange,
   beforePhoto, afterPhoto, onBeforePhotoChange, onAfterPhotoChange,
+  initial,
 }: NextDirectionProps) {
 
   // Direction select state
-  const [selectedDirections, setSelectedDirections] = useState<DirectionOption[]>([]);
-  const [dirSubSel, setDirSubSel] = useState<Record<string, string>>({});
+  const [selectedDirections, setSelectedDirections] = useState<DirectionOption[]>(initial?.directions ?? []);
+  const [dirSubSel, setDirSubSel] = useState<Record<string, string>>(initial?.subSelections ?? {});
   const [openSubItem, setOpenSubItem] = useState<DirectionOption | null>(null);
 
   // TODAY SERVICE state
-  const [gender, setGender] = useState<'female' | 'male'>('female');
-  const [todayServices, setTodayServices] = useState<ServiceKey[]>([]);
-  const [todayDetails, setTodayDetails] = useState<Partial<Record<ServiceKey, string[]>>>({});
+  const [gender, setGender] = useState<'female' | 'male'>(initial?.gender ?? 'female');
+  const [todayServices, setTodayServices] = useState<ServiceKey[]>(initial?.todayServices ?? []);
+  const [todayDetails, setTodayDetails] = useState<Partial<Record<ServiceKey, string[]>>>((initial?.todayDetails ?? {}) as Partial<Record<ServiceKey, string[]>>);
 
   // NEXT CARE override
   const [careOverride, setCareOverride] = useState<{ minWeeks: number; maxWeeks: number; services: string[] } | null>(null);

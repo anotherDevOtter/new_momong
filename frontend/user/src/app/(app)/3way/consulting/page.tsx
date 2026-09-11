@@ -22,7 +22,7 @@ import { PreSurveyReview } from '@/components/3way/PreSurveyReview';
 import { PremiumReport } from '@/components/3way/PremiumReport';
 import { CompletionPage } from '@/components/3way/CompletionPage';
 import { saveConsult } from '@/utils/3way-api';
-import { getCustomerById } from '@/utils/api';
+import { getCustomerById, getConsultationsByCustomerId } from '@/utils/api';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 
 // ── 'new' 코스(시안 이식) 전용 화면 ────────────────────────────────────
@@ -281,6 +281,47 @@ function Inner() {
       .finally(() => setHydrating(false));
   }, [token, customerId, occupation, user, router]);
 
+  // 저장된 상담 복원 — 새로고침하거나 리포트를 닫고 다시 들어오면 고른 값이
+  // 전부 날아갔다. 화면들이 값을 자기 안에만 들고 있어서다.
+  //
+  // 같은 날 기록만 되살린다. 재방문 고객의 지난 방문 값을 미리 채워 두면
+  // 디자이너가 못 보고 그대로 저장해 엉뚱한 기록이 남는다. (2026-09-11)
+  const [restored, setRestored] = useState<Record<string, unknown> | null>(null);
+  const [restoring, setRestoring] = useState(selectedCourse === 'new');
+  useEffect(() => {
+    if (selectedCourse !== 'new' || !token || !customerId) { setRestoring(false); return; }
+    let cancelled = false;
+    (async () => {
+      try {
+        const list = await getConsultationsByCustomerId(token, customerId);
+        const today = new Date().toDateString();
+        const latest = list
+          .filter((c) => c.createdAt && new Date(c.createdAt).toDateString() === today)
+          .sort((a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime())[0];
+        const three = (latest?.clientInfo as { threeWay?: Record<string, unknown> } | undefined)?.threeWay;
+        if (cancelled || !three) return;
+        setRestored(three);
+        setSavedConsultId(latest.id);
+        const pos = three.faceItemPositions as Record<string, number> | undefined;
+        if (pos && Object.keys(pos).length) setFaceResultPosMap(pos);
+        const fa = three.faceAnalysis as { faceImageUrl?: string } | undefined;
+        if (fa?.faceImageUrl) setFaceImageUrl(fa.faceImageUrl);
+        const hc = three.hairConsulting as HairConsultingData | undefined;
+        if (hc) setHairConsultingData(hc);
+        const cd = three.cycleData as CycleData | undefined;
+        if (cd) {
+          setNewCycleData(cd);
+          if (cd.subSelections) setDirectionSubSel(cd.subSelections);
+        }
+      } catch {
+        // 이력 조회가 실패해도 화면은 빈 상태로 그대로 쓴다
+      } finally {
+        if (!cancelled) setRestoring(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [selectedCourse, token, customerId]);
+
   // 'new' 코스는 사전 인터뷰 화면을 뺐으므로, 고객이 방문 전 작성한 사전설문을 대신 읽는다.
   // 제출된 것 중 가장 최근 1건. 없으면 빈 값으로 두고 화면은 그대로 띄운다.
   useEffect(() => {
@@ -324,7 +365,7 @@ function Inner() {
 
   // 'new' 는 사전설문 유무에 따라 첫 화면이 달라진다. 확인 전에 그리면
   // 요약 화면이 잠깐 보였다 사라지므로, 조회가 끝날 때까지 기다린다.
-  if (loading || hydrating || (selectedCourse === 'new' && hasPreSurvey === null)) {
+  if (loading || hydrating || restoring || (selectedCourse === 'new' && hasPreSurvey === null)) {
     return <div className="min-h-screen flex items-center justify-center bg-white"><p className="text-sm text-[#999999]">불러오는 중...</p></div>;
   }
   if (!user || !customerData) return null;
@@ -613,6 +654,7 @@ function Inner() {
       return (
         <HairConsulting
           posMap={faceResultPosMap}
+          initial={(restored?.hairConsulting as HairConsultingData | undefined) ?? null}
           onChange={setHairConsultingData}
           onNext={() => goNext('hairConsulting')}
           onBack={() => goBack('hairConsulting')}
@@ -626,6 +668,7 @@ function Inner() {
             onBack={() => goBack('nextDirection')}
             onNext={() => setShowReport(true)}
             onCycleDataChange={setNewCycleData}
+            initial={(restored?.cycleData as CycleData | undefined) ?? null}
             onSubSelectionsChange={setDirectionSubSel}
             beforePhoto={beforePhoto}
             afterPhoto={afterPhoto}

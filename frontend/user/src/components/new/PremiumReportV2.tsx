@@ -1523,7 +1523,7 @@ export function PremiumReport({
         page={page}
         onBack={page === 0 ? onBack : () => { if (page === 1) { setPage(0); window.scrollTo(0, 0); } else goTo(page - 1); }}
         onPrev={() => { if (page > 1) goTo(page - 1); else { setPage(0); window.scrollTo(0, 0); } }}
-        onNext={() => { if (page > 0 && page < 4) goTo(page + 1); }}
+        onNext={() => { if (page > 0 && page < 4) goTo(page + 1); else if (page === 4) onBack(); }}
       />
       <AnimatePresence mode="wait">
         {page === 0 && <Cover key="cover" onStart={() => goTo(1)} session={session} />}

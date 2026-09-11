@@ -58,6 +58,8 @@ interface Props {
   onBack?: () => void;
   /** 선택이 바뀔 때마다 상위로 보고 — 저장은 page.tsx 가 한다 */
   onChange?: (data: HairConsultingData) => void;
+  /** 저장된 상담을 다시 열 때 복원할 값 (같은 날 기록만) */
+  initial?: HairConsultingData | null;
 }
 
 // ── Option data ───────────────────────────────────────────────────────
@@ -300,7 +302,7 @@ function MapLegend({
   );
 }
 
-export function HairConsulting({ posMap, onNext, onBack, onChange }: Props) {
+export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Props) {
   const formDominant = dominantOf(FORM, posMap);
   const propDominant = dominantOf(PROP, posMap);
 
@@ -321,7 +323,15 @@ export function HairConsulting({ posMap, onNext, onBack, onChange }: Props) {
   const isRecommended = (axis: 'bangs' | 'length' | 'curl', id: string) =>
     !!rec && rec.verified && rec[axis].includes(id);
 
-  const [selectedCell, setSelectedCell] = useState<[number, number] | null>(null);
+  // 추구미 칸도 복원한다 — 저장에는 타입 이름만 있어 맵에서 위치를 되찾는다
+  const [selectedCell, setSelectedCell] = useState<[number, number] | null>(() => {
+    const en = initial?.targetType?.en;
+    if (!en) return null;
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 3; c++) if (IMAP[r][c].en === en) return [r, c];
+    }
+    return null;
+  });
   // 헤어이미지맵 확대 — 사진이 작아 잘 안 보인다는 요청 (2026-09-11)
   const [mapZoomOpen, setMapZoomOpen] = useState(false);
   const [activeGuide, setActiveGuide] = useState<string>('nutral');
@@ -351,13 +361,13 @@ export function HairConsulting({ posMap, onNext, onBack, onChange }: Props) {
 
   const [showHairMap, setShowHairMap] = useState(false);
   const [activeStyle, setActiveStyle] = useState<'bangs' | 'parting' | 'length' | 'curl' | 'color'>('bangs');
-  const [selectedBangs, setSelectedBangs] = useState<string | null>(null);
-  const [selectedParting, setSelectedParting] = useState<string | null>(null);
-  const [selectedLength, setSelectedLength] = useState<string | null>(null);
-  const [selectedCurl, setSelectedCurl] = useState<string | null>(null);
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [selectedBangs, setSelectedBangs] = useState<string | null>(initial?.style?.bangs ?? null);
+  const [selectedParting, setSelectedParting] = useState<string | null>(initial?.style?.parting ?? null);
+  const [selectedLength, setSelectedLength] = useState<string | null>(initial?.style?.length ?? null);
+  const [selectedCurl, setSelectedCurl] = useState<string | null>(initial?.style?.curl ?? null);
+  const [selectedColor, setSelectedColor] = useState<string | null>(initial?.style?.color ?? null);
   const [activeCondition, setActiveCondition] = useState<'damage' | 'thickness' | 'density' | 'curl'>('damage');
-  const [selectedConditions, setSelectedConditions] = useState<Record<string, string | null>>({});
+  const [selectedConditions, setSelectedConditions] = useState<Record<string, string | null>>(initial?.condition ?? {});
 
   /**
    * 컬러 추천(RECOMMENDED 뱃지).
