@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { BrandHeader } from './BrandHeader';
 import { FORM, PROP, MONO, dominantOf, type MItem } from './faceAnalysisData';
 import { FaceOverlay } from './FaceOverlay';
+import { useFaceLandmarks } from './useFaceLandmarks';
+import { LandmarkGuideImage } from './LandmarkGuideImage';
 import { ANALYZED_ITEM_IDS } from './faceAnalysisToPosMap';
 import type { Measurement } from '@/utils/face-analysis-api';
 
@@ -280,6 +282,8 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
   const [zoomOpen, setZoomOpen] = useState(false);
   // 분석 결과(측정선)를 끄고 맨 얼굴만 볼 수 있게 한다. 작은 화면·확대 화면 모두에 적용된다.
   const [overlayOn, setOverlayOn] = useState(true);
+  // 가이드선을 실제 얼굴에 맞추기 위한 좌표. 파이썬 모듈 유무와 무관하게 전 항목에 쓴다.
+  const { points: landmarks } = useFaceLandmarks(facePhotoUrl || FALLBACK_PHOTO);
 
   // 실제 분석 결과를 출발점으로 잡는다. 디자이너가 슬라이더로 고치면 그 값이 이긴다.
   const [posMap, setPosMap]       = useState<Record<string, number>>(initialPosMap ?? {});
@@ -543,12 +547,11 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                   </div>
 
                   <div className="flex-1 overflow-auto p-5 flex justify-center bg-[#F9F9F7]">
-                    {currentMeasurement ? (
-                      <FaceOverlay
-                        strokeColor="#111111"
-                        hideText
+                    {landmarks ? (
+                      <LandmarkGuideImage
                         imageUrl={facePhotoUrl || FALLBACK_PHOTO}
-                        measurement={overlayOn ? currentMeasurement : null}
+                        points={landmarks}
+                        itemId={overlayOn && current ? current.id : null}
                         maxWidth={640}
                         alt="얼굴 분석 확대"
                       />
@@ -569,9 +572,9 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
 
                   <div className="px-5 py-3 border-t border-[#E8E8E4]">
                     <p className="text-[10px] text-[#999999] leading-relaxed">
-                      {currentMeasurement
-                        ? '자동으로 그린 측정선입니다. 얼굴과 어긋나 보이면 오른쪽 슬라이더로 직접 조정해주세요.'
-                        : '이 항목은 자동 측정이 없습니다. 사진을 보고 오른쪽 슬라이더로 직접 잡아주세요.'}
+                      {landmarks
+                        ? '얼굴 좌표로 그린 가이드선입니다. 값은 오른쪽 슬라이더로 조정해주세요.'
+                        : '얼굴을 찾지 못했습니다. 사진을 보고 오른쪽 슬라이더로 직접 잡아주세요.'}
                       {' '}‹ › 또는 ← → 키로 항목을 넘길 수 있습니다.
                     </p>
                   </div>
@@ -586,9 +589,14 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
               <div className="relative overflow-hidden bg-[#F9F9F7] rounded-sm flex items-center justify-center" style={{ height: 516 }}>
                 {/* 실측 도형이 있으면 그걸 그린다 — 좌표가 실제 사진 기준이라 얼굴이 바뀌어도 맞는다.
                     없으면(건너뛰기·미매핑 항목) 시안이 예시 사진에 맞춰 그려둔 오버레이로 떨어진다. */}
-                {currentMeasurement && facePhotoUrl ? (
+                {landmarks ? (
                   <div className="relative">
-                    <FaceOverlay strokeColor="#111111" hideText imageUrl={facePhotoUrl} measurement={overlayOn ? currentMeasurement : null} maxWidth={252} alt="얼굴 분석" />
+                    <LandmarkGuideImage
+                      imageUrl={facePhotoUrl || FALLBACK_PHOTO}
+                      points={landmarks}
+                      itemId={overlayOn && current ? current.id : null}
+                      maxWidth={252}
+                    />
                     {guideline && <GuideLines />}
                     {(
                       <button
