@@ -543,10 +543,10 @@ function Page01({ session }: { session: CustomerSession }) {
             <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.22em', color: G6 }}>{session.courseLabel} PERSONAL HAIR CONSULTING</p>
           </div>
 
-          {/* Right: meta */}
+          {/* Right: meta — 라벨 위 / 값 아래로 한 줄씩 쌓는다.
+              시안은 분석일과 리포트번호가 가로로 붙어 있었다. (2026-09-11) */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {/* DATE + REPORT NO in a 2-col micro-grid */}
-            <div className="grid grid-cols-2 gap-x-6 gap-y-5" style={{ marginBottom: hasDesigner ? 20 : 0 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               <div>
                 <p style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.24em', color: G5, marginBottom: 6 }}>ANALYSIS DATE</p>
                 <p style={{ fontSize: 13, color: G2, fontWeight: 300 }}>{customer.visitDate || '—'}</p>
