@@ -15,6 +15,19 @@ const OWN_COLOR = '#B8963C';
 const TARGET_COLOR = '#1F6F63';
 const TARGET_COLOR_DARK = '#155048';
 const imgHairMap37 = '/new/hair-map-37.png';
+
+/**
+ * 헤어스타일 가이드 — 이미지타입별 스타일 사진 모음.
+ * 시안3(figma/1way (Copy) 3) 의 n·ws·wh·cs·ch 를 옮겨왔다.
+ * 원본 아래에 붙어 있던 CONSULTING NOTE 문구는 임시로 만든 것이라 잘라냈다. (2026-09-11)
+ */
+const STYLE_GUIDES = [
+  { key: 'nutral',   en: 'NUTRAL',   img: '/new/style-guide-nutral.png' },
+  { key: 'cute',     en: 'CUTE',     img: '/new/style-guide-cute.png' },
+  { key: 'feminine', en: 'FEMININE', img: '/new/style-guide-feminine.png' },
+  { key: 'fresh',    en: 'FRESH',    img: '/new/style-guide-fresh.png' },
+  { key: 'modern',   en: 'MODERN',   img: '/new/style-guide-modern.png' },
+] as const;
 const imgDamage1 = '/new/damage-1.png';
 const imgDamage2 = '/new/damage-2.png';
 const imgDamage3 = '/new/damage-3.png';
@@ -311,6 +324,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange }: Props) {
   const [selectedCell, setSelectedCell] = useState<[number, number] | null>(null);
   // 헤어이미지맵 확대 — 사진이 작아 잘 안 보인다는 요청 (2026-09-11)
   const [mapZoomOpen, setMapZoomOpen] = useState(false);
+  const [activeGuide, setActiveGuide] = useState<string>('nutral');
 
   // Esc 로 닫는다 — 얼굴 사진 확대와 같은 조작
   useEffect(() => {
@@ -921,6 +935,53 @@ export function HairConsulting({ posMap, onNext, onBack, onChange }: Props) {
           )}
           </AnimatePresence>
         </div>
+
+        {/* ── Hair Style Guide ─────────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05, duration: 0.4 }}
+          className="mb-14"
+        >
+          <div className="pb-5 mb-8" style={{ borderBottom: '1px solid #E8E8E4' }}>
+            <p className="text-[9px] tracking-[0.22em] text-[#AAAAAA] mb-5" style={{ fontFamily: MONO }}>HAIR STYLE GUIDE</p>
+            <div className="text-center mb-6">
+              <h2 className="text-[27px] text-[#111111] tracking-tight" style={{ fontWeight: 300, letterSpacing: '-0.01em' }}>
+                헤어스타일 가이드
+              </h2>
+            </div>
+            <div className="flex items-center justify-center gap-0">
+              {STYLE_GUIDES.map((g, i) => (
+                <span key={g.key} className="flex items-center">
+                  {i > 0 && <span className="mx-3" style={{ color: '#DDDDDA', fontSize: 10 }}>|</span>}
+                  <button
+                    onClick={() => setActiveGuide(g.key)}
+                    className="pb-1.5 transition-colors"
+                    style={{
+                      fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.12em',
+                      color: activeGuide === g.key ? '#111111' : '#BBBBB8',
+                      borderBottom: activeGuide === g.key ? '1px solid #111111' : '1px solid transparent',
+                    }}
+                  >
+                    {g.en}
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* 타입별 사진 — 문구 없이 이미지만 */}
+          <AnimatePresence mode="wait">
+            {STYLE_GUIDES.filter(g => g.key === activeGuide).map(g => (
+              <motion.div key={g.key}
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}
+                style={{ border: '1px solid #E8E8E4' }}
+              >
+                <img src={g.img} alt={`${g.en} 헤어스타일 가이드`} className="w-full h-auto block" />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
 
         {/* ── Hair Condition (toggled) ─────────────────────────────── */}
         <motion.div
