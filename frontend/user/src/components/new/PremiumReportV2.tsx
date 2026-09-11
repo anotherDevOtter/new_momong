@@ -700,25 +700,25 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
       <Wrap>
         <SectionLabel>IMAGE MAP</SectionLabel>
         <h2 style={{ fontSize: 32, fontWeight: 300, color: G1, letterSpacing: '-0.01em', marginBottom: 48 }}>현재 이미지와 원하는 이미지</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-10 lg:gap-16">
-          <div>
+        <div className="grid grid-cols-1 sm:grid-cols-[3fr_2fr] gap-10 sm:gap-12 lg:gap-16 items-stretch">
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', marginBottom: 6, paddingLeft: 40 }}>
               {['Warm', 'Neutral', 'Cool'].map(c => <div key={c} style={{ flex: 1, textAlign: 'center', fontFamily: MONO, fontSize: 8, color: G6, letterSpacing: '0.12em' }}>{c}</div>)}
             </div>
-            <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
               <div style={{ width: 40, display: 'flex', flexDirection: 'column', justifyContent: 'space-around' }}>
                 {['Soft', 'Natural', 'Hard'].map(r => <div key={r} style={{ fontFamily: MONO, fontSize: 7, color: G6, writingMode: 'vertical-rl', transform: 'rotate(180deg)', letterSpacing: '0.12em', alignSelf: 'center', padding: '14px 0' }}>{r}</div>)}
               </div>
-              <div style={{ flex: 1, border: `1px solid ${G7}` }}>
+              <div style={{ flex: 1, border: `1px solid ${G7}`, display: 'flex', flexDirection: 'column' }}>
                 {[0, 1, 2].map(row => (
-                  <div key={row} style={{ display: 'flex' }}>
+                  <div key={row} style={{ display: 'flex', flex: 1 }}>
                     {[0, 1, 2].map(col => {
                       const cell = IMAP[row][col];
                       const isCur = row === CURRENT.row && col === CURRENT.col;
                       const isDes = row === DESIRED.row && col === DESIRED.col;
                       const isCl = clickedCell?.row === row && clickedCell?.col === col;
                       return (
-                        <button key={col} onClick={() => setClickedCell(isCl ? null : { row, col })} style={{ flex: 1, border: 'none', borderRight: col < 2 ? `1px solid ${G8}` : 'none', borderBottom: row < 2 ? `1px solid ${G8}` : 'none', padding: '55px 8px', cursor: 'pointer', background: isCur ? '#EEEDE8' : isDes ? 'rgba(184,150,60,0.06)' : '#FFFFFF', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, minHeight: 84 }}>
+                        <button key={col} onClick={() => setClickedCell(isCl ? null : { row, col })} style={{ flex: 1, border: 'none', borderRight: col < 2 ? `1px solid ${G8}` : 'none', borderBottom: row < 2 ? `1px solid ${G8}` : 'none', padding: '18px 8px', cursor: 'pointer', background: isCur ? '#EEEDE8' : isDes ? 'rgba(184,150,60,0.06)' : '#FFFFFF', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, minHeight: 96 }}>
                           {isCur && <div style={{ position: 'absolute', top: 8, right: 8, width: 8, height: 8, borderRadius: '50%', background: G1 }} />}
                           {isDes && <div style={{ position: 'absolute', top: 8, right: 8, width: 8, height: 8, borderRadius: '50%', background: GOLD }} />}
                           <span style={{ fontFamily: MONO, fontSize: 9, fontWeight: 700, letterSpacing: '0.06em', color: isCur ? G1 : isDes ? '#7A6020' : G5 }}>{cell.en}</span>
