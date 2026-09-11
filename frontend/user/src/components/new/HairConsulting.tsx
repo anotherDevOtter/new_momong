@@ -1039,7 +1039,9 @@ export function HairConsulting({ posMap, onNext, onBack, onChange }: Props) {
                           border: isSel ? '2px solid #1A1A1A' : '1px solid #EAEAE6',
                           position: 'relative', height: '100%',
                         }}>
-                          <div style={{ flexShrink: 0, width: 68, height: 68, overflow: 'hidden' }}>
+                          {/* 사진이 세로로 길어 정사각에 넣으면 위아래가 잘린다 —
+                              원본 비율(약 3:4)에 맞춰 칸을 잡는다 (2026-09-11) */}
+                          <div style={{ flexShrink: 0, width: 62, height: 78, overflow: 'hidden' }}>
                             <img src={level.photo} alt={level.label}
                               style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                           </div>
