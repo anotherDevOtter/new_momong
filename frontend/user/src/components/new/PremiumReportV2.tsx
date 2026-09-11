@@ -1,13 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowRight, ArrowLeft, ChevronDown } from 'lucide-react';
 import { CycleData, ServiceKey, SERVICE_KO, AFTER_CARE, HOME_CARE_TIPS } from './NextDirection';
 import { MONO, IMAP, FORM, PROP, dominantIdx, dominantOf } from './faceAnalysisData';
 import { AREA_ITEMS, areaScores } from './AIFaceResultDerived';
 import type { MItem } from './faceAnalysisData';
-import { CONDITION_AXES, conditionOptionOf, type HairConsultingData } from './HairConsulting';
+import {
+  CONDITION_AXES, conditionOptionOf, type HairConsultingData,
+  BANGS_OPTIONS, PARTING_OPTIONS, LENGTH_OPTIONS, CURL_OPTIONS, COLOR_OPTIONS,
+} from './HairConsulting';
 
 const COVER_IMAGE = '/new/report-cover.png';
 
@@ -160,7 +163,7 @@ const DESIGN_OPTIONS: Record<DesignTab, { label: string; options: { value: strin
 const CHAPTERS = [
   { num: '01', title: 'YOUR IMAGE',      ko: '이미지 분석',    items: ['최종 이미지 타입', '이미지를 결정짓는 요소', '핵심 해석'] },
   { num: '02', title: 'HAIR DIRECTION',  ko: '헤어 방향',      items: ['현재 이미지 & 원하는 이미지', '이미지 GAP', '모질 분석'] },
-  { num: '03', title: 'PERSONAL DESIGN', ko: '퍼스널 디자인',  items: ['앞머리 · 가르마 · 길이', '컬감 · 컬러', '추천 등급 (BEST / GOOD / CAUTION)'] },
+  { num: '03', title: 'PERSONAL DESIGN', ko: '퍼스널 디자인',  items: ['앞머리 · 가르마 · 길이', '컬감 · 컬러', '오늘의 시술 · 홈케어'] },
   { num: '04', title: 'NEXT & RESULT',   ko: '다음 방향 & 결과', items: ['Next Direction 선택', '6개월 방문 주기 플랜', 'Before / After 기록'] },
 ];
 
@@ -308,7 +311,8 @@ function buildSession({
     ? `현재의 ${curImg.label} 이미지를 더욱 완성도 있게 발전시킵니다.`
     : `${curImg.label}의 특성은 유지하면서, ${desImg.label} 이미지로의 자연스러운 전환을 헤어로 표현합니다.`;
 
-  const todayServices = ['CUT', 'LAYER', 'COLOR'];
+  // 오늘의 시술 — 퍼스널 리포트 화면에서 고른 값. 시안은 CUT/LAYER/COLOR 고정이었다.
+  const todayServices = (cycleData?.todayServices ?? []).map(k => k.replace('_', ' '));
   const { minWeeks, maxWeeks } = calcNextVisit(todayServices);
 
   // Auto-generate report number from visit date
@@ -379,7 +383,9 @@ function buildSession({
     },
     todayDesign: {
       services: todayServices,
-      summary: `현재의 ${curImg.label} 인상은 유지하면서 얼굴 주변에 자연스러운 움직임을 더합니다.`,
+      summary: todayServices.length
+        ? `현재의 ${curImg.label} 인상은 유지하면서 얼굴 주변에 자연스러운 움직임을 더합니다.`
+        : '오늘 진행한 시술을 선택하지 않았습니다.',
     },
     cyclePlan: buildCyclePlan(cycleData),
     nextVisit: {
@@ -670,10 +676,10 @@ function Page01({ session }: { session: CustomerSession }) {
 
 // ── PAGE 02: YOUR HAIR DIRECTION ───────────────────────────────────
 
-function Page02({ session, selectedDesigns, setSelectedDesigns, guideStyles = [] }: {
+function Page02({ session, hairStyle, guideStyles = [] }: {
   session: CustomerSession;
-  selectedDesigns: Record<string, string>;
-  setSelectedDesigns: (d: Record<string, string>) => void;
+  /** 헤어컨설팅에서 고른 스타일 5축 */
+  hairStyle: HairConsultingData['style'] | null;
   guideStyles?: HairStyleKey[];
 }) {
   const [clickedCell, setClickedCell] = useState<{ row: number; col: number } | null>(null);
@@ -901,23 +907,24 @@ function Page02({ session, selectedDesigns, setSelectedDesigns, guideStyles = []
         <h2 style={{ fontSize: 32, fontWeight: 300, color: G1, marginBottom: 12 }}>퍼스널 헤어 디자인</h2>
         <p style={{ fontSize: 15, color: G4, fontWeight: 300, lineHeight: 1.65, marginBottom: 40 }}>얼굴 이미지 + 원하는 이미지 + 모질 상태를 함께 반영한 세부 디자인입니다.</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: G7, border: `1px solid ${G7}` }}>
-          {(Object.entries(DESIGN_OPTIONS) as [DesignTab, typeof DESIGN_OPTIONS[DesignTab]][]).map(([key, val]) => {
-            const selVal = selectedDesigns[key];
-            const selOpt = val.options.find(o => o.value === selVal);
+          {DESIGN_AXES.map(({ key, en, label, opts }) => {
+            const opt = opts.find(o => o.id === hairStyle?.[key]);
             return (
               <div key={key} style={{ background: '#FFFFFF', display: 'grid', gridTemplateColumns: '88px 1fr' }}>
                 <div style={{ padding: '22px 14px', borderRight: `1px solid ${G7}`, background: G9, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 3 }}>
-                  <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.14em', color: G4 }}>{key.toUpperCase()}</p>
-                  <p style={{ fontSize: 13, color: G2, fontWeight: 500 }}>{val.label}</p>
+                  <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.14em', color: G4 }}>{en}</p>
+                  <p style={{ fontSize: 13, color: G2, fontWeight: 500 }}>{label}</p>
                 </div>
                 <div style={{ padding: '22px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-                  {selOpt ? (
+                  {opt ? (
                     <>
-                      <span style={{ fontSize: 18, fontWeight: 500, color: G1, letterSpacing: '-0.01em' }}>{selOpt.value}</span>
-                      <p style={{ fontSize: 12, color: G5, lineHeight: 1.55, fontWeight: 300, maxWidth: 280, textAlign: 'right' }}>{selOpt.why}</p>
+                      <span style={{ fontSize: 18, fontWeight: 500, color: G1, letterSpacing: '-0.01em' }}>{opt.label}</span>
+                      <p style={{ fontSize: 12, color: G5, lineHeight: 1.55, fontWeight: 300, maxWidth: 280, textAlign: 'right' }}>
+                        {opt.tags.map(t => `#${t}`).join(' ')}
+                      </p>
                     </>
                   ) : (
-                    <span style={{ fontSize: 14, color: G6, fontWeight: 300 }}>—</span>
+                    <span style={{ fontSize: 14, color: G6, fontWeight: 300 }}>이번 컨설팅에서 선택하지 않았습니다</span>
                   )}
                 </div>
               </div>
@@ -928,6 +935,19 @@ function Page02({ session, selectedDesigns, setSelectedDesigns, guideStyles = []
     </motion.div>
   );
 }
+
+/**
+ * 퍼스널 디자인 5축 — 헤어컨설팅 화면에서 디자이너가 고른 값을 그대로 싣는다.
+ * 시안은 BEST/GOOD/CAUTION 등급표가 박혀 있었는데, 실제로는 화면에서 이미 하나를
+ * 고르므로 그 값과 태그를 보여주는 게 맞다. (2026-09-11)
+ */
+const DESIGN_AXES = [
+  { key: 'bangs'   as const, en: 'BANGS',  label: '앞머리', opts: BANGS_OPTIONS },
+  { key: 'parting' as const, en: 'PART',   label: '가르마', opts: PARTING_OPTIONS },
+  { key: 'length'  as const, en: 'LENGTH', label: '길이',   opts: LENGTH_OPTIONS },
+  { key: 'curl'    as const, en: 'CURL',   label: '컬감',   opts: CURL_OPTIONS },
+  { key: 'color'   as const, en: 'COLOR',  label: '컬러',   opts: COLOR_OPTIONS },
+];
 
 // ── Photo upload slot ─────────────────────────────────────────────
 
@@ -1281,12 +1301,16 @@ function Page03({ session, cycleData = null, subSel, setSubSel, beforePhoto = nu
 
 // ── PAGE 04: REPORT COMPLETE ───────────────────────────────────────
 
-function Page04({ session, selectedDesigns, subSel = {}, onBack, onRestart }: {
+function Page04({ session, selectedDesigns, subSel = {}, onBack, onRestart, onDownloadPdf, printing = false, embedded = false }: {
   session: CustomerSession;
   selectedDesigns: Record<string, string>;
   subSel?: Record<string, string>;
   onBack: () => void;
   onRestart: () => void;
+  onDownloadPdf?: () => void;
+  printing?: boolean;
+  /** 공유 페이지에서만 '링크 공유' 가 의미 있다 — 그 주소가 곧 공유 링크다 */
+  embedded?: boolean;
 }) {
   const nextSelEntries = NEXT_ITEMS.filter(item => subSel[item.id] && subSel[item.id] !== '유지');
   const { imageDirection, nextVisit } = session;
@@ -1364,14 +1388,14 @@ function Page04({ session, selectedDesigns, subSel = {}, onBack, onRestart }: {
             언제든 다시 확인할 수 있도록<br />리포트를 저장하거나 링크로 공유할 수 있습니다.
           </p>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3" style={{ marginBottom: 16 }}>
-            <button onClick={() => alert('PDF 다운로드 기능은 서버 연동이 필요합니다.')}
+            <button onClick={onDownloadPdf} disabled={printing}
               style={{ padding: '16px 24px', background: G1, border: 'none', cursor: 'pointer', color: '#FFFFFF', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', minHeight: 52 }}>
-              리포트 저장하기 (PDF)
+              {printing ? 'PDF 만드는 중…' : '리포트 저장하기 (PDF)'}
             </button>
-            <button onClick={() => navigator.clipboard.writeText(window.location.href).then(() => alert('링크가 복사되었습니다.'))}
+            {embedded && <button onClick={() => navigator.clipboard.writeText(window.location.href).then(() => alert('링크가 복사되었습니다.'))}
               style={{ padding: '16px 24px', background: '#FFFFFF', border: `1px solid ${G7}`, cursor: 'pointer', color: G2, fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', minHeight: 52 }}>
               링크 공유
-            </button>
+            </button>}
           </div>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center', paddingTop: 16, borderTop: `1px solid ${G8}` }}>
             <button onClick={onRestart}
@@ -1407,6 +1431,8 @@ interface PremiumReportProps {
   /** 헤어컨설팅 이미지맵에서 고른 추구미 */
   hairTargetType?: string | null;
   hairCondition?: HairConsultingData['condition'] | null;
+  /** 헤어컨설팅에서 고른 스타일 5축 — 퍼스널 디자인 표가 이걸 그린다 */
+  hairStyle?: HairConsultingData['style'] | null;
   facePhotoUrl?: string | null;
   /** 페이지 안에 그대로 얹을 때 (공유 페이지) */
   embedded?: boolean;
@@ -1426,7 +1452,7 @@ export function PremiumReport({
   beforePhoto = null, afterPhoto = null,
   onBeforePhotoChange, onAfterPhotoChange,
   facePosMap = {}, hairTargetType = null, hairCondition = null, facePhotoUrl = null,
-  embedded = false, selectedCourse,
+  hairStyle = null, embedded = false, selectedCourse,
 }: PremiumReportProps) {
   const [page, setPage] = useState(0);
   const [selectedDesigns, setSelectedDesigns] = useState<Record<string, string>>(initialDesigns);
@@ -1437,6 +1463,44 @@ export function PremiumReport({
     facePosMap, hairTargetType, hairCondition, facePhotoUrl, beforePhoto, afterPhoto,
     courseLabel: COURSE_TITLE[selectedCourse ?? ''] ?? '1WAY',
   });
+
+  // PDF — 한 장씩 넘기며 캡쳐하면 전환 애니메이션 때문에 반쯤 그려진 화면이 찍힌다.
+  // 숨은 영역에 4장을 한꺼번에 그려 놓고 장마다 캡쳐한다. (V1 과 같은 방식) (2026-09-11)
+  const printRef = useRef<HTMLDivElement>(null);
+  const [printing, setPrinting] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    if (printing) return;
+    setPrinting(true);
+    try {
+      await new Promise(r => setTimeout(r, 600));
+      const root = printRef.current;
+      if (!root) return;
+      const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
+        import('jspdf'),
+        import('html2canvas-pro'),
+      ]);
+      const pdf = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait' });
+      const pw = pdf.internal.pageSize.getWidth();
+      const ph = pdf.internal.pageSize.getHeight();
+      const nodes = Array.from(root.children) as HTMLElement[];
+      for (let i = 0; i < nodes.length; i++) {
+        const canvas = await html2canvas(nodes[i], { scale: 2, backgroundColor: '#FFFFFF', logging: false });
+        const img = canvas.toDataURL('image/jpeg', 0.92);
+        let w = pw;
+        let h = (canvas.height * w) / canvas.width;
+        if (h > ph) { h = ph; w = (canvas.width * h) / canvas.height; }
+        if (i > 0) pdf.addPage();
+        pdf.addImage(img, 'JPEG', (pw - w) / 2, 0, w, h);
+      }
+      pdf.save(`${customerName || '고객'}_이미지설계리포트_${new Date().toISOString().slice(0, 10)}.pdf`);
+    } catch (e) {
+      console.error(e);
+      alert('PDF 를 만들지 못했습니다. 잠시 후 다시 시도해주세요.');
+    } finally {
+      setPrinting(false);
+    }
+  };
 
   const goTo = (p: number) => {
     setPage(p);
@@ -1462,10 +1526,19 @@ export function PremiumReport({
       <AnimatePresence mode="wait">
         {page === 0 && <Cover key="cover" onStart={() => goTo(1)} session={session} />}
         {page === 1 && <Page01 key="p1" session={session} />}
-        {page === 2 && <Page02 key="p2" session={session} selectedDesigns={selectedDesigns} setSelectedDesigns={setSelectedDesigns} guideStyles={guideStyles} />}
+        {page === 2 && <Page02 key="p2" session={session} hairStyle={hairStyle} guideStyles={guideStyles} />}
         {page === 3 && <Page03 key="p3" session={session} cycleData={cycleData} subSel={subSel} setSubSel={setSubSel} beforePhoto={beforePhoto} afterPhoto={afterPhoto} onBeforePhotoChange={onBeforePhotoChange} onAfterPhotoChange={onAfterPhotoChange} />}
-        {page === 4 && <Page04 key="p4" session={session} selectedDesigns={selectedDesigns} subSel={subSel} onBack={onBack} onRestart={() => goTo(1)} />}
+        {page === 4 && <Page04 key="p4" session={session} selectedDesigns={selectedDesigns} subSel={subSel} onBack={onBack} onRestart={() => goTo(1)} onDownloadPdf={handleDownloadPdf} printing={printing} embedded={embedded} />}
       </AnimatePresence>
+      {/* PDF 캡쳐용 — 화면에는 안 보이지만 레이아웃은 잡혀 있어야 한다 */}
+      <div aria-hidden style={{ position: 'fixed', left: -99999, top: 0, width: 900 }}>
+        <div ref={printRef}>
+          <div style={{ background: '#FFFFFF' }}><Page01 session={session} /></div>
+          <div style={{ background: '#FFFFFF' }}><Page02 session={session} hairStyle={hairStyle} guideStyles={guideStyles} /></div>
+          <div style={{ background: '#FFFFFF' }}><Page03 session={session} cycleData={cycleData} subSel={subSel} setSubSel={() => {}} beforePhoto={beforePhoto} afterPhoto={afterPhoto} /></div>
+          <div style={{ background: '#FFFFFF' }}><Page04 session={session} selectedDesigns={selectedDesigns} subSel={subSel} onBack={() => {}} onRestart={() => {}} /></div>
+        </div>
+      </div>
       {page > 0 && (
         <div style={{ borderTop: `1px solid ${G8}`, background: '#FFFFFF' }}>
           <div className="max-w-3xl mx-auto px-5 lg:px-10" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: 64 }}>

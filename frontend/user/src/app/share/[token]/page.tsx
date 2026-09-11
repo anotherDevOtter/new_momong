@@ -5,6 +5,8 @@ import { useParams } from 'next/navigation';
 import { verifyShare } from '@/utils/api';
 import { ConsultationData } from '@/types';
 import { PremiumReport as NewPremiumReport } from '@/components/new/PremiumReport';
+// 시안3 구조. 오늘 이후에 만든 기록만 이걸로 그린다 — 아래 주석 참고.
+import { PremiumReport as NewPremiumReportV2 } from '@/components/new/PremiumReportV2';
 import { Lock, Eye, EyeOff } from 'lucide-react';
 
 export default function SharePage() {
@@ -106,7 +108,7 @@ type SharedThreeWay = {
   } | null;
   /** 예전 '헤어질감' 화면이 저장하던 값. 화면을 뺀 뒤로는 새로 안 쌓인다 */
   hairTexture?: Record<string, string | null> | null;
-  cycleData?: { selectedMonths?: unknown[]; directions?: string[]; changeLevel?: number } | null;
+  cycleData?: { selectedMonths?: unknown[]; directions?: string[]; changeLevel?: number; todayServices?: string[] } | null;
 };
 
 /**
@@ -114,6 +116,36 @@ type SharedThreeWay = {
  * 로그인 없이 열리므로 분석을 다시 조회할 수 없다 → 저장해 둔 값만으로 그린다.
  */
 function SharedReportView({ data, three }: { data: ConsultationData; three: SharedThreeWay }) {
+  // 리포트를 시안3 구조(표지+4장)로 바꿨지만, 그 전에 만든 기록에는 '오늘의 시술'
+  // 같은 값이 아예 없다. 그런 기록을 새 리포트로 그리면 절반이 빈 채로 나가므로,
+  // 값이 있는 기록만 새 리포트로 그리고 나머지는 예전 리포트를 그대로 쓴다.
+  // (고객이 이미 받아 간 링크가 바뀌면 안 된다) (2026-09-11)
+  const isV2Record = (three.cycleData?.todayServices?.length ?? 0) > 0;
+
+  const common = {
+    embedded: true as const,
+    customerName: data.clientInfo?.name || '',
+    consultDate: data.visitDate || (data.createdAt ? new Date(data.createdAt).toLocaleDateString('ko-KR') : ''),
+    designerName: data.designerName || '디자이너',
+    selectedCourse: 'new',
+  };
+
+  if (isV2Record) {
+    return (
+      <div className="min-h-screen bg-[#F5F5F7] py-8">
+        <NewPremiumReportV2
+          {...common}
+          onBack={() => undefined}
+          cycleData={(three.cycleData ?? null) as never}
+          hairStyle={(three.hairConsulting?.style ?? null) as never}
+          hairCondition={(three.hairConsulting?.condition ?? null) as never}
+          hairTargetType={three.hairConsulting?.targetType?.en ?? null}
+          facePosMap={three.faceItemPositions ?? {}}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F5F5F7] py-8">
       <NewPremiumReport

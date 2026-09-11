@@ -641,6 +641,7 @@ function Inner() {
               cycleData={newCycleData}
               hairTargetType={hairConsultingData?.targetType?.en ?? null}
               hairCondition={hairConsultingData?.condition ?? null}
+              hairStyle={hairConsultingData?.style ?? null}
               facePosMap={faceResultPosMap}
               facePhotoUrl={faceImageUrl}
               beforePhoto={beforePhoto}
@@ -682,6 +683,7 @@ function Inner() {
               cycleData={newCycleData}
               hairTargetType={hairConsultingData?.targetType?.en ?? null}
               hairCondition={hairConsultingData?.condition ?? null}
+              hairStyle={hairConsultingData?.style ?? null}
               facePosMap={faceResultPosMap}
               facePhotoUrl={faceImageUrl}
               beforePhoto={beforePhoto}
