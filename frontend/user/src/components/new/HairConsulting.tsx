@@ -309,6 +309,16 @@ export function HairConsulting({ posMap, onNext, onBack, onChange }: Props) {
     !!rec && rec.verified && rec[axis].includes(id);
 
   const [selectedCell, setSelectedCell] = useState<[number, number] | null>(null);
+  // 헤어이미지맵 확대 — 사진이 작아 잘 안 보인다는 요청 (2026-09-11)
+  const [mapZoomOpen, setMapZoomOpen] = useState(false);
+
+  // Esc 로 닫는다 — 얼굴 사진 확대와 같은 조작
+  useEffect(() => {
+    if (!mapZoomOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMapZoomOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [mapZoomOpen]);
   const targetRow = selectedCell?.[0];
   const targetCol = selectedCell?.[1];
   const targetType = (targetRow != null && targetCol != null) ? IMAP[targetRow][targetCol] : null;
@@ -774,8 +784,27 @@ export function HairConsulting({ posMap, onNext, onBack, onChange }: Props) {
               {/* Hair photo — editorial floating collage.
                   3×3 이미지맵과 축(W–C / S–H)이 같아서, 같은 칸 위치에 고유미·추구미를 겹쳐 찍는다.
                   사진 시트의 축 교차점이 이미지 정중앙(50%, 47.5%)이고 한 칸이 가로 30% · 세로 24% 다. */}
-              <div className="flex-1 relative overflow-hidden bg-white">
+              <div
+                className="flex-1 relative overflow-hidden bg-white group"
+                style={{ cursor: 'zoom-in' }}
+                onClick={() => setMapZoomOpen(true)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setMapZoomOpen(true); }}
+              >
                 <img src={imgHairMap37} alt="헤어이미지맵" className="w-full h-auto block" />
+
+                {/* 클릭하면 커진다는 안내 */}
+                <div
+                  className="absolute opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{
+                    right: 8, bottom: 8, zIndex: 3,
+                    background: 'rgba(26,26,26,0.72)', color: '#FFFFFF',
+                    fontSize: 9, letterSpacing: '0.08em', padding: '3px 8px', borderRadius: 2,
+                  }}
+                >
+                  크게 보기 ⤢
+                </div>
 
                 {(() => {
                   // 3×3 이미지맵과 같은 규칙 — 좌표, 화살표, 같은 칸이면 추구미를 숨기는 것까지 맞춘다.
@@ -845,6 +874,48 @@ export function HairConsulting({ posMap, onNext, onBack, onChange }: Props) {
               own={measured ? imageType : null}
               target={targetType}
             />
+
+            {/* 확대 보기 — 얼굴 사진 확대(AIFaceFeature)와 같은 방식 */}
+            {mapZoomOpen && (
+              <div
+                className="fixed inset-0 z-[9998] flex items-center justify-center p-6"
+                style={{ background: 'rgba(20,20,20,0.82)' }}
+                onClick={() => setMapZoomOpen(false)}
+              >
+                <div
+                  className="bg-white rounded-sm overflow-hidden max-h-[94vh] flex flex-col"
+                  style={{ width: 'min(96vw, 1400px)' }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between px-5 py-3 border-b border-[#E8E8E4]">
+                    <p style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.22em', color: '#AAAAAA' }}>
+                      HAIR IMAGE MAP
+                    </p>
+                    <button
+                      onClick={() => setMapZoomOpen(false)}
+                      className="text-[11px] text-[#888888] hover:text-[#111111] transition-colors"
+                    >
+                      닫기 ✕
+                    </button>
+                  </div>
+
+                  <div className="relative overflow-auto">
+                    <img src={imgHairMap37} alt="헤어이미지맵 확대" className="w-full h-auto block" />
+                    {/* 작은 맵과 같은 위치에 표식을 얹는다 */}
+                    {measured && (
+                      <MapPin left={`${50 + (col - 1) * 30}%`} top={`${47.5 + (row - 1) * 24}%`} tone="own" />
+                    )}
+                    {targetRow != null && targetCol != null && !(measured && targetRow === row && targetCol === col) && (
+                      <MapPin left={`${50 + (targetCol - 1) * 30}%`} top={`${47.5 + (targetRow - 1) * 24}%`} tone="target" />
+                    )}
+                  </div>
+
+                  <div className="px-5 py-3 border-t border-[#E8E8E4]">
+                    <MapLegend own={measured ? imageType : null} target={targetType} />
+                  </div>
+                </div>
+              </div>
+            )}
 
           </motion.div>
           )}
