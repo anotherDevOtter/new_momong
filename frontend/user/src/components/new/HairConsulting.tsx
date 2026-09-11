@@ -1231,6 +1231,37 @@ export function HairConsulting({ posMap, onNext, onBack, onChange }: Props) {
           </AnimatePresence>
         </motion.div>
 
+        {/* ── Condition Summary ───────────────────────────────────
+            스타일 쪽과 달리 모질은 고른 값이 탭 안에만 있어서, 탭을 옮기면
+            앞서 무엇을 골랐는지 확인할 길이 없었다. 아래에 모아 보여준다. (2026-09-11) */}
+        {CONDITION_AXES.some(a => selectedConditions[a.key]) && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mb-14 p-4"
+            style={{ background: '#F7F7F5', border: '1px solid #EBEBEB', borderRadius: 2 }}
+          >
+            <p className="text-[9px] tracking-[0.18em] text-[#AAAAAA] mb-3" style={{ fontFamily: MONO }}>
+              CONDITION SUMMARY
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {CONDITION_AXES.map(({ key, title }) => {
+                const opt = conditionOptionOf(key, selectedConditions[key]);
+                return opt ? (
+                  <div key={key} className="flex items-center gap-1.5">
+                    <span className="text-[9px] text-[#BBBBBB]">{title}</span>
+                    <span className="text-[11px] font-medium text-[#1A1A1A] px-2 py-0.5"
+                      style={{ background: '#E8E8E4', borderRadius: 2 }}>
+                      {opt.label}
+                    </span>
+                  </div>
+                ) : null;
+              })}
+            </div>
+          </motion.div>
+        )}
+
         {/* ── Style Sections (toggled) ─────────────────────────────── */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
