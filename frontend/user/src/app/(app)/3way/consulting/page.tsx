@@ -17,7 +17,7 @@ import { SkeletonImageAnalysis, type SkeletonData } from '@/components/3way/Skel
 import { ImageDirectionSetting, type ImageDirectionData } from '@/components/3way/ImageDirectionSetting';
 import { HairDesignProposal, type HairDesignData } from '@/components/3way/HairDesignProposal';
 import { HairTextureAnalysis, type HairTextureData } from '@/components/3way/HairTextureAnalysis';
-import { NextDirection } from '@/components/3way/NextDirection';
+import { NextDirection, type CycleData as LegacyCycleData } from '@/components/3way/NextDirection';
 import { PreSurveyReview } from '@/components/3way/PreSurveyReview';
 import { PremiumReport } from '@/components/3way/PremiumReport';
 import { CompletionPage } from '@/components/3way/CompletionPage';
@@ -208,6 +208,15 @@ function Inner() {
   const [imagePreferenceData, setImagePreferenceData] = useState<ImagePreferenceData | null>(null);
   const [fashionPreferenceData, setFashionPreferenceData] = useState<FashionPreferenceData | null>(null);
   const [cycleData, setCycleData] = useState<CycleData | null>(null);
+  // 퍼스널 리포트 화면에서 등록하는 시술 전·후 사진과 방향별 세부 선택.
+  // 리포트가 그대로 인쇄한다. (2026-09-11)
+  const [beforePhoto, setBeforePhoto] = useState<string | null>(null);
+  const [afterPhoto, setAfterPhoto] = useState<string | null>(null);
+  const [directionSubSel, setDirectionSubSel] = useState<Record<string, string>>({});
+
+  // 1way/3way 코스 전용 — 옛 '다음 방향' 화면이 주는 월 단위 계획. new 코스가
+  // 시안3 구조(주 단위 + 오늘의 시술)로 바뀌면서 모양이 갈라졌다. (2026-09-11)
+  const [legacyCycleData, setLegacyCycleData] = useState<LegacyCycleData | null>(null);
   const [faceAnalysisResult, setFaceAnalysisResult] = useState<AnalyzeResponse | null>(null);
   const [faceImageUrl, setFaceImageUrl] = useState<string | null>(null);
   // 디자이너가 확정/수정한 다운스트림 입력값 (저장 + step 간 연동)
@@ -450,7 +459,7 @@ function Inner() {
           imageDirection: imageDirectionData,
           hairDesign: hairDesignData,
           hairTexture: hairTextureData,
-          cycleData,
+          cycleData: cycleData ?? legacyCycleData,
           imagePreferenceData,
           fashionPreferenceData,
           preInterviewData,
@@ -617,6 +626,11 @@ function Inner() {
             onBack={() => goBack('nextDirection')}
             onNext={() => setShowReport(true)}
             onCycleDataChange={setCycleData}
+            onSubSelectionsChange={setDirectionSubSel}
+            beforePhoto={beforePhoto}
+            afterPhoto={afterPhoto}
+            onBeforePhotoChange={setBeforePhoto}
+            onAfterPhotoChange={setAfterPhoto}
           />
           {showReport && (
             <NewPremiumReport
@@ -711,7 +725,7 @@ function Inner() {
         <NextDirection
           onBack={handleNextDirectionBack}
           onNext={handleNextDirectionNext}
-          onCycleDataChange={setCycleData}
+          onCycleDataChange={setLegacyCycleData}
         />
       );
     }
@@ -730,7 +744,7 @@ function Inner() {
               customerName={customerData.name}
               consultDate={new Date().toLocaleDateString('ko-KR')}
               designerName={customerData.designerName || '디자이너'}
-              cycleData={cycleData}
+              cycleData={legacyCycleData}
               selectedCourse={selectedCourse}
               imageType={currentImageType}
               ratios={faceResultData?.ratios}
