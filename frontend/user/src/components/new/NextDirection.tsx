@@ -142,7 +142,12 @@ function getVisitPurpose(key: ServiceKey, iter: number): string {
 function weekToKoLabel(week: number): string {
   if (week === 0) return '오늘';
   if (week <= 9) return `약 ${week}주 후`;
-  const months = Math.ceil(week / 4.5);
+  // 4.5 로 나눠 올림하면 서로 다른 주차가 같은 '약 4개월 후' 로 뭉쳤다.
+  // 실제 날짜의 월 차이로 센다. (2026-09-11)
+  const from = new Date();
+  const to = new Date();
+  to.setDate(to.getDate() + week * 7);
+  const months = Math.max(1, (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth()));
   return `약 ${months}개월 후`;
 }
 
@@ -746,15 +751,17 @@ export function NextDirection({
                   key={key}
                   onClick={() => toggleService(key)}
                   style={{
+                    // 고른 버튼을 검정으로 꽉 채우면 시술 목록이 너무 무거워진다.
+                    // 옅게 깔고 테두리만 검정으로 — 고른 건 알아보되 튀지 않게. (2026-09-11)
                     padding: '12px 6px', border: `1px solid ${isOn ? '#1A1A1A' : '#E0E0DC'}`,
-                    background: isOn ? '#1A1A1A' : 'transparent',
+                    background: isOn ? 'rgba(26,26,26,0.06)' : 'transparent',
                     cursor: 'pointer', textAlign: 'center',
                     transition: 'all 0.15s ease',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
                   }}
                 >
-                  <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.12em', color: isOn ? '#FFFFFF' : '#555550' }}>{meta.label}</span>
-                  <span style={{ fontSize: 15, fontWeight: 400, color: isOn ? 'rgba(255,255,255,0.65)' : '#AAAAAA' }}>{meta.ko}</span>
+                  <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.12em', color: '#555550' }}>{meta.label}</span>
+                  <span style={{ fontSize: 15, fontWeight: 400, color: '#AAAAAA' }}>{meta.ko}</span>
                 </button>
               );
             })}
@@ -948,11 +955,12 @@ export function NextDirection({
                 <div style={{ display: 'flex', alignItems: 'stretch' }}>
                   {/* Left: 시점 */}
                   <div style={{ width: 100, flexShrink: 0 }}>
-                    <div style={{ display: 'inline-block', padding: '2px 10px', background: '#1A1A1A', marginBottom: 3 }}>
-                      <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.14em', color: '#FFFFFF' }}>오늘</span>
-                    </div>
-                    <p style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.1em', color: '#CCCCCA' }}>
+                    {/* 아래 줄들과 같은 위계로 — 월이 크고 시점이 작게 */}
+                    <p style={{ fontSize: 17, fontWeight: 500, letterSpacing: '-0.01em', color: '#111111', marginBottom: 2, lineHeight: 1.3 }}>
                       {weekToMonthHint(0)}
+                    </p>
+                    <p style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.08em', color: '#111111', fontWeight: 500, lineHeight: 1.4 }}>
+                      오늘
                     </p>
                   </div>
                   {/* Right: 시술명 (TODAY에서는 시술이 primary) */}
@@ -982,11 +990,13 @@ export function NextDirection({
                     <div key={i} style={{ display: 'flex', alignItems: 'stretch' }}>
                       {/* Left: 시점 + 월 */}
                       <div style={{ width: 100, flexShrink: 0, paddingTop: 2 }}>
-                        <p className="text-left" style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.10em', color: isReview ? '#B8963C' : '#888880', marginBottom: 3, lineHeight: 1.4 }}>
-                          {ev.label}
-                        </p>
-                        <p className="text-left" style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '0.1em', color: '#CCCCCA' }}>
+                        {/* 몇 월인지가 먼저 보여야 한다 — 예전에는 '약 3주 후' 가 크고
+                            '10월' 은 10px 연회색이라 눈에 안 들어왔다. (2026-09-11) */}
+                        <p className="text-left" style={{ fontSize: 17, fontWeight: 500, letterSpacing: '-0.01em', color: isReview ? '#B8963C' : '#111111', marginBottom: 2, lineHeight: 1.3 }}>
                           {ev.monthHint}
+                        </p>
+                        <p className="text-left" style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.08em', color: isReview ? '#C9AE72' : '#AAAAA5', lineHeight: 1.4 }}>
+                          {ev.label}
                         </p>
                       </div>
 

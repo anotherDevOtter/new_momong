@@ -201,7 +201,9 @@ function Inner() {
     const s = searchParams.get('step') as PageKey | null;
     return s && jumpSteps.includes(s) ? s : firstStep;
   });
-  const [showReport, setShowReport] = useState(false);
+  // 개발용 — 주소에 &report=1 을 붙이면 마지막 화면에서 리포트가 바로 열린다.
+  // 리포트 안을 확인할 때마다 앞 단계를 클릭해 내려갈 필요가 없게. (2026-09-11)
+  const [showReport, setShowReport] = useState(() => devJump && searchParams.get('report') === '1');
   // 저장된 상담 id — 완료 화면의 '링크 공유' 가 이걸로 공유 링크를 만든다
   const [savedConsultId, setSavedConsultId] = useState<string | null>(null);
   const [shareModalOpen, setShareModalOpen] = useState(false);

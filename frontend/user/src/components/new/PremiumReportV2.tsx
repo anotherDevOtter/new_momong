@@ -44,6 +44,8 @@ export interface HairConditionEntry {
 }
 export interface CyclePlanEntry {
   offsetWeeks: number; label: string; services: string[]; note: string;
+  /** 9월 · 10월 … — 시점('약 3주 후')보다 이게 먼저 눈에 들어와야 한다 */
+  monthHint?: string;
 }
 export interface CustomerSession {
   customer: { name: string; visitDate: string; designerName: string };
@@ -195,12 +197,14 @@ function buildCyclePlan(cycleData: CycleData | null): CyclePlanEntry[] {
     const todayEntry: CyclePlanEntry = {
       offsetWeeks: 0,
       label: '오늘',
+      monthHint: `${new Date().getMonth() + 1}월`,
       services: cycleData.todayServices.map(s => svcLabel[s] ?? s),
       note: '오늘 진행한 시술',
     };
     const entries: CyclePlanEntry[] = cycleData.cycleEvents.map(e => ({
       offsetWeeks: e.offsetWeeks,
       label: e.label,
+      monthHint: e.monthHint,
       services: e.services,
       note: e.purpose || e.note,
     }));
@@ -1157,7 +1161,7 @@ function Page03({ session, cycleData = null, subSel, setSubSel, beforePhoto = nu
         <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
           <div style={{ display: 'flex', minWidth: `${cyclePlan.length * 140}px`, position: 'relative', paddingBottom: 8 }}>
             {/* connecting line at circle level */}
-            <div style={{ position: 'absolute', top: 38, left: '7%', right: '7%', height: 1, background: G7, zIndex: 0 }} />
+            <div style={{ position: 'absolute', top: 5, left: '7%', right: '7%', height: 1, background: G7, zIndex: 0 }} />
 
             {cyclePlan.map((item, i) => {
               const isToday = i === 0;
@@ -1166,26 +1170,26 @@ function Page03({ session, cycleData = null, subSel, setSubSel, beforePhoto = nu
               const sub = item.note;
               return (
                 <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', zIndex: 1, padding: '0 6px' }}>
-                  {/* time label above circle */}
-                  <p style={{
-                    fontFamily: MONO, fontSize: 9, letterSpacing: '0.06em',
-                    color: isToday ? G1 : G4,
-                    marginBottom: 10,
-                    textAlign: 'center',
-                    whiteSpace: 'nowrap',
-                    fontWeight: isToday ? 500 : 300,
-                  }}>{item.label}</p>
-
-                  {/* circle node */}
+                  {/* 선(점)이 맨 위 → 얼마나 후 → 월 순서 (2026-09-11) */}
                   <div style={{
                     width: isToday ? 11 : 9,
                     height: isToday ? 11 : 9,
                     borderRadius: '50%',
                     background: isToday ? G1 : '#FFFFFF',
                     border: isToday ? `2px solid ${G1}` : `1.5px solid ${G5}`,
-                    marginBottom: 16,
+                    marginBottom: 14,
                     flexShrink: 0,
                   }} />
+                  <p style={{
+                    fontFamily: MONO, fontSize: 9, letterSpacing: '0.06em',
+                    color: isToday ? G4 : G5,
+                    marginBottom: 2, textAlign: 'center', whiteSpace: 'nowrap', fontWeight: 300,
+                  }}>{item.label}</p>
+                  <p style={{
+                    fontSize: 15, fontWeight: 500, letterSpacing: '-0.01em',
+                    color: isToday ? G1 : G2,
+                    marginBottom: 16, textAlign: 'center', whiteSpace: 'nowrap',
+                  }}>{item.monthHint ?? item.label}</p>
 
                   {/* title */}
                   <p style={{
