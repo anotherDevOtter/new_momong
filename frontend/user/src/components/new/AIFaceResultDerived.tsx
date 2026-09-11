@@ -89,6 +89,63 @@ function axisDist(score: number, labels: readonly string[]) {
   ];
 }
 
+
+/**
+ * 최종 이미지타입을 3×3 맵 위에 찍어 보여준다 — 분포 막대 왼쪽에 놓는다.
+ * 헤어컨설팅의 큰 이미지맵과 같은 배치(Soft/Neutral/Hard × Warm/Neutral/Cool). (2026-09-11)
+ */
+function MiniImageMap({ col, row }: { col: number | null; row: number | null }) {
+  const GOLD = '#B8963C';
+  return (
+    <div style={{ width: 196, flexShrink: 0 }}>
+      <div className="flex items-center mb-1.5">
+        <div className="h-px flex-1" style={{ background: 'linear-gradient(to right, transparent, #DDDDDA)' }} />
+        <span className="mx-2" style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.22em', color: '#BBBBB8' }}>SOFT</span>
+        <div className="h-px flex-1" style={{ background: 'linear-gradient(to left, transparent, #DDDDDA)' }} />
+      </div>
+
+      <div className="flex items-stretch gap-1">
+        <span style={{ fontFamily: MONO, fontSize: 6.5, letterSpacing: '0.2em', color: '#BBBBB8', writingMode: 'vertical-rl', transform: 'rotate(180deg)', alignSelf: 'center' }}>WARM</span>
+        <div style={{ flex: 1, border: '1px solid #E8E8E4' }}>
+          {[0, 1, 2].map(r => (
+            <div key={r} className="flex" style={{ borderBottom: r < 2 ? '1px solid #EFEFED' : 'none' }}>
+              {[0, 1, 2].map(c => {
+                const cell = IMAP[r][c];
+                const on = col === c && row === r;
+                return (
+                  <div key={c} className="relative flex flex-col items-center justify-center"
+                    style={{
+                      flex: 1, height: 52, borderRight: c < 2 ? '1px solid #EFEFED' : 'none',
+                      background: on ? 'rgba(184,150,60,0.12)' : '#FFFFFF',
+                    }}>
+                    <span style={{ fontFamily: MONO, fontSize: 6.5, letterSpacing: '0.1em', color: on ? '#8A6C28' : '#CCCCCA' }}>
+                      {cell.en}
+                    </span>
+                    <span style={{ fontSize: 8.5, color: on ? '#111111' : '#BBBBB8', fontWeight: on ? 600 : 400 }}>
+                      {cell.ko}
+                    </span>
+                    {on && (
+                      <span className="absolute rounded-full"
+                        style={{ width: 7, height: 7, background: GOLD, boxShadow: `0 0 0 3px rgba(184,150,60,0.25)`, top: 7, right: 7 }} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+        <span style={{ fontFamily: MONO, fontSize: 6.5, letterSpacing: '0.2em', color: '#BBBBB8', writingMode: 'vertical-rl', alignSelf: 'center' }}>COOL</span>
+      </div>
+
+      <div className="flex items-center mt-1.5">
+        <div className="h-px flex-1" style={{ background: 'linear-gradient(to right, transparent, #DDDDDA)' }} />
+        <span className="mx-2" style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.22em', color: '#BBBBB8' }}>HARD</span>
+        <div className="h-px flex-1" style={{ background: 'linear-gradient(to left, transparent, #DDDDDA)' }} />
+      </div>
+    </div>
+  );
+}
+
 export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Props) {
   const { formScore, propScore } = computeScores(posMap);
   const formDominant = dominantOf(FORM, posMap);
@@ -193,8 +250,10 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
               </div>
             </div>
 
-            {/* Distribution bars */}
-            <div className="px-5 pt-4 pb-5 border-t border-[#E8E8E4]">
+            {/* Distribution bars — 왼쪽에 이미지맵을 두어 최종 타입 위치를 같이 본다 */}
+            <div className="px-5 pt-4 pb-5 border-t border-[#E8E8E4] flex gap-5 items-start">
+              <MiniImageMap col={colIdx} row={rowIdx} />
+              <div className="flex-1 min-w-0">
               <div className="mb-4">
                 <p className="text-[9px] tracking-[0.18em] text-[#AAAAAA] mb-2.5" style={{ fontFamily: MONO }}>
                   WARM · NEUTRAL · COOL
@@ -246,6 +305,7 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
                     </div>
                   );
                 })}
+              </div>
               </div>
             </div>
           </motion.div>
