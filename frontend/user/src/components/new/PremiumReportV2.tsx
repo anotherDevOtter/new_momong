@@ -1495,7 +1495,10 @@ export function PremiumReport({
           ctx.drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
           if (!first) pdf.addPage();
           first = false;
-          pdf.addImage(part.toDataURL('image/jpeg', 0.92), 'JPEG', 0, PAD_TOP, pw, (h * pw) / canvas.width);
+          // 짧은 장은 위에 붙지 않게 세로 가운데로 (2026-09-12)
+          const drawH = (h * pw) / canvas.width;
+          const top = PAD_TOP + Math.max(0, (usableH - drawH) / 2);
+          pdf.addImage(part.toDataURL('image/jpeg', 0.92), 'JPEG', 0, top, pw, drawH);
           y = end;
         }
       }
