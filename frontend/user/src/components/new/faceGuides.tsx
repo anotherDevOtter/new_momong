@@ -14,7 +14,7 @@
 import type { LandmarkPoint } from './useFaceLandmarks';
 
 const INK = '#FFFFFF';
-const DOT = '#FFFFFF';
+const DOT = '#1A1A1A';
 
 /** MediaPipe FaceMesh 표준 인덱스 — 부위별로 필요한 점만 추렸다 */
 const IDX = {

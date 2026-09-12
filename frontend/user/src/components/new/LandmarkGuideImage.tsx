@@ -23,7 +23,7 @@ const HALO_CSS = `
 `;
 
 /** 선이 사진을 덮지 않게 전체를 반투명으로 얹는다 (2026-09-12) */
-const GUIDE_OPACITY = 0.9;
+const GUIDE_OPACITY = 0.6;
 
 interface Props {
   imageUrl: string;
