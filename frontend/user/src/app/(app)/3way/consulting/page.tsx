@@ -684,6 +684,8 @@ function Inner() {
               consultDate={new Date().toLocaleDateString('ko-KR')}
               designerName={customerData.designerName || '디자이너'}
               cycleData={newCycleData}
+              onShareLink={handleShareLink}
+              onGoHome={handleGoHome}
               hairTargetType={hairConsultingData?.targetType?.en ?? null}
               hairCondition={hairConsultingData?.condition ?? null}
               hairStyle={hairConsultingData?.style ?? null}
@@ -726,6 +728,8 @@ function Inner() {
               consultDate={new Date().toLocaleDateString('ko-KR')}
               designerName={customerData.designerName || '디자이너'}
               cycleData={newCycleData}
+              onShareLink={handleShareLink}
+              onGoHome={handleGoHome}
               hairTargetType={hairConsultingData?.targetType?.en ?? null}
               hairCondition={hairConsultingData?.condition ?? null}
               hairStyle={hairConsultingData?.style ?? null}

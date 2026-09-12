@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowRight, ArrowLeft, ChevronDown } from 'lucide-react';
+import { ArrowRight, ArrowLeft, ChevronDown, Download, Share2, Home } from 'lucide-react';
 import { CycleData, ServiceKey, SERVICE_KO, AFTER_CARE, HOME_CARE_TIPS } from './NextDirection';
 import { MONO, IMAP, FORM, PROP, dominantIdx, dominantOf } from './faceAnalysisData';
 import { AREA_ITEMS, areaScores } from './AIFaceResultDerived';
@@ -1018,13 +1018,17 @@ const NEXT_ITEMS = [
 
 // ── PAGE 03: NEXT DIRECTION ────────────────────────────────────────
 
-function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, beforePhoto = null, afterPhoto = null, onBeforePhotoChange, onAfterPhotoChange }: {
+function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, beforePhoto = null, afterPhoto = null, onBeforePhotoChange, onAfterPhotoChange, onDownloadPdf, printing = false, onShareLink, onGoHome }: {
   session: CustomerSession;
   cycleData?: CycleData | null;
   subSel: Record<string, string>;
   setSubSel: (s: Record<string, string>) => void;
   /** 방향별 메모 — 퍼스널 리포트 화면에서 적은 것 (2026-09-12) */
   memos?: Record<string, string>;
+  onDownloadPdf?: () => void;
+  printing?: boolean;
+  onShareLink?: () => void;
+  onGoHome?: () => void;
   beforePhoto?: string | null;
   afterPhoto?: string | null;
   onBeforePhotoChange?: (url: string | null) => void;
@@ -1353,6 +1357,50 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
             </div>
           );
         })()}
+
+        {/* ── 리포트 끝 — 저장·공유. 04장이 완료 화면으로 옮겨가면서 같이 사라졌다 (2026-09-12) */}
+        <HDivider />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 460, margin: '0 auto' }}>
+          <button
+            onClick={onDownloadPdf}
+            disabled={printing}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+              padding: '16px 24px', background: G1, border: 'none',
+              cursor: printing ? 'default' : 'pointer', color: '#FFFFFF',
+              fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', minHeight: 52,
+            }}
+          >
+            <Download size={14} strokeWidth={1.5} />
+            {printing ? 'PDF 만드는 중…' : 'PDF 다운로드'}
+          </button>
+          {onShareLink && (
+            <button
+              onClick={onShareLink}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                padding: '16px 24px', background: '#FFFFFF', border: `1px solid ${G1}`,
+                cursor: 'pointer', color: G1, fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', minHeight: 52,
+              }}
+            >
+              <Share2 size={14} strokeWidth={1.5} />
+              링크 공유
+            </button>
+          )}
+          {onGoHome && (
+            <button
+              onClick={onGoHome}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                padding: '16px 24px', background: '#FFFFFF', border: `1px solid ${G7}`,
+                cursor: 'pointer', color: G4, fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', minHeight: 52,
+              }}
+            >
+              <Home size={14} strokeWidth={1.5} />
+              홈으로 이동
+            </button>
+          )}
+        </div>
       </Wrap>
     </motion.div>
   );
@@ -1360,6 +1408,9 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
 
 interface PremiumReportProps {
   onBack: () => void;
+  /** 리포트 끝의 '링크 공유' · '홈으로 이동'. 없으면 그 버튼을 숨긴다 */
+  onShareLink?: () => void;
+  onGoHome?: () => void;
   customerName: string;
   consultDate: string;
   designerName: string;
@@ -1393,7 +1444,7 @@ export function PremiumReport({
   beforePhoto = null, afterPhoto = null,
   onBeforePhotoChange, onAfterPhotoChange,
   facePosMap = {}, hairTargetType = null, hairCondition = null, facePhotoUrl = null,
-  hairStyle = null, embedded = false, selectedCourse,
+  hairStyle = null, embedded = false, selectedCourse, onShareLink, onGoHome,
 }: PremiumReportProps) {
   const [page, setPage] = useState(0);
   const [subSel, setSubSel] = useState<Record<string, string>>(initialSubSel);
@@ -1467,7 +1518,7 @@ export function PremiumReport({
         {page === 0 && <Cover key="cover" onStart={() => goTo(1)} session={session} />}
         {page === 1 && <Page01 key="p1" session={session} />}
         {page === 2 && <Page02 key="p2" session={session} hairStyle={hairStyle} guideStyles={guideStyles} />}
-        {page === 3 && <Page03 key="p3" session={session} cycleData={cycleData} subSel={subSel} setSubSel={setSubSel} memos={cycleData?.memos ?? {}} beforePhoto={beforePhoto} afterPhoto={afterPhoto} onBeforePhotoChange={onBeforePhotoChange} onAfterPhotoChange={onAfterPhotoChange} />}
+        {page === 3 && <Page03 key="p3" session={session} cycleData={cycleData} subSel={subSel} setSubSel={setSubSel} memos={cycleData?.memos ?? {}} onDownloadPdf={handleDownloadPdf} printing={printing} onShareLink={onShareLink} onGoHome={onGoHome} beforePhoto={beforePhoto} afterPhoto={afterPhoto} onBeforePhotoChange={onBeforePhotoChange} onAfterPhotoChange={onAfterPhotoChange} />}
       </AnimatePresence>
       {/* PDF 캡쳐용 — 화면에는 안 보이지만 레이아웃은 잡혀 있어야 한다 */}
       <div aria-hidden style={{ position: 'fixed', left: -99999, top: 0, width: 900 }}>
