@@ -44,6 +44,8 @@ export interface CycleData {
   /** 방향별 세부 선택 (길이→미디움 등). 화면에만 있던 값이라 저장되지 않아
    *  공유 링크로 열면 리포트에서 사라졌다. (2026-09-11) */
   subSelections?: Record<string, string>;
+  /** 방향별 메모 — 옵션으로 못 적는 얘기 (2026-09-12) */
+  memos?: Record<string, string>;
   /** ↓ 아래 셋은 지금 리포트가 보는 값. 시안3 리포트로 갈아탈 때 정리한다. */
   selectedMonths: MonthCycleData[];
   directions?: DirectionOption[];
@@ -474,6 +476,8 @@ export function NextDirection({
   // Direction select state
   const [selectedDirections, setSelectedDirections] = useState<DirectionOption[]>(initial?.directions ?? []);
   const [dirSubSel, setDirSubSel] = useState<Record<string, string>>(initial?.subSelections ?? {});
+  // 방향별 메모 — 옵션만으로 못 적는 얘기를 디자이너가 남긴다. 리포트에도 실린다 (2026-09-12)
+  const [dirMemo, setDirMemo] = useState<Record<string, string>>(initial?.memos ?? {});
   const [openSubItem, setOpenSubItem] = useState<DirectionOption | null>(null);
 
   // TODAY SERVICE state
@@ -512,6 +516,7 @@ export function NextDirection({
       todayServices, todayDetails, gender, nextCare, nextDesign, cycleEvents,
       homeCare: getHomeCare(todayServices),
       subSelections: dirSubSel,
+      memos: dirMemo,
       // 아래 셋은 아직 시안3 리포트로 갈아타지 않은 페이지들이 본다
       selectedMonths: toMonthPlan(cycleEvents),
       directions: selectedDirections,
@@ -520,7 +525,7 @@ export function NextDirection({
         selectedDirections.length,
       )),
     });
-  }, [todayServices, todayDetails, gender, careOverride, designOverride, selectedDirections, dirSubSel]);
+  }, [todayServices, todayDetails, gender, careOverride, designOverride, selectedDirections, dirSubSel, dirMemo]);
 
   const directions = DIRECTION_ITEMS;
 
@@ -630,6 +635,11 @@ export function NextDirection({
                       <p style={{ fontSize: 11, fontWeight: 300, color: selectedOpt ? '#8A7B4E' : '#BBBBB6', letterSpacing: '-0.01em' }}>
                         {selectedOpt ?? dir.sublabel}
                       </p>
+                      {dirMemo[dir.id] && (
+                        <p style={{ fontSize: 11, fontWeight: 300, color: '#888880', marginTop: 2 }}>
+                          {dirMemo[dir.id]}
+                        </p>
+                      )}
                     </div>
                     <div style={{ display: 'flex', gap: 3, flexShrink: 0 }}>
                       {[1, 2, 3, 4].map(pip => (
@@ -643,7 +653,8 @@ export function NextDirection({
                   <AnimatePresence>
                     {isOpen && (
                       <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} style={{ overflow: 'hidden' }}>
-                        <div style={{ padding: '10px 4px 14px 97px', borderBottom: '1px solid #EEEEE9', background: '#FAFAF8', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                        <div style={{ padding: '10px 4px 14px 97px', borderBottom: '1px solid #EEEEE9', background: '#FAFAF8' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                           {dir.options.map(opt => {
                             const isCurrent = selectedOpt === opt;
                             return (
@@ -663,6 +674,20 @@ export function NextDirection({
                               </button>
                             );
                           })}
+                        </div>
+                          {/* 메모 — 옵션만으로 못 적는 얘기를 남긴다 (2026-09-12) */}
+                          <input
+                            type="text"
+                            value={dirMemo[dir.id] ?? ''}
+                            onClick={e => e.stopPropagation()}
+                            onChange={e => setDirMemo({ ...dirMemo, [dir.id]: e.target.value })}
+                            placeholder="메모 (선택)"
+                            style={{
+                              marginTop: 10, width: '100%', maxWidth: 460, padding: '8px 10px',
+                              fontSize: 13, fontFamily: 'inherit', color: '#333330',
+                              background: '#FFFFFF', border: '1px solid #E0E0DC', borderRadius: 2, outline: 'none',
+                            }}
+                          />
                         </div>
                       </motion.div>
                     )}

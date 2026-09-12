@@ -972,11 +972,13 @@ const NEXT_ITEMS = [
 
 // ── PAGE 03: NEXT DIRECTION ────────────────────────────────────────
 
-function Page03({ session, cycleData = null, subSel, setSubSel, beforePhoto = null, afterPhoto = null, onBeforePhotoChange, onAfterPhotoChange }: {
+function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, beforePhoto = null, afterPhoto = null, onBeforePhotoChange, onAfterPhotoChange }: {
   session: CustomerSession;
   cycleData?: CycleData | null;
   subSel: Record<string, string>;
   setSubSel: (s: Record<string, string>) => void;
+  /** 방향별 메모 — 퍼스널 리포트 화면에서 적은 것 (2026-09-12) */
+  memos?: Record<string, string>;
   beforePhoto?: string | null;
   afterPhoto?: string | null;
   onBeforePhotoChange?: (url: string | null) => void;
@@ -1053,9 +1055,14 @@ function Page03({ session, cycleData = null, subSel, setSubSel, beforePhoto = nu
                   {selectedIds.map(id => {
                     const item = NEXT_ITEMS.find(i => i.id === id);
                     return (
-                      <div key={id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: `1px solid rgba(184,150,60,0.15)` }}>
-                        <span style={{ fontFamily: MONO, fontSize: 9, color: G5 }}>{item?.en}</span>
-                        <span style={{ fontSize: 13, color: G1, fontWeight: 500 }}>{subSel[id]}</span>
+                      <div key={id} style={{ padding: '8px 0', borderBottom: `1px solid rgba(184,150,60,0.15)` }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ fontFamily: MONO, fontSize: 9, color: G5 }}>{item?.en}</span>
+                          <span style={{ fontSize: 13, color: G1, fontWeight: 500 }}>{subSel[id]}</span>
+                        </div>
+                        {memos[id] && (
+                          <p style={{ fontSize: 12, color: G4, fontWeight: 300, marginTop: 4, lineHeight: 1.6 }}>{memos[id]}</p>
+                        )}
                       </div>
                     );
                   })}
@@ -1486,7 +1493,7 @@ export function PremiumReport({
         {page === 0 && <Cover key="cover" onStart={() => goTo(1)} session={session} />}
         {page === 1 && <Page01 key="p1" session={session} />}
         {page === 2 && <Page02 key="p2" session={session} hairStyle={hairStyle} guideStyles={guideStyles} />}
-        {page === 3 && <Page03 key="p3" session={session} cycleData={cycleData} subSel={subSel} setSubSel={setSubSel} beforePhoto={beforePhoto} afterPhoto={afterPhoto} onBeforePhotoChange={onBeforePhotoChange} onAfterPhotoChange={onAfterPhotoChange} />}
+        {page === 3 && <Page03 key="p3" session={session} cycleData={cycleData} subSel={subSel} setSubSel={setSubSel} memos={cycleData?.memos ?? {}} beforePhoto={beforePhoto} afterPhoto={afterPhoto} onBeforePhotoChange={onBeforePhotoChange} onAfterPhotoChange={onAfterPhotoChange} />}
         {page === 4 && <Page04 key="p4" session={session} subSel={subSel} onBack={onBack} onRestart={() => goTo(1)} onDownloadPdf={handleDownloadPdf} printing={printing} embedded={embedded} />}
       </AnimatePresence>
       {/* PDF 캡쳐용 — 화면에는 안 보이지만 레이아웃은 잡혀 있어야 한다 */}
@@ -1494,7 +1501,7 @@ export function PremiumReport({
         <div ref={printRef}>
           <div style={{ background: '#FFFFFF' }}><Page01 session={session} /></div>
           <div style={{ background: '#FFFFFF' }}><Page02 session={session} hairStyle={hairStyle} guideStyles={guideStyles} /></div>
-          <div style={{ background: '#FFFFFF' }}><Page03 session={session} cycleData={cycleData} subSel={subSel} setSubSel={() => {}} beforePhoto={beforePhoto} afterPhoto={afterPhoto} /></div>
+          <div style={{ background: '#FFFFFF' }}><Page03 session={session} cycleData={cycleData} subSel={subSel} setSubSel={() => {}} memos={cycleData?.memos ?? {}} beforePhoto={beforePhoto} afterPhoto={afterPhoto} /></div>
           <div style={{ background: '#FFFFFF' }}><Page04 session={session} subSel={subSel} onBack={() => {}} onRestart={() => {}} /></div>
         </div>
       </div>
