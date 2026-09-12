@@ -11,9 +11,11 @@ const imgHairMap = '/new/hair-map.png';
 
 // 마커 색 — 고유미는 브랜드 금색, 추구미는 확실히 구분되는 딥틸.
 // 예전엔 둘 다 금색이라 '강조 활용' 일 때 두 마커가 같은 색으로 보였다 (2026-09-06).
-const OWN_COLOR = '#B8963C';
-const TARGET_COLOR = '#1F6F63';
-const TARGET_COLOR_DARK = '#155048';
+// 이미지맵 표식 색. 금색·청록으로 나뉘어 있던 걸 버건디 한 계열로 모은다 —
+// 고유미/추구미는 실선·점선으로 구분되므로 색까지 갈릴 이유가 없다. (2026-09-12)
+const OWN_COLOR = '#7B2E3B';
+const TARGET_COLOR = '#7B2E3B';
+const TARGET_COLOR_DARK = '#5E2230';
 const imgHairMap37 = '/new/hair-map-37.png';
 
 /**
@@ -553,7 +555,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                     xmlns="http://www.w3.org/2000/svg">
                     <defs>
                       <marker id="hc-arr-acc" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
-                        <path d="M0 1 L9 5 L0 9" fill="none" stroke="#B8963C" strokeWidth="1.4" strokeLinecap="square" />
+                        <path d="M0 1 L9 5 L0 9" fill="none" stroke={OWN_COLOR} strokeWidth="1.4" strokeLinecap="square" />
                       </marker>
                       <marker id="hc-arr-cov" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
                         <path d="M0 1 L9 5 L0 9" fill="none" stroke="#3A3A38" strokeWidth="1.4" strokeLinecap="square" />
@@ -562,9 +564,9 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
 
                     {/* 고유미 axis hairlines — solid gold. 미측정이면 그리지 않는다 */}
                     {measured && <line x1="0" y1={(row + 0.5) * 100} x2="300" y2={(row + 0.5) * 100}
-                      stroke="#B8963C" strokeWidth="0.7" opacity="0.6" />}
+                      stroke={OWN_COLOR} strokeWidth="0.7" opacity="0.6" />}
                     {measured && <line x1={(col + 0.5) * 100} y1="0" x2={(col + 0.5) * 100} y2="300"
-                      stroke="#B8963C" strokeWidth="0.7" opacity="0.6" />}
+                      stroke={OWN_COLOR} strokeWidth="0.7" opacity="0.6" />}
 
                     {/* 추구미 axis hairlines — dashed */}
                     {targetRow != null && targetCol != null && !(measured && targetRow === row && targetCol === col) && (() => {
@@ -590,7 +592,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                         <line
                           x1={x1 + (dx / len) * pad} y1={y1 + (dy / len) * pad}
                           x2={x2 - (dx / len) * pad} y2={y2 - (dy / len) * pad}
-                          stroke={isAcc ? '#B8963C' : '#2A2A28'}
+                          stroke={isAcc ? OWN_COLOR : '#2A2A28'}
                           strokeWidth="1.2"
                           markerEnd={isAcc ? 'url(#hc-arr-acc)' : 'url(#hc-arr-cov)'} />
                       );
@@ -601,12 +603,12 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                       const cx = (col + 0.5) * 100, cy = (row + 0.5) * 100;
                       return (
                         <g>
-                          <circle cx={cx} cy={cy} r="15" fill="none" stroke="#B8963C" strokeWidth="0.8" opacity="0.5" />
-                          <line x1={cx - 20} y1={cy} x2={cx - 11} y2={cy} stroke="#B8963C" strokeWidth="1" />
-                          <line x1={cx + 11} y1={cy} x2={cx + 20} y2={cy} stroke="#B8963C" strokeWidth="1" />
-                          <line x1={cx} y1={cy - 20} x2={cx} y2={cy - 11} stroke="#B8963C" strokeWidth="1" />
-                          <line x1={cx} y1={cy + 11} x2={cx} y2={cy + 20} stroke="#B8963C" strokeWidth="1" />
-                          <circle cx={cx} cy={cy} r="5.5" fill="#B8963C" />
+                          <circle cx={cx} cy={cy} r="15" fill="none" stroke={OWN_COLOR} strokeWidth="0.8" opacity="0.5" />
+                          <line x1={cx - 20} y1={cy} x2={cx - 11} y2={cy} stroke={OWN_COLOR} strokeWidth="1" />
+                          <line x1={cx + 11} y1={cy} x2={cx + 20} y2={cy} stroke={OWN_COLOR} strokeWidth="1" />
+                          <line x1={cx} y1={cy - 20} x2={cx} y2={cy - 11} stroke={OWN_COLOR} strokeWidth="1" />
+                          <line x1={cx} y1={cy + 11} x2={cx} y2={cy + 20} stroke={OWN_COLOR} strokeWidth="1" />
+                          <circle cx={cx} cy={cy} r="5.5" fill="${OWN_COLOR}" />
                           <circle cx={cx} cy={cy} r="2" fill="white" />
                           {/* 라벨은 자기 칸 위쪽에 둔다 (칸 이름은 가운데 왼쪽이라 안 겹친다).
                               단 상대 마커가 왼쪽 위에 있으면 화살표가 이 모서리를 지나므로 오른쪽 위로 보낸다. */}
