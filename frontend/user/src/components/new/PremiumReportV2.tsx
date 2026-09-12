@@ -1252,6 +1252,8 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
 
         <HDivider />
 
+        {/* PDF 에서 여기부터 새 장. 앞 섹션에 붙어 나오지 않게 (2026-09-12) */}
+        <div data-pdf-break="1" />
         <SectionLabel>6 MONTH DESIGN CYCLE</SectionLabel>
         <h2 style={{ fontSize: 32, fontWeight: 300, color: G1, marginBottom: 48 }}>방문 후 6개월 관리 플랜</h2>
 
@@ -1441,32 +1443,45 @@ export function PremiumReport({
       // 그냥 자르면 표나 문단 한가운데가 끊긴다 — 요소 경계(섹션·표·카드)를 미리
       // 재 두고 그중 페이지에 들어가는 마지막 지점에서 끊는다. (2026-09-12)
       const SCALE = 2;
-      const cutPointsOf = (node: HTMLElement): number[] => {
+      const measure = (node: HTMLElement) => {
         const top = node.getBoundingClientRect().top;
         // Wrap 안의 최상위 블록들이 섹션 경계다
         const blocks = [...node.querySelectorAll<HTMLElement>(':scope > div > div > *')]
           .map(el => el.getBoundingClientRect())
           .filter(r => r.height > 0);
-        const pts: number[] = [];
+        const soft: number[] = [];
         for (let i = 1; i < blocks.length; i++) {
           // 앞 블록이 제목처럼 짧으면 그 뒤에서 끊지 않는다 — 제목만 앞 장에 남는다
           if (blocks[i - 1].height < 110) continue;
-          pts.push((blocks[i].top - top) * SCALE);
+          soft.push((blocks[i].top - top) * SCALE);
         }
-        return pts.sort((a, b) => a - b);
+        // data-pdf-break 가 붙은 자리는 무조건 새 장에서 시작한다
+        const hard = [...node.querySelectorAll<HTMLElement>('[data-pdf-break]')]
+          .map(el => (el.getBoundingClientRect().top - top) * SCALE)
+          .filter(v => v > 0);
+        return { soft: soft.sort((a, b) => a - b), hard: hard.sort((a, b) => a - b) };
       };
+
+      // 내용이 종이 끝에 닿지 않게 위아래를 띄운다 (2026-09-12)
+      const PAD_TOP = 34;
+      const PAD_BOTTOM = 28;
+      const usableH = ph - PAD_TOP - PAD_BOTTOM;
 
       let first = true;
       for (const node of nodes) {
-        const cuts = cutPointsOf(node);
+        const { soft, hard } = measure(node);
         const canvas = await html2canvas(node, { scale: SCALE, backgroundColor: '#FFFFFF', logging: false });
-        const sliceH = Math.floor((canvas.width * ph) / pw);   // A4 한 장에 해당하는 픽셀 높이
+        const sliceH = Math.floor((canvas.width * usableH) / pw);   // 한 장에 담기는 픽셀 높이
         let y = 0;
         while (y < canvas.height - 2) {
           let end = Math.min(y + sliceH, canvas.height);
-          if (end < canvas.height) {
+          // 강제 넘김이 이 장 안에 들어오면 거기서 끊는다
+          const forced = hard.find(hp => hp > y + 2 && hp <= end);
+          if (forced != null) {
+            end = Math.round(forced);
+          } else if (end < canvas.height) {
             // 페이지의 35% 는 넘게 채우면서, 경계 중 가장 아래 지점에서 끊는다
-            const fits = cuts.filter(c => c > y + sliceH * 0.35 && c <= end);
+            const fits = soft.filter(c => c > y + sliceH * 0.35 && c <= end);
             if (fits.length) end = Math.round(fits[fits.length - 1]);
           }
           const h = Math.max(1, Math.round(end - y));
@@ -1480,7 +1495,7 @@ export function PremiumReport({
           ctx.drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
           if (!first) pdf.addPage();
           first = false;
-          pdf.addImage(part.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, pw, (h * pw) / canvas.width);
+          pdf.addImage(part.toDataURL('image/jpeg', 0.92), 'JPEG', 0, PAD_TOP, pw, (h * pw) / canvas.width);
           y = end;
         }
       }
