@@ -697,7 +697,27 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
               <div style={{ width: 40, display: 'flex', flexDirection: 'column', justifyContent: 'space-around' }}>
                 {['Soft', 'Natural', 'Hard'].map(r => <div key={r} style={{ fontFamily: MONO, fontSize: 7, color: G6, writingMode: 'vertical-rl', transform: 'rotate(180deg)', letterSpacing: '0.12em', alignSelf: 'center', padding: '14px 0' }}>{r}</div>)}
               </div>
-              <div style={{ flex: 1, border: `1px solid ${G7}`, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ flex: 1, border: `1px solid ${G7}`, display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                {/* 현재 → 원하는 이미지 연결 화살표. 칸이 다를 때만 그린다. (2026-09-12)
+                    예전에는 두 칸에 점만 찍혀 있어 어디서 어디로 가는지 안 보였다. */}
+                {CURRENT.row !== DESIRED.row || CURRENT.col !== DESIRED.col ? (
+                  <svg
+                    viewBox="0 0 300 300" preserveAspectRatio="none"
+                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 2 }}
+                  >
+                    <defs>
+                      <marker id="rep-imap-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+                        <path d="M0 1 L5.5 3.5 L0 6" fill="none" stroke={GOLD} strokeWidth="1.4" />
+                      </marker>
+                    </defs>
+                    <line
+                      x1={CURRENT.col * 100 + 50} y1={CURRENT.row * 100 + 50}
+                      x2={DESIRED.col * 100 + 50} y2={DESIRED.row * 100 + 50}
+                      stroke={GOLD} strokeWidth="1.6" strokeDasharray="5 4"
+                      markerEnd="url(#rep-imap-arrow)" vectorEffect="non-scaling-stroke"
+                    />
+                  </svg>
+                ) : null}
                 {[0, 1, 2].map(row => (
                   <div key={row} style={{ display: 'flex', flex: 1 }}>
                     {[0, 1, 2].map(col => {
