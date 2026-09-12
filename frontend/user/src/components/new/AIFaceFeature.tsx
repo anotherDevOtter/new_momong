@@ -25,6 +25,36 @@ interface Props {
 }
 
 // ── Overlays ──────────────────────────────────────────────────────────
+/**
+ * 얼굴 좌표를 못 찾았을 때 떨어지는 시안 고정 오버레이.
+ * 굵은 검정 실선으로 그려져 있어 랜드마크 가이드선(흰 점선)과 따로 놀았다.
+ * 도형은 그대로 두고 색·굵기만 덮어써 같은 스타일로 맞춘다. (2026-09-12)
+ */
+const LEGACY_GUIDE_CSS = `
+.mm-legacy-halo path, .mm-legacy-halo line {
+  stroke: #000000; stroke-width: 2.7px; stroke-opacity: 0.22; fill: none;
+  stroke-dasharray: 4 5; vector-effect: non-scaling-stroke; opacity: 1;
+}
+.mm-legacy-halo circle { display: none; }
+.mm-legacy-guide path, .mm-legacy-guide line {
+  stroke: #FFFFFF; stroke-width: 1.5px; fill: none;
+  stroke-dasharray: 4 5; vector-effect: non-scaling-stroke; opacity: 1;
+}
+.mm-legacy-guide circle {
+  fill: #1A1A1A; stroke: none; opacity: 1;
+}
+`;
+
+function LegacyGuide({ node }: { node: React.ReactNode }) {
+  return (
+    <g opacity={0.6}>
+      <style>{LEGACY_GUIDE_CSS}</style>
+      <g className="mm-legacy-halo">{node}</g>
+      <g className="mm-legacy-guide">{node}</g>
+    </g>
+  );
+}
+
 const OVERLAYS: Record<string, React.ReactNode> = {
   faceline: (
     <g>
@@ -563,7 +593,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                           <svg viewBox="0 0 1414 2000" preserveAspectRatio="xMidYMid meet"
                             xmlns="http://www.w3.org/2000/svg"
                             className="absolute inset-0 w-full h-full pointer-events-none">
-                            {OVERLAYS[current.id]}
+                            <LegacyGuide node={OVERLAYS[current.id]} />
                           </svg>
                         )}
                       </div>
@@ -615,7 +645,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                   <AnimatePresence mode="wait">
                     {overlayOn && current && OVERLAYS[current.id] && (
                       <motion.g key={current.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.22 }}>
-                        {OVERLAYS[current.id]}
+                        <LegacyGuide node={OVERLAYS[current.id]} />
                       </motion.g>
                     )}
                   </AnimatePresence>
