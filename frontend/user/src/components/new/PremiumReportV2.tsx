@@ -1018,7 +1018,7 @@ const NEXT_ITEMS = [
 
 // ── PAGE 03: NEXT DIRECTION ────────────────────────────────────────
 
-function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, beforePhoto = null, afterPhoto = null, onBeforePhotoChange, onAfterPhotoChange, onDownloadPdf, printing = false, onShareLink, onGoHome }: {
+function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, beforePhoto = null, afterPhoto = null, onBeforePhotoChange, onAfterPhotoChange, onDownloadPdf, printing = false, onShareLink, onGoHome, forPrint = false }: {
   session: CustomerSession;
   cycleData?: CycleData | null;
   subSel: Record<string, string>;
@@ -1033,6 +1033,8 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
   afterPhoto?: string | null;
   onBeforePhotoChange?: (url: string | null) => void;
   onAfterPhotoChange?: (url: string | null) => void;
+  /** PDF 캡쳐본. 저장·공유 버튼은 인쇄물에 들어갈 이유가 없다 (2026-09-12) */
+  forPrint?: boolean;
 }) {
   const [openItem, setOpenItem] = useState<string | null>(null);
   // 시술별 관리방법 토글 — 화면(NextDirection)과 같은 방식 (2026-09-12)
@@ -1359,8 +1361,11 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
         })()}
 
         {/* ── 리포트 끝 — 저장·공유. 04장이 완료 화면으로 옮겨가면서 같이 사라졌다 (2026-09-12) */}
-        <HDivider />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 460, margin: '0 auto' }}>
+        {!forPrint && (<>
+        {/* 다음 방문 카드에 버튼이 딱 붙어 있었다. HDivider 는 빈 껍데기라
+            (return null) 간격이 안 생겨 직접 띄운다. (2026-09-12) */}
+        <div style={{ height: 1, background: G8, marginTop: 72, marginBottom: 56 }} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 460, margin: '0 auto', paddingBottom: 32 }}>
           <button
             onClick={onDownloadPdf}
             disabled={printing}
@@ -1401,6 +1406,7 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
             </button>
           )}
         </div>
+        </>)}
       </Wrap>
     </motion.div>
   );
@@ -1475,14 +1481,28 @@ export function PremiumReport({
       const pw = pdf.internal.pageSize.getWidth();
       const ph = pdf.internal.pageSize.getHeight();
       const nodes = Array.from(root.children) as HTMLElement[];
-      for (let i = 0; i < nodes.length; i++) {
-        const canvas = await html2canvas(nodes[i], { scale: 2, backgroundColor: '#FFFFFF', logging: false });
-        const img = canvas.toDataURL('image/jpeg', 0.92);
-        let w = pw;
-        let h = (canvas.height * w) / canvas.width;
-        if (h > ph) { h = ph; w = (canvas.width * h) / canvas.height; }
-        if (i > 0) pdf.addPage();
-        pdf.addImage(img, 'JPEG', (pw - w) / 2, 0, w, h);
+      // 한 장이 A4 보다 길면 통째로 줄이지 않고 A4 높이만큼 잘라 여러 장으로 낸다.
+      // 예전에는 줄여서 한 장에 우겨넣어 3장이 깨알같이 찍혔다. (2026-09-12)
+      let first = true;
+      for (const node of nodes) {
+        const canvas = await html2canvas(node, { scale: 2, backgroundColor: '#FFFFFF', logging: false });
+        const sliceH = Math.floor((canvas.width * ph) / pw);   // A4 한 장에 해당하는 픽셀 높이
+        const slices = Math.max(1, Math.ceil(canvas.height / sliceH));
+        for (let sIdx = 0; sIdx < slices; sIdx++) {
+          const y = sIdx * sliceH;
+          const h = Math.min(sliceH, canvas.height - y);
+          const part = document.createElement('canvas');
+          part.width = canvas.width;
+          part.height = h;
+          const ctx = part.getContext('2d');
+          if (!ctx) continue;
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, part.width, part.height);
+          ctx.drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
+          if (!first) pdf.addPage();
+          first = false;
+          pdf.addImage(part.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, pw, (h * pw) / canvas.width);
+        }
       }
       pdf.save(`${customerName || '고객'}_이미지설계리포트_${new Date().toISOString().slice(0, 10)}.pdf`);
     } catch (e) {
@@ -1525,7 +1545,7 @@ export function PremiumReport({
         <div ref={printRef}>
           <div style={{ background: '#FFFFFF' }}><Page01 session={session} /></div>
           <div style={{ background: '#FFFFFF' }}><Page02 session={session} hairStyle={hairStyle} guideStyles={guideStyles} /></div>
-          <div style={{ background: '#FFFFFF' }}><Page03 session={session} cycleData={cycleData} subSel={subSel} setSubSel={() => {}} memos={cycleData?.memos ?? {}} beforePhoto={beforePhoto} afterPhoto={afterPhoto} /></div>
+          <div style={{ background: '#FFFFFF' }}><Page03 session={session} cycleData={cycleData} subSel={subSel} setSubSel={() => {}} memos={cycleData?.memos ?? {}} beforePhoto={beforePhoto} afterPhoto={afterPhoto} forPrint /></div>
         </div>
       </div>
       {page > 0 && (
