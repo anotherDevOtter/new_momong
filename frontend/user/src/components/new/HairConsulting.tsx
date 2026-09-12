@@ -253,27 +253,26 @@ function MapPin({
   top: string;
   tone: 'own' | 'target';
 }) {
-  // 사진 위에는 링만 얹는다. 이름표를 사진 위에 두면 얼굴을 가려서
+  // 사진 위에는 표식만 얹는다. 이름표를 사진 위에 두면 얼굴을 가려서
   // 맵 아래 범례로 뺐다 (2026-09-11).
+  // 흰 링 안에 채워진 점 — 고유미·추구미 모양을 같게 두고 구분은 범례가 한다 (2026-09-12)
   const color = tone === 'own' ? HAIR_MAP_COLOR : HAIR_MAP_COLOR_DARK;
   return (
     <div
       className="absolute pointer-events-none"
       style={{ left, top, transform: 'translate(-50%, -50%)', zIndex: 2 }}
     >
-      {/* 속이 빈 얇은 링 — 안쪽으로 사진이 그대로 비쳐 얼굴을 가리지 않는다.
-          실선은 고유미, 점선은 추구미. 무엇인지는 맵 아래 범례가 말해 준다. */}
       <div
-        className="rounded-full"
+        className="rounded-full flex items-center justify-center"
         style={{
-          width: 26,
-          height: 26,
-          // 버건디로 바꾸면서 1px·55% 는 사진 위에서 너무 가늘었다 (2026-09-12)
-          border: `2px ${tone === 'own' ? 'solid' : 'dashed'} ${color}`,
-          outline: '1px solid rgba(255,255,255,0.8)',
-          opacity: 0.9,
+          width: 34,
+          height: 34,
+          border: '2px solid rgba(255,255,255,0.95)',
+          background: 'rgba(255,255,255,0.10)',
         }}
-      />
+      >
+        <div className="rounded-full" style={{ width: 13, height: 13, background: color }} />
+      </div>
     </div>
   );
 }
@@ -845,7 +844,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                   const sameCell = measured && hasTarget && targetRow === row && targetCol === col;
                   return (
                     <>
-                      {/* 고유미 → 추구미 화살표. 둘 다 있고 칸이 다를 때만 */}
+                      {/* 고유미 ↔ 추구미 연결 점선. 둘 다 있고 칸이 다를 때만 */}
                       {measured && hasTarget && !sameCell && (
                         <svg
                           className="absolute inset-0 w-full h-full pointer-events-none"
@@ -853,19 +852,10 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                           preserveAspectRatio="none"
                           style={{ zIndex: 1 }}
                         >
-                          <defs>
-                            <marker id="hairmap-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                              <path d="M0 0.8 L4.6 3 L0 5.2" fill="none" stroke={HAIR_MAP_COLOR} strokeWidth="1.6" opacity="0.9" />
-                            </marker>
-                          </defs>
                           <line
                             x1={x(col)} y1={y(row)} x2={x(targetCol!)} y2={y(targetRow!)}
-                            stroke="#FFFFFF" strokeWidth="2.4" opacity="0.45" vectorEffect="non-scaling-stroke"
-                          />
-                          <line
-                            x1={x(col)} y1={y(row)} x2={x(targetCol!)} y2={y(targetRow!)}
-                            stroke={HAIR_MAP_COLOR} strokeWidth="1.6" opacity="0.9" strokeDasharray="4 3"
-                            markerEnd="url(#hairmap-arrow)" vectorEffect="non-scaling-stroke"
+                            stroke={HAIR_MAP_COLOR} strokeWidth="3" strokeDasharray="9 7" strokeLinecap="butt"
+                            vectorEffect="non-scaling-stroke"
                           />
                         </svg>
                       )}
