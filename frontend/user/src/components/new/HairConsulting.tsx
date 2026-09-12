@@ -11,11 +11,15 @@ const imgHairMap = '/new/hair-map.png';
 
 // 마커 색 — 고유미는 브랜드 금색, 추구미는 확실히 구분되는 딥틸.
 // 예전엔 둘 다 금색이라 '강조 활용' 일 때 두 마커가 같은 색으로 보였다 (2026-09-06).
-// 이미지맵 표식 색. 금색·청록으로 나뉘어 있던 걸 버건디 한 계열로 모은다 —
-// 고유미/추구미는 실선·점선으로 구분되므로 색까지 갈릴 이유가 없다. (2026-09-12)
-const OWN_COLOR = '#7B2E3B';
-const TARGET_COLOR = '#7B2E3B';
-const TARGET_COLOR_DARK = '#5E2230';
+// 3×3 이미지맵 표식 색 — 원래대로 금색(고유미) · 청록(추구미)
+const OWN_COLOR = '#B8963C';
+const TARGET_COLOR = '#1F6F63';
+const TARGET_COLOR_DARK = '#155048';
+
+// 헤어이미지맵(사진 시트) 표식 색. 사진 위에 얹히는 표식이라 사진과 부딪히지
+// 않는 버건디 한 계열로 간다 — 고유미/추구미는 실선·점선으로 구분된다. (2026-09-12)
+const HAIR_MAP_COLOR = '#7B2E3B';
+const HAIR_MAP_COLOR_DARK = '#5E2230';
 const imgHairMap37 = '/new/hair-map-37.png';
 
 /**
@@ -251,7 +255,7 @@ function MapPin({
 }) {
   // 사진 위에는 링만 얹는다. 이름표를 사진 위에 두면 얼굴을 가려서
   // 맵 아래 범례로 뺐다 (2026-09-11).
-  const color = tone === 'own' ? OWN_COLOR : TARGET_COLOR;
+  const color = tone === 'own' ? HAIR_MAP_COLOR : HAIR_MAP_COLOR_DARK;
   return (
     <div
       className="absolute pointer-events-none"
@@ -282,7 +286,7 @@ function MapLegend({
   target: { en: string; ko: string } | null;
 }) {
   const Item = ({ tone, label, type }: { tone: 'own' | 'target'; label: string; type: { en: string; ko: string } | null }) => {
-    const color = tone === 'own' ? OWN_COLOR : TARGET_COLOR;
+    const color = tone === 'own' ? HAIR_MAP_COLOR : HAIR_MAP_COLOR_DARK;
     return (
       <div className="flex items-center gap-2">
         <span
@@ -608,7 +612,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                           <line x1={cx + 11} y1={cy} x2={cx + 20} y2={cy} stroke={OWN_COLOR} strokeWidth="1" />
                           <line x1={cx} y1={cy - 20} x2={cx} y2={cy - 11} stroke={OWN_COLOR} strokeWidth="1" />
                           <line x1={cx} y1={cy + 11} x2={cx} y2={cy + 20} stroke={OWN_COLOR} strokeWidth="1" />
-                          <circle cx={cx} cy={cy} r="5.5" fill="${OWN_COLOR}" />
+                          <circle cx={cx} cy={cy} r="5.5" fill={OWN_COLOR} />
                           <circle cx={cx} cy={cy} r="2" fill="white" />
                           {/* 라벨은 자기 칸 위쪽에 둔다 (칸 이름은 가운데 왼쪽이라 안 겹친다).
                               단 상대 마커가 왼쪽 위에 있으면 화살표가 이 모서리를 지나므로 오른쪽 위로 보낸다. */}
@@ -850,7 +854,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                         >
                           <defs>
                             <marker id="hairmap-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                              <path d="M0 0.8 L4.6 3 L0 5.2" fill="none" stroke={TARGET_COLOR} strokeWidth="0.9" opacity="0.7" />
+                              <path d="M0 0.8 L4.6 3 L0 5.2" fill="none" stroke={HAIR_MAP_COLOR} strokeWidth="0.9" opacity="0.7" />
                             </marker>
                           </defs>
                           <line
@@ -859,7 +863,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                           />
                           <line
                             x1={x(col)} y1={y(row)} x2={x(targetCol!)} y2={y(targetRow!)}
-                            stroke={TARGET_COLOR} strokeWidth="0.9" opacity="0.7" strokeDasharray="3 2.5"
+                            stroke={HAIR_MAP_COLOR} strokeWidth="0.9" opacity="0.7" strokeDasharray="3 2.5"
                             markerEnd="url(#hairmap-arrow)" vectorEffect="non-scaling-stroke"
                           />
                         </svg>
