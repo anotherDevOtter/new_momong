@@ -1413,6 +1413,13 @@ export function PremiumReport({
   // PDF — 한 장씩 넘기며 캡쳐하면 전환 애니메이션 때문에 반쯤 그려진 화면이 찍힌다.
   // 숨은 영역에 4장을 한꺼번에 그려 놓고 장마다 캡쳐한다. (V1 과 같은 방식) (2026-09-11)
   const printRef = useRef<HTMLDivElement>(null);
+  // 리포트는 전체화면 오버레이가 스크롤을 갖는다. window 를 올려도 소용없다. (2026-09-12)
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const toTop = () => {
+    const el = scrollRef.current;
+    if (el) el.scrollTo({ top: 0, behavior: 'smooth' });
+    else window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
   const [printing, setPrinting] = useState(false);
 
   const handleDownloadPdf = async () => {
@@ -1430,27 +1437,51 @@ export function PremiumReport({
       const pw = pdf.internal.pageSize.getWidth();
       const ph = pdf.internal.pageSize.getHeight();
       const nodes = Array.from(root.children) as HTMLElement[];
-      // 한 장이 A4 보다 길면 통째로 줄이지 않고 A4 높이만큼 잘라 여러 장으로 낸다.
-      // 예전에는 줄여서 한 장에 우겨넣어 3장이 깨알같이 찍혔다. (2026-09-12)
+      // 한 장이 A4 보다 길면 A4 높이만큼 잘라 여러 장으로 낸다.
+      // 그냥 자르면 표나 문단 한가운데가 끊긴다 — 요소 경계(섹션·표·카드)를 미리
+      // 재 두고 그중 페이지에 들어가는 마지막 지점에서 끊는다. (2026-09-12)
+      const SCALE = 2;
+      const cutPointsOf = (node: HTMLElement): number[] => {
+        const top = node.getBoundingClientRect().top;
+        // Wrap 안의 최상위 블록들이 섹션 경계다
+        const blocks = [...node.querySelectorAll<HTMLElement>(':scope > div > div > *')]
+          .map(el => el.getBoundingClientRect())
+          .filter(r => r.height > 0);
+        const pts: number[] = [];
+        for (let i = 1; i < blocks.length; i++) {
+          // 앞 블록이 제목처럼 짧으면 그 뒤에서 끊지 않는다 — 제목만 앞 장에 남는다
+          if (blocks[i - 1].height < 110) continue;
+          pts.push((blocks[i].top - top) * SCALE);
+        }
+        return pts.sort((a, b) => a - b);
+      };
+
       let first = true;
       for (const node of nodes) {
-        const canvas = await html2canvas(node, { scale: 2, backgroundColor: '#FFFFFF', logging: false });
+        const cuts = cutPointsOf(node);
+        const canvas = await html2canvas(node, { scale: SCALE, backgroundColor: '#FFFFFF', logging: false });
         const sliceH = Math.floor((canvas.width * ph) / pw);   // A4 한 장에 해당하는 픽셀 높이
-        const slices = Math.max(1, Math.ceil(canvas.height / sliceH));
-        for (let sIdx = 0; sIdx < slices; sIdx++) {
-          const y = sIdx * sliceH;
-          const h = Math.min(sliceH, canvas.height - y);
+        let y = 0;
+        while (y < canvas.height - 2) {
+          let end = Math.min(y + sliceH, canvas.height);
+          if (end < canvas.height) {
+            // 페이지의 35% 는 넘게 채우면서, 경계 중 가장 아래 지점에서 끊는다
+            const fits = cuts.filter(c => c > y + sliceH * 0.35 && c <= end);
+            if (fits.length) end = Math.round(fits[fits.length - 1]);
+          }
+          const h = Math.max(1, Math.round(end - y));
           const part = document.createElement('canvas');
           part.width = canvas.width;
           part.height = h;
           const ctx = part.getContext('2d');
-          if (!ctx) continue;
+          if (!ctx) break;
           ctx.fillStyle = '#FFFFFF';
           ctx.fillRect(0, 0, part.width, part.height);
           ctx.drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
           if (!first) pdf.addPage();
           first = false;
           pdf.addImage(part.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, pw, (h * pw) / canvas.width);
+          y = end;
         }
       }
       pdf.save(`${customerName || '고객'}_이미지설계리포트_${new Date().toISOString().slice(0, 10)}.pdf`);
@@ -1477,7 +1508,7 @@ export function PremiumReport({
 
   const goTo = (p: number) => {
     setPage(p);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    toTop();
   };
 
   return (
@@ -1485,6 +1516,7 @@ export function PremiumReport({
     // 그냥 두면 상담 화면 아래에 이어 붙는다. 공유 페이지(embedded)에서는
     // 페이지 안에 그대로 얹으므로 덮지 않는다. (2026-09-11)
     <div
+      ref={scrollRef}
       style={embedded
         ? { background: '#FFFFFF', ...FF }
         : { position: 'fixed', inset: 0, zIndex: 60, overflowY: 'auto', background: '#FFFFFF', ...FF }}
@@ -1492,8 +1524,8 @@ export function PremiumReport({
     <div style={{ minHeight: '100vh', background: '#FFFFFF', ...FF }}>
       <ReportHeader
         page={page}
-        onBack={page === 0 ? onBack : () => { if (page === 1) { setPage(0); window.scrollTo(0, 0); } else goTo(page - 1); }}
-        onPrev={() => { if (page > 1) goTo(page - 1); else { setPage(0); window.scrollTo(0, 0); } }}
+        onBack={page === 0 ? onBack : () => { if (page === 1) { setPage(0); toTop(); } else goTo(page - 1); }}
+        onPrev={() => { if (page > 1) goTo(page - 1); else { setPage(0); toTop(); } }}
         onNext={() => { if (page > 0 && page < 3) goTo(page + 1); else if (page === 3) onBack(); }}
       />
       <AnimatePresence mode="wait">
@@ -1513,7 +1545,7 @@ export function PremiumReport({
       {page > 0 && (
         <div style={{ borderTop: `1px solid ${G8}`, background: '#FFFFFF' }}>
           <div className="max-w-3xl mx-auto px-5 lg:px-10" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: 64 }}>
-            <button onClick={() => { if (page > 1) goTo(page - 1); else { setPage(0); window.scrollTo(0, 0); } }} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', padding: '12px 0', fontSize: 14, color: G3, fontFamily: MONO, letterSpacing: '0.08em', minHeight: 48 }}>
+            <button onClick={() => { if (page > 1) goTo(page - 1); else { setPage(0); toTop(); } }} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', padding: '12px 0', fontSize: 14, color: G3, fontFamily: MONO, letterSpacing: '0.08em', minHeight: 48 }}>
               <ArrowLeft size={14} color={G3} strokeWidth={1.5} />이전
             </button>
             <div style={{ display: 'flex', gap: 8 }}>
