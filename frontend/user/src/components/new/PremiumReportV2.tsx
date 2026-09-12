@@ -433,11 +433,14 @@ function ReportHeader({ page, onBack, onPrev, onNext }: { page: number; onBack: 
 function Cover({ onStart, session }: { onStart: () => void; session: CustomerSession }) {
   return (
     <motion.div key="cover" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
-      <div className="max-w-3xl mx-auto" style={{ position: 'relative', height: 'calc(100vh - 60px)', minHeight: 520, overflow: 'hidden' }}>
+      {/* 표지에 목차를 같이 얹는다 — 무엇이 담겼는지 첫 장에서 보이게 (2026-09-12).
+          사진 위에 글을 두 단으로 올리므로 전체를 조금 어둡게 깐다. */}
+      <div className="max-w-5xl mx-auto" style={{ position: 'relative', height: 'calc(100vh - 60px)', minHeight: 560, overflow: 'hidden' }}>
         <img src={COVER_IMAGE} alt="MERCI MOMONG Personal Hair Report" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,8,6,0.65) 0%, rgba(10,8,6,0.08) 60%, transparent 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,8,6,0.80) 0%, rgba(10,8,6,0.42) 55%, rgba(10,8,6,0.30) 100%)' }} />
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
-          <div className="max-w-3xl mx-auto px-5 lg:px-10" style={{ paddingBottom: 56 }}>
+          <div className="max-w-5xl mx-auto px-5 lg:px-10 grid grid-cols-1 sm:grid-cols-[1.15fr_1fr] gap-8 sm:gap-12 items-end" style={{ paddingBottom: 56 }}>
+          <div>
             <p style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.28em', color: 'rgba(255,255,255,0.45)', marginBottom: 20 }}>YOUR PERSONAL REPORT</p>
             {session.customer.name && (
               <div style={{ marginBottom: 28 }}>
@@ -452,10 +455,33 @@ function Cover({ onStart, session }: { onStart: () => void; session: CustomerSes
               <ArrowRight size={12} color={G1} strokeWidth={1.5} />
             </button>
           </div>
+
+          {/* CONTENTS — 04장의 '이 리포트에 담긴 것' 과 같은 표를 쓴다 */}
+          <div className="hidden sm:block" style={{ paddingBottom: 6 }}>
+            <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.28em', color: 'rgba(255,255,255,0.40)', marginBottom: 14 }}>CONTENTS</p>
+            <div style={{ height: 1, background: 'rgba(255,255,255,0.22)', marginBottom: 18 }} />
+            {CHAPTERS.map((ch, i) => (
+              <div key={ch.num} style={{ marginBottom: i === CHAPTERS.length - 1 ? 0 : 22 }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                  <span style={{ fontFamily: MONO, fontSize: 8, color: 'rgba(255,255,255,0.38)' }}>{ch.num}</span>
+                  <span style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.12em', color: 'rgba(255,255,255,0.92)', fontWeight: 500 }}>{ch.title}</span>
+                </div>
+                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', margin: '3px 0 7px 22px' }}>{ch.ko}</p>
+                <ul style={{ listStyle: 'none', margin: '0 0 0 22px', padding: 0 }}>
+                  {ch.items.map(it => (
+                    <li key={it} style={{ fontSize: 11, color: 'rgba(255,255,255,0.62)', lineHeight: 1.9, display: 'flex', gap: 7 }}>
+                      <span style={{ color: 'rgba(255,255,255,0.3)' }}>·</span>{it}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          </div>
         </div>
       </div>
       <div style={{ borderBottom: `1px solid ${G7}` }}>
-        <div className="max-w-3xl mx-auto px-5 lg:px-10">
+        <div className="max-w-5xl mx-auto px-5 lg:px-10">
           <div style={{ borderLeft: `1px solid ${G7}`, display: 'flex' }}>
             {[
               { label: 'CLIENT',        value: session.customer.name || '—' },
