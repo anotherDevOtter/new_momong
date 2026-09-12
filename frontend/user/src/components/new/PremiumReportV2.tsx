@@ -439,7 +439,7 @@ function Cover({ onStart, session }: { onStart: () => void; session: CustomerSes
         <img src={COVER_IMAGE} alt="MERCI MOMONG Personal Hair Report" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,8,6,0.80) 0%, rgba(10,8,6,0.42) 55%, rgba(10,8,6,0.30) 100%)' }} />
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
-          <div className="max-w-5xl mx-auto px-5 lg:px-10 grid grid-cols-1 sm:grid-cols-[1.15fr_1fr] gap-8 sm:gap-12 items-end" style={{ paddingBottom: 56 }}>
+          <div className="max-w-5xl mx-auto px-5 lg:px-10 grid grid-cols-1 sm:grid-cols-[2.4fr_1fr] gap-8 sm:gap-10 items-end" style={{ paddingBottom: 56 }}>
           <div>
             <p style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.28em', color: 'rgba(255,255,255,0.45)', marginBottom: 20 }}>YOUR PERSONAL REPORT</p>
             {session.customer.name && (
