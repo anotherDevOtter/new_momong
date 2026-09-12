@@ -268,9 +268,10 @@ function MapPin({
         style={{
           width: 26,
           height: 26,
-          border: `1px ${tone === 'own' ? 'solid' : 'dashed'} ${color}`,
-          outline: '1px solid rgba(255,255,255,0.75)',
-          opacity: 0.55,
+          // 버건디로 바꾸면서 1px·55% 는 사진 위에서 너무 가늘었다 (2026-09-12)
+          border: `2px ${tone === 'own' ? 'solid' : 'dashed'} ${color}`,
+          outline: '1px solid rgba(255,255,255,0.8)',
+          opacity: 0.9,
         }}
       />
     </div>
@@ -291,7 +292,7 @@ function MapLegend({
       <div className="flex items-center gap-2">
         <span
           className="rounded-full inline-block"
-          style={{ width: 13, height: 13, border: `1.5px ${tone === 'own' ? 'solid' : 'dashed'} ${color}` }}
+          style={{ width: 13, height: 13, border: `2px ${tone === 'own' ? 'solid' : 'dashed'} ${color}` }}
         />
         <span style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.18em', color: '#AAAAAA' }}>{label}</span>
         <span style={{ fontSize: 11, color: type ? '#111111' : '#CCCCCC', fontWeight: 500 }}>
@@ -854,7 +855,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                         >
                           <defs>
                             <marker id="hairmap-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                              <path d="M0 0.8 L4.6 3 L0 5.2" fill="none" stroke={HAIR_MAP_COLOR} strokeWidth="0.9" opacity="0.7" />
+                              <path d="M0 0.8 L4.6 3 L0 5.2" fill="none" stroke={HAIR_MAP_COLOR} strokeWidth="1.6" opacity="0.9" />
                             </marker>
                           </defs>
                           <line
@@ -863,7 +864,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                           />
                           <line
                             x1={x(col)} y1={y(row)} x2={x(targetCol!)} y2={y(targetRow!)}
-                            stroke={HAIR_MAP_COLOR} strokeWidth="0.9" opacity="0.7" strokeDasharray="3 2.5"
+                            stroke={HAIR_MAP_COLOR} strokeWidth="1.6" opacity="0.9" strokeDasharray="4 3"
                             markerEnd="url(#hairmap-arrow)" vectorEffect="non-scaling-stroke"
                           />
                         </svg>
