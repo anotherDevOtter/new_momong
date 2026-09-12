@@ -14,7 +14,7 @@
 import type { LandmarkPoint } from './useFaceLandmarks';
 
 const INK = '#FFFFFF';
-const DOT = '#1A1A1A';
+const DOT = '#FFFFFF';
 
 /** MediaPipe FaceMesh 표준 인덱스 — 부위별로 필요한 점만 추렸다 */
 const IDX = {
@@ -54,6 +54,9 @@ function toPx(pts: LandmarkPoint[], i: number, w: number, h: number): P {
 // 얇아져 사라진다. non-scaling-stroke 로 굵기를 화면 기준으로 고정한다. (2026-09-11)
 const STROKE = { vectorEffect: 'non-scaling-stroke' as const };
 
+/** 원장님 예시의 선 — 흰 얇은 점선. non-scaling-stroke 라 이 값이 화면 px 다 (2026-09-12) */
+const DASH = '4 5';
+
 /**
  * 점은 길이 0 짜리 선의 둥근 끝으로 그린다 — circle 의 r 은 viewBox 배율을 타서
  * 축소된 화면에서 점이 사라진다.
@@ -62,7 +65,7 @@ function Dot({ p }: { p: P }) {
   return (
     <line
       x1={p.x} y1={p.y} x2={p.x} y2={p.y}
-      stroke={DOT} strokeWidth={6} strokeLinecap="round" {...STROKE}
+      stroke={DOT} strokeWidth={5} strokeLinecap="round" {...STROKE}
     />
   );
 }
@@ -72,7 +75,7 @@ function Line({ a, b }: { a: P; b: P }) {
   return (
     <line
       x1={a.x} y1={a.y} x2={b.x} y2={b.y}
-      stroke={INK} strokeWidth={1.6} strokeLinecap="round"
+      stroke={INK} strokeWidth={1} strokeLinecap="butt" strokeDasharray={DASH}
       {...STROKE}
     />
   );
@@ -98,7 +101,7 @@ function smoothPath(pts: P[], close?: boolean): string {
 }
 
 function Poly({ pts, close }: { pts: P[]; close?: boolean }) {
-  return <path d={smoothPath(pts, close)} stroke={INK} strokeWidth={1.6} fill="none" strokeLinecap="round" strokeLinejoin="round" {...STROKE} />;
+  return <path d={smoothPath(pts, close)} stroke={INK} strokeWidth={1} fill="none" strokeLinecap="butt" strokeLinejoin="round" strokeDasharray={DASH} {...STROKE} />;
 }
 
 /**
