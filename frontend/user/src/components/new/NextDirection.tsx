@@ -159,13 +159,15 @@ function weekToMonthHint(week: number): string {
   return `${d.getMonth() + 1}월`;
 }
 
+// 매장에서 실제로 쓰는 말로 바꿨다 (2026-09-12).
+// CLINIC 은 제품·메뉴 이름이라 원장님 확인 전까지 그대로 둔다.
 const SERVICE_DETAILS: Partial<Record<ServiceKey, string[]>> = {
   CUT:       ['전체 커트', '앞머리 커트', '레이어', '길이 조정', '숱 조절'],
-  PERM:      ['C Curl', 'S Curl', 'C + S', 'Natural Wave', 'Volume Perm'],
-  ROOT_PERM: ['뿌리 볼륨', '자연 볼륨'],
-  COLOR:     ['Full Color', 'Tone Up', 'Tone Down', '색감 변경'],
-  ROOT_COLOR:['뿌리 염색', '섀도 루트'],
-  BLEACH:    ['Partial', 'Full', 'Highlight', 'Re-bleach'],
+  PERM:      ['C컬', 'S컬', 'C + S', '웨이브', '스트레이트'],
+  ROOT_PERM: ['윗볼륨', '옆볼륨', '뒷볼륨'],
+  COLOR:     ['전체 염색', '톤업', '톤다운', '색감 변경', '새치커버'],
+  ROOT_COLOR:['뿌리 염색', '섀도 루트', '새치커버'],
+  BLEACH:    ['뿌리 탈색', '전체 탈색', '옴브레', '통브릿지'],
   CLINIC:    ['Moisture', 'Damage Care', 'Protein', 'Scalp'],
 };
 
