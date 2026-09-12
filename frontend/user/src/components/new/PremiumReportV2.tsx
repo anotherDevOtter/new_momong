@@ -1439,27 +1439,34 @@ export function PremiumReport({
       const pw = pdf.internal.pageSize.getWidth();
       const ph = pdf.internal.pageSize.getHeight();
       const nodes = Array.from(root.children) as HTMLElement[];
-      // 한 장이 A4 보다 길면 A4 높이만큼 잘라 여러 장으로 낸다.
-      // 그냥 자르면 표나 문단 한가운데가 끊긴다 — 요소 경계(섹션·표·카드)를 미리
-      // 재 두고 그중 페이지에 들어가는 마지막 지점에서 끊는다. (2026-09-12)
       const SCALE = 2;
-      const measure = (node: HTMLElement) => {
-        const top = node.getBoundingClientRect().top;
-        // Wrap 안의 최상위 블록들이 섹션 경계다
-        const blocks = [...node.querySelectorAll<HTMLElement>(':scope > div > div > *')]
-          .map(el => el.getBoundingClientRect())
-          .filter(r => r.height > 0);
-        const soft: number[] = [];
-        for (let i = 1; i < blocks.length; i++) {
-          // 앞 블록이 제목처럼 짧으면 그 뒤에서 끊지 않는다 — 제목만 앞 장에 남는다
-          if (blocks[i - 1].height < 110) continue;
-          soft.push((blocks[i].top - top) * SCALE);
-        }
-        // data-pdf-break 가 붙은 자리는 무조건 새 장에서 시작한다
+      // 한 장이 A4 보다 길면 여러 장으로 잘라 낸다.
+      // 아무 데서나 자르면 표·카드 한가운데가 끊긴다 — 자를 수 있는 자리를 먼저 모은다.
+      // 규칙: 한 장에 들어가는 요소는 '덩어리'로 보고 그 안은 건드리지 않는다.
+      //      한 장보다 큰 요소만 안으로 들어가 자식들 사이를 후보로 삼는다.
+      //      가로로 나란히 놓인 자식(2단 레이아웃·그리드)은 쪼갤 수 없으니 통째로 둔다. (2026-09-12)
+      const collect = (node: HTMLElement, limitPx: number) => {
+        const rootTop = node.getBoundingClientRect().top;
+        const cuts: { y: number; prevH: number }[] = [];
+        const walk = (el: HTMLElement) => {
+          const kids = ([...el.children] as HTMLElement[])
+            .map(k => ({ el: k, r: k.getBoundingClientRect() }))
+            .filter(k => k.r.height > 0 && k.r.width > 0);
+          if (kids.length < 1) return;
+          const stacked = kids.every((k, i) => i === 0 || k.r.top >= kids[i - 1].r.bottom - 2);
+          if (!stacked) return;           // 가로 배치 — 여기서는 자르지 않는다
+          for (let i = 0; i < kids.length; i++) {
+            if (i > 0) cuts.push({ y: kids[i].r.top - rootTop, prevH: kids[i - 1].r.height });
+            if (kids[i].r.height > limitPx) walk(kids[i].el);
+          }
+        };
+        walk(node);
         const hard = [...node.querySelectorAll<HTMLElement>('[data-pdf-break]')]
-          .map(el => (el.getBoundingClientRect().top - top) * SCALE)
-          .filter(v => v > 0);
-        return { soft: soft.sort((a, b) => a - b), hard: hard.sort((a, b) => a - b) };
+          .map(el => el.getBoundingClientRect().top - rootTop)
+          .filter(v => v > 0)
+          .sort((a, b) => a - b);
+        cuts.sort((a, b) => a.y - b.y);
+        return { cuts, hard };
       };
 
       // 내용이 종이 끝에 닿지 않게 위아래를 띄운다 (2026-09-12)
@@ -1469,20 +1476,23 @@ export function PremiumReport({
 
       let first = true;
       for (const node of nodes) {
-        const { soft, hard } = measure(node);
+        const limitPx = (node.getBoundingClientRect().width * usableH) / pw;   // 한 장 높이(화면 px)
+        const { cuts, hard } = collect(node, limitPx);
         const canvas = await html2canvas(node, { scale: SCALE, backgroundColor: '#FFFFFF', logging: false });
-        const sliceH = Math.floor((canvas.width * usableH) / pw);   // 한 장에 담기는 픽셀 높이
+        const px = canvas.width / node.getBoundingClientRect().width;          // 화면 px → 캔버스 px
+        const sliceH = Math.floor(limitPx * px);
         let y = 0;
         while (y < canvas.height - 2) {
           let end = Math.min(y + sliceH, canvas.height);
-          // 강제 넘김이 이 장 안에 들어오면 거기서 끊는다
-          const forced = hard.find(hp => hp > y + 2 && hp <= end);
+          const forced = hard.map(v => v * px).find(hp => hp > y + 2 && hp <= end);
           if (forced != null) {
             end = Math.round(forced);
           } else if (end < canvas.height) {
-            // 페이지의 35% 는 넘게 채우면서, 경계 중 가장 아래 지점에서 끊는다
-            const fits = soft.filter(c => c > y + sliceH * 0.35 && c <= end);
-            if (fits.length) end = Math.round(fits[fits.length - 1]);
+            const fits = cuts.filter(c => c.y * px > y + 2 && c.y * px <= end);
+            // 제목만 앞 장에 남지 않게, 앞 블록이 짧은 자리는 뒤로 미룬다
+            const safe = fits.filter(c => c.prevH >= 110);
+            const pick = safe.length ? safe : fits;
+            if (pick.length) end = Math.round(pick[pick.length - 1].y * px);
           }
           const h = Math.max(1, Math.round(end - y));
           const part = document.createElement('canvas');
