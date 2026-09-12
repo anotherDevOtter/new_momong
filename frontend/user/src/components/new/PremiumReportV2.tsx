@@ -8,7 +8,7 @@ import { MONO, IMAP, FORM, PROP, dominantIdx, dominantOf } from './faceAnalysisD
 import { AREA_ITEMS, areaScores } from './AIFaceResultDerived';
 import type { MItem } from './faceAnalysisData';
 import {
-  CONDITION_AXES, conditionOptionOf, type HairConsultingData,
+  CONDITION_AXES, conditionOptionOf, styleIds, type HairConsultingData,
   BANGS_OPTIONS, PARTING_OPTIONS, LENGTH_OPTIONS, CURL_OPTIONS, COLOR_OPTIONS,
 } from './HairConsulting';
 
@@ -916,7 +916,11 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
         <p style={{ fontSize: 15, color: G4, fontWeight: 300, lineHeight: 1.65, marginBottom: 40 }}>얼굴 이미지 + 원하는 이미지 + 모질 상태를 함께 반영한 세부 디자인입니다.</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: G7, border: `1px solid ${G7}` }}>
           {DESIGN_AXES.map(({ key, en, label, opts }) => {
-            const opt = opts.find(o => o.id === hairStyle?.[key]);
+            // 축마다 여러 개를 고를 수 있다 — 고른 순서대로 나란히 적는다 (2026-09-12)
+            const picked = styleIds(hairStyle?.[key])
+              .map(id => opts.find(o => o.id === id))
+              .filter((o): o is NonNullable<typeof o> => !!o);
+            const tags = [...new Set(picked.flatMap(o => o.tags))];
             return (
               <div key={key} style={{ background: '#FFFFFF', display: 'grid', gridTemplateColumns: '88px 1fr' }}>
                 <div style={{ padding: '22px 14px', borderRight: `1px solid ${G7}`, background: G9, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 3 }}>
@@ -924,11 +928,13 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
                   <p style={{ fontSize: 13, color: G2, fontWeight: 500 }}>{label}</p>
                 </div>
                 <div style={{ padding: '22px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-                  {opt ? (
+                  {picked.length ? (
                     <>
-                      <span style={{ fontSize: 18, fontWeight: 500, color: G1, letterSpacing: '-0.01em' }}>{opt.label}</span>
+                      <span style={{ fontSize: 18, fontWeight: 500, color: G1, letterSpacing: '-0.01em' }}>
+                        {picked.map(o => o.label).join(' · ')}
+                      </span>
                       <p style={{ fontSize: 12, color: G5, lineHeight: 1.55, fontWeight: 300, maxWidth: 280, textAlign: 'right' }}>
-                        {opt.tags.map(t => `#${t}`).join(' ')}
+                        {tags.map(t => `#${t}`).join(' ')}
                       </p>
                     </>
                   ) : (

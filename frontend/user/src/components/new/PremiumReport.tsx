@@ -5,7 +5,7 @@ import { CycleData, DIRECTION_ITEMS, CHANGE_LEVELS } from './NextDirection';
 import { TEXTURE_LABELS, TEXTURE_NOTES } from '@/components/3way/HairTextureAnalysis';
 import { FORM, PROP, IMAP, dominantIdx, dominantOf } from './faceAnalysisData';
 import {
-  STYLE_AXES, styleOptionOf, type StyleAxis, type HairConsultingData,
+  STYLE_AXES, styleOptionsOf, type StyleAxis, type HairConsultingData,
   CONDITION_AXES, conditionOptionOf, DAMAGE_DETAIL, CONDITION_SECTIONS,
 } from './HairConsulting';
 // 저장은 상위 page.tsx 의 saveConsult() 가 담당한다. 시안의 Supabase 헬퍼는 쓰지 않는다.
@@ -729,12 +729,14 @@ function TodayDesignPage({ pageNumber, totalPages, style }: { pageNumber: number
   ];
 
   const picked = AXES.map(({ axis, key }) => {
-    const opt = styleOptionOf(axis, style?.[key]);
+    // 축마다 여러 개를 고를 수 있게 바뀌었다 — 옛 기록은 하나짜리로 들어온다 (2026-09-12)
+    const opts = styleOptionsOf(axis, style?.[key]);
+    const tags = [...new Set(opts.flatMap(o => o.tags))];
     return {
       label: STYLE_AXES[axis].title,
-      value: opt?.label ?? '—',
+      value: opts.length ? opts.map(o => o.label).join(' · ') : '—',
       // 설명은 그 옵션에 붙어 있는 이미지 태그를 그대로 쓴다 (시안 시트와 같은 문구).
-      explanation: opt ? `${opt.tags.join(' · ')} 인상을 만드는 방향입니다.` : '이번 컨설팅에서 선택하지 않았습니다.',
+      explanation: opts.length ? `${tags.join(' · ')} 인상을 만드는 방향입니다.` : '이번 컨설팅에서 선택하지 않았습니다.',
     };
   });
 

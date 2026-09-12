@@ -46,13 +46,14 @@ export interface HairConsultingData {
   currentType: { en: string; ko: string } | null;
   /** 목표로 고른 이미지타입 (3×3 맵에서 클릭) */
   targetType: { en: string; ko: string } | null;
-  /** 스타일 제안 5개 축 */
+  /** 스타일 제안 5개 축 — 축마다 여러 개를 고를 수 있다 (2026-09-12).
+   *  예전 기록은 축마다 id 하나(문자열)라 두 꼴을 모두 받는다 — styleIds() 로 편다. */
   style: {
-    bangs: string | null;
-    parting: string | null;
-    length: string | null;
-    curl: string | null;
-    color: string | null;
+    bangs: StyleSel;
+    parting: StyleSel;
+    length: StyleSel;
+    curl: StyleSel;
+    color: StyleSel;
   };
   /** 모질 4개 축 (damage · thickness · density · curl) */
   condition: Record<string, string | null>;
@@ -149,6 +150,23 @@ export const STYLE_AXES = {
 } as const;
 
 export type StyleAxis = keyof typeof STYLE_AXES;
+
+/** 한 축의 선택. 예전 기록은 문자열 하나, 지금은 배열 */
+export type StyleSel = string | string[] | null;
+
+/** 어느 꼴로 저장돼 있든 id 배열로 편다 */
+export function styleIds(v: StyleSel | undefined): string[] {
+  if (!v) return [];
+  return (Array.isArray(v) ? v : [v]).filter(Boolean);
+}
+
+/** 한 축에서 고른 것 전부를 { 이름, 태그 } 로 */
+export function styleOptionsOf(axis: StyleAxis, v: StyleSel | undefined) {
+  return styleIds(v)
+    .map(id => STYLE_AXES[axis].options.find(o => o.id === id))
+    .filter((o): o is NonNullable<typeof o> => !!o)
+    .map(o => ({ label: o.label, tags: [...o.tags] }));
+}
 
 /** 옵션 id → { 이름, 태그 }. 없는 id 면 null. */
 export function styleOptionOf(axis: StyleAxis, id: string | null | undefined) {
@@ -367,11 +385,14 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
 
   const [showHairMap, setShowHairMap] = useState(false);
   const [activeStyle, setActiveStyle] = useState<'bangs' | 'parting' | 'length' | 'curl' | 'color'>('bangs');
-  const [selectedBangs, setSelectedBangs] = useState<string | null>(initial?.style?.bangs ?? null);
-  const [selectedParting, setSelectedParting] = useState<string | null>(initial?.style?.parting ?? null);
-  const [selectedLength, setSelectedLength] = useState<string | null>(initial?.style?.length ?? null);
-  const [selectedCurl, setSelectedCurl] = useState<string | null>(initial?.style?.curl ?? null);
-  const [selectedColor, setSelectedColor] = useState<string | null>(initial?.style?.color ?? null);
+  // 스타일 제안은 축마다 중복선택 (2026-09-12) — 같은 걸 다시 누르면 빠진다
+  const [selectedBangs, setSelectedBangs] = useState<string[]>(styleIds(initial?.style?.bangs));
+  const [selectedParting, setSelectedParting] = useState<string[]>(styleIds(initial?.style?.parting));
+  const [selectedLength, setSelectedLength] = useState<string[]>(styleIds(initial?.style?.length));
+  const [selectedCurl, setSelectedCurl] = useState<string[]>(styleIds(initial?.style?.curl));
+  const [selectedColor, setSelectedColor] = useState<string[]>(styleIds(initial?.style?.color));
+  const toggleIn = (set: React.Dispatch<React.SetStateAction<string[]>>) => (id: string) =>
+    set(prev => (prev.includes(id) ? prev.filter(v => v !== id) : [...prev, id]));
   const [activeCondition, setActiveCondition] = useState<'damage' | 'thickness' | 'density' | 'curl'>('damage');
   const [selectedConditions, setSelectedConditions] = useState<Record<string, string | null>>(initial?.condition ?? {});
 
@@ -404,7 +425,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
   }, [selectedBangs, selectedParting, selectedLength, selectedCurl, selectedColor,
       selectedConditions, selectedCell, imageType?.en]);
 
-  const allSelected = selectedBangs && selectedParting && selectedLength && selectedCurl && selectedColor;
+  const allSelected = [selectedBangs, selectedParting, selectedLength, selectedCurl, selectedColor].every(a => a.length > 0);
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "'Pretendard Variable','Inter',-apple-system,sans-serif" }}>
@@ -1330,12 +1351,12 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
           {/* 6-card grid */}
           <div className="mb-8" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 10 }}>
             {BANGS_OPTIONS.map(opt => {
-              const isSel = selectedBangs === opt.id;
+              const isSel = selectedBangs.includes(opt.id);
               const photo = stylePhoto('bangs', opt.id);
               return (
                 <button
                   key={opt.id}
-                  onClick={() => setSelectedBangs(isSel ? null : opt.id)}
+                  onClick={() => toggleIn(setSelectedBangs)(opt.id)}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'center', alignSelf: 'start' }}
                 >
                   {/* Photo */}
@@ -1406,11 +1427,11 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
         {activeStyle === 'parting' && <motion.div key="parting" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
           <div className="mb-8" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
             {PARTING_OPTIONS.map(opt => {
-              const isSel = selectedParting === opt.id;
+              const isSel = selectedParting.includes(opt.id);
               return (
                 <button
                   key={opt.id}
-                  onClick={() => setSelectedParting(isSel ? null : opt.id)}
+                  onClick={() => toggleIn(setSelectedParting)(opt.id)}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'center', alignSelf: 'start' }}
                 >
                   <div style={{
@@ -1450,11 +1471,11 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
         {activeStyle === 'length' && <motion.div key="length" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
           <div className="mb-8" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
             {LENGTH_OPTIONS.map(opt => {
-              const isSel = selectedLength === opt.id;
+              const isSel = selectedLength.includes(opt.id);
               return (
                 <button
                   key={opt.id}
-                  onClick={() => setSelectedLength(isSel ? null : opt.id)}
+                  onClick={() => toggleIn(setSelectedLength)(opt.id)}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'center', alignSelf: 'start' }}
                 >
                   <div style={{
@@ -1503,11 +1524,11 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
         {activeStyle === 'curl' && <motion.div key="curl" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
           <div className="mb-8" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
             {CURL_OPTIONS.map(opt => {
-              const isSel = selectedCurl === opt.id;
+              const isSel = selectedCurl.includes(opt.id);
               return (
                 <button
                   key={opt.id}
-                  onClick={() => setSelectedCurl(isSel ? null : opt.id)}
+                  onClick={() => toggleIn(setSelectedCurl)(opt.id)}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'center', alignSelf: 'start' }}
                 >
                   <div style={{
@@ -1556,11 +1577,11 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
         {activeStyle === 'color' && <motion.div key="color" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
           <div className="mb-8" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10, alignItems: 'stretch' }}>
             {COLOR_OPTIONS.map(opt => {
-              const isSel = selectedColor === opt.id;
+              const isSel = selectedColor.includes(opt.id);
               return (
                 <button
                   key={opt.id}
-                  onClick={() => setSelectedColor(isSel ? null : opt.id)}
+                  onClick={() => toggleIn(setSelectedColor)(opt.id)}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', height: '100%' }}
                 >
                   <div style={{
@@ -1632,7 +1653,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
         </motion.div>
 
         {/* ── Selection Summary ───────────────────────────────────── */}
-        {(selectedBangs || selectedParting || selectedLength || selectedCurl || selectedColor) && (
+        {[selectedBangs, selectedParting, selectedLength, selectedCurl, selectedColor].some(a => a.length > 0) && (
           <motion.div
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1645,18 +1666,20 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
             </p>
             <div className="flex flex-wrap gap-3">
               {[
-                { key: 'bangs',   label: '앞머리', id: selectedBangs,   opts: BANGS_OPTIONS },
-                { key: 'parting', label: '가르마', id: selectedParting, opts: PARTING_OPTIONS },
-                { key: 'length',  label: '길이',   id: selectedLength,  opts: LENGTH_OPTIONS },
-                { key: 'curl',    label: '컬',     id: selectedCurl,    opts: CURL_OPTIONS },
-                { key: 'color',   label: '컬러',   id: selectedColor,   opts: COLOR_OPTIONS },
-              ].map(({ key, label, id, opts }) => id ? (
+                { key: 'bangs',   label: '앞머리', ids: selectedBangs,   opts: BANGS_OPTIONS },
+                { key: 'parting', label: '가르마', ids: selectedParting, opts: PARTING_OPTIONS },
+                { key: 'length',  label: '길이',   ids: selectedLength,  opts: LENGTH_OPTIONS },
+                { key: 'curl',    label: '컬',     ids: selectedCurl,    opts: CURL_OPTIONS },
+                { key: 'color',   label: '컬러',   ids: selectedColor,   opts: COLOR_OPTIONS },
+              ].map(({ key, label, ids, opts }) => ids.length ? (
                 <div key={key} className="flex items-center gap-1.5">
                   <span className="text-[9px] text-[#BBBBBB]">{label}</span>
-                  <span className="text-[11px] font-medium text-[#1A1A1A] px-2 py-0.5"
-                    style={{ background: '#E8E8E4', borderRadius: 2 }}>
-                    {opts.find(o => o.id === id)?.label}
-                  </span>
+                  {ids.map(id => (
+                    <span key={id} className="text-[11px] font-medium text-[#1A1A1A] px-2 py-0.5"
+                      style={{ background: '#E8E8E4', borderRadius: 2 }}>
+                      {opts.find(o => o.id === id)?.label}
+                    </span>
+                  ))}
                 </div>
               ) : null)}
             </div>
@@ -1677,7 +1700,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
             }}>
             {allSelected
               ? '다음 단계로 진행 →'
-              : `선택 완료 후 다음 단계 가능 (${[selectedBangs, selectedParting, selectedLength, selectedCurl, selectedColor].filter(Boolean).length}/5)`}
+              : `선택 완료 후 다음 단계 가능 (${[selectedBangs, selectedParting, selectedLength, selectedCurl, selectedColor].filter(a => a.length > 0).length}/5)`}
           </button>
         </div>
       </div>
