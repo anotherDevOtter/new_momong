@@ -75,7 +75,7 @@ function Line({ a, b }: { a: P; b: P }) {
   return (
     <line
       x1={a.x} y1={a.y} x2={b.x} y2={b.y}
-      stroke={INK} strokeWidth={1} strokeLinecap="butt" strokeDasharray={DASH}
+      stroke={INK} strokeWidth={1.5} strokeLinecap="butt" strokeDasharray={DASH}
       {...STROKE}
     />
   );
@@ -101,7 +101,7 @@ function smoothPath(pts: P[], close?: boolean): string {
 }
 
 function Poly({ pts, close }: { pts: P[]; close?: boolean }) {
-  return <path d={smoothPath(pts, close)} stroke={INK} strokeWidth={1} fill="none" strokeLinecap="butt" strokeLinejoin="round" strokeDasharray={DASH} {...STROKE} />;
+  return <path d={smoothPath(pts, close)} stroke={INK} strokeWidth={1.5} fill="none" strokeLinecap="butt" strokeLinejoin="round" strokeDasharray={DASH} {...STROKE} />;
 }
 
 /**
