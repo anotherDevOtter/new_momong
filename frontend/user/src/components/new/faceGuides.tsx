@@ -72,7 +72,7 @@ function Line({ a, b }: { a: P; b: P }) {
   return (
     <line
       x1={a.x} y1={a.y} x2={b.x} y2={b.y}
-      stroke={INK} strokeWidth={1} strokeLinecap="round"
+      stroke={INK} strokeWidth={1.6} strokeLinecap="round"
       {...STROKE}
     />
   );
@@ -80,7 +80,7 @@ function Line({ a, b }: { a: P; b: P }) {
 
 function Poly({ pts, close }: { pts: P[]; close?: boolean }) {
   const d = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x} ${p.y}`).join(' ') + (close ? ' Z' : '');
-  return <path d={d} stroke={INK} strokeWidth={1} fill="none" strokeLinecap="round" strokeLinejoin="round" {...STROKE} />;
+  return <path d={d} stroke={INK} strokeWidth={1.6} fill="none" strokeLinecap="round" strokeLinejoin="round" {...STROKE} />;
 }
 
 /**
