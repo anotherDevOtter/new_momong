@@ -1018,17 +1018,13 @@ const NEXT_ITEMS = [
 
 // ── PAGE 03: NEXT DIRECTION ────────────────────────────────────────
 
-function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, beforePhoto = null, afterPhoto = null, onBeforePhotoChange, onAfterPhotoChange, onDownloadPdf, printing = false, onShareLink, onGoHome, forPrint = false }: {
+function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, beforePhoto = null, afterPhoto = null, onBeforePhotoChange, onAfterPhotoChange, forPrint = false }: {
   session: CustomerSession;
   cycleData?: CycleData | null;
   subSel: Record<string, string>;
   setSubSel: (s: Record<string, string>) => void;
   /** 방향별 메모 — 퍼스널 리포트 화면에서 적은 것 (2026-09-12) */
   memos?: Record<string, string>;
-  onDownloadPdf?: () => void;
-  printing?: boolean;
-  onShareLink?: () => void;
-  onGoHome?: () => void;
   beforePhoto?: string | null;
   afterPhoto?: string | null;
   onBeforePhotoChange?: (url: string | null) => void;
@@ -1361,52 +1357,6 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
         })()}
 
         {/* ── 리포트 끝 — 저장·공유. 04장이 완료 화면으로 옮겨가면서 같이 사라졌다 (2026-09-12) */}
-        {!forPrint && (<>
-        {/* 다음 방문 카드에 버튼이 딱 붙어 있었다. HDivider 는 빈 껍데기라
-            (return null) 간격이 안 생겨 직접 띄운다. (2026-09-12) */}
-        <div style={{ height: 1, background: G8, marginTop: 72, marginBottom: 56 }} />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 460, margin: '0 auto', paddingBottom: 32 }}>
-          <button
-            onClick={onDownloadPdf}
-            disabled={printing}
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-              padding: '16px 24px', background: G1, border: 'none',
-              cursor: printing ? 'default' : 'pointer', color: '#FFFFFF',
-              fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', minHeight: 52,
-            }}
-          >
-            <Download size={14} strokeWidth={1.5} />
-            {printing ? 'PDF 만드는 중…' : 'PDF 다운로드'}
-          </button>
-          {onShareLink && (
-            <button
-              onClick={onShareLink}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                padding: '16px 24px', background: '#FFFFFF', border: `1px solid ${G1}`,
-                cursor: 'pointer', color: G1, fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', minHeight: 52,
-              }}
-            >
-              <Share2 size={14} strokeWidth={1.5} />
-              링크 공유
-            </button>
-          )}
-          {onGoHome && (
-            <button
-              onClick={onGoHome}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                padding: '16px 24px', background: '#FFFFFF', border: `1px solid ${G7}`,
-                cursor: 'pointer', color: G4, fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', minHeight: 52,
-              }}
-            >
-              <Home size={14} strokeWidth={1.5} />
-              홈으로 이동
-            </button>
-          )}
-        </div>
-        </>)}
       </Wrap>
     </motion.div>
   );
@@ -1414,9 +1364,8 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
 
 interface PremiumReportProps {
   onBack: () => void;
-  /** 리포트 끝의 '링크 공유' · '홈으로 이동'. 없으면 그 버튼을 숨긴다 */
-  onShareLink?: () => void;
-  onGoHome?: () => void;
+  /** 완료 화면의 'PDF 다운로드' 로 열린 경우. 바로 내보내고 스스로 닫는다 */
+  autoPdf?: boolean;
   customerName: string;
   consultDate: string;
   designerName: string;
@@ -1450,7 +1399,7 @@ export function PremiumReport({
   beforePhoto = null, afterPhoto = null,
   onBeforePhotoChange, onAfterPhotoChange,
   facePosMap = {}, hairTargetType = null, hairCondition = null, facePhotoUrl = null,
-  hairStyle = null, embedded = false, selectedCourse, onShareLink, onGoHome,
+  hairStyle = null, embedded = false, selectedCourse, autoPdf = false,
 }: PremiumReportProps) {
   const [page, setPage] = useState(0);
   const [subSel, setSubSel] = useState<Record<string, string>>(initialSubSel);
@@ -1513,6 +1462,19 @@ export function PremiumReport({
     }
   };
 
+  // 완료 화면의 'PDF 다운로드' 는 리포트를 열어 여기서 내보낸다.
+  // 리포트 안에는 버튼을 두지 않으므로(완료 화면과 중복) 자동으로 처리한다. (2026-09-12)
+  React.useEffect(() => {
+    if (!autoPdf) return;
+    let done = false;
+    (async () => {
+      await handleDownloadPdf();
+      if (!done) onBack();
+    })();
+    return () => { done = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoPdf]);
+
   const goTo = (p: number) => {
     setPage(p);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1538,7 +1500,7 @@ export function PremiumReport({
         {page === 0 && <Cover key="cover" onStart={() => goTo(1)} session={session} />}
         {page === 1 && <Page01 key="p1" session={session} />}
         {page === 2 && <Page02 key="p2" session={session} hairStyle={hairStyle} guideStyles={guideStyles} />}
-        {page === 3 && <Page03 key="p3" session={session} cycleData={cycleData} subSel={subSel} setSubSel={setSubSel} memos={cycleData?.memos ?? {}} onDownloadPdf={handleDownloadPdf} printing={printing} onShareLink={onShareLink} onGoHome={onGoHome} beforePhoto={beforePhoto} afterPhoto={afterPhoto} onBeforePhotoChange={onBeforePhotoChange} onAfterPhotoChange={onAfterPhotoChange} />}
+        {page === 3 && <Page03 key="p3" session={session} cycleData={cycleData} subSel={subSel} setSubSel={setSubSel} memos={cycleData?.memos ?? {}} beforePhoto={beforePhoto} afterPhoto={afterPhoto} onBeforePhotoChange={onBeforePhotoChange} onAfterPhotoChange={onAfterPhotoChange} />}
       </AnimatePresence>
       {/* PDF 캡쳐용 — 화면에는 안 보이지만 레이아웃은 잡혀 있어야 한다 */}
       <div aria-hidden style={{ position: 'fixed', left: -99999, top: 0, width: 900 }}>

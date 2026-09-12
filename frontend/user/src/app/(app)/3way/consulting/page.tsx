@@ -684,8 +684,6 @@ function Inner() {
               consultDate={new Date().toLocaleDateString('ko-KR')}
               designerName={customerData.designerName || '디자이너'}
               cycleData={newCycleData}
-              onShareLink={handleShareLink}
-              onGoHome={handleGoHome}
               hairTargetType={hairConsultingData?.targetType?.en ?? null}
               hairCondition={hairConsultingData?.condition ?? null}
               hairStyle={hairConsultingData?.style ?? null}
@@ -723,13 +721,12 @@ function Inner() {
           {/* 완료 화면에서 'PDF 저장' 을 누르면 리포트를 다시 열어 거기서 내려받는다 */}
           {showReport && (
             <NewPremiumReportV2
+              autoPdf
               onBack={() => setShowReport(false)}
               customerName={customerData.name}
               consultDate={new Date().toLocaleDateString('ko-KR')}
               designerName={customerData.designerName || '디자이너'}
               cycleData={newCycleData}
-              onShareLink={handleShareLink}
-              onGoHome={handleGoHome}
               hairTargetType={hairConsultingData?.targetType?.en ?? null}
               hairCondition={hairConsultingData?.condition ?? null}
               hairStyle={hairConsultingData?.style ?? null}
