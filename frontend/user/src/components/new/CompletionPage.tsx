@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
-import { Check, Download, Share2, Home } from 'lucide-react';
+import { Download, Share2, Home } from 'lucide-react';
+import { CHAPTERS } from './PremiumReportV2';
 
 interface CompletionPageProps {
   onDownloadPDF: () => void;
@@ -16,7 +17,7 @@ export function CompletionPage({ onDownloadPDF, onShareLink, onGoHome, courseLab
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
-        className="max-w-md w-full"
+        className="max-w-lg w-full"
       >
         {/* 상단 로고 */}
         <motion.div
@@ -41,61 +42,43 @@ export function CompletionPage({ onDownloadPDF, onShareLink, onGoHome, courseLab
           <h2 className="text-[20px] tracking-[0.08em] text-[#111111] mb-8" style={{ fontWeight: 400 }}>
             REPORT COMPLETE
           </h2>
-          <p className="text-[13px] leading-[1.8] text-[#777777]" style={{ fontWeight: 300 }}>
-            고객님의
-            <br />
-            {courseLabel} 프리미엄 이미지 설계 리포트가
-            <br />
-            완성되었습니다
+          <p className="text-[30px] leading-[1.3] text-[#111111] mt-6 mb-4" style={{ fontWeight: 200 }}>
+            &apos;BE yourself&apos;
           </p>
-          <p className="text-[13px] leading-[1.8] text-[#777777] mt-8" style={{ fontWeight: 300 }}>
-            오늘의 디자인은 단순한 시술이 아닌
+          <p className="text-[12px] leading-[1.8] text-[#999995]" style={{ fontWeight: 300 }}>
+            모든 사람들이 자신의 아름다움을 발견하고
             <br />
-            구조 기반 이미지 설계입니다
+            스스로를 사랑할 수 있도록 돕습니다.
+          </p>
+          <p className="text-[13px] leading-[1.9] text-[#777777] mt-10" style={{ fontWeight: 300 }}>
+            오늘의 분석부터 원하는 이미지, 세부 디자인
+            <br />
+            앞으로의 관리 주기까지 하나의 리포트로 완성했습니다.
           </p>
         </motion.div>
 
-        {/* SECTION 1 – 리포트 안내 */}
+        {/* SECTION 1 – 이 리포트에 담긴 것.
+            리포트의 CHAPTERS 를 그대로 쓴다 — 리포트 마지막 장을 이 화면으로
+            옮겼으므로 내용이 갈라지면 안 된다. (2026-09-12) */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.8 }}
-          className="bg-white p-8 border border-[#E5E5E5] mb-10"
+          className="bg-[#FAFAF8] px-8 py-10 mb-10"
         >
-          <div className="space-y-5 mb-8">
-            <div className="flex items-center gap-4">
-              <div className="w-1 h-1 bg-[#111111] flex-shrink-0"></div>
-              <p className="text-[13px] text-[#111111]" style={{ fontWeight: 300 }}>얼굴 구조 분석</p>
+          {CHAPTERS.map((ch, i) => (
+            <div
+              key={ch.num}
+              className={i === 0 ? 'text-center' : 'text-center pt-8 mt-8 border-t border-[#E5E5E3]'}
+            >
+              <p className="text-[11px] text-[#BBBBB6] mb-1" style={{ fontWeight: 300 }}>{ch.num}</p>
+              <p className="text-[13px] tracking-[0.12em] text-[#111111] mb-1" style={{ fontWeight: 500 }}>{ch.title}</p>
+              <p className="text-[12px] text-[#999995] mb-4" style={{ fontWeight: 300 }}>{ch.ko}</p>
+              {ch.items.map(it => (
+                <p key={it} className="text-[13px] leading-[2] text-[#333330]" style={{ fontWeight: 300 }}>{it}</p>
+              ))}
             </div>
-
-            <div className="flex items-center gap-4">
-              <div className="w-1 h-1 bg-[#111111] flex-shrink-0"></div>
-              <p className="text-[13px] text-[#111111]" style={{ fontWeight: 300 }}>이미지 좌표 진단</p>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="w-1 h-1 bg-[#111111] flex-shrink-0"></div>
-              <p className="text-[13px] text-[#111111]" style={{ fontWeight: 300 }}>TODAY DESIGN 전략</p>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="w-1 h-1 bg-[#111111] flex-shrink-0"></div>
-              <p className="text-[13px] text-[#111111]" style={{ fontWeight: 300 }}>DESIGN CYCLE MASTER PLAN</p>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="w-1 h-1 bg-[#111111] flex-shrink-0"></div>
-              <p className="text-[13px] text-[#111111]" style={{ fontWeight: 300 }}>{courseLabel} HAIR CONSULTING REPORT</p>
-            </div>
-          </div>
-
-          <div className="pt-6 border-t border-[#E5E5E5]">
-            <p className="text-[11px] text-[#AAAAAA] text-center tracking-[0.02em]" style={{ fontWeight: 300 }}>
-              PDF로 저장하거나
-              <br />
-              링크로 공유할 수 있습니다
-            </p>
-          </div>
+          ))}
         </motion.div>
 
         {/* SECTION 2 – 버튼 영역 */}
@@ -136,20 +119,6 @@ export function CompletionPage({ onDownloadPDF, onShareLink, onGoHome, courseLab
           </button>
         </motion.div>
 
-        {/* SECTION 3 – 브랜드 마무리 */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 0.8 }}
-          className="text-center pt-10 border-t border-[#E5E5E5]"
-        >
-          <p className="text-[11px] tracking-[0.25em] text-[#111111] mb-5 uppercase" style={{ fontWeight: 400 }}>
-            BE YOURSELF
-          </p>
-          <p className="text-[12px] leading-[1.8] text-[#777777]" style={{ fontWeight: 300 }}>
-            모든 사람들이 자신의 아름다움을 발견하고 스스로 사랑할 수 있도록 돕습니다.
-          </p>
-        </motion.div>
       </motion.div>
     </div>
   );

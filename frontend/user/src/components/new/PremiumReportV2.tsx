@@ -127,7 +127,7 @@ const TL_DEFAULT = [
 
 // Hair style guide options (CURRENT vs DESIRED per category)
 
-const CHAPTERS = [
+export const CHAPTERS = [
   { num: '01', title: 'YOUR IMAGE',      ko: '이미지 분석',    items: ['최종 이미지 타입', '이미지를 결정짓는 요소', '핵심 해석'] },
   { num: '02', title: 'HAIR DIRECTION',  ko: '헤어 방향',      items: ['현재 이미지 & 원하는 이미지', '이미지 GAP', '모질 분석'] },
   { num: '03', title: 'PERSONAL DESIGN', ko: '퍼스널 디자인',  items: ['앞머리 · 가르마 · 길이', '컬감 · 컬러', '오늘의 시술 · 홈케어'] },
@@ -400,22 +400,22 @@ function Wrap({ children }: { children: React.ReactNode }) {
 // ── Sticky report header ───────────────────────────────────────────
 
 function ReportHeader({ page, onBack, onPrev, onNext }: { page: number; onBack: () => void; onPrev: () => void; onNext: () => void }) {
-  const LABELS = ['', 'YOUR IMAGE', 'HAIR DIRECTION', 'NEXT DIRECTION', 'YOUR RESULT'];
+  const LABELS = ['', 'YOUR IMAGE', 'HAIR DIRECTION', 'NEXT DIRECTION'];
   return (
     <div style={{ position: 'sticky', top: 0, zIndex: 20, background: 'rgba(255,255,255,0.97)', borderBottom: `1px solid ${G8}`, backdropFilter: 'blur(8px)' }}>
       <div className="max-w-3xl mx-auto px-5 lg:px-10" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: 60 }}>
         <div>
           <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.28em', color: G4 }}>MERCI MOMONG · PERSONAL HAIR REPORT</p>
-          {page > 0 && <p style={{ fontFamily: MONO, fontSize: 10, color: G1, fontWeight: 600, marginTop: 2, letterSpacing: '0.1em' }}>{String(page).padStart(2, '0')} / 04 · {LABELS[page]}</p>}
+          {page > 0 && <p style={{ fontFamily: MONO, fontSize: 10, color: G1, fontWeight: 600, marginTop: 2, letterSpacing: '0.1em' }}>{String(page).padStart(2, '0')} / 03 · {LABELS[page]}</p>}
         </div>
         {page > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <button onClick={onPrev} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px 10px', fontSize: 13, color: page === 1 ? G6 : G3, fontFamily: MONO, minHeight: 44 }}>← 이전</button>
             <div style={{ display: 'flex', gap: 5 }}>
-              {[1, 2, 3, 4].map(i => <div key={i} style={{ width: i === page ? 20 : 6, height: 5, borderRadius: 3, background: i === page ? G1 : G7, transition: 'all 0.25s' }} />)}
+              {[1, 2, 3].map(i => <div key={i} style={{ width: i === page ? 20 : 6, height: 5, borderRadius: 3, background: i === page ? G1 : G7, transition: 'all 0.25s' }} />)}
             </div>
-            <button onClick={onNext} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px 10px', fontSize: 13, color: page === 4 ? G6 : G1, fontFamily: MONO, fontWeight: 500, minHeight: 44 }}>
-              {page === 4 ? '완료' : '다음 →'}
+            <button onClick={onNext} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px 10px', fontSize: 13, color: G1, fontFamily: MONO, fontWeight: 500, minHeight: 44 }}>
+              {page === 3 ? '완료' : '다음 →'}
             </button>
           </div>
         )}
@@ -487,7 +487,7 @@ function Cover({ onStart, session }: { onStart: () => void; session: CustomerSes
               { label: 'CLIENT',        value: session.customer.name || '—' },
               { label: 'ANALYSIS DATE', value: session.customer.visitDate || '—' },
               ...(session.customer.designerName ? [{ label: 'DESIGNER', value: session.customer.designerName }] : []),
-              { label: 'REPORT', value: '01 – 04' },
+              { label: 'REPORT', value: '01 – 03' },
             ].map(r => (
               <div key={r.label} style={{ padding: '18px 20px', borderRight: `1px solid ${G7}`, flex: 1 }}>
                 <p style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.22em', color: G5, marginBottom: 5 }}>{r.label}</p>
@@ -1338,120 +1338,6 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
   );
 }
 
-// ── PAGE 04: REPORT COMPLETE ───────────────────────────────────────
-
-function Page04({ session, subSel = {}, onBack, onRestart, onDownloadPdf, printing = false, embedded = false }: {
-  session: CustomerSession;
-  subSel?: Record<string, string>;
-  onBack: () => void;
-  onRestart: () => void;
-  onDownloadPdf?: () => void;
-  printing?: boolean;
-  /** 공유 페이지에서만 '링크 공유' 가 의미 있다 — 그 주소가 곧 공유 링크다 */
-  embedded?: boolean;
-}) {
-  const nextSelEntries = NEXT_ITEMS.filter(item => subSel[item.id] && subSel[item.id] !== '유지');
-  const { imageDirection, nextVisit } = session;
-  const cur = imageDirection.currentImage;
-  const des = imageDirection.desiredImage;
-  return (
-    <motion.div key="p4" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
-      <Wrap>
-
-        {/* ── Hero ─────────────────────────────────────────────────── */}
-        <div style={{ textAlign: 'center', paddingBottom: 64, borderBottom: `1px solid ${G7}`, marginBottom: 100 }}>
-          <p style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.32em', color: GOLD, marginBottom: 100 }}>REPORT COMPLETE</p>
-          <h2 style={{ fontSize: 36, fontWeight: 200, color: G1, lineHeight: 1.35, letterSpacing: '-0.02em', marginBottom: 10 }} className="text-[28px] lg:text-[36px]">'BE yourself'</h2>
-          <p className="m-[10px]" style={{ fontSize: 10, color: G4, lineHeight: 1.1, fontWeight: 300 }}>모든 사람들이 자신의 아름다움을 발견하고<br /> 스스로를 사랑할 수 있도록 돕습니다.</p>
-          <p className="m-[60px]" style={{ fontSize: 15, color: G4, lineHeight: 2.1, fontWeight: 300 }}>오늘의 분석부터 원하는 이미지, 세부 디자인<br /> 앞으로의 관리 주기까지 하나의 리포트로 완성했습니다.</p>
-        </div>
-
-        {/* ── FINAL DIRECTION + NEXT VISIT ──────────────────────── */}
-        
-
-        {/* ── NEXT DIRECTION summary ───────────────────────────────── */}
-        {nextSelEntries.length > 0 && (
-          <div style={{ marginBottom: 64 }}>
-            <SectionLabel>NEXT DIRECTION</SectionLabel>
-            <h2 style={{ fontSize: 28, fontWeight: 300, color: G1, marginBottom: 28, letterSpacing: '-0.01em' }}>다음 방향</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: G7, border: `1px solid ${G7}` }}>
-              {nextSelEntries.map(item => (
-                <div key={item.id} style={{ background: '#FFFFFF', display: 'grid', gridTemplateColumns: '88px 1fr' }}>
-                  <div style={{ padding: '20px 14px', borderRight: `1px solid ${G7}`, background: G9 }}>
-                    <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.14em', color: G4, marginBottom: 4 }}>{item.en}</p>
-                    <p style={{ fontSize: 13, color: G2, fontWeight: 500 }}>{item.ko}</p>
-                  </div>
-                  <div style={{ padding: '20px 20px', display: 'flex', alignItems: 'center' }}>
-                    <span style={{ fontSize: 17, fontWeight: 500, color: G1, letterSpacing: '-0.01em' }}>{subSel[item.id]}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ── REPORT INCLUDES ──────────────────────────────────────── */}
-        <HDivider mt={0} mb={48} />
-        <SectionLabel>REPORT INCLUDES</SectionLabel>
-        <h2 style={{ fontSize: 28, fontWeight: 300, color: G1, marginBottom: 40, letterSpacing: '-0.01em' }}>이 리포트에 담긴 것</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-px" style={{ background: G7, border: `1px solid ${G7}`, marginBottom: 72 }}>
-          {CHAPTERS.map(ch => (
-            <div key={ch.num} style={{ background: '#FFFFFF', padding: '28px 24px' }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, marginBottom: 16 }}>
-                <span style={{ fontFamily: MONO, fontSize: 10, color: G6, flexShrink: 0 }}>{ch.num}</span>
-                <div>
-                  <p style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '0.14em', color: G1, marginBottom: 3 }}>{ch.title}</p>
-                  <p style={{ fontSize: 12, color: G5, fontWeight: 300 }}>{ch.ko}</p>
-                </div>
-              </div>
-              <div style={{ height: 1, background: G8, marginBottom: 14 }} />
-              {ch.items.map(item => (
-                <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                  <div style={{ width: 3, height: 3, borderRadius: '50%', background: G6, flexShrink: 0 }} />
-                  <p style={{ fontSize: 13, color: G3, fontWeight: 300 }}>{item}</p>
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-
-        {/* ── SAVE & SHARE ─────────────────────────────────────────── */}
-        <div style={{ borderTop: `1px solid ${G7}`, paddingTop: 56 }}>
-          <SectionLabel>KEEP YOUR REPORT</SectionLabel>
-          <h2 className="text-center" style={{ fontSize: 24, fontWeight: 300, color: G1, marginBottom: 10, letterSpacing: '-0.01em' }}>리포트를 저장하거나 공유하세요</h2>
-          <p className="text-center" style={{ fontSize: 14, color: G4, fontWeight: 300, lineHeight: 1.85, marginBottom: 36 }}>
-            언제든 다시 확인할 수 있도록<br />리포트를 저장하거나 링크로 공유할 수 있습니다.
-          </p>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3" style={{ marginBottom: 16 }}>
-            <button onClick={onDownloadPdf} disabled={printing}
-              style={{ padding: '16px 24px', background: G1, border: 'none', cursor: 'pointer', color: '#FFFFFF', fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', minHeight: 52 }}>
-              {printing ? 'PDF 만드는 중…' : '리포트 저장하기 (PDF)'}
-            </button>
-            {embedded && <button onClick={() => navigator.clipboard.writeText(window.location.href).then(() => alert('링크가 복사되었습니다.'))}
-              style={{ padding: '16px 24px', background: '#FFFFFF', border: `1px solid ${G7}`, cursor: 'pointer', color: G2, fontFamily: MONO, fontSize: 11, letterSpacing: '0.12em', minHeight: 52 }}>
-              링크 공유
-            </button>}
-          </div>
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center', paddingTop: 16, borderTop: `1px solid ${G8}` }}>
-            <button onClick={onRestart}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: MONO, fontSize: 11, color: G4, letterSpacing: '0.1em', padding: '12px 0', minHeight: 44 }}>
-              리포트 다시 보기
-            </button>
-            <span style={{ color: G7 }}>·</span>
-            <button onClick={onBack}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: MONO, fontSize: 11, color: G5, letterSpacing: '0.1em', padding: '12px 0', minHeight: 44 }}>
-              다음 방문 일정 확인
-            </button>
-          </div>
-        </div>
-
-      </Wrap>
-    </motion.div>
-  );
-}
-
-// ── Main PremiumReport ─────────────────────────────────────────────
-
 interface PremiumReportProps {
   onBack: () => void;
   customerName: string;
@@ -1555,14 +1441,13 @@ export function PremiumReport({
         page={page}
         onBack={page === 0 ? onBack : () => { if (page === 1) { setPage(0); window.scrollTo(0, 0); } else goTo(page - 1); }}
         onPrev={() => { if (page > 1) goTo(page - 1); else { setPage(0); window.scrollTo(0, 0); } }}
-        onNext={() => { if (page > 0 && page < 4) goTo(page + 1); else if (page === 4) onBack(); }}
+        onNext={() => { if (page > 0 && page < 3) goTo(page + 1); else if (page === 3) onBack(); }}
       />
       <AnimatePresence mode="wait">
         {page === 0 && <Cover key="cover" onStart={() => goTo(1)} session={session} />}
         {page === 1 && <Page01 key="p1" session={session} />}
         {page === 2 && <Page02 key="p2" session={session} hairStyle={hairStyle} guideStyles={guideStyles} />}
         {page === 3 && <Page03 key="p3" session={session} cycleData={cycleData} subSel={subSel} setSubSel={setSubSel} memos={cycleData?.memos ?? {}} beforePhoto={beforePhoto} afterPhoto={afterPhoto} onBeforePhotoChange={onBeforePhotoChange} onAfterPhotoChange={onAfterPhotoChange} />}
-        {page === 4 && <Page04 key="p4" session={session} subSel={subSel} onBack={onBack} onRestart={() => goTo(1)} onDownloadPdf={handleDownloadPdf} printing={printing} embedded={embedded} />}
       </AnimatePresence>
       {/* PDF 캡쳐용 — 화면에는 안 보이지만 레이아웃은 잡혀 있어야 한다 */}
       <div aria-hidden style={{ position: 'fixed', left: -99999, top: 0, width: 900 }}>
@@ -1570,7 +1455,6 @@ export function PremiumReport({
           <div style={{ background: '#FFFFFF' }}><Page01 session={session} /></div>
           <div style={{ background: '#FFFFFF' }}><Page02 session={session} hairStyle={hairStyle} guideStyles={guideStyles} /></div>
           <div style={{ background: '#FFFFFF' }}><Page03 session={session} cycleData={cycleData} subSel={subSel} setSubSel={() => {}} memos={cycleData?.memos ?? {}} beforePhoto={beforePhoto} afterPhoto={afterPhoto} /></div>
-          <div style={{ background: '#FFFFFF' }}><Page04 session={session} subSel={subSel} onBack={() => {}} onRestart={() => {}} /></div>
         </div>
       </div>
       {page > 0 && (
@@ -1580,14 +1464,14 @@ export function PremiumReport({
               <ArrowLeft size={14} color={G3} strokeWidth={1.5} />이전
             </button>
             <div style={{ display: 'flex', gap: 8 }}>
-              {[1, 2, 3, 4].map(i => (
+              {[1, 2, 3].map(i => (
                 <button key={i} onClick={() => goTo(i)} style={{ padding: 4, background: 'none', border: 'none', cursor: 'pointer' }}>
                   <div style={{ width: i === page ? 24 : 6, height: 6, borderRadius: 3, background: i === page ? G1 : G7, transition: 'all 0.25s' }} />
                 </button>
               ))}
             </div>
-            <button onClick={() => { if (page < 4) goTo(page + 1); else onBack(); }} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', padding: '12px 0', fontSize: 14, color: page === 4 ? G5 : G1, fontFamily: MONO, letterSpacing: '0.08em', fontWeight: 500, minHeight: 48 }}>
-              {page === 4 ? '완료' : '다음'}{page < 4 && <ArrowRight size={14} color={G1} strokeWidth={1.5} />}
+            <button onClick={() => { if (page < 3) goTo(page + 1); else onBack(); }} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', padding: '12px 0', fontSize: 14, color: G1, fontFamily: MONO, letterSpacing: '0.08em', fontWeight: 500, minHeight: 48 }}>
+              {page === 3 ? '완료' : '다음'}{page < 3 && <ArrowRight size={14} color={G1} strokeWidth={1.5} />}
             </button>
           </div>
         </div>
