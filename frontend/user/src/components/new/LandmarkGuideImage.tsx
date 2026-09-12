@@ -15,15 +15,15 @@ import { guideFor } from './faceGuides';
 const HALO_CSS = `
 .mm-guide-halo line, .mm-guide-halo path {
   stroke: #000000;
-  stroke-width: 2px;
-  stroke-opacity: 0.28;
+  stroke-width: 3.2px;
+  stroke-opacity: 0.45;
   fill: none;
   opacity: 1;
 }
 `;
 
 /** 선이 사진을 덮지 않게 전체를 반투명으로 얹는다 (2026-09-12) */
-const GUIDE_OPACITY = 0.72;
+const GUIDE_OPACITY = 0.95;
 
 interface Props {
   imageUrl: string;
