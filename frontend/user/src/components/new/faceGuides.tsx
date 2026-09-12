@@ -78,9 +78,27 @@ function Line({ a, b }: { a: P; b: P }) {
   );
 }
 
+/**
+ * 랜드마크를 직선으로 이으면 턱·관자놀이에 마디가 보인다 — 예시 사진의 선은 매끈하다.
+ * 점들을 Catmull-Rom 으로 지나는 3차 베지에로 바꿔 곡선으로 그린다. (2026-09-12)
+ */
+function smoothPath(pts: P[], close?: boolean): string {
+  if (pts.length < 3) return pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x} ${p.y}`).join(' ');
+  const at = (i: number): P =>
+    close ? pts[(i + pts.length) % pts.length] : pts[Math.min(Math.max(i, 0), pts.length - 1)];
+  const last = close ? pts.length : pts.length - 1;
+  let d = `M${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+  for (let i = 0; i < last; i++) {
+    const p0 = at(i - 1), p1 = at(i), p2 = at(i + 1), p3 = at(i + 2);
+    const c1 = { x: p1.x + (p2.x - p0.x) / 6, y: p1.y + (p2.y - p0.y) / 6 };
+    const c2 = { x: p2.x - (p3.x - p1.x) / 6, y: p2.y - (p3.y - p1.y) / 6 };
+    d += ` C${c1.x.toFixed(1)} ${c1.y.toFixed(1)} ${c2.x.toFixed(1)} ${c2.y.toFixed(1)} ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+  }
+  return d + (close ? ' Z' : '');
+}
+
 function Poly({ pts, close }: { pts: P[]; close?: boolean }) {
-  const d = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x} ${p.y}`).join(' ') + (close ? ' Z' : '');
-  return <path d={d} stroke={INK} strokeWidth={1.6} fill="none" strokeLinecap="round" strokeLinejoin="round" {...STROKE} />;
+  return <path d={smoothPath(pts, close)} stroke={INK} strokeWidth={1.6} fill="none" strokeLinecap="round" strokeLinejoin="round" {...STROKE} />;
 }
 
 /**
