@@ -505,9 +505,10 @@ function Page01({ session }: { session: CustomerSession }) {
           </div>
 
           {/* Right: meta — 라벨 위 / 값 아래로 한 줄씩 쌓는다.
-              시안은 분석일과 리포트번호가 가로로 붙어 있었다. (2026-09-11) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              시안은 분석일과 리포트번호가 가로로 붙어 있었다. (2026-09-11)
+              오른쪽 끝으로 붙인다 — 왼쪽 CLIENT 블록과 양 끝에서 마주보게 (2026-09-12) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignItems: 'flex-end', textAlign: 'right' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'flex-end' }}>
               <div>
                 <p style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.24em', color: G5, marginBottom: 6 }}>ANALYSIS DATE</p>
                 <p style={{ fontSize: 13, color: G2, fontWeight: 300 }}>{customer.visitDate || '—'}</p>
