@@ -14,7 +14,8 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import type { FaceLandmarker, FaceLandmarkerResult } from '@mediapipe/tasks-vision';
+import type { FaceLandmarker } from '@mediapipe/tasks-vision';
+import { silenceMediapipeInfoLog } from '@/lib/mediapipeLog';
 
 // useFaceDetector 와 같은 픽스 버전을 쓴다 — 운영에서 갑자기 깨지지 않게
 const WASM_URL =
@@ -34,43 +35,21 @@ let loadPromise: Promise<void> | null = null;
 
 async function loadLandmarker() {
   if (loadPromise) return loadPromise;
+  silenceMediapipeInfoLog();   // wasm 을 불러오기 전에 걸어야 한다
   loadPromise = (async () => {
     const { FilesetResolver, FaceLandmarker: FaceLandmarkerClass } = await import(
       '@mediapipe/tasks-vision'
     );
     const vision = await FilesetResolver.forVisionTasks(WASM_URL);
-    landmarker = await withoutWasmInfoLog(() => FaceLandmarkerClass.createFromOptions(vision, {
+    landmarker = await FaceLandmarkerClass.createFromOptions(vision, {
       // GPU 델리게이트는 환경에 따라 결과가 비어 돌아온다. 가이드선 용도라
       // 속도보다 안정성이 중요해 CPU 를 쓴다. (2026-09-11)
       baseOptions: { modelAssetPath: MODEL_URL, delegate: 'CPU' },
       runningMode: 'IMAGE',
       numFaces: 1,
-    }));
+    });
   })();
   return loadPromise;
-}
-
-/**
- * MediaPipe wasm 이 'INFO: Created TensorFlow Lite XNNPACK delegate for CPU.' 를
- * console.error 로 뱉는다. 오류가 아닌데 Next 개발 오버레이가 오류로 띄운다.
- * 이 INFO 줄만 걸러 내고 나머지는 그대로 흘린다. (2026-09-12)
- */
-function withoutWasmInfoLog<T>(fn: () => T | Promise<T>): T | Promise<T> {
-  const original = console.error;
-  console.error = (...args: unknown[]) => {
-    if (typeof args[0] === 'string' && args[0].startsWith('INFO:')) return;
-    original(...args);
-  };
-  const restore = () => { console.error = original; };
-  try {
-    const out = fn();
-    if (out instanceof Promise) return out.finally(restore);
-    restore();
-    return out;
-  } catch (e) {
-    restore();
-    throw e;
-  }
 }
 
 /** 이미지 한 장에서 468점을 뽑는다. 얼굴을 못 찾으면 null */
@@ -87,7 +66,7 @@ export async function detectLandmarks(imageUrl: string): Promise<LandmarkPoint[]
     el.src = imageUrl;
   });
 
-  const result = withoutWasmInfoLog(() => landmarker!.detect(img)) as FaceLandmarkerResult;
+  const result = landmarker.detect(img);
   const face = result.faceLandmarks?.[0];
   return face && face.length ? (face as LandmarkPoint[]) : null;
 }
