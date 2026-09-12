@@ -15,12 +15,15 @@ import { guideFor } from './faceGuides';
 const HALO_CSS = `
 .mm-guide-halo line, .mm-guide-halo path {
   stroke: #000000;
-  stroke-width: 3px;
-  stroke-opacity: 0.35;
+  stroke-width: 2px;
+  stroke-opacity: 0.28;
   fill: none;
   opacity: 1;
 }
 `;
+
+/** 선이 사진을 덮지 않게 전체를 반투명으로 얹는다 (2026-09-12) */
+const GUIDE_OPACITY = 0.72;
 
 interface Props {
   imageUrl: string;
@@ -68,8 +71,10 @@ export function LandmarkGuideImage({ imageUrl, points, itemId, maxWidth = 480, a
             이마처럼 밝은 데서도 흰 선이 보이게 하려고. (2026-09-11)
           */}
           <style>{HALO_CSS}</style>
-          <g className="mm-guide-halo">{guide}</g>
-          {guide}
+          <g opacity={GUIDE_OPACITY}>
+            <g className="mm-guide-halo">{guide}</g>
+            {guide}
+          </g>
         </svg>
       )}
     </div>

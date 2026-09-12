@@ -62,18 +62,17 @@ function Dot({ p }: { p: P }) {
   return (
     <line
       x1={p.x} y1={p.y} x2={p.x} y2={p.y}
-      stroke={DOT} strokeWidth={4} strokeLinecap="round" {...STROKE}
+      stroke={DOT} strokeWidth={3} strokeLinecap="round" {...STROKE}
     />
   );
 }
 
-function Line({ a, b, dashed }: { a: P; b: P; dashed?: boolean }) {
+// 보조선도 실선으로 그린다 — 점선은 축소된 화면에서 지저분해 보인다 (2026-09-12)
+function Line({ a, b }: { a: P; b: P }) {
   return (
     <line
       x1={a.x} y1={a.y} x2={b.x} y2={b.y}
       stroke={INK} strokeWidth={1} strokeLinecap="round"
-      strokeDasharray={dashed ? '6 6' : undefined}
-      opacity={dashed ? 0.8 : 1}
       {...STROKE}
     />
   );
@@ -112,7 +111,7 @@ export function guideFor(
       const l = P(IDX.cheekL), r = P(IDX.cheekR);
       return (
         <g>
-          <Line a={l} b={r} dashed />
+          <Line a={l} b={r} />
           <Dot p={l} /><Dot p={r} />
         </g>
       );
@@ -154,9 +153,9 @@ export function guideFor(
       return (
         <g>
           <Line a={lIn} b={lOut} />
-          <Line a={{ x: lOut.x, y: lIn.y }} b={lIn} dashed />
+          <Line a={{ x: lOut.x, y: lIn.y }} b={lIn} />
           <Line a={rIn} b={rOut} />
-          <Line a={{ x: rOut.x, y: rIn.y }} b={rIn} dashed />
+          <Line a={{ x: rOut.x, y: rIn.y }} b={rIn} />
           <Dot p={lOut} /><Dot p={rOut} />
         </g>
       );
@@ -166,7 +165,7 @@ export function guideFor(
       const lIn = P(IDX.eyeInnerL), rIn = P(IDX.eyeInnerR);
       return (
         <g>
-          <Line a={lIn} b={rIn} dashed />
+          <Line a={lIn} b={rIn} />
           <Dot p={lIn} /><Dot p={rIn} />
         </g>
       );
@@ -198,7 +197,7 @@ export function guideFor(
       const t = P(IDX.lipTop), b = P(IDX.lipBottom);
       const inT = P(IDX.lipUpperInner), inB = P(IDX.lipLowerInner);
       const lx = P(IDX.lipLeft).x, rx = P(IDX.lipRight).x;
-      const hline = (y: number) => <Line a={{ x: lx, y }} b={{ x: rx, y }} dashed />;
+      const hline = (y: number) => <Line a={{ x: lx, y }} b={{ x: rx, y }} />;
       return (
         <g>
           <Line a={t} b={b} />
@@ -215,7 +214,7 @@ export function guideFor(
       return (
         <g>
           <Line a={top} b={chin} />
-          <Line a={l} b={r} dashed />
+          <Line a={l} b={r} />
           <Dot p={top} /><Dot p={chin} />
         </g>
       );
@@ -225,7 +224,7 @@ export function guideFor(
       const top = P(IDX.foreheadTop), brow = mid(P(55), P(285));
       const noseB = P(IDX.noseBottom), chin = P(IDX.chin);
       const span = (P(IDX.cheekR).x - P(IDX.cheekL).x) * 0.42;
-      const hline = (p: P) => <Line a={{ x: p.x - span, y: p.y }} b={{ x: p.x + span, y: p.y }} dashed />;
+      const hline = (p: P) => <Line a={{ x: p.x - span, y: p.y }} b={{ x: p.x + span, y: p.y }} />;
       return (
         <g>
           {hline(top)}{hline(brow)}{hline(noseB)}{hline(chin)}
