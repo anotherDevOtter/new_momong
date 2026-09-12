@@ -1011,6 +1011,8 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
   onAfterPhotoChange?: (url: string | null) => void;
 }) {
   const [openItem, setOpenItem] = useState<string | null>(null);
+  // 시술별 관리방법 토글 — 화면(NextDirection)과 같은 방식 (2026-09-12)
+  const [openCare, setOpenCare] = useState<string | null>(null);
   const beforeInputRef = React.useRef<HTMLInputElement>(null);
   const afterInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -1175,12 +1177,52 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
                     </div>
                   ))}
                 </div>
-                <button
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 13, color: GOLD, textDecoration: 'underline', letterSpacing: '0.01em', textUnderlineOffset: 3 }}
-                  onClick={() => {}}
-                >
-                  관리방법 자세히 보기
-                </button>
+                {/* 시술별 관리방법 — 아래로 펼치는 토글. 고른 시술만 나온다 (2026-09-12) */}
+                <div style={{ borderTop: `1px solid ${G8}` }}>
+                  {reportServices.map(key => {
+                    const care = AFTER_CARE[key];
+                    if (!care) return null;
+                    const isOpen = openCare === key;
+                    return (
+                      <div key={key} style={{ borderBottom: `1px solid ${G8}` }}>
+                        <button
+                          onClick={() => setOpenCare(isOpen ? null : key)}
+                          style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%',
+                            padding: '16px 0', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left',
+                          }}
+                        >
+                          <span style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+                            <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.14em', color: G5 }}>{care.title}</span>
+                            <span style={{ fontSize: 14, color: G2, fontWeight: 400 }}>{SERVICE_KO[key]}</span>
+                          </span>
+                          <ChevronDown
+                            size={14} color={G5}
+                            style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }}
+                          />
+                        </button>
+                        <AnimatePresence>
+                          {isOpen && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }}
+                              style={{ overflow: 'hidden' }}
+                            >
+                              <div style={{ padding: '4px 0 20px' }}>
+                                {care.tips.map(tip => (
+                                  <div key={tip.label} style={{ display: 'flex', alignItems: 'flex-start', gap: 20, padding: '8px 0' }}>
+                                    <span style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.12em', color: G5, width: 92, flexShrink: 0, paddingTop: 3 }}>{tip.label}</span>
+                                    <span style={{ fontSize: 13, color: G3, fontWeight: 300, lineHeight: 1.7 }}>{tip.text}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    );
+                  })}
+                </div>
               </>
             )}
           </>
