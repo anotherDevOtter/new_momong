@@ -1148,7 +1148,7 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
         <SectionLabel>BEFORE / AFTER</SectionLabel>
         <h2 style={{ fontSize: 32, fontWeight: 300, color: G1, marginBottom: 12 }}>시술 전 · 후 사진</h2>
         <p style={{ fontSize: 14, color: G4, fontWeight: 300, lineHeight: 1.65, marginBottom: 40 }}>사진을 등록하면 리포트에 함께 기록됩니다.</p>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <PhotoSlot label="BEFORE" sub="시술 전" photo={beforePhoto} setPhoto={url => onBeforePhotoChange?.(url)} inputRef={beforeInputRef} />
           <PhotoSlot label="AFTER"  sub="시술 후" photo={afterPhoto}  setPhoto={url => onAfterPhotoChange?.(url)}  inputRef={afterInputRef} />
         </div>
