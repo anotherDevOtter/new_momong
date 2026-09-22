@@ -758,8 +758,8 @@ export function NextDirection({
                     onClick={() => { setGender(g); setCareOverride(null); setDesignOverride(null); }}
                     style={{
                       padding: '10px 20px', fontFamily: MONO, fontSize: 12, letterSpacing: '0.12em',
-                      background: gender === g ? '#1A1A1A' : 'transparent',
-                      color: gender === g ? '#FFFFFF' : '#AAAAAA',
+                      background: gender === g ? 'rgba(26,26,26,0.06)' : 'transparent',
+                      color: gender === g ? '#1A1A1A' : '#AAAAAA',
                       border: 'none', cursor: 'pointer', transition: 'all 0.15s',
                     }}
                   >{g === 'female' ? '여성' : '남성'}</button>
