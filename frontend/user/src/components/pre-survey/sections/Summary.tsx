@@ -108,6 +108,18 @@ export function Summary({ answers, currentDate, onPrev, onNext }: SummaryProps) 
                 </Section>
               )}
 
+              {a.preferredStyles && a.preferredStyles.length > 0 && (
+                <Section label="PREFERRED FASHION STYLE">
+                  <Chips items={a.preferredStyles} />
+                </Section>
+              )}
+
+              {a.dislikedStyles && a.dislikedStyles.length > 0 && (
+                <Section label="NON-PREFERRED FASHION STYLE">
+                  <Chips items={a.dislikedStyles} />
+                </Section>
+              )}
+
               {a.bodyConcerns && a.bodyConcerns.length > 0 && (
                 <Section label="BODY CONCERNS">
                   <Chips items={a.bodyConcerns} />
