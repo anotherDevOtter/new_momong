@@ -37,6 +37,7 @@ export function ConsultingSummary({
   onNext,
 }: ConsultingSummaryProps) {
   const {
+    bodyConcerns, bodyConcernsMemo,
     faceAreas, faceAreasMemo,
     hairConcerns, hairConcernsMemo,
     preferredImageIds, preferredImageMemo,
@@ -78,6 +79,15 @@ export function ConsultingSummary({
               Today Keyword
             </p>
             <div className="space-y-3 text-[13px]">
+              <div>
+                <span className="text-[#AAAAAA]" style={{ fontWeight: 300 }}>체형 고민: </span>
+                <span className="text-[#111111]" style={{ fontWeight: 600 }}>
+                  {bodyConcerns.length > 0 ? bodyConcerns.join(', ') : '—'}
+                </span>
+                {bodyConcernsMemo && (
+                  <p className="mt-1 text-[12px] text-[#888888]" style={{ fontWeight: 300 }}>└ {bodyConcernsMemo}</p>
+                )}
+              </div>
               <div>
                 <span className="text-[#AAAAAA]" style={{ fontWeight: 300 }}>얼굴 고민: </span>
                 <span className="text-[#111111]" style={{ fontWeight: 600 }}>

@@ -4,6 +4,8 @@ import { LABEL_TO_IMAGE_ID } from '@/data/image-keywords';
 // 'new' 코스의 사전 정보 한 벌. 원래 사전 인터뷰 화면이 들고 있던 모양인데,
 // 그 화면을 흐름에서 뺀 뒤로는 사전설문이 유일한 공급처라 여기로 옮겼다.
 export interface PreInterviewData {
+  bodyConcerns: string[];
+  bodyConcernsMemo: string;
   faceAreas: string[];
   faceAreasMemo: string;
   hairConcerns: string[];
@@ -61,6 +63,7 @@ function unmappedNote(labels: string[] | undefined): string {
 }
 
 export const EMPTY_PRE_INTERVIEW: PreInterviewData = {
+  bodyConcerns: [], bodyConcernsMemo: '',
   faceAreas: [], faceAreasMemo: '',
   hairConcerns: [], hairConcernsMemo: '',
   preferredImageIds: [], preferredImageMemo: '',
@@ -73,7 +76,9 @@ export function preSurveyToPreInterview(a: PreSurveyAnswers | null | undefined):
   if (!a) return EMPTY_PRE_INTERVIEW;
 
   return {
-    // 그대로 옮겨지는 4개
+    // 그대로 옮겨지는 6개
+    bodyConcerns: a.bodyConcerns ?? [],
+    bodyConcernsMemo: a.otherBodyConcern ?? '',
     faceAreas: a.faceConcerns ?? [],
     faceAreasMemo: a.otherFaceConcern ?? '',
     hairConcerns: a.hairConcerns ?? [],
