@@ -21,12 +21,28 @@ interface DetailedConcernsProps {
   onNext: () => void;
 }
 
+const NONE = '해당없음';
 const FACE_LEFT = ['이마', '볼 옆 라인', '얼굴 전체 비율', '얼굴이 커 보이는 느낌'];
-const FACE_RIGHT = ['광대', '턱선', '얼굴이 길어 보이는 느낌', '기타'];
+const FACE_RIGHT = ['광대', '턱선', '얼굴이 길어 보이는 느낌', '기타', NONE];
 const HAIR_LEFT = ['앞머리', '옆 볼륨', '모발 손상', '두피'];
-const HAIR_RIGHT = ['정수리 볼륨', '스타일 변화', '모질', '기타'];
+const HAIR_RIGHT = ['정수리 볼륨', '스타일 변화', '모질', '기타', NONE];
 const BODY_LEFT = ['목이 짧아요', '어깨가 좁아요'];
-const BODY_RIGHT = ['승모근이 높아요', '기타'];
+const BODY_RIGHT = ['승모근이 높아요', '기타', NONE];
+
+// '해당없음'을 고르면 나머지 선택을 비우고, 다른 항목을 고르면 '해당없음'을 지운다.
+function toggleWithNone(k: string, list: string[], apply: (k: string) => void) {
+  if (k === NONE) {
+    if (list.includes(NONE)) {
+      apply(NONE);
+    } else {
+      list.forEach((item) => apply(item));
+      apply(NONE);
+    }
+  } else {
+    if (list.includes(NONE)) apply(NONE);
+    apply(k);
+  }
+}
 
 function ConcernColumn({
   items,
@@ -116,8 +132,8 @@ export function DetailedConcerns(p: DetailedConcernsProps) {
             </p>
           </div>
           <div className="grid grid-cols-2 gap-x-8">
-            <ConcernColumn items={BODY_LEFT} selected={p.bodyConcerns} onToggle={p.onToggleBody} />
-            <ConcernColumn items={BODY_RIGHT} selected={p.bodyConcerns} onToggle={p.onToggleBody} />
+            <ConcernColumn items={BODY_LEFT} selected={p.bodyConcerns} onToggle={(k) => toggleWithNone(k, p.bodyConcerns, p.onToggleBody)} />
+            <ConcernColumn items={BODY_RIGHT} selected={p.bodyConcerns} onToggle={(k) => toggleWithNone(k, p.bodyConcerns, p.onToggleBody)} />
           </div>
           {p.bodyConcerns.includes('기타') && (
             <OtherInput value={p.otherBodyConcern} onChange={p.onChangeOtherBody} placeholder="체형 고민을 자유롭게 적어주세요" />
@@ -135,8 +151,8 @@ export function DetailedConcerns(p: DetailedConcernsProps) {
             </p>
           </div>
           <div className="grid grid-cols-2 gap-x-8">
-            <ConcernColumn items={FACE_LEFT} selected={p.faceConcerns} onToggle={p.onToggleFace} />
-            <ConcernColumn items={FACE_RIGHT} selected={p.faceConcerns} onToggle={p.onToggleFace} />
+            <ConcernColumn items={FACE_LEFT} selected={p.faceConcerns} onToggle={(k) => toggleWithNone(k, p.faceConcerns, p.onToggleFace)} />
+            <ConcernColumn items={FACE_RIGHT} selected={p.faceConcerns} onToggle={(k) => toggleWithNone(k, p.faceConcerns, p.onToggleFace)} />
           </div>
           {p.faceConcerns.includes('기타') && (
             <OtherInput value={p.otherFaceConcern} onChange={p.onChangeOtherFace} placeholder="얼굴 고민을 자유롭게 적어주세요" />
@@ -154,8 +170,8 @@ export function DetailedConcerns(p: DetailedConcernsProps) {
             </p>
           </div>
           <div className="grid grid-cols-2 gap-x-8">
-            <ConcernColumn items={HAIR_LEFT} selected={p.hairConcerns} onToggle={p.onToggleHair} />
-            <ConcernColumn items={HAIR_RIGHT} selected={p.hairConcerns} onToggle={p.onToggleHair} />
+            <ConcernColumn items={HAIR_LEFT} selected={p.hairConcerns} onToggle={(k) => toggleWithNone(k, p.hairConcerns, p.onToggleHair)} />
+            <ConcernColumn items={HAIR_RIGHT} selected={p.hairConcerns} onToggle={(k) => toggleWithNone(k, p.hairConcerns, p.onToggleHair)} />
           </div>
           {p.hairConcerns.includes('기타') && (
             <OtherInput value={p.otherHairConcern} onChange={p.onChangeOtherHair} placeholder="헤어 고민을 자유롭게 적어주세요" />
