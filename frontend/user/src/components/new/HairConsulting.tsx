@@ -441,7 +441,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
             <div className="flex items-center gap-2 mb-0.5">
               {onBack && (
                 <button onClick={onBack}
-                  className="px-3 py-2 text-[12px] tracking-[0.04em] rounded-sm border border-[#E8E8E4] text-[#888888]"
+                  className="px-3 py-2 text-[12px] tracking-[0.04em] rounded-sm border border-[#E8E8E4] text-[#777777]"
                   style={{ background: 'transparent', cursor: 'pointer' }}>
                   ← 돌아가기
                 </button>
@@ -560,15 +560,15 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                           color: isCurrent ? '#111111'
                             : isTarget && isAcc ? '#8B6F3E'
                             : isTarget ? '#4A4A4A'
-                            : '#AAAAAA',
+                            : '#777777',
                         }}>{cell.en}</span>
                         <span style={{
                           display: 'block',
-                          fontSize: 12, fontWeight: 300,
+                          fontSize: 12, fontWeight: 400,
                           color: isCurrent ? '#333333'
                             : isTarget && isAcc ? '#7A5C28'
                             : isTarget ? '#555555'
-                            : '#CCCCCA',
+                            : '#777777',
                         }}>{cell.ko}</span>
                       </button>
                     );
@@ -702,7 +702,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                   <div style={{ width: 1, height: 10, background: '#E0E0DC' }} />
                   <div className="flex gap-2 flex-wrap">
                     {(imageType?.kw ?? []).map(k => (
-                      <span key={k} style={{ fontSize: 12, color: '#888882', letterSpacing: '0.04em' }}>{k}</span>
+                      <span key={k} style={{ fontSize: 12, color: '#777777', letterSpacing: '0.04em' }}>{k}</span>
                     ))}
                   </div>
                 </div>
@@ -935,7 +935,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                     </p>
                     <button
                       onClick={() => setMapZoomOpen(false)}
-                      className="text-[12px] text-[#888888] hover:text-[#111111] transition-colors"
+                      className="text-[12px] text-[#777777] hover:text-[#111111] transition-colors"
                     >
                       닫기 ✕
                     </button>
@@ -1144,7 +1144,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                             {/* Text */}
                             <div style={{ flex: 1 }}>
                               <p style={{ fontSize: 14, fontWeight: isSel ? 700 : 500, color: '#111111', marginBottom: 5, letterSpacing: '-0.01em' }}>{level.label}</p>
-                              <p style={{ fontSize: 12, color: '#888882', lineHeight: 1.65, fontWeight: 300, whiteSpace: 'pre-line', marginBottom: 8 }}>{level.desc}</p>
+                              <p style={{ fontSize: 12, color: '#777777', lineHeight: 1.65, fontWeight: 400, whiteSpace: 'pre-line', marginBottom: 8 }}>{level.desc}</p>
                               <div style={{ width: 24, height: 1, background: '#D8D4CE', marginBottom: 5 }} />
                               <p style={{ fontSize: 12, color: isSel ? '#555550' : '#AAAAAA', fontFamily: MONO, letterSpacing: '0.04em' }}>손상도 {level.pct}</p>
                             </div>
@@ -1190,7 +1190,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                                 <p style={{ fontSize: 12, color: '#555550', marginBottom: 6, letterSpacing: '-0.01em' }}>{m.label}</p>
                                 <div style={{ fontSize: 22, color: '#2A2A28', marginBottom: 2, lineHeight: 1 }}>{m.icon}</div>
                                 <DotBar val={m.val} filled="#1A1A1A" empty="#E8E8E4" />
-                                <p style={{ fontSize: 12, color: '#888882', marginTop: 2 }}>{m.subLabel}</p>
+                                <p style={{ fontSize: 12, color: '#777777', marginTop: 2 }}>{m.subLabel}</p>
                               </div>
                             ))}
                           </div>
@@ -1200,7 +1200,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                       <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '11px 18px' }}>
                         <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.2em', color: '#777777', flexShrink: 0 }}>해석 가이드</span>
                         <div style={{ width: 1, height: 14, background: '#E0E0DC' }} />
-                        <p style={{ fontSize: 12, color: '#555550', lineHeight: 1.65, fontWeight: 300 }}>{detail.guide}</p>
+                        <p style={{ fontSize: 12, color: '#555550', lineHeight: 1.65, fontWeight: 400 }}>{detail.guide}</p>
                       </div>
                     </motion.div>
                   )}
@@ -1232,7 +1232,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                           </div>
                           <div style={{ flex: 1 }}>
                             <p style={{ fontSize: 14, fontWeight: isSel ? 700 : 500, color: '#111111', marginBottom: 5, letterSpacing: '-0.01em' }}>{level.label}</p>
-                            <p style={{ fontSize: 12, color: '#888882', lineHeight: 1.65, fontWeight: 300, whiteSpace: 'pre-line', marginBottom: 8 }}>{level.desc}</p>
+                            <p style={{ fontSize: 12, color: '#777777', lineHeight: 1.65, fontWeight: 400, whiteSpace: 'pre-line', marginBottom: 8 }}>{level.desc}</p>
                             <div style={{ width: 24, height: 1, background: '#D8D4CE', marginBottom: 5 }} />
                             {/* 손상도의 '손상도 0~20%' 자리 */}
                             <p style={{ fontSize: 12, color: isSel ? '#555550' : '#AAAAAA', fontFamily: MONO, letterSpacing: '0.04em' }}>
@@ -1252,7 +1252,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 20, padding: '14px 18px', background: '#F7F7F5', border: '1px solid #EFEFED' }}>
                   <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.22em', color: '#777777', flexShrink: 0, paddingTop: 2 }}>CONSULTING NOTE</span>
                   <div style={{ width: 1, alignSelf: 'stretch', background: '#E0E0DC' }} />
-                  <p style={{ fontSize: 12, color: '#666666', lineHeight: 1.75, fontWeight: 300 }}>{section.note}</p>
+                  <p style={{ fontSize: 12, color: '#666666', lineHeight: 1.75, fontWeight: 400 }}>{section.note}</p>
                 </div>
               </motion.div>
             ))}
@@ -1399,7 +1399,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                   <div style={{ width: 18, height: 1, background: '#D8D4CE', margin: '0 auto 6px' }} />
                   {/* Tags */}
                   {opt.tags.map(t => (
-                    <p key={t} style={{ fontSize: 12, lineHeight: 1.75, color: isSel ? '#555555' : '#AAAAAA', fontWeight: 300 }}>{t}</p>
+                    <p key={t} style={{ fontSize: 12, lineHeight: 1.75, color: isSel ? '#555555' : '#AAAAAA', fontWeight: 400 }}>{t}</p>
                   ))}
                 </button>
               );
@@ -1413,10 +1413,10 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
             </span>
             <div style={{ width: 1, alignSelf: 'stretch', background: '#E0E0DC' }} />
             <div>
-              <p style={{ fontSize: 12, color: '#666666', lineHeight: 1.75, fontWeight: 300 }}>
+              <p style={{ fontSize: 12, color: '#666666', lineHeight: 1.75, fontWeight: 400 }}>
                 앞머리는 전체 인상의 균형을 좌우하는 중요한 요소입니다.
               </p>
-              <p style={{ fontSize: 12, color: '#666666', lineHeight: 1.75, fontWeight: 300 }}>
+              <p style={{ fontSize: 12, color: '#666666', lineHeight: 1.75, fontWeight: 400 }}>
                 얼굴 비율, 이목구비의 특성, 라이프스타일을 반영하여 가장 잘 어울리는 스타일을 제안해드립니다.
               </p>
             </div>
@@ -1451,7 +1451,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                   <p style={{ fontSize: 13, fontWeight: isSel ? 600 : 400, color: '#111111', marginBottom: 6, letterSpacing: '-0.01em' }}>{opt.label}</p>
                   <div style={{ width: 18, height: 1, background: '#D8D4CE', margin: '0 auto 6px' }} />
                   {opt.tags.map(t => (
-                    <p key={t} style={{ fontSize: 12, lineHeight: 1.75, color: isSel ? '#555555' : '#AAAAAA', fontWeight: 300 }}>{t}</p>
+                    <p key={t} style={{ fontSize: 12, lineHeight: 1.75, color: isSel ? '#555555' : '#AAAAAA', fontWeight: 400 }}>{t}</p>
                   ))}
                 </button>
               );
@@ -1461,8 +1461,8 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
             <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.22em', color: '#777777', flexShrink: 0, paddingTop: 2 }}>CONSULTING NOTE</span>
             <div style={{ width: 1, alignSelf: 'stretch', background: '#E0E0DC' }} />
             <div>
-              <p style={{ fontSize: 12, color: '#666666', lineHeight: 1.75, fontWeight: 300 }}>가르마는 얼굴형 비율과 이마 형태에 따라 최적의 위치가 달라집니다.</p>
-              <p style={{ fontSize: 12, color: '#666666', lineHeight: 1.75, fontWeight: 300 }}>얼굴 비율과 이목구비의 위치를 고려하여 가장 조화로운 가르마를 제안해드립니다.</p>
+              <p style={{ fontSize: 12, color: '#666666', lineHeight: 1.75, fontWeight: 400 }}>가르마는 얼굴형 비율과 이마 형태에 따라 최적의 위치가 달라집니다.</p>
+              <p style={{ fontSize: 12, color: '#666666', lineHeight: 1.75, fontWeight: 400 }}>얼굴 비율과 이목구비의 위치를 고려하여 가장 조화로운 가르마를 제안해드립니다.</p>
             </div>
           </div>
         </motion.div>}
@@ -1504,7 +1504,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                   <p style={{ fontSize: 13, fontWeight: isSel ? 600 : 400, color: '#111111', marginBottom: 6, letterSpacing: '-0.01em' }}>{opt.label}</p>
                   <div style={{ width: 18, height: 1, background: '#D8D4CE', margin: '0 auto 6px' }} />
                   {opt.tags.map(t => (
-                    <p key={t} style={{ fontSize: 12, lineHeight: 1.75, color: isSel ? '#555555' : '#AAAAAA', fontWeight: 300 }}>{t}</p>
+                    <p key={t} style={{ fontSize: 12, lineHeight: 1.75, color: isSel ? '#555555' : '#AAAAAA', fontWeight: 400 }}>{t}</p>
                   ))}
                 </button>
               );
@@ -1514,8 +1514,8 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
             <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.22em', color: '#777777', flexShrink: 0, paddingTop: 2 }}>CONSULTING NOTE</span>
             <div style={{ width: 1, alignSelf: 'stretch', background: '#E0E0DC' }} />
             <div>
-              <p style={{ fontSize: 12, color: '#666666', lineHeight: 1.75, fontWeight: 300 }}>헤어 길이는 전체 실루엣과 라이프스타일을 좌우하는 핵심 요소입니다.</p>
-              <p style={{ fontSize: 12, color: '#666666', lineHeight: 1.75, fontWeight: 300 }}>얼굴형의 세로·가로 비율과 개인의 취향을 반영하여 가장 어울리는 길이를 제안해드립니다.</p>
+              <p style={{ fontSize: 12, color: '#666666', lineHeight: 1.75, fontWeight: 400 }}>헤어 길이는 전체 실루엣과 라이프스타일을 좌우하는 핵심 요소입니다.</p>
+              <p style={{ fontSize: 12, color: '#666666', lineHeight: 1.75, fontWeight: 400 }}>얼굴형의 세로·가로 비율과 개인의 취향을 반영하여 가장 어울리는 길이를 제안해드립니다.</p>
             </div>
           </div>
         </motion.div>}
@@ -1557,7 +1557,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                   <p style={{ fontSize: 13, fontWeight: isSel ? 600 : 400, color: '#111111', marginBottom: 6, letterSpacing: '-0.01em' }}>{opt.label}</p>
                   <div style={{ width: 18, height: 1, background: '#D8D4CE', margin: '0 auto 6px' }} />
                   {opt.tags.map(t => (
-                    <p key={t} style={{ fontSize: 12, lineHeight: 1.75, color: isSel ? '#555555' : '#AAAAAA', fontWeight: 300 }}>{t}</p>
+                    <p key={t} style={{ fontSize: 12, lineHeight: 1.75, color: isSel ? '#555555' : '#AAAAAA', fontWeight: 400 }}>{t}</p>
                   ))}
                 </button>
               );
@@ -1567,8 +1567,8 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
             <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.22em', color: '#777777', flexShrink: 0, paddingTop: 2 }}>CONSULTING NOTE</span>
             <div style={{ width: 1, alignSelf: 'stretch', background: '#E0E0DC' }} />
             <div>
-              <p style={{ fontSize: 12, color: '#666666', lineHeight: 1.75, fontWeight: 300 }}>컬감은 전체적인 분위기와 텍스처를 결정짓는 중요한 요소입니다.</p>
-              <p style={{ fontSize: 12, color: '#666666', lineHeight: 1.75, fontWeight: 300 }}>이미지타입과 개인의 라이프스타일에 맞는 최적의 컬감을 제안해드립니다.</p>
+              <p style={{ fontSize: 12, color: '#666666', lineHeight: 1.75, fontWeight: 400 }}>컬감은 전체적인 분위기와 텍스처를 결정짓는 중요한 요소입니다.</p>
+              <p style={{ fontSize: 12, color: '#666666', lineHeight: 1.75, fontWeight: 400 }}>이미지타입과 개인의 라이프스타일에 맞는 최적의 컬감을 제안해드립니다.</p>
             </div>
           </div>
         </motion.div>}
@@ -1627,7 +1627,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                       ))}
                     </div>
                     {/* Desc */}
-                    <p style={{ fontSize: 12, color: isSel ? '#444444' : '#AAAAAA', lineHeight: 1.65, fontWeight: 300, marginBottom: 10 }}>{opt.desc}</p>
+                    <p style={{ fontSize: 12, color: isSel ? '#444444' : '#AAAAAA', lineHeight: 1.65, fontWeight: 400, marginBottom: 10 }}>{opt.desc}</p>
                     {/* COLOR CODE */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingTop: 8, borderTop: '1px solid #EAEAE6', marginTop: 'auto' }}>
                       <span style={{ fontSize: 12, letterSpacing: '0.14em', color: '#777777', fontFamily: MONO }}>COLOR CODE</span>
@@ -1643,8 +1643,8 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
             <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.22em', color: '#777777', flexShrink: 0, paddingTop: 2 }}>CONSULTING NOTE</span>
             <div style={{ width: 1, alignSelf: 'stretch', background: '#E0E0DC' }} />
             <div>
-              <p style={{ fontSize: 12, color: '#666666', lineHeight: 1.75, fontWeight: 300 }}>헤어 컬러는 이미지타입과 피부 톤을 고려하여 선택해야 가장 자연스럽고 완성도 있는 연출이 가능합니다.</p>
-              <p style={{ fontSize: 12, color: '#666666', lineHeight: 1.75, fontWeight: 300 }}>고유미를 살리거나 추구미 방향으로 보완하는 컬러 전략을 제안해드립니다.</p>
+              <p style={{ fontSize: 12, color: '#666666', lineHeight: 1.75, fontWeight: 400 }}>헤어 컬러는 이미지타입과 피부 톤을 고려하여 선택해야 가장 자연스럽고 완성도 있는 연출이 가능합니다.</p>
+              <p style={{ fontSize: 12, color: '#666666', lineHeight: 1.75, fontWeight: 400 }}>고유미를 살리거나 추구미 방향으로 보완하는 컬러 전략을 제안해드립니다.</p>
             </div>
           </div>
         </motion.div>}

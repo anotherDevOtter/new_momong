@@ -270,7 +270,7 @@ function PctBar({ label, pct }: { label: string; pct: number }) {
       <div className="flex-1 h-[3px] bg-[#E8E8E4] rounded-full overflow-hidden">
         <motion.div className="h-full bg-[#1A1A1A] rounded-full" initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} />
       </div>
-      <span className="text-[12px] text-[#A6A6A2] w-7 text-right" style={{ fontFamily: MONO }}>{pct}%</span>
+      <span className="text-[12px] text-[#777777] w-7 text-right" style={{ fontFamily: MONO }}>{pct}%</span>
     </div>
   );
 }
@@ -420,7 +420,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
               {onBack && (
                 <button
                   onClick={onBack}
-                  className="px-3 py-2 text-[12px] tracking-[0.04em] rounded-sm border border-[#E8E8E4] text-[#888888]"
+                  className="px-3 py-2 text-[12px] tracking-[0.04em] rounded-sm border border-[#E8E8E4] text-[#777777]"
                   style={{ background: 'transparent', cursor: 'pointer' }}>
                   ← 돌아가기
                 </button>
@@ -774,7 +774,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                   <div className="flex gap-2">
                     {axisLabels.map(label => (
                       <div key={label} className="flex items-baseline gap-1">
-                        <span className="text-[12px] text-[#888888]">{label}</span>
+                        <span className="text-[12px] text-[#777777]">{label}</span>
                         <span className="text-[16px] font-light text-[#1A1A1A]" style={{ fontFamily: MONO }}>
                           {axisCounts[label] ?? 0}
                         </span>
@@ -804,7 +804,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                           </motion.span>
                         </AnimatePresence>
                       </div>
-                      <p className="text-[12px] text-[#888888] mb-3">
+                      <p className="text-[12px] text-[#777777] mb-3">
                         현재 값 — <span className="text-[#1A1A1A] font-medium">{deriveValue(current, pos)}</span>
                       </p>
 
@@ -862,7 +862,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                           </motion.p>
                         </AnimatePresence>
                         <div className="flex flex-wrap gap-1 mb-2">
-                          {liveTags.map(t => <span key={t} className="text-[12px] text-[#888888]">{t}</span>)}
+                          {liveTags.map(t => <span key={t} className="text-[12px] text-[#777777]">{t}</span>)}
                         </div>
                         {liveBd.map(b => <PctBar key={b.label} {...b} />)}
                       </div>

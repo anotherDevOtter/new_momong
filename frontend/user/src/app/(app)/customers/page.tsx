@@ -38,7 +38,7 @@ export default function CustomersPage() {
         <div className="max-w-[1200px] mx-auto px-6 md:px-20 flex items-center gap-6">
           <button
             onClick={handleBack}
-            className="flex items-center gap-1.5 text-[#888888] hover:text-[#111111] transition-colors py-4"
+            className="flex items-center gap-1.5 text-[#777777] hover:text-[#111111] transition-colors py-4"
           >
             <ChevronLeft className="w-4 h-4" />
             <span className="text-sm">돌아가기</span>

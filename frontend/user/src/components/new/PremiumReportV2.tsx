@@ -445,11 +445,11 @@ function Cover({ onStart, session }: { onStart: () => void; session: CustomerSes
             {session.customer.name && (
               <div style={{ marginBottom: 28 }}>
                 <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.26em', color: 'rgba(255,255,255,0.35)', marginBottom: 7 }}>FOR</p>
-                <p style={{ fontSize: 22, fontWeight: 300, color: 'rgba(255,255,255,0.88)', letterSpacing: '0.04em', lineHeight: 1.2 }}>{session.customer.name}</p>
+                <p style={{ fontSize: 22, fontWeight: 400, color: 'rgba(255,255,255,0.88)', letterSpacing: '0.04em', lineHeight: 1.2 }}>{session.customer.name}</p>
               </div>
             )}
             <p style={{ fontSize: 32, fontWeight: 200, color: '#FFFFFF', letterSpacing: '-0.01em', lineHeight: 1.35, marginBottom: 10 }} className="text-[26px] lg:text-[32px]">'Be yourself'</p>
-            <p style={{ fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, marginBottom: 36 }}>모든 사람들이 자신의 아름다움을 발견하고<br />스스로를 사랑할 수 있도록 돕습니다.</p>
+            <p style={{ fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, marginBottom: 36 }}>모든 사람들이 자신의 아름다움을 발견하고<br />스스로를 사랑할 수 있도록 돕습니다.</p>
             <button onClick={onStart} style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '14px 28px', background: '#FFFFFF', border: 'none', cursor: 'pointer', minHeight: 52 }}>
               <span style={{ fontFamily: MONO, fontSize: 12, color: G1, letterSpacing: '0.14em' }}>리포트 시작하기</span>
               <ArrowRight size={12} color={G1} strokeWidth={1.5} />
@@ -491,7 +491,7 @@ function Cover({ onStart, session }: { onStart: () => void; session: CustomerSes
             ].map(r => (
               <div key={r.label} style={{ padding: '18px 20px', borderRight: `1px solid ${G7}`, flex: 1 }}>
                 <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.22em', color: G5, marginBottom: 5 }}>{r.label}</p>
-                <p style={{ fontSize: 13, color: G1, fontWeight: 300 }}>{r.value}</p>
+                <p style={{ fontSize: 13, color: G1, fontWeight: 400 }}>{r.value}</p>
               </div>
             ))}
           </div>
@@ -524,7 +524,7 @@ function Page01({ session }: { session: CustomerSession }) {
           {/* Left: name block */}
           <div>
             <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.28em', color: G5, marginBottom: 16 }}>CLIENT</p>
-            <p style={{ fontSize: hasName ? 34 : 18, fontWeight: 300, color: hasName ? G1 : G5, letterSpacing: '-0.01em', lineHeight: 1.2, marginBottom: 12 }}>
+            <p style={{ fontSize: hasName ? 34 : 18, fontWeight: 400, color: hasName ? G1 : G5, letterSpacing: '-0.01em', lineHeight: 1.2, marginBottom: 12 }}>
               {hasName ? customer.name : '고객 이름 미입력'}
             </p>
             <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.22em', color: G6 }}>{session.courseLabel} PERSONAL HAIR CONSULTING</p>
@@ -537,7 +537,7 @@ function Page01({ session }: { session: CustomerSession }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'flex-end' }}>
               <div>
                 <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.24em', color: G5, marginBottom: 6 }}>ANALYSIS DATE</p>
-                <p style={{ fontSize: 13, color: G2, fontWeight: 300 }}>{customer.visitDate || '—'}</p>
+                <p style={{ fontSize: 13, color: G2, fontWeight: 400 }}>{customer.visitDate || '—'}</p>
               </div>
               {hasReportNo && (
                 <div>
@@ -548,7 +548,7 @@ function Page01({ session }: { session: CustomerSession }) {
               {hasDesigner && (
                 <div>
                   <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.24em', color: G5, marginBottom: 6 }}>DESIGNER</p>
-                  <p style={{ fontSize: 13, color: G2, fontWeight: 300 }}>{customer.designerName}</p>
+                  <p style={{ fontSize: 13, color: G2, fontWeight: 400 }}>{customer.designerName}</p>
                 </div>
               )}
             </div>
@@ -633,7 +633,7 @@ function Page01({ session }: { session: CustomerSession }) {
                       <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} style={{ overflow: 'hidden' }}>
                         <div style={{ padding: '12px 32px 16px' }}>
                           <p style={{ fontSize: 14, fontWeight: 500, color: G2, marginBottom: 6 }}>{f.result}</p>
-                          <p style={{ fontSize: 13, color: G4, lineHeight: 1.7, fontWeight: 300 }}>{f.interpretation}</p>
+                          <p style={{ fontSize: 13, color: G4, lineHeight: 1.7, fontWeight: 400 }}>{f.interpretation}</p>
                         </div>
                       </motion.div>
                     )}
@@ -653,7 +653,7 @@ function Page01({ session }: { session: CustomerSession }) {
             </div>
             <div style={{ padding: '20px', background: G9 }}>
               <p style={{ fontFamily: MONO, fontSize: 12, color: G5, marginBottom: 8 }}>HAIR DIRECTION NOTE</p>
-              <p style={{ fontSize: 13, color: G3, lineHeight: 1.75, fontWeight: 300 }}>{ci.hairNote}</p>
+              <p style={{ fontSize: 13, color: G3, lineHeight: 1.75, fontWeight: 400 }}>{ci.hairNote}</p>
             </div>
           </div>
         </div>
@@ -730,7 +730,7 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
                           {isCur && <div style={{ position: 'absolute', top: 8, right: 8, width: 8, height: 8, borderRadius: '50%', background: G1 }} />}
                           {isDes && <div style={{ position: 'absolute', top: 8, right: 8, width: 8, height: 8, borderRadius: '50%', background: GOLD }} />}
                           <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 700, letterSpacing: '0.06em', color: isCur ? G1 : isDes ? '#7A6020' : G5 }}>{cell.en}</span>
-                          <span style={{ fontSize: 12, fontWeight: 300, color: isCur ? G3 : isDes ? '#9A7C2A' : G6 }}>{cell.ko}</span>
+                          <span style={{ fontSize: 12, fontWeight: 400, color: isCur ? G3 : isDes ? '#9A7C2A' : G6 }}>{cell.ko}</span>
                         </button>
                       );
                     })}
@@ -743,7 +743,7 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
                 <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
                   <div style={{ padding: '14px 16px', background: G9, border: `1px solid ${G7}`, marginTop: 12 }}>
                     <p style={{ fontFamily: MONO, fontSize: 12, color: G5, marginBottom: 6 }}>{IMAP[clickedCell.row][clickedCell.col].en} · {IMAP[clickedCell.row][clickedCell.col].ko}</p>
-                    <p style={{ fontSize: 13, color: G2, lineHeight: 1.7, fontWeight: 300 }}>{IMAP[clickedCell.row][clickedCell.col].desc}</p>
+                    <p style={{ fontSize: 13, color: G2, lineHeight: 1.7, fontWeight: 400 }}>{IMAP[clickedCell.row][clickedCell.col].desc}</p>
                   </div>
                 </motion.div>
               )}
@@ -770,12 +770,12 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
             ) : (
               <div style={{ padding: '20px', border: `1px solid ${G7}`, background: G9 }}>
                 <p style={{ fontFamily: MONO, fontSize: 12, color: G5, marginBottom: 8 }}>DESIRED IMAGE</p>
-                <p style={{ fontSize: 14, color: G4, fontWeight: 300 }}>원하는 이미지를 선택해주세요</p>
+                <p style={{ fontSize: 14, color: G4, fontWeight: 400 }}>원하는 이미지를 선택해주세요</p>
               </div>
             )}
             <div style={{ padding: '20px', borderLeft: `2px solid ${GOLD}`, background: 'rgba(184,150,60,0.04)' }}>
               <p style={{ fontFamily: MONO, fontSize: 12, color: GOLD, marginBottom: 8 }}>YOUR GAP</p>
-              <p style={{ fontSize: 14, color: G2, lineHeight: 1.75, fontWeight: 300 }}>{imageDirection.gapSummary}</p>
+              <p style={{ fontSize: 14, color: G2, lineHeight: 1.75, fontWeight: 400 }}>{imageDirection.gapSummary}</p>
             </div>
           </div>
         </div>
@@ -844,7 +844,7 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
                     {guideStyles.map(k => (
                       <span key={k} style={{ fontSize: 16, fontWeight: 600, color: G1, letterSpacing: '-0.01em' }}>
                         {STYLE_MAP[k].en}
-                        <span style={{ fontSize: 12, color: G4, fontWeight: 300, marginLeft: 6 }}>{STYLE_MAP[k].ko}</span>
+                        <span style={{ fontSize: 12, color: G4, fontWeight: 400, marginLeft: 6 }}>{STYLE_MAP[k].ko}</span>
                       </span>
                     ))}
                   </div>
@@ -872,8 +872,8 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
                           justifyContent: 'flex-end',
                           padding: '20px 18px',
                         }}>
-                          <p style={{ fontSize: guideStyles.length > 1 ? 22 : 28, fontWeight: 300, color: '#FFFFFF', letterSpacing: '-0.01em', lineHeight: 1.2 }}>{s.en}</p>
-                          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', fontWeight: 300, marginTop: 4 }}>{s.ko}</p>
+                          <p style={{ fontSize: guideStyles.length > 1 ? 22 : 28, fontWeight: 400, color: '#FFFFFF', letterSpacing: '-0.01em', lineHeight: 1.2 }}>{s.en}</p>
+                          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', fontWeight: 400, marginTop: 4 }}>{s.ko}</p>
                         </div>
                       </div>
                     );
@@ -882,7 +882,7 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
                 {/* Note for first selected style */}
                 <div style={{ padding: '16px 24px', borderTop: `1px solid ${G8}` }}>
                   <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.18em', color: G5, marginBottom: 6 }}>STYLE NOTE</p>
-                  <p style={{ fontSize: 12, color: G3, lineHeight: 1.7, fontWeight: 300 }}>{STYLE_MAP[guideStyles[0]].note}</p>
+                  <p style={{ fontSize: 12, color: G3, lineHeight: 1.7, fontWeight: 400 }}>{STYLE_MAP[guideStyles[0]].note}</p>
                 </div>
               </div>
 
@@ -903,7 +903,7 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
               </div>
               <div style={{ padding: '22px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
                 <span style={{ fontSize: 18, fontWeight: 500, color: G1, letterSpacing: '-0.01em' }}>{c.level}</span>
-                <p style={{ fontSize: 12, color: G5, lineHeight: 1.55, fontWeight: 300, maxWidth: 280, textAlign: 'right' }}>{c.impact}</p>
+                <p style={{ fontSize: 12, color: G5, lineHeight: 1.55, fontWeight: 400, maxWidth: 280, textAlign: 'right' }}>{c.impact}</p>
               </div>
             </div>
           ))}
@@ -933,12 +933,12 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
                       <span style={{ fontSize: 18, fontWeight: 500, color: G1, letterSpacing: '-0.01em' }}>
                         {picked.map(o => o.label).join(' · ')}
                       </span>
-                      <p style={{ fontSize: 12, color: G5, lineHeight: 1.55, fontWeight: 300, maxWidth: 280, textAlign: 'right' }}>
+                      <p style={{ fontSize: 12, color: G5, lineHeight: 1.55, fontWeight: 400, maxWidth: 280, textAlign: 'right' }}>
                         {tags.map(t => `#${t}`).join(' ')}
                       </p>
                     </>
                   ) : (
-                    <span style={{ fontSize: 14, color: G6, fontWeight: 300 }}>이번 컨설팅에서 선택하지 않았습니다</span>
+                    <span style={{ fontSize: 14, color: G6, fontWeight: 400 }}>이번 컨설팅에서 선택하지 않았습니다</span>
                   )}
                 </div>
               </div>
@@ -1003,7 +1003,7 @@ function PhotoSlot({ label, sub, photo, setPhoto, inputRef }: {
             </div>
             <div style={{ textAlign: 'center' }}>
               <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.16em', color: isBefore ? G3 : GOLD, marginBottom: 6 }}>{label}</p>
-              <p style={{ fontSize: 13, color: G5, fontWeight: 300 }}>{sub} 사진 추가</p>
+              <p style={{ fontSize: 13, color: G5, fontWeight: 400 }}>{sub} 사진 추가</p>
             </div>
           </div>
         )}
@@ -1073,7 +1073,7 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
                   <div style={{ width: 18, height: 18, borderRadius: '50%', border: `1.5px solid ${subSel[item.id] && subSel[item.id] !== '유지' ? GOLD : G6}`, background: subSel[item.id] && subSel[item.id] !== '유지' ? GOLD : 'transparent', flexShrink: 0 }} />
                   <div style={{ flex: 1 }}>
                     <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.14em', color: G4, display: 'block', marginBottom: 2 }}>{item.en}</span>
-                    <span style={{ fontSize: 15, fontWeight: 300, color: G3 }}>
+                    <span style={{ fontSize: 15, fontWeight: 400, color: G3 }}>
                       {item.ko}{subSel[item.id] ? <span style={{ color: GOLD, fontWeight: 500 }}> · {subSel[item.id]}</span> : ''}
                     </span>
                   </div>
@@ -1100,7 +1100,7 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
             <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.18em', color: G4 }}>MY NEXT DIRECTION</p>
             {selectedIds.length === 0 ? (
               <div style={{ padding: '32px 24px', background: G9, border: `1px solid ${G7}` }}>
-                <p style={{ fontSize: 14, color: G5, lineHeight: 1.75, fontWeight: 300 }}>왼쪽 목록에서 다음에 바꾸고 싶은 항목을 선택해주세요.</p>
+                <p style={{ fontSize: 14, color: G5, lineHeight: 1.75, fontWeight: 400 }}>왼쪽 목록에서 다음에 바꾸고 싶은 항목을 선택해주세요.</p>
               </div>
             ) : (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -1115,14 +1115,14 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
                           <span style={{ fontSize: 13, color: G1, fontWeight: 500 }}>{subSel[id]}</span>
                         </div>
                         {memos[id] && (
-                          <p style={{ fontSize: 12, color: G4, fontWeight: 300, marginTop: 4, lineHeight: 1.6 }}>{memos[id]}</p>
+                          <p style={{ fontSize: 12, color: G4, fontWeight: 400, marginTop: 4, lineHeight: 1.6 }}>{memos[id]}</p>
                         )}
                       </div>
                     );
                   })}
                 </div>
                 <div style={{ padding: '20px 24px', borderLeft: `2px solid ${GOLD}` }}>
-                  <p style={{ fontSize: 14, color: G2, lineHeight: 1.8, fontWeight: 300 }}>
+                  <p style={{ fontSize: 14, color: G2, lineHeight: 1.8, fontWeight: 400 }}>
                     {selectedIds.includes('bangs') ? '앞머리와 얼굴 주변 레이어를 먼저 조정합니다.' : `${selectedIds.map(id => NEXT_ITEMS.find(i => i.id === id)?.ko || '').join(' + ')} 방향으로 단계적으로 진행합니다.`}
                   </p>
                 </div>
@@ -1136,7 +1136,7 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
                   : <span style={{ fontSize: 13, color: G5 }}>시술 정보 없음</span>
                 }
               </div>
-              <p style={{ fontSize: 13, color: G3, lineHeight: 1.65, fontWeight: 300 }}>{todayDesign.summary}</p>
+              <p style={{ fontSize: 13, color: G3, lineHeight: 1.65, fontWeight: 400 }}>{todayDesign.summary}</p>
             </div>
           </div>
         </div>
@@ -1144,8 +1144,8 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
         <HDivider />
 
         <SectionLabel>BEFORE / AFTER</SectionLabel>
-        <h2 style={{ fontSize: 32, fontWeight: 300, color: G1, marginBottom: 12 }}>시술 전 · 후 사진</h2>
-        <p style={{ fontSize: 14, color: G4, fontWeight: 300, lineHeight: 1.65, marginBottom: 40 }}>사진을 등록하면 리포트에 함께 기록됩니다.</p>
+        <h2 style={{ fontSize: 32, fontWeight: 400, color: G1, marginBottom: 12 }}>시술 전 · 후 사진</h2>
+        <p style={{ fontSize: 14, color: G4, fontWeight: 400, lineHeight: 1.65, marginBottom: 40 }}>사진을 등록하면 리포트에 함께 기록됩니다.</p>
         <div className="grid grid-cols-2 gap-4">
           <PhotoSlot label="BEFORE" sub="시술 전" photo={beforePhoto} setPhoto={url => onBeforePhotoChange?.(url)} inputRef={beforeInputRef} />
           <PhotoSlot label="AFTER"  sub="시술 후" photo={afterPhoto}  setPhoto={url => onAfterPhotoChange?.(url)}  inputRef={afterInputRef} />
@@ -1180,7 +1180,7 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
                     {detailText && (
                       <>
                         <span style={{ fontSize: 13, color: G5 }}>·</span>
-                        <span style={{ fontSize: 13, color: GOLD, fontWeight: 300 }}>{detailText}</span>
+                        <span style={{ fontSize: 13, color: GOLD, fontWeight: 400 }}>{detailText}</span>
                       </>
                     )}
                   </div>
@@ -1199,7 +1199,7 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
                       <span style={{ fontFamily: MONO, fontSize: 12, color: G5, letterSpacing: '0.08em', flexShrink: 0, paddingTop: 2 }}>
                         {String(i + 1).padStart(2, '0')}
                       </span>
-                      <span style={{ fontSize: 14, color: G2, fontWeight: 300, lineHeight: 1.65 }}>{tip}</span>
+                      <span style={{ fontSize: 14, color: G2, fontWeight: 400, lineHeight: 1.65 }}>{tip}</span>
                     </div>
                   ))}
                 </div>
@@ -1238,7 +1238,7 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
                                 {care.tips.map(tip => (
                                   <div key={tip.label} style={{ display: 'flex', alignItems: 'flex-start', gap: 20, padding: '8px 0' }}>
                                     <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.12em', color: G5, width: 92, flexShrink: 0, paddingTop: 3 }}>{tip.label}</span>
-                                    <span style={{ fontSize: 13, color: G3, fontWeight: 300, lineHeight: 1.7 }}>{tip.text}</span>
+                                    <span style={{ fontSize: 13, color: G3, fontWeight: 400, lineHeight: 1.7 }}>{tip.text}</span>
                                   </div>
                                 ))}
                               </div>
@@ -1338,25 +1338,25 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
               {/* NEXT CARE */}
               <div style={{ border: `1px solid ${G7}`, padding: '32px 28px 36px', background: '#FFFFFF' }}>
                 <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.2em', color: G5, marginBottom: 20 }}>NEXT CARE</p>
-                <p style={{ fontSize: 44, fontWeight: 300, color: G1, letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 14 }}>
+                <p style={{ fontSize: 44, fontWeight: 400, color: G1, letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 14 }}>
                   {nc ? fmtWeeks(nc.minWeeks, nc.maxWeeks) : '3–4주 후'}
                 </p>
                 <p style={{ fontSize: 13, color: GOLD, fontWeight: 500, marginBottom: 16, lineHeight: 1.5 }}>
                   {nc?.services?.join(' · ') || '클리닉 · 모발 상태 점검'}
                 </p>
-                <p style={{ fontSize: 13, color: G4, lineHeight: 1.75, fontWeight: 300 }}>{CARE_NOTE}</p>
+                <p style={{ fontSize: 13, color: G4, lineHeight: 1.75, fontWeight: 400 }}>{CARE_NOTE}</p>
               </div>
 
               {/* NEXT DESIGN */}
               <div style={{ border: `1px solid ${GOLD}`, padding: '32px 28px 36px', background: '#FFFFFF' }}>
                 <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.2em', color: GOLD, marginBottom: 20 }}>NEXT DESIGN</p>
-                <p style={{ fontSize: 44, fontWeight: 300, color: G1, letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 14 }}>
+                <p style={{ fontSize: 44, fontWeight: 400, color: G1, letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 14 }}>
                   {nd ? fmtWeeks(nd.minWeeks, nd.maxWeeks) : '약 8주 후'}
                 </p>
                 <p style={{ fontSize: 13, color: GOLD, fontWeight: 500, marginBottom: 16, lineHeight: 1.5 }}>
                   {nd?.services?.join(' · ') || '커트 · 컬러 상태 점검'}
                 </p>
-                <p style={{ fontSize: 13, color: G4, lineHeight: 1.75, fontWeight: 300 }}>{DESIGN_NOTE}</p>
+                <p style={{ fontSize: 13, color: G4, lineHeight: 1.75, fontWeight: 400 }}>{DESIGN_NOTE}</p>
               </div>
             </div>
           );

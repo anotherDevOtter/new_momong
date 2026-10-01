@@ -174,7 +174,7 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
             <div className="flex items-center gap-2 mb-0.5">
               {onBack && (
                 <button onClick={onBack}
-                  className="px-3 py-2 text-[12px] tracking-[0.04em] rounded-sm border border-[#E8E8E4] text-[#888888]"
+                  className="px-3 py-2 text-[12px] tracking-[0.04em] rounded-sm border border-[#E8E8E4] text-[#777777]"
                   style={{ background: 'transparent', cursor: 'pointer' }}>
                   ← 돌아가기
                 </button>
@@ -227,7 +227,7 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
 
             {/* Type identity */}
             <div className="px-5 pt-5 pb-4 bg-[#F7F7F5]">
-              <p className="text-[12px] tracking-[0.28em] text-[#888888] mb-1" style={{ fontFamily: MONO }}>
+              <p className="text-[12px] tracking-[0.28em] text-[#777777] mb-1" style={{ fontFamily: MONO }}>
                 {imageType ? `${imageType.en} TYPE` : 'NOT MEASURED'}
               </p>
               <p className="text-[32px] font-bold text-[#1A1A1A] tracking-tight leading-tight">
@@ -376,7 +376,7 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
                             const d = radarData.find(r => r.area === payload.value);
                             return (
                               <text x={x} y={y} textAnchor="middle" dominantBaseline="middle">
-                                <tspan key="label" x={x} dy="-0.5em" style={{ fontSize: 12, fill: '#777777', fontWeight: 300 }}>
+                                <tspan key="label" x={x} dy="-0.5em" style={{ fontSize: 12, fill: '#777777', fontWeight: 400 }}>
                                   {payload.value}
                                 </tspan>
                                 <tspan key="pct" x={x} dy="1.3em" style={{ fontSize: 12, fill: '#111111', fontWeight: 500 }}>
@@ -446,7 +446,7 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
                           <span className="text-[12px] text-[#777777] mr-0.5">매력</span>
                           {f.item.tags.slice(0, 3).map(t => (
                             <span key={t} className="text-[12px] px-1.5 py-0.5"
-                              style={{ background: '#F5F5F3', color: '#888888' }}>
+                              style={{ background: '#F5F5F3', color: '#777777' }}>
                               {t}
                             </span>
                           ))}

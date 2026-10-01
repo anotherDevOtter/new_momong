@@ -85,7 +85,7 @@ export function ConsultingSummary({
                   {bodyConcerns.length > 0 ? bodyConcerns.join(', ') : '—'}
                 </span>
                 {bodyConcernsMemo && (
-                  <p className="mt-1 text-[12px] text-[#888888]" style={{ fontWeight: 300 }}>└ {bodyConcernsMemo}</p>
+                  <p className="mt-1 text-[12px] text-[#777777]" style={{ fontWeight: 300 }}>└ {bodyConcernsMemo}</p>
                 )}
               </div>
               <div>
@@ -94,7 +94,7 @@ export function ConsultingSummary({
                   {faceAreas.length > 0 ? faceAreas.join(', ') : '—'}
                 </span>
                 {faceAreasMemo && (
-                  <p className="mt-1 text-[12px] text-[#888888] pl-0" style={{ fontWeight: 300 }}>└ {faceAreasMemo}</p>
+                  <p className="mt-1 text-[12px] text-[#777777] pl-0" style={{ fontWeight: 300 }}>└ {faceAreasMemo}</p>
                 )}
               </div>
               <div>
@@ -103,7 +103,7 @@ export function ConsultingSummary({
                   {hairConcerns.length > 0 ? hairConcerns.join(', ') : '—'}
                 </span>
                 {hairConcernsMemo && (
-                  <p className="mt-1 text-[12px] text-[#888888]" style={{ fontWeight: 300 }}>└ {hairConcernsMemo}</p>
+                  <p className="mt-1 text-[12px] text-[#777777]" style={{ fontWeight: 300 }}>└ {hairConcernsMemo}</p>
                 )}
               </div>
             </div>
@@ -172,11 +172,11 @@ export function ConsultingSummary({
             <div className="flex items-center gap-4 mt-4">
               <div className="flex items-center gap-1.5">
                 <span className="w-3.5 h-3.5 bg-[#111111] text-white text-[12px] flex items-center justify-center">✓</span>
-                <span className="text-[12px] text-[#888888]">선호</span>
+                <span className="text-[12px] text-[#777777]">선호</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-3.5 h-3.5 bg-[#888888] text-white text-[12px] flex items-center justify-center">✕</span>
-                <span className="text-[12px] text-[#888888]">비선호</span>
+                <span className="text-[12px] text-[#777777]">비선호</span>
               </div>
             </div>
           </motion.div>
@@ -206,10 +206,10 @@ export function ConsultingSummary({
                   )}
                 </div>
                 {preferredStylesMemo && (
-                  <p className="mt-2 text-[12px] text-[#888888]" style={{ fontWeight: 300 }}>└ {preferredStylesMemo}</p>
+                  <p className="mt-2 text-[12px] text-[#777777]" style={{ fontWeight: 300 }}>└ {preferredStylesMemo}</p>
                 )}
                 {preferredImageMemo && (
-                  <p className="mt-1 text-[12px] text-[#888888]" style={{ fontWeight: 300 }}>└ (이미지) {preferredImageMemo}</p>
+                  <p className="mt-1 text-[12px] text-[#777777]" style={{ fontWeight: 300 }}>└ (이미지) {preferredImageMemo}</p>
                 )}
               </div>
               <div>
@@ -217,7 +217,7 @@ export function ConsultingSummary({
                 <div className="flex flex-wrap gap-2">
                   {dislikedStyles.length > 0 ? (
                     dislikedStyles.map((id) => (
-                      <span key={id} className="border border-[#CCCCCC] text-[#888888] text-[12px] px-3 py-1" style={{ fontWeight: 400 }}>
+                      <span key={id} className="border border-[#CCCCCC] text-[#777777] text-[12px] px-3 py-1" style={{ fontWeight: 400 }}>
                         {styleLabels[id] || id}
                       </span>
                     ))

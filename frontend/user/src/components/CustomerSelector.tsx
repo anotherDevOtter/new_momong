@@ -82,7 +82,7 @@ export function CustomerSelector({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="이름 또는 전화번호로 검색"
-            className="w-full pl-10 pr-4 py-3 border border-[#E5E5E5] rounded-lg text-sm text-[#111111] placeholder-[#BBBBBB] focus:outline-none focus:border-[#111111]"
+            className="w-full pl-10 pr-4 py-3 border border-[#E5E5E5] rounded-lg text-sm text-[#111111] placeholder-[#888888] focus:outline-none focus:border-[#111111]"
           />
         </div>
 
