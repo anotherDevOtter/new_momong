@@ -194,7 +194,7 @@ export function HairDesignProposal({
             </div>
 
             {/* 자동 설명 */}
-            <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
+            <div className="bg-[#F5F3EE] rounded-xl p-4 border border-[#E4E4E0]">
               <p className="text-xs text-gray-700 font-light leading-relaxed">
                 {getSelectedOption(lengthOptions, selectedLength)?.description}
               </p>
@@ -245,7 +245,7 @@ export function HairDesignProposal({
             </div>
 
             {/* 자동 설명 */}
-            <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
+            <div className="bg-[#F5F3EE] rounded-xl p-4 border border-[#E4E4E0]">
               <p className="text-xs text-gray-700 font-light leading-relaxed">
                 {getSelectedOption(bangsOptions, selectedBangs)?.description}
               </p>
@@ -357,7 +357,7 @@ export function HairDesignProposal({
             </div>
 
             {/* 자동 설명 */}
-            <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
+            <div className="bg-[#F5F3EE] rounded-xl p-4 border border-[#E4E4E0]">
               <p className="text-xs text-gray-700 font-light leading-relaxed">
                 {getSelectedOption(colorOptions, selectedColor)?.description}
               </p>

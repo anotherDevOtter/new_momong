@@ -122,7 +122,7 @@ export default function SignupPage() {
             />
           </div>
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && <p className="text-sm text-[#9A3B3B]">{error}</p>}
 
           <button
             type="submit"

@@ -723,7 +723,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
                   <p className="text-xs text-white font-normal flex items-center gap-2">
                     <span
                       className={`w-2 h-2 rounded-full ${
-                        faceInOval ? 'bg-green-400 animate-pulse' : 'bg-yellow-400'
+                        faceInOval ? 'bg-[#4B2928] animate-pulse' : 'bg-[#C8C8C4]'
                       }`}
                     />
                     {!faceDetector.ready
@@ -767,7 +767,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
                 <>
                   {/* 분석 에러 표시 */}
                   {analyzeError && (
-                    <p className="text-xs text-red-500 text-center">{analyzeError}</p>
+                    <p className="text-xs text-[#9A3B3B] text-center">{analyzeError}</p>
                   )}
 
                   {/* 프리뷰 모드: 분석 / 다시 (촬영 또는 파일 선택)

@@ -440,7 +440,7 @@ function FaceStructurePage({ pageNumber, totalPages, values, posMap, numbers }: 
         </div>
       </div>
 
-      <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100">
+      <div className="bg-[#F5F3EE] rounded-xl p-6 border border-[#E4E4E0]">
         <p className="text-sm font-light text-gray-700 leading-relaxed">
           {measured > 0
             ? '위 수치는 촬영한 사진에서 측정한 값입니다. 수치가 나오지 않는 항목은 범위로 적었고, 좌우 대칭은 현재 자동 측정 항목이 아닙니다.'
@@ -536,7 +536,7 @@ function ImageAxisPage({ pageNumber, totalPages, posMap }: { pageNumber: number;
         </div>
       </div>
 
-      <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100">
+      <div className="bg-[#F5F3EE] rounded-xl p-6 border border-[#E4E4E0]">
         <p className="text-sm font-light text-gray-700 leading-relaxed">
           {typeCell
             ? typeCell.desc
@@ -602,7 +602,7 @@ function PersonalColorPage({ pageNumber, totalPages }: { pageNumber: number; tot
         </div>
       </div>
 
-      <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100">
+      <div className="bg-[#F5F3EE] rounded-xl p-6 border border-[#E4E4E0]">
         <p className="text-sm font-light text-gray-700 leading-relaxed">
           명도 조절을 통한 이미지 조율이 가장 효과적입니다. 과도한 채도 변화는 피부톤과 부조화를
           일으킬 수 있습니다.
@@ -627,9 +627,9 @@ function HairTexturePage({
   // 예전에는 '헤어질감' 화면을 봤는데, 그 화면을 흐름에서 빼면서 5줄이 전부 '—' 로
   // 인쇄됐다. 그 화면에만 있던 '모질 상태' 줄은 곱슬 정도와 겹쳐서 뺐다. (2026-09-10)
   const DAMAGE_TONE: Record<string, string> = {
-    '1': 'bg-green-500', '2': 'bg-green-500',
-    '3': 'bg-yellow-500',
-    '4': 'bg-red-500', '5': 'bg-red-500', '6': 'bg-red-500',
+    '1': 'bg-[#B5B5B0]', '2': 'bg-[#B5B5B0]',
+    '3': 'bg-[#777777]',
+    '4': 'bg-[#4B2928]', '5': 'bg-[#4B2928]', '6': 'bg-[#4B2928]',
   };
 
   // 헤어컨설팅 값이 하나도 없고 옛 기록만 있으면 그쪽을 읽는다 (예전 공유 링크 보호)
@@ -805,9 +805,9 @@ function ImageMovementPage({ pageNumber, totalPages, posMap, target, directions 
     : null;
 
   const STEPS = [
-    { n: 1, dot: 'bg-green-500',  title: '안정 유지',   at: 0, desc: '현재 이미지타입을 유지하며 소폭 조율만 진행합니다.' },
-    { n: 2, dot: 'bg-yellow-500', title: '소폭 확장',   at: 1, desc: '맵에서 한 칸 옆의 이미지타입으로, 인상을 크게 바꾸지 않고 넓힙니다.' },
-    { n: 3, dot: 'bg-red-500',    title: '이미지 전환', at: 2, desc: '맵에서 두 칸 이상 떨어진 이미지타입으로, 단계적인 이동이 필요합니다.' },
+    { n: 1, dot: 'bg-[#B5B5B0]',  title: '안정 유지',   at: 0, desc: '현재 이미지타입을 유지하며 소폭 조율만 진행합니다.' },
+    { n: 2, dot: 'bg-[#777777]', title: '소폭 확장',   at: 1, desc: '맵에서 한 칸 옆의 이미지타입으로, 인상을 크게 바꾸지 않고 넓힙니다.' },
+    { n: 3, dot: 'bg-[#4B2928]',    title: '이미지 전환', at: 2, desc: '맵에서 두 칸 이상 떨어진 이미지타입으로, 단계적인 이동이 필요합니다.' },
   ];
   const activeStep = distance == null ? null : distance === 0 ? 1 : distance === 1 ? 2 : 3;
 
@@ -883,7 +883,7 @@ function ImageMovementPage({ pageNumber, totalPages, posMap, target, directions 
         })}
       </div>
 
-      <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100">
+      <div className="bg-[#F5F3EE] rounded-xl p-6 border border-[#E4E4E0]">
         <p className="text-sm font-light text-gray-700 leading-relaxed">
           {activeStep == null
             ? (current
@@ -1157,7 +1157,7 @@ function NextDirectionSummaryPage({ pageNumber, totalPages, cycleData }: { pageN
         )}
       </div>
 
-      <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100">
+      <div className="bg-[#F5F3EE] rounded-xl p-6 border border-[#E4E4E0]">
         <p className="text-sm font-light text-gray-700 leading-relaxed">
           디자인은 고정되지 않으며 얼굴, 이미지, 컨디션에 따라 매 방문마다 최적의 방향으로
           조율됩니다.

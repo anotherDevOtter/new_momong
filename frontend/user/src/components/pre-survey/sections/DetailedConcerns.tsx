@@ -99,7 +99,7 @@ function OtherInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={3}
-        className="w-full border-b border-[#E5E5E5] pb-3 text-[14px] text-[#111111] bg-transparent focus:outline-none focus:border-[#B88A5A] transition-colors resize-none"
+        className="w-full border-b border-[#E5E5E5] pb-3 text-[14px] text-[#111111] bg-transparent focus:outline-none focus:border-[#4B2928] transition-colors resize-none"
         style={{ fontWeight: 400, lineHeight: '2' }}
       />
     </div>
@@ -198,7 +198,7 @@ export function DetailedConcerns(p: DetailedConcernsProps) {
                     value={option}
                     checked={p.treatmentPreference === option}
                     onChange={(e) => p.onChangeTreatment(e.target.value)}
-                    className="w-3.5 h-3.5 accent-[#B88A5A]"
+                    className="w-3.5 h-3.5 accent-[#4B2928]"
                   />
                   <span className="text-[14px] text-[#2B2B2B]" style={{ fontWeight: 400, letterSpacing: '0.02em' }}>
                     {option}

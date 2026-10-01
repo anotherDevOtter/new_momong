@@ -193,7 +193,7 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
             <button
               onClick={handleCreatePreSurvey}
               disabled={creatingPreSurvey}
-              className="px-8 py-3 border border-[#B88A5A] text-[#B88A5A] text-sm rounded-full hover:bg-[#FFFBF7] transition-colors inline-flex items-center gap-2 disabled:opacity-50"
+              className="px-8 py-3 border border-[#4B2928] text-[#4B2928] text-sm rounded-full hover:bg-[#F5F3EE] transition-colors inline-flex items-center gap-2 disabled:opacity-50"
             >
               <Link2 size={14} />
               {creatingPreSurvey ? '발급 중...' : '사전설문지 링크 생성'}
@@ -291,7 +291,7 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
                       </button>
                       <button
                         onClick={() => handleDelete(record.id)}
-                        className="flex items-center gap-1 text-xs text-[#999999] hover:text-red-500 transition-colors px-2 py-1 border border-[#E5E5E5] hover:border-red-300"
+                        className="flex items-center gap-1 text-xs text-[#999999] hover:text-[#9A3B3B] transition-colors px-2 py-1 border border-[#E5E5E5] hover:border-[#E4E4E0]"
                       >
                         <Trash2 size={11} />
                         삭제
@@ -642,7 +642,7 @@ function PreSurveyList({
           <button
             onClick={onCreate}
             disabled={creating}
-            className="text-xs px-3 py-1.5 border border-[#B88A5A] text-[#B88A5A] hover:bg-[#FFFBF7] transition-colors disabled:opacity-50"
+            className="text-xs px-3 py-1.5 border border-[#4B2928] text-[#4B2928] hover:bg-[#F5F3EE] transition-colors disabled:opacity-50"
           >
             {creating ? '발급 중...' : '+ 새 링크 발급'}
           </button>

@@ -729,8 +729,8 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
                         <button key={col} onClick={() => setClickedCell(isCl ? null : { row, col })} style={{ flex: 1, border: 'none', borderRight: col < 2 ? `1px solid ${G8}` : 'none', borderBottom: row < 2 ? `1px solid ${G8}` : 'none', padding: '18px 8px', cursor: 'pointer', background: isCur ? '#EEEDE8' : isDes ? 'rgba(184,150,60,0.06)' : '#FFFFFF', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, minHeight: 96 }}>
                           {isCur && <div style={{ position: 'absolute', top: 8, right: 8, width: 8, height: 8, borderRadius: '50%', background: G1 }} />}
                           {isDes && <div style={{ position: 'absolute', top: 8, right: 8, width: 8, height: 8, borderRadius: '50%', background: GOLD }} />}
-                          <span style={{ fontFamily: MONO, fontSize: 9, fontWeight: 700, letterSpacing: '0.06em', color: isCur ? G1 : isDes ? '#7A6020' : G5 }}>{cell.en}</span>
-                          <span style={{ fontSize: 11, fontWeight: 300, color: isCur ? G3 : isDes ? '#9A7C2A' : G6 }}>{cell.ko}</span>
+                          <span style={{ fontFamily: MONO, fontSize: 9, fontWeight: 700, letterSpacing: '0.06em', color: isCur ? G1 : isDes ? '#4B2928' : G5 }}>{cell.en}</span>
+                          <span style={{ fontSize: 11, fontWeight: 300, color: isCur ? G3 : isDes ? '#777777' : G6 }}>{cell.ko}</span>
                         </button>
                       );
                     })}
@@ -761,8 +761,8 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
             {imageDirection.desiredImage.type !== imageDirection.currentImage.type ? (
               <div style={{ padding: '20px', border: `1px solid rgba(184,150,60,0.3)`, background: 'rgba(184,150,60,0.03)' }}>
                 <p style={{ fontFamily: MONO, fontSize: 8, color: GOLD, marginBottom: 8 }}>DESIRED IMAGE</p>
-                <p style={{ fontSize: 22, fontWeight: 700, color: '#7A6020', marginBottom: 4 }}>{imageDirection.desiredImage.type}</p>
-                <p style={{ fontSize: 13, color: '#9A7C2A', marginBottom: 12 }}>{imageDirection.desiredImage.label} · {imageDirection.desiredImage.tone} × {imageDirection.desiredImage.mood}</p>
+                <p style={{ fontSize: 22, fontWeight: 700, color: '#4B2928', marginBottom: 4 }}>{imageDirection.desiredImage.type}</p>
+                <p style={{ fontSize: 13, color: '#777777', marginBottom: 12 }}>{imageDirection.desiredImage.label} · {imageDirection.desiredImage.tone} × {imageDirection.desiredImage.mood}</p>
                 <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                   {imageDirection.desiredImage.keywords.map(k => <Chip key={k} label={k} muted />)}
                 </div>

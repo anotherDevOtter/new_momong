@@ -204,7 +204,7 @@ export function HairTextureAnalysis({ onBack, onNext, onChange, startEmpty }: Ha
                 >
                   {option.warning && (
                     <div className="absolute -top-2 -right-2">
-                      <div className="bg-red-500 text-white rounded-full p-1">
+                      <div className="bg-[#9A3B3B] text-white rounded-full p-1">
                         <AlertCircle className="w-3 h-3" strokeWidth={2} />
                       </div>
                     </div>
@@ -223,8 +223,8 @@ export function HairTextureAnalysis({ onBack, onNext, onChange, startEmpty }: Ha
             <div
               className={`rounded-xl p-4 border ${
                 damageLevels.find((d) => d.id === damageLevel)?.warning
-                  ? 'bg-red-50/50 border-red-100'
-                  : 'bg-blue-50/50 border-blue-100'
+                  ? 'bg-[#F5F3EE] border-[#E4E4E0]'
+                  : 'bg-[#F5F3EE] border-[#E4E4E0]'
               }`}
             >
               <p className="text-xs text-gray-700 font-light leading-relaxed">
@@ -269,7 +269,7 @@ export function HairTextureAnalysis({ onBack, onNext, onChange, startEmpty }: Ha
             </div>
 
             {/* 자동 해석 */}
-            <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
+            <div className="bg-[#F5F3EE] rounded-xl p-4 border border-[#E4E4E0]">
               <p className="text-xs text-gray-700 font-light leading-relaxed">
                 {hairTypes.find((h) => h.id === hairType)?.interpretation}
               </p>
@@ -312,7 +312,7 @@ export function HairTextureAnalysis({ onBack, onNext, onChange, startEmpty }: Ha
             </div>
 
             {/* 자동 해석 */}
-            <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
+            <div className="bg-[#F5F3EE] rounded-xl p-4 border border-[#E4E4E0]">
               <p className="text-xs text-gray-700 font-light leading-relaxed">
                 {thicknessOptions.find((t) => t.id === thickness)?.interpretation}
               </p>
@@ -355,7 +355,7 @@ export function HairTextureAnalysis({ onBack, onNext, onChange, startEmpty }: Ha
             </div>
 
             {/* 자동 해석 */}
-            <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
+            <div className="bg-[#F5F3EE] rounded-xl p-4 border border-[#E4E4E0]">
               <p className="text-xs text-gray-700 font-light leading-relaxed">
                 {densityOptions.find((d) => d.id === density)?.interpretation}
               </p>
@@ -398,7 +398,7 @@ export function HairTextureAnalysis({ onBack, onNext, onChange, startEmpty }: Ha
             </div>
 
             {/* 자동 해석 */}
-            <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
+            <div className="bg-[#F5F3EE] rounded-xl p-4 border border-[#E4E4E0]">
               <p className="text-xs text-gray-700 font-light leading-relaxed">
                 {curlCoverageOptions.find((c) => c.id === curlCoverage)?.interpretation}
               </p>

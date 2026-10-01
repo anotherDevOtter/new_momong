@@ -81,7 +81,7 @@ export function Notice({ onPrev, onNext }: { onPrev: () => void; onNext: () => v
           <p className="text-[12px] text-[#7A7A7A] leading-[2.2]" style={{ fontWeight: 400 }}>
             추가 문의사항이 있으시거나 궁금한 점이 있으시다면 언제든 편안하게 연락 주세요
           </p>
-          <p className="text-[13px] text-[#B88A5A]" style={{ fontWeight: 500, letterSpacing: '0.05em' }}>
+          <p className="text-[13px] text-[#4B2928]" style={{ fontWeight: 500, letterSpacing: '0.05em' }}>
             MERCI MOMONG
           </p>
         </div>

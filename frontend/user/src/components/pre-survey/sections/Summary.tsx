@@ -20,7 +20,7 @@ interface SummaryProps {
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="pb-5 border-b border-[#E5E5E5]">
-      <h3 className="text-[10px] text-[#B88A5A] mb-3 tracking-[0.15em]" style={{ fontWeight: 600 }}>
+      <h3 className="text-[10px] text-[#4B2928] mb-3 tracking-[0.15em]" style={{ fontWeight: 600 }}>
         {label}
       </h3>
       {children}
@@ -43,8 +43,8 @@ function Chips({ items }: { items: string[] }) {
 function OtherNote({ label, value }: { label: string; value?: string }) {
   if (!value) return null;
   return (
-    <p className="text-[11px] text-[#2B2B2B] leading-[1.6] bg-[#FFFBF7] p-2 mt-2" style={{ fontWeight: 400 }}>
-      <span className="text-[#B88A5A]">{label}:</span> {value}
+    <p className="text-[11px] text-[#2B2B2B] leading-[1.6] bg-[#F5F3EE] p-2 mt-2" style={{ fontWeight: 400 }}>
+      <span className="text-[#4B2928]">{label}:</span> {value}
     </p>
   );
 }
@@ -55,10 +55,10 @@ export function Summary({ answers, currentDate, onPrev, onNext }: SummaryProps) 
     <PageLayout pageNumber={6} totalPages={8} onPrev={onPrev} onNext={onNext} showPageNumber={false}>
       <div className="bg-white">
         <div className="pt-12 pb-16 px-7">
-          <div className="max-w-[600px] mx-auto bg-white border-2 border-[#B88A5A] shadow-xl">
-            <div className="bg-white border-b-2 border-[#B88A5A] px-6 py-8">
+          <div className="max-w-[600px] mx-auto bg-white border-2 border-[#4B2928] shadow-xl">
+            <div className="bg-white border-b-2 border-[#4B2928] px-6 py-8">
               <div className="text-center mb-6">
-                <p className="text-[9px] text-[#B88A5A] tracking-[0.3em] mb-3" style={{ fontWeight: 500 }}>
+                <p className="text-[9px] text-[#4B2928] tracking-[0.3em] mb-3" style={{ fontWeight: 500 }}>
                   HAIR CONSULTING
                 </p>
                 <h1 className="text-[24px] text-[#111111] mb-3" style={{ fontWeight: 400, letterSpacing: '0.05em' }}>
@@ -71,7 +71,7 @@ export function Summary({ answers, currentDate, onPrev, onNext }: SummaryProps) 
                   {currentDate}
                 </p>
               </div>
-              <div className="w-16 h-[1px] bg-[#B88A5A] mx-auto"></div>
+              <div className="w-16 h-[1px] bg-[#4B2928] mx-auto"></div>
             </div>
 
             <div className="px-6 py-8 space-y-6">
@@ -143,7 +143,7 @@ export function Summary({ answers, currentDate, onPrev, onNext }: SummaryProps) 
 
               {a.treatmentPreference && (
                 <div className="pb-5">
-                  <h3 className="text-[10px] text-[#B88A5A] mb-3 tracking-[0.15em]" style={{ fontWeight: 600 }}>
+                  <h3 className="text-[10px] text-[#4B2928] mb-3 tracking-[0.15em]" style={{ fontWeight: 600 }}>
                     TREATMENT PREFERENCE
                   </h3>
                   <p className="text-[12px] text-[#2B2B2B] leading-[1.8]" style={{ fontWeight: 400 }}>
@@ -153,7 +153,7 @@ export function Summary({ answers, currentDate, onPrev, onNext }: SummaryProps) 
               )}
             </div>
 
-            <div className="bg-white border-t-2 border-[#B88A5A] px-6 py-6 text-center">
+            <div className="bg-white border-t-2 border-[#4B2928] px-6 py-6 text-center">
               <p className="text-[9px] text-[#7A7A7A] tracking-[0.3em] mb-2" style={{ fontWeight: 400 }}>
                 MERCI MOMONG
               </p>

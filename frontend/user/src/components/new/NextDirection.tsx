@@ -434,10 +434,10 @@ export const DIRECTION_ITEMS: DirectionItem[] = [
 
 /** 변화 강도 1~4. changeLevel 0 은 '아직 안 고름'. */
 export const CHANGE_LEVELS = [
-  { level: 1, label: '안정 유지', color: 'bg-blue-500' },
-  { level: 2, label: '소폭 변화', color: 'bg-green-500' },
-  { level: 3, label: '중간 변화', color: 'bg-yellow-500' },
-  { level: 4, label: '이미지 전환', color: 'bg-red-500' },
+  { level: 1, label: '안정 유지', color: 'bg-[#DCE4E9]' },
+  { level: 2, label: '소폭 변화', color: 'bg-[#B5B5B0]' },
+  { level: 3, label: '중간 변화', color: 'bg-[#777777]' },
+  { level: 4, label: '이미지 전환', color: 'bg-[#4B2928]' },
 ];
 
 /**

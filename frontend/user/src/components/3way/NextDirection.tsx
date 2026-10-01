@@ -69,10 +69,10 @@ export function NextDirection({ onBack, onNext, onCycleDataChange }: NextDirecti
 
   // 변화 강도 레벨
   const changeLevels = [
-    { level: 1, label: '안정 유지', color: 'bg-blue-500' },
-    { level: 2, label: '소폭 변화', color: 'bg-green-500' },
-    { level: 3, label: '중간 변화', color: 'bg-yellow-500' },
-    { level: 4, label: '이미지 전환', color: 'bg-red-500' },
+    { level: 1, label: '안정 유지', color: 'bg-[#DCE4E9]' },
+    { level: 2, label: '소폭 변화', color: 'bg-[#B5B5B0]' },
+    { level: 3, label: '중간 변화', color: 'bg-[#777777]' },
+    { level: 4, label: '이미지 전환', color: 'bg-[#4B2928]' },
   ];
 
   // 월별 서비스 토글
@@ -244,10 +244,10 @@ export function NextDirection({ onBack, onNext, onCycleDataChange }: NextDirecti
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.6 }}
-            className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100 mb-8"
+            className="bg-[#F5F3EE] rounded-2xl p-6 border border-[#E4E4E0] mb-8"
           >
             <div className="flex items-center gap-2 mb-3">
-              <TrendingUp className="w-5 h-5 text-blue-600" strokeWidth={2} />
+              <TrendingUp className="w-5 h-5 text-[#4B2928]" strokeWidth={2} />
               <h3 className="text-sm font-light tracking-wide text-black">추천 이동 전략</h3>
             </div>
 
@@ -371,7 +371,7 @@ export function NextDirection({ onBack, onNext, onCycleDataChange }: NextDirecti
 
             {/* CYCLE PLAN SUMMARY */}
             {cycleData.length > 0 && (
-              <div className="bg-blue-50 rounded-xl p-6 border border-blue-100">
+              <div className="bg-[#F5F3EE] rounded-xl p-6 border border-[#E4E4E0]">
                 <h3 className="text-sm font-light tracking-wide text-black mb-3">
                   CYCLE PLAN SUMMARY
                 </h3>

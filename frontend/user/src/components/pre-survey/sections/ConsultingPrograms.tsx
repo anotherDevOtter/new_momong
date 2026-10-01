@@ -72,11 +72,11 @@ export function ConsultingPrograms({ selectedProgram, onSelect, onPrev, onNext }
                 type="button"
                 onClick={() => onSelect(p.number, p.hasBodyAnalysis)}
                 className={`w-full bg-white px-7 py-10 border-2 transition-all duration-200 text-left relative ${
-                  selected ? 'border-[#B88A5A] bg-[#FFFBF7] shadow-lg' : 'border-[#E5E5E5] hover:border-[#B88A5A]'
+                  selected ? 'border-[#4B2928] bg-[#F5F3EE] shadow-lg' : 'border-[#E5E5E5] hover:border-[#4B2928]'
                 }`}
               >
                 {selected && (
-                  <div className="absolute top-4 right-4 w-6 h-6 bg-[#B88A5A] rounded-full flex items-center justify-center">
+                  <div className="absolute top-4 right-4 w-6 h-6 bg-[#4B2928] rounded-full flex items-center justify-center">
                     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
@@ -85,7 +85,7 @@ export function ConsultingPrograms({ selectedProgram, onSelect, onPrev, onNext }
 
                 <div className="mb-7 text-center">
                   <span
-                    className="text-[15px] block mb-3 text-[#B88A5A]"
+                    className="text-[15px] block mb-3 text-[#4B2928]"
                     style={{ fontWeight: selected ? 600 : 400 }}
                   >
                     {p.number}

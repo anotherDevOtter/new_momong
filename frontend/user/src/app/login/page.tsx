@@ -12,7 +12,7 @@ function RegisteredBanner() {
   if (!registered) return null;
 
   return (
-    <div className="mb-6 px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 text-center">
+    <div className="mb-6 px-4 py-3 bg-[#F5F3EE] border border-[#E4E4E0] rounded-lg text-sm text-[#4B2928] text-center">
       가입 신청이 완료되었습니다.<br />관리자 승인 후 로그인이 가능합니다.
     </div>
   );
@@ -97,7 +97,7 @@ export default function LoginPage() {
             />
           </div>
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && <p className="text-sm text-[#9A3B3B]">{error}</p>}
 
           <button
             type="submit"

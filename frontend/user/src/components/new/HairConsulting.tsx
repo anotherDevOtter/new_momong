@@ -549,7 +549,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                           padding: '10px 12px',
                           border: '1px solid #E4E4E0',
                           background: isCurrent ? '#F5F3EE'
-                            : isTarget && isAcc ? '#FBF7F0'
+                            : isTarget && isAcc ? '#F5F3EE'
                             : isTarget ? '#F3F3F1'
                             : '#FFFFFF',
                           cursor: 'pointer', textAlign: 'left',
@@ -558,7 +558,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                           display: 'block',
                           fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', marginBottom: 2,
                           color: isCurrent ? '#111111'
-                            : isTarget && isAcc ? '#8B6F3E'
+                            : isTarget && isAcc ? '#4B2928'
                             : isTarget ? '#4A4A4A'
                             : '#AAAAAA',
                         }}>{cell.en}</span>
@@ -566,7 +566,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                           display: 'block',
                           fontSize: 11, fontWeight: 300,
                           color: isCurrent ? '#333333'
-                            : isTarget && isAcc ? '#7A5C28'
+                            : isTarget && isAcc ? '#4B2928'
                             : isTarget ? '#555555'
                             : '#CCCCCA',
                         }}>{cell.ko}</span>
@@ -761,7 +761,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                       alignSelf: 'flex-start',
                       fontFamily: MONO, fontSize: 8, letterSpacing: '0.14em',
                       padding: '2px 8px',
-                      color: approach === 'accentuate' ? '#8B6F3E' : '#666660',
+                      color: approach === 'accentuate' ? '#4B2928' : '#666660',
                       border: `0.5px solid ${approach === 'accentuate' ? 'rgba(139,111,62,0.4)' : 'rgba(0,0,0,0.15)'}`,
                       background: approach === 'accentuate' ? 'rgba(139,111,62,0.06)' : 'rgba(0,0,0,0.03)',
                     }}>
@@ -781,17 +781,17 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                   <div>
                     <div className="flex items-center gap-2 mb-2.5">
                       <svg width="14" height="14" viewBox="0 0 14 14">
-                        <circle cx="7" cy="7" r="3.5" fill={approach === 'accentuate' ? '#8B6F3E' : '#5A5A5A'} />
+                        <circle cx="7" cy="7" r="3.5" fill={approach === 'accentuate' ? '#4B2928' : '#5A5A5A'} />
                         <line x1="0" y1="7" x2="14" y2="7" stroke={approach === 'accentuate' ? 'rgba(139,111,62,0.5)' : 'rgba(90,90,90,0.4)'} strokeWidth="0.6" />
                         <line x1="7" y1="0" x2="7" y2="14" stroke={approach === 'accentuate' ? 'rgba(139,111,62,0.5)' : 'rgba(90,90,90,0.4)'} strokeWidth="0.6" />
                       </svg>
                       <span className="text-[8px] tracking-[0.22em]" style={{
                         fontFamily: MONO,
-                        color: approach === 'accentuate' ? '#8B6F3E' : '#888882',
+                        color: approach === 'accentuate' ? '#4B2928' : '#888882',
                       }}>추구</span>
                     </div>
                     <p className="text-[24px] font-bold tracking-tight leading-none mb-0.5"
-                      style={{ color: approach === 'accentuate' ? '#7A5C28' : '#3A3A38' }}>
+                      style={{ color: approach === 'accentuate' ? '#4B2928' : '#3A3A38' }}>
                       {targetType.en}
                     </p>
                     <p className="text-[13px] font-light mb-1.5"
@@ -803,7 +803,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
                     </p>
                     {approach && (
                       <p className="text-[9px] leading-[1.7]"
-                        style={{ color: approach === 'accentuate' ? '#8B6F3E' : '#888882' }}>
+                        style={{ color: approach === 'accentuate' ? '#4B2928' : '#888882' }}>
                         {approach === 'accentuate' ? '자연 이미지를\n강조하는 방향' : '자연 이미지를\n중화·커버하는 방향'}
                       </p>
                     )}

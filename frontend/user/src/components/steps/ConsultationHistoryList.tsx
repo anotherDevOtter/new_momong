@@ -149,7 +149,7 @@ export function ConsultationHistoryList({ token, onSelectCustomer }: Props) {
             </div>
           ) : error ? (
             <div className="text-center py-20">
-              <p className="text-[15px] text-[#C0392B]" style={{ fontWeight: 300 }}>{error}</p>
+              <p className="text-[15px] text-[#9A3B3B]" style={{ fontWeight: 300 }}>{error}</p>
             </div>
           ) : rows.length === 0 ? (
             <div className="text-center py-20">

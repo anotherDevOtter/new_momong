@@ -545,7 +545,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                         <p className="text-[14px] text-[#1A1A1A] mt-0.5">
                           {current.num}. {current.title}
                           {isUnmeasured(current.id) && (
-                            <span className="ml-2 text-[10px] text-[#B08A3E]">미측정</span>
+                            <span className="ml-2 text-[10px] text-[#777777]">미측정</span>
                           )}
                         </p>
                       </div>
@@ -814,7 +814,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                           (2) 모듈은 있는데 이 사진에서 등급이 안 나온 항목 */}
                       {posMap[current.id] == null && (
                         <div className="mb-3 px-2.5 py-2 rounded-sm border border-[#E8E4D8] bg-[#FBF8F0]">
-                          <p className="text-[10px] text-[#8A7645] leading-relaxed">
+                          <p className="text-[10px] text-[#555555] leading-relaxed">
                             {isUnmeasured(current.id)
                               ? '자동 분석 모듈이 없는 항목입니다.'
                               : '이 사진에서는 자동 분석이 등급을 내지 못했습니다.'}
@@ -825,7 +825,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                       )}
                       {posMap[current.id] != null && isUnmeasured(current.id) && (
                         <div className="mb-3 px-2.5 py-2 rounded-sm border border-[#DDE6DD] bg-[#F3F7F3]">
-                          <p className="text-[10px] text-[#4C7A55] leading-relaxed">
+                          <p className="text-[10px] text-[#555555] leading-relaxed">
                             디자이너가 직접 정한 값입니다. 자동 분석 결과가 아닙니다.
                           </p>
                         </div>
@@ -889,7 +889,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                         ) : (
                           <span
                             className="px-2.5 py-1.5 text-[10px] tracking-[0.06em] rounded-sm"
-                            style={{ background: '#F2F4F2', color: '#4C7A55' }}>
+                            style={{ background: '#F2F2F0', color: '#555555' }}>
                             {done[current.id] || isUnmeasured(current.id) ? '✓ 디자이너 확정' : '✓ 자동 측정됨'}
                           </span>
                         )}

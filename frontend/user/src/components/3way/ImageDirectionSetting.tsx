@@ -460,7 +460,7 @@ export function ImageDirectionSetting({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.6 }}
-            className="bg-blue-50/50 rounded-2xl p-6 border border-blue-100 mb-12"
+            className="bg-[#F5F3EE] rounded-2xl p-6 border border-[#E4E4E0] mb-12"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
