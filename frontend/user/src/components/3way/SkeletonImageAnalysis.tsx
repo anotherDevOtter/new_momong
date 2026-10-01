@@ -106,7 +106,7 @@ export function SkeletonImageAnalysis({ onBack, onNext, onChange }: SkeletonImag
           <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em]">
             골격 이미지 분석
           </h2>
-          <p className="text-sm text-[#999999]">얼굴 골격에 어울리는 이미지 타입을 분석합니다</p>
+          <p className="text-sm text-[#777777]">얼굴 골격에 어울리는 이미지 타입을 분석합니다</p>
         </motion.div>
 
         {/* 골격 타입별 차트 */}
@@ -149,7 +149,7 @@ export function SkeletonImageAnalysis({ onBack, onNext, onChange }: SkeletonImag
                           {type.name}
                         </h3>
                         <p className="text-sm text-[#777777] mb-2">{type.subtitle}</p>
-                        <p className="text-xs text-[#999999]">{type.description}</p>
+                        <p className="text-xs text-[#777777]">{type.description}</p>
                       </div>
 
                       {/* 선택 체크박스 */}
@@ -164,7 +164,7 @@ export function SkeletonImageAnalysis({ onBack, onNext, onChange }: SkeletonImag
 
                     {/* 특징 */}
                     <div className="mb-4">
-                      <p className="text-xs uppercase font-medium mb-2 text-[#999999]">특징</p>
+                      <p className="text-xs uppercase font-medium mb-2 text-[#777777]">특징</p>
                       <div className="space-y-1">
                         {type.characteristics.map((char, idx) => (
                           <div key={idx} className="flex items-start gap-2">
@@ -177,7 +177,7 @@ export function SkeletonImageAnalysis({ onBack, onNext, onChange }: SkeletonImag
 
                     {/* 추천 헤어스타일 */}
                     <div>
-                      <p className="text-xs uppercase font-medium mb-2 text-[#999999]">추천 스타일</p>
+                      <p className="text-xs uppercase font-medium mb-2 text-[#777777]">추천 스타일</p>
                       <div className="flex gap-2 flex-wrap">
                         {type.hairRecommendations.map((rec, idx) => (
                           <span

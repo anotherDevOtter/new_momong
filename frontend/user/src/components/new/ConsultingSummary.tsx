@@ -63,7 +63,7 @@ export function ConsultingSummary({
             <h1 className="text-[1.6rem] tracking-[0.08em] text-[#111111] mb-2" style={{ fontWeight: 700 }}>
               INFO
             </h1>
-            <p className="text-[13px] text-[#AAAAAA]" style={{ fontWeight: 300 }}>
+            <p className="text-[13px] text-[#777777]" style={{ fontWeight: 300 }}>
               컨설팅 전 정보 요약
             </p>
           </motion.div>
@@ -75,12 +75,12 @@ export function ConsultingSummary({
             transition={{ delay: 0.1, duration: 0.5 }}
             className="border border-[#DDDDDD] p-6 mb-4"
           >
-            <p className="text-[11px] tracking-[0.15em] text-[#AAAAAA] mb-5 uppercase" style={{ fontWeight: 400 }}>
+            <p className="text-[12px] tracking-[0.15em] text-[#777777] mb-5 uppercase" style={{ fontWeight: 400 }}>
               Today Keyword
             </p>
             <div className="space-y-3 text-[13px]">
               <div>
-                <span className="text-[#AAAAAA]" style={{ fontWeight: 300 }}>체형 고민: </span>
+                <span className="text-[#777777]" style={{ fontWeight: 300 }}>체형 고민: </span>
                 <span className="text-[#111111]" style={{ fontWeight: 600 }}>
                   {bodyConcerns.length > 0 ? bodyConcerns.join(', ') : '—'}
                 </span>
@@ -89,7 +89,7 @@ export function ConsultingSummary({
                 )}
               </div>
               <div>
-                <span className="text-[#AAAAAA]" style={{ fontWeight: 300 }}>얼굴 고민: </span>
+                <span className="text-[#777777]" style={{ fontWeight: 300 }}>얼굴 고민: </span>
                 <span className="text-[#111111]" style={{ fontWeight: 600 }}>
                   {faceAreas.length > 0 ? faceAreas.join(', ') : '—'}
                 </span>
@@ -98,7 +98,7 @@ export function ConsultingSummary({
                 )}
               </div>
               <div>
-                <span className="text-[#AAAAAA]" style={{ fontWeight: 300 }}>헤어 고민: </span>
+                <span className="text-[#777777]" style={{ fontWeight: 300 }}>헤어 고민: </span>
                 <span className="text-[#111111]" style={{ fontWeight: 600 }}>
                   {hairConcerns.length > 0 ? hairConcerns.join(', ') : '—'}
                 </span>
@@ -116,7 +116,7 @@ export function ConsultingSummary({
             transition={{ delay: 0.2, duration: 0.5 }}
             className="border border-[#DDDDDD] p-6 mb-4"
           >
-            <p className="text-[11px] tracking-[0.15em] text-[#AAAAAA] mb-6 uppercase" style={{ fontWeight: 400 }}>
+            <p className="text-[12px] tracking-[0.15em] text-[#777777] mb-6 uppercase" style={{ fontWeight: 400 }}>
               Image Keyword
             </p>
 
@@ -142,24 +142,24 @@ export function ConsultingSummary({
                     }`}
                   >
                     {isPreferred && (
-                      <span className="absolute top-3 right-3 w-5 h-5 bg-[#111111] text-white text-[10px] flex items-center justify-center">✓</span>
+                      <span className="absolute top-3 right-3 w-5 h-5 bg-[#111111] text-white text-[12px] flex items-center justify-center">✓</span>
                     )}
                     {isDisliked && (
-                      <span className="absolute top-3 right-3 w-5 h-5 bg-[#888888] text-white text-[10px] flex items-center justify-center">✕</span>
+                      <span className="absolute top-3 right-3 w-5 h-5 bg-[#888888] text-white text-[12px] flex items-center justify-center">✕</span>
                     )}
 
-                    <p className="text-[10px] text-[#CCCCCC] uppercase mb-2 tracking-[0.12em]" style={{ fontWeight: 300 }}>
+                    <p className="text-[12px] text-[#777777] uppercase mb-2 tracking-[0.12em]" style={{ fontWeight: 300 }}>
                       {card.en}
                     </p>
                     <p
-                      className={`text-[15px] mb-4 ${isDisliked ? 'text-[#AAAAAA]' : 'text-[#111111]'}`}
+                      className={`text-[15px] mb-4 ${isDisliked ? 'text-[#777777]' : 'text-[#111111]'}`}
                       style={{ fontWeight: 400 }}
                     >
                       {card.ko}
                     </p>
                     <div className="flex flex-col items-center gap-1">
                       {card.keywords.map((kw) => (
-                        <p key={kw} className="text-[10px] text-[#DDDDDD] leading-tight" style={{ fontWeight: 300 }}>
+                        <p key={kw} className="text-[12px] text-[#DDDDDD] leading-tight" style={{ fontWeight: 300 }}>
                           {kw}
                         </p>
                       ))}
@@ -171,12 +171,12 @@ export function ConsultingSummary({
 
             <div className="flex items-center gap-4 mt-4">
               <div className="flex items-center gap-1.5">
-                <span className="w-3.5 h-3.5 bg-[#111111] text-white text-[8px] flex items-center justify-center">✓</span>
-                <span className="text-[11px] text-[#888888]">선호</span>
+                <span className="w-3.5 h-3.5 bg-[#111111] text-white text-[12px] flex items-center justify-center">✓</span>
+                <span className="text-[12px] text-[#888888]">선호</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-3.5 h-3.5 bg-[#888888] text-white text-[8px] flex items-center justify-center">✕</span>
-                <span className="text-[11px] text-[#888888]">비선호</span>
+                <span className="w-3.5 h-3.5 bg-[#888888] text-white text-[12px] flex items-center justify-center">✕</span>
+                <span className="text-[12px] text-[#888888]">비선호</span>
               </div>
             </div>
           </motion.div>
@@ -188,12 +188,12 @@ export function ConsultingSummary({
             transition={{ delay: 0.3, duration: 0.5 }}
             className="border border-[#DDDDDD] p-6 mb-8"
           >
-            <p className="text-[11px] tracking-[0.15em] text-[#AAAAAA] mb-5 uppercase" style={{ fontWeight: 400 }}>
+            <p className="text-[12px] tracking-[0.15em] text-[#777777] mb-5 uppercase" style={{ fontWeight: 400 }}>
               Fashion Style
             </p>
             <div className="space-y-4 text-[13px]">
               <div>
-                <p className="text-[#AAAAAA] mb-2" style={{ fontWeight: 300 }}>선호</p>
+                <p className="text-[#777777] mb-2" style={{ fontWeight: 300 }}>선호</p>
                 <div className="flex flex-wrap gap-2">
                   {preferredStyles.length > 0 ? (
                     preferredStyles.map((id) => (
@@ -202,7 +202,7 @@ export function ConsultingSummary({
                       </span>
                     ))
                   ) : (
-                    <span className="text-[#BBBBBB]">—</span>
+                    <span className="text-[#777777]">—</span>
                   )}
                 </div>
                 {preferredStylesMemo && (
@@ -213,7 +213,7 @@ export function ConsultingSummary({
                 )}
               </div>
               <div>
-                <p className="text-[#AAAAAA] mb-2" style={{ fontWeight: 300 }}>비선호</p>
+                <p className="text-[#777777] mb-2" style={{ fontWeight: 300 }}>비선호</p>
                 <div className="flex flex-wrap gap-2">
                   {dislikedStyles.length > 0 ? (
                     dislikedStyles.map((id) => (
@@ -222,7 +222,7 @@ export function ConsultingSummary({
                       </span>
                     ))
                   ) : (
-                    <span className="text-[#BBBBBB]">—</span>
+                    <span className="text-[#777777]">—</span>
                   )}
                 </div>
               </div>
@@ -233,7 +233,7 @@ export function ConsultingSummary({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.5 }}
-            className="text-[11px] text-[#BBBBBB] mb-10"
+            className="text-[12px] text-[#777777] mb-10"
             style={{ fontWeight: 300 }}
           >
             *디자이너 내부 확인용입니다

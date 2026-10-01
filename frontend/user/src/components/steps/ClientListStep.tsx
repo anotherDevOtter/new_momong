@@ -112,7 +112,7 @@ export const ClientListStep = ({ onBack, onSelectClient }: ClientListStepProps) 
       <div className="max-w-[1200px] mx-auto px-6 md:px-20 py-12">
         <div className="mb-8">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#999999]" size={20} />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#777777]" size={20} />
             <input
               type="text"
               placeholder="이름 또는 전화번호로 검색"
@@ -148,12 +148,12 @@ export const ClientListStep = ({ onBack, onSelectClient }: ClientListStepProps) 
         {isLoading ? (
           <div className="text-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#111111] mx-auto mb-4" />
-            <p className="text-[#999999] text-sm">로딩 중...</p>
+            <p className="text-[#777777] text-sm">로딩 중...</p>
           </div>
         ) : filteredCustomers.length === 0 ? (
           <div className="text-center py-20">
-            <User size={48} className="mx-auto mb-4 text-[#CCCCCC]" />
-            <p className="text-[#999999] text-sm">
+            <User size={48} className="mx-auto mb-4 text-[#777777]" />
+            <p className="text-[#777777] text-sm">
               {searchQuery ? '검색 결과가 없습니다.' : '저장된 고객이 없습니다.'}
             </p>
           </div>
@@ -181,7 +181,7 @@ export const ClientListStep = ({ onBack, onSelectClient }: ClientListStepProps) 
                     {customer.phone && <p className="text-sm text-[#777777] mb-1">전화번호: {customer.phone}</p>}
                     {customer.memo && <p className="text-sm text-[#777777] mb-1">메모: {customer.memo}</p>}
                     {customer.created_at && (
-                      <div className="flex items-center gap-1 text-xs text-[#999999]">
+                      <div className="flex items-center gap-1 text-xs text-[#777777]">
                         <Calendar size={12} />
                         <span>{formatDate(customer.created_at)}</span>
                       </div>
@@ -191,7 +191,7 @@ export const ClientListStep = ({ onBack, onSelectClient }: ClientListStepProps) 
                     onClick={(e) => handleDelete(e, customer)}
                     className="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-[#F5F5F5]"
                   >
-                    <Trash2 size={18} className="text-[#999999] hover:text-[#111111]" />
+                    <Trash2 size={18} className="text-[#777777] hover:text-[#111111]" />
                   </button>
                 </div>
               </div>

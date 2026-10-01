@@ -33,9 +33,9 @@ function GradeTable({
 }) {
   return (
     <div>
-      <p className="text-[11px] text-[#999999] uppercase tracking-wider mb-2">{title}</p>
+      <p className="text-[12px] text-[#777777] uppercase tracking-wider mb-2">{title}</p>
       <div className="border border-[#E5E5E5] bg-white">
-        <div className="grid grid-cols-4 gap-1 px-3 py-1.5 border-b border-[#EEEEEE] text-[11px] text-[#999999]">
+        <div className="grid grid-cols-4 gap-1 px-3 py-1.5 border-b border-[#EEEEEE] text-[12px] text-[#777777]">
           <span />
           {cols.map((c) => (
             <span key={c.key} className="text-center">
@@ -70,7 +70,7 @@ export function FaceAnalysisSummary({ fa }: { fa: SavedFaceAnalysis }) {
       <div className="border border-[#EAEAEA] p-4 bg-[#FAFAFA] space-y-4">
         {fa.imageType && (
           <div className="flex items-center gap-2">
-            <span className="text-[11px] text-[#999999] uppercase tracking-wider">Image Type</span>
+            <span className="text-[12px] text-[#777777] uppercase tracking-wider">Image Type</span>
             <span className="px-2 py-0.5 bg-[#111111] text-white text-xs tracking-wider">{fa.imageType}</span>
           </div>
         )}
@@ -78,7 +78,7 @@ export function FaceAnalysisSummary({ fa }: { fa: SavedFaceAnalysis }) {
         {!!fa.softHard?.length && <GradeTable title="Soft / N / Hard" cols={SNH_COLS} rows={fa.softHard} />}
         {r && (r.vertical || r.face || r.midSection) && (
           <div className="text-xs text-[#555555]">
-            <span className="text-[11px] text-[#999999] uppercase tracking-wider mr-2">비율</span>
+            <span className="text-[12px] text-[#777777] uppercase tracking-wider mr-2">비율</span>
             상중하 {r.vertical || '-'} · 얼굴비율 {r.face || '-'} · 중안부 {r.midSection || '-'}
           </div>
         )}

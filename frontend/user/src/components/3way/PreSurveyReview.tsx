@@ -71,19 +71,19 @@ export function PreSurveyReview({ customerId, onBack, onNext }: PreSurveyReviewP
           {loading ? (
             <div className="border border-[#E5E5E5] px-8 py-16 text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#111111] mx-auto mb-3" />
-              <p className="text-sm text-[#999999]">불러오는 중...</p>
+              <p className="text-sm text-[#777777]">불러오는 중...</p>
             </div>
           ) : detail ? (
             <div className="space-y-4">
               {filledAt && (
-                <p className="text-xs text-[#999999]">제출: {new Date(filledAt).toLocaleString('ko-KR')}</p>
+                <p className="text-xs text-[#777777]">제출: {new Date(filledAt).toLocaleString('ko-KR')}</p>
               )}
               <PreSurveyDetailView detail={detail} />
             </div>
           ) : (
             <div className="border border-[#E5E5E5] px-8 py-16 text-center">
-              <p className="text-sm text-[#999999]">제출된 사전 설문이 없습니다.</p>
-              <p className="text-xs text-[#CCCCCC] mt-1">
+              <p className="text-sm text-[#777777]">제출된 사전 설문이 없습니다.</p>
+              <p className="text-xs text-[#777777] mt-1">
                 이 고객은 방문 전 사전 설문을 작성하지 않았습니다.
               </p>
             </div>

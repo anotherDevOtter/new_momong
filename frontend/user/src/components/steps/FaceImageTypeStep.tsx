@@ -39,7 +39,7 @@ export const FaceImageTypeStep = ({ data, gender, onChange, onNext, onBack }: Fa
     <div className="max-w-3xl mx-auto px-6 py-24 space-y-12">
       <div className="text-center space-y-3">
         <h2 className="font-semibold text-[#111111] tracking-[-0.01em]">얼굴 & 이미지 타입 분석</h2>
-        <p className="text-sm text-[#999999]">현재 얼굴이 주는 이미지를 분석합니다</p>
+        <p className="text-sm text-[#777777]">현재 얼굴이 주는 이미지를 분석합니다</p>
       </div>
 
       {/* 예시 이미지 */}
@@ -58,7 +58,7 @@ export const FaceImageTypeStep = ({ data, gender, onChange, onNext, onBack }: Fa
               </div>
               <div className="text-center space-y-1">
                 <div className="text-sm uppercase tracking-wider text-[#111111] font-semibold">{label}</div>
-                <div className="text-xs text-[#999999]">{sub}</div>
+                <div className="text-xs text-[#777777]">{sub}</div>
               </div>
             </div>
           ))}

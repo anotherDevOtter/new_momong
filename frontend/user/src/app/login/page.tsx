@@ -62,7 +62,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <p className="text-xs tracking-[0.2em] text-gray-400 uppercase mb-1">Merci Momong</p>
+          <p className="text-xs tracking-[0.2em] text-gray-500 uppercase mb-1">Merci Momong</p>
           <h1 className="text-2xl font-semibold text-[#111]">FIT 헤어컨설팅</h1>
         </div>
 
@@ -119,7 +119,7 @@ export default function LoginPage() {
           )}
         </form>
 
-        <div className="mt-6 flex items-center justify-center gap-4 text-xs text-gray-400">
+        <div className="mt-6 flex items-center justify-center gap-4 text-xs text-gray-500">
           <Link href="/find-id" className="hover:text-gray-600 transition-colors">아이디 찾기</Link>
           <span>·</span>
           <Link href="/reset-password" className="hover:text-gray-600 transition-colors">비밀번호 재설정</Link>

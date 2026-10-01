@@ -15,13 +15,13 @@ export const Input = ({ label, onChange, required, className, ...props }: InputP
       {label && (
         <label className="block text-sm text-[#555555]">
           {label}
-          {required && <span className="text-[#999999] ml-1">*</span>}
+          {required && <span className="text-[#777777] ml-1">*</span>}
         </label>
       )}
       <input
         className={cn(
           'w-full px-0 py-2 border-0 border-b border-[#EAEAEA] bg-transparent',
-          'text-[#111111] text-sm placeholder:text-[#BBBBBB]',
+          'text-[#111111] text-sm placeholder:text-[#777777]',
           'focus:outline-none focus:border-[#111111] transition-colors',
           className
         )}

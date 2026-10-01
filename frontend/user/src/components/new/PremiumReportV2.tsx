@@ -370,22 +370,22 @@ function buildSession({
 // ── Shared primitives ──────────────────────────────────────────────
 
 function SectionLabel({ children, gold }: { children: string; gold?: boolean }) {
-  return <p className="text-center" style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.26em', color: gold ? GOLD : G4, marginBottom: 12 }}>{children}</p>;
+  return <p className="text-center" style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.26em', color: gold ? GOLD : G4, marginBottom: 12 }}>{children}</p>;
 }
 function HDivider({ mt = 56, mb = 56 }: { mt?: number; mb?: number }) {
   return null;
 }
 function Chip({ label, muted }: { label: string; muted?: boolean }) {
-  return <span style={{ fontSize: 11, padding: '3px 10px', border: `1px solid ${G7}`, color: muted ? G5 : G3, background: muted ? G9 : '#FFFFFF', whiteSpace: 'nowrap' }}>{label}</span>;
+  return <span style={{ fontSize: 12, padding: '3px 10px', border: `1px solid ${G7}`, color: muted ? G5 : G3, background: muted ? G9 : '#FFFFFF', whiteSpace: 'nowrap' }}>{label}</span>;
 }
 function ScaleBar({ value, leftLabel, rightLabel }: { value: number; leftLabel: string; rightLabel: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 0' }}>
-      <span style={{ fontFamily: MONO, fontSize: 9, color: G5, width: 48, textAlign: 'right', flexShrink: 0 }}>{leftLabel}</span>
+      <span style={{ fontFamily: MONO, fontSize: 12, color: G5, width: 48, textAlign: 'right', flexShrink: 0 }}>{leftLabel}</span>
       <div style={{ flex: 1, height: 1, background: G7, position: 'relative' }}>
         <div style={{ position: 'absolute', top: '50%', left: `${value * 100}%`, transform: 'translate(-50%,-50%)', width: 8, height: 8, borderRadius: '50%', background: G1, border: '1.5px solid #FFF', boxShadow: `0 0 0 1px ${G1}` }} />
       </div>
-      <span style={{ fontFamily: MONO, fontSize: 9, color: G5, width: 48, flexShrink: 0 }}>{rightLabel}</span>
+      <span style={{ fontFamily: MONO, fontSize: 12, color: G5, width: 48, flexShrink: 0 }}>{rightLabel}</span>
     </div>
   );
 }
@@ -405,8 +405,8 @@ function ReportHeader({ page, onBack, onPrev, onNext }: { page: number; onBack: 
     <div style={{ position: 'sticky', top: 0, zIndex: 20, background: 'rgba(255,255,255,0.97)', borderBottom: `1px solid ${G8}`, backdropFilter: 'blur(8px)' }}>
       <div className="max-w-3xl mx-auto px-5 lg:px-10" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: 60 }}>
         <div>
-          <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.28em', color: G4 }}>MERCI MOMONG · PERSONAL HAIR REPORT</p>
-          {page > 0 && <p style={{ fontFamily: MONO, fontSize: 10, color: G1, fontWeight: 600, marginTop: 2, letterSpacing: '0.1em' }}>{String(page).padStart(2, '0')} / 03 · {LABELS[page]}</p>}
+          <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.28em', color: G4 }}>MERCI MOMONG · PERSONAL HAIR REPORT</p>
+          {page > 0 && <p style={{ fontFamily: MONO, fontSize: 12, color: G1, fontWeight: 600, marginTop: 2, letterSpacing: '0.1em' }}>{String(page).padStart(2, '0')} / 03 · {LABELS[page]}</p>}
         </div>
         {page > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -441,35 +441,35 @@ function Cover({ onStart, session }: { onStart: () => void; session: CustomerSes
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
           <div className="max-w-5xl mx-auto px-5 lg:px-10 grid grid-cols-1 sm:grid-cols-[2.4fr_1fr] gap-8 sm:gap-10 items-end" style={{ paddingBottom: 56 }}>
           <div>
-            <p style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.28em', color: 'rgba(255,255,255,0.45)', marginBottom: 20 }}>YOUR PERSONAL REPORT</p>
+            <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.28em', color: 'rgba(255,255,255,0.45)', marginBottom: 20 }}>YOUR PERSONAL REPORT</p>
             {session.customer.name && (
               <div style={{ marginBottom: 28 }}>
-                <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.26em', color: 'rgba(255,255,255,0.35)', marginBottom: 7 }}>FOR</p>
+                <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.26em', color: 'rgba(255,255,255,0.35)', marginBottom: 7 }}>FOR</p>
                 <p style={{ fontSize: 22, fontWeight: 300, color: 'rgba(255,255,255,0.88)', letterSpacing: '0.04em', lineHeight: 1.2 }}>{session.customer.name}</p>
               </div>
             )}
             <p style={{ fontSize: 32, fontWeight: 200, color: '#FFFFFF', letterSpacing: '-0.01em', lineHeight: 1.35, marginBottom: 10 }} className="text-[26px] lg:text-[32px]">'Be yourself'</p>
             <p style={{ fontSize: 13, fontWeight: 300, color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, marginBottom: 36 }}>모든 사람들이 자신의 아름다움을 발견하고<br />스스로를 사랑할 수 있도록 돕습니다.</p>
             <button onClick={onStart} style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '14px 28px', background: '#FFFFFF', border: 'none', cursor: 'pointer', minHeight: 52 }}>
-              <span style={{ fontFamily: MONO, fontSize: 11, color: G1, letterSpacing: '0.14em' }}>리포트 시작하기</span>
+              <span style={{ fontFamily: MONO, fontSize: 12, color: G1, letterSpacing: '0.14em' }}>리포트 시작하기</span>
               <ArrowRight size={12} color={G1} strokeWidth={1.5} />
             </button>
           </div>
 
           {/* CONTENTS — 04장의 '이 리포트에 담긴 것' 과 같은 표를 쓴다 */}
           <div className="hidden sm:block" style={{ paddingBottom: 6 }}>
-            <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.28em', color: 'rgba(255,255,255,0.40)', marginBottom: 14 }}>CONTENTS</p>
+            <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.28em', color: 'rgba(255,255,255,0.40)', marginBottom: 14 }}>CONTENTS</p>
             <div style={{ height: 1, background: 'rgba(255,255,255,0.22)', marginBottom: 18 }} />
             {CHAPTERS.map((ch, i) => (
               <div key={ch.num} style={{ marginBottom: i === CHAPTERS.length - 1 ? 0 : 22 }}>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                  <span style={{ fontFamily: MONO, fontSize: 8, color: 'rgba(255,255,255,0.38)' }}>{ch.num}</span>
-                  <span style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '0.12em', color: 'rgba(255,255,255,0.92)', fontWeight: 500 }}>{ch.title}</span>
+                  <span style={{ fontFamily: MONO, fontSize: 12, color: 'rgba(255,255,255,0.38)' }}>{ch.num}</span>
+                  <span style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.12em', color: 'rgba(255,255,255,0.92)', fontWeight: 500 }}>{ch.title}</span>
                 </div>
-                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', margin: '3px 0 7px 22px' }}>{ch.ko}</p>
+                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', margin: '3px 0 7px 22px' }}>{ch.ko}</p>
                 <ul style={{ listStyle: 'none', margin: '0 0 0 22px', padding: 0 }}>
                   {ch.items.map(it => (
-                    <li key={it} style={{ fontSize: 11, color: 'rgba(255,255,255,0.62)', lineHeight: 1.9, display: 'flex', gap: 7 }}>
+                    <li key={it} style={{ fontSize: 12, color: 'rgba(255,255,255,0.62)', lineHeight: 1.9, display: 'flex', gap: 7 }}>
                       <span style={{ color: 'rgba(255,255,255,0.3)' }}>·</span>{it}
                     </li>
                   ))}
@@ -490,7 +490,7 @@ function Cover({ onStart, session }: { onStart: () => void; session: CustomerSes
               { label: 'REPORT', value: '01 – 03' },
             ].map(r => (
               <div key={r.label} style={{ padding: '18px 20px', borderRight: `1px solid ${G7}`, flex: 1 }}>
-                <p style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.22em', color: G5, marginBottom: 5 }}>{r.label}</p>
+                <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.22em', color: G5, marginBottom: 5 }}>{r.label}</p>
                 <p style={{ fontSize: 13, color: G1, fontWeight: 300 }}>{r.value}</p>
               </div>
             ))}
@@ -523,11 +523,11 @@ function Page01({ session }: { session: CustomerSession }) {
 
           {/* Left: name block */}
           <div>
-            <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.28em', color: G5, marginBottom: 16 }}>CLIENT</p>
+            <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.28em', color: G5, marginBottom: 16 }}>CLIENT</p>
             <p style={{ fontSize: hasName ? 34 : 18, fontWeight: 300, color: hasName ? G1 : G5, letterSpacing: '-0.01em', lineHeight: 1.2, marginBottom: 12 }}>
               {hasName ? customer.name : '고객 이름 미입력'}
             </p>
-            <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.22em', color: G6 }}>{session.courseLabel} PERSONAL HAIR CONSULTING</p>
+            <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.22em', color: G6 }}>{session.courseLabel} PERSONAL HAIR CONSULTING</p>
           </div>
 
           {/* Right: meta — 라벨 위 / 값 아래로 한 줄씩 쌓는다.
@@ -536,18 +536,18 @@ function Page01({ session }: { session: CustomerSession }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignItems: 'flex-end', textAlign: 'right' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'flex-end' }}>
               <div>
-                <p style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.24em', color: G5, marginBottom: 6 }}>ANALYSIS DATE</p>
+                <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.24em', color: G5, marginBottom: 6 }}>ANALYSIS DATE</p>
                 <p style={{ fontSize: 13, color: G2, fontWeight: 300 }}>{customer.visitDate || '—'}</p>
               </div>
               {hasReportNo && (
                 <div>
-                  <p style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.24em', color: G5, marginBottom: 6 }}>REPORT NO.</p>
-                  <p style={{ fontFamily: MONO, fontSize: 10, color: G3, letterSpacing: '0.04em' }}>{report!.reportNumber}</p>
+                  <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.24em', color: G5, marginBottom: 6 }}>REPORT NO.</p>
+                  <p style={{ fontFamily: MONO, fontSize: 12, color: G3, letterSpacing: '0.04em' }}>{report!.reportNumber}</p>
                 </div>
               )}
               {hasDesigner && (
                 <div>
-                  <p style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.24em', color: G5, marginBottom: 6 }}>DESIGNER</p>
+                  <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.24em', color: G5, marginBottom: 6 }}>DESIGNER</p>
                   <p style={{ fontSize: 13, color: G2, fontWeight: 300 }}>{customer.designerName}</p>
                 </div>
               )}
@@ -563,7 +563,7 @@ function Page01({ session }: { session: CustomerSession }) {
             <img src={session.facePhotoUrl || FALLBACK_PHOTO} alt="얼굴 분석" style={{ width: '100%', aspectRatio: '4/5', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
           </div>
           <div style={{ paddingTop: 8 }}>
-            <p style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.22em', color: G4, marginBottom: 8 }}>{imageAnalysis.finalType} TYPE · 고유미</p>
+            <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.22em', color: G4, marginBottom: 8 }}>{imageAnalysis.finalType} TYPE · 고유미</p>
             <p style={{ fontSize: 64, fontWeight: 700, color: G1, letterSpacing: '-0.03em', lineHeight: 1, marginBottom: 6 }}>{imageAnalysis.finalType}</p>
             <p style={{ fontSize: 24, fontWeight: 300, color: G3, marginBottom: 28 }}>{imageAnalysis.finalTypeKo}</p>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 28 }}>
@@ -572,15 +572,15 @@ function Page01({ session }: { session: CustomerSession }) {
             <p style={{ fontSize: 15, color: G2, lineHeight: 1.85, fontWeight: 300, marginBottom: 40 }}>
               {imapDataFor(session.imageAnalysis.finalType).desc}
             </p>
-            <p style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.18em', color: G4, marginBottom: 16 }}>IMAGE POSITION</p>
+            <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.18em', color: G4, marginBottom: 16 }}>IMAGE POSITION</p>
             {[
               { left: 'WARM', right: 'COOL', pct: imageAnalysis.warmCoolPct },
               { left: 'SOFT', right: 'HARD', pct: imageAnalysis.softHardPct },
             ].map(bar => (
               <div key={bar.left} style={{ marginBottom: 14 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <span style={{ fontFamily: MONO, fontSize: 8, color: G5 }}>{bar.left}</span>
-                  <span style={{ fontFamily: MONO, fontSize: 8, color: G5 }}>{bar.right}</span>
+                  <span style={{ fontFamily: MONO, fontSize: 12, color: G5 }}>{bar.left}</span>
+                  <span style={{ fontFamily: MONO, fontSize: 12, color: G5 }}>{bar.right}</span>
                 </div>
                 <div style={{ height: 2, background: G8, borderRadius: 2, overflow: 'hidden' }}>
                   <motion.div style={{ height: '100%', background: G1, borderRadius: 2 }} initial={{ width: 0 }} animate={{ width: `${bar.pct}%` }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} />
@@ -588,7 +588,7 @@ function Page01({ session }: { session: CustomerSession }) {
               </div>
             ))}
             <div style={{ padding: '16px 0', borderTop: `1px solid ${G8}`, marginTop: 8 }}>
-              <p style={{ fontFamily: MONO, fontSize: 8, color: G5, marginBottom: 4 }}>YOUR POSITION</p>
+              <p style={{ fontFamily: MONO, fontSize: 12, color: G5, marginBottom: 4 }}>YOUR POSITION</p>
               <p style={{ fontSize: 20, fontWeight: 600, color: G1 }}>{imageAnalysis.tonePosition} × {imageAnalysis.moodPosition}</p>
             </div>
           </div>
@@ -604,23 +604,23 @@ function Page01({ session }: { session: CustomerSession }) {
             {factors.map((f, i) => (
               <div key={f.key}>
                 <div className="hidden sm:flex" style={{ alignItems: 'center', gap: 12, padding: '14px 0', borderBottom: `1px solid ${G8}` }}>
-                  <span style={{ fontFamily: MONO, fontSize: 9, color: i === 0 ? GOLD : G6, width: 22, flexShrink: 0 }}>{String(i + 1).padStart(2, '0')}</span>
+                  <span style={{ fontFamily: MONO, fontSize: 12, color: i === 0 ? GOLD : G6, width: 22, flexShrink: 0 }}>{String(i + 1).padStart(2, '0')}</span>
                   <div style={{ width: 80, flexShrink: 0 }}>
                     <span style={{ fontSize: 14, fontWeight: 500, color: G2 }}>{f.label}</span>
-                    <span style={{ fontFamily: MONO, fontSize: 8, color: G5, display: 'block', marginTop: 2 }}>{f.key.replace(/_/g, ' ').toUpperCase()}</span>
+                    <span style={{ fontFamily: MONO, fontSize: 12, color: G5, display: 'block', marginTop: 2 }}>{f.key.replace(/_/g, ' ').toUpperCase()}</span>
                   </div>
                   <div style={{ flex: 1, height: 2, background: G8, borderRadius: 2, overflow: 'hidden' }}>
                     <motion.div style={{ height: '100%', background: i === 0 ? G1 : G6, borderRadius: 2 }} initial={{ width: 0 }} animate={{ width: `${f.score}%` }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} />
                   </div>
-                  <span style={{ fontFamily: MONO, fontSize: 11, color: i === 0 ? G1 : G4, fontWeight: i === 0 ? 700 : 400, width: 36, textAlign: 'right', flexShrink: 0 }}>{f.score}%</span>
+                  <span style={{ fontFamily: MONO, fontSize: 12, color: i === 0 ? G1 : G4, fontWeight: i === 0 ? 700 : 400, width: 36, textAlign: 'right', flexShrink: 0 }}>{f.score}%</span>
                 </div>
                 <div className="block sm:hidden">
                   <button onClick={() => setOpenFactor(openFactor === i ? null : i)} style={{ display: 'flex', width: '100%', alignItems: 'center', gap: 12, padding: '14px 0', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', borderBottom: `1px solid ${G8}`, minHeight: 56 }}>
-                    <span style={{ fontFamily: MONO, fontSize: 9, color: i === 0 ? GOLD : G6, width: 20, flexShrink: 0 }}>{String(i + 1).padStart(2, '0')}</span>
+                    <span style={{ fontFamily: MONO, fontSize: 12, color: i === 0 ? GOLD : G6, width: 20, flexShrink: 0 }}>{String(i + 1).padStart(2, '0')}</span>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
                         <span style={{ fontSize: 14, fontWeight: 500, color: G1 }}>{f.label}</span>
-                        <span style={{ fontFamily: MONO, fontSize: 10, color: i === 0 ? G1 : G4 }}>{f.score}%</span>
+                        <span style={{ fontFamily: MONO, fontSize: 12, color: i === 0 ? G1 : G4 }}>{f.score}%</span>
                       </div>
                       <div style={{ height: 1.5, background: G8, overflow: 'hidden', borderRadius: 2 }}>
                         <motion.div style={{ height: '100%', background: i === 0 ? G1 : G6 }} initial={{ width: 0 }} animate={{ width: `${f.score}%` }} transition={{ duration: 0.9, delay: i * 0.05 }} />
@@ -643,16 +643,16 @@ function Page01({ session }: { session: CustomerSession }) {
             ))}
           </div>
           <div className="sm:border-l sm:border-[#E2E2DE] sm:pl-8">
-            <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.18em', color: G4, marginBottom: 20 }}>CORE INTERPRETATION</p>
+            <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.18em', color: G4, marginBottom: 20 }}>CORE INTERPRETATION</p>
             <p style={{ fontSize: 22, fontWeight: 600, color: G1, marginBottom: 16 }}>{ci.headline}</p>
             <p style={{ fontSize: 15, color: G2, lineHeight: 1.85, fontWeight: 300, marginBottom: 32 }}>{ci.body}</p>
             <div style={{ height: 1, background: G8, marginBottom: 24 }} />
-            <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.18em', color: G4, marginBottom: 12 }}>TOP KEYWORDS</p>
+            <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.18em', color: G4, marginBottom: 12 }}>TOP KEYWORDS</p>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 32 }}>
               {ci.keywords.map(k => <Chip key={k} label={k} />)}
             </div>
             <div style={{ padding: '20px', background: G9 }}>
-              <p style={{ fontFamily: MONO, fontSize: 8, color: G5, marginBottom: 8 }}>HAIR DIRECTION NOTE</p>
+              <p style={{ fontFamily: MONO, fontSize: 12, color: G5, marginBottom: 8 }}>HAIR DIRECTION NOTE</p>
               <p style={{ fontSize: 13, color: G3, lineHeight: 1.75, fontWeight: 300 }}>{ci.hairNote}</p>
             </div>
           </div>
@@ -691,11 +691,11 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
         <div className="grid grid-cols-1 sm:grid-cols-[3fr_2fr] gap-10 sm:gap-12 lg:gap-16 items-stretch">
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', marginBottom: 6, paddingLeft: 40 }}>
-              {['Warm', 'Neutral', 'Cool'].map(c => <div key={c} style={{ flex: 1, textAlign: 'center', fontFamily: MONO, fontSize: 8, color: G6, letterSpacing: '0.12em' }}>{c}</div>)}
+              {['Warm', 'Neutral', 'Cool'].map(c => <div key={c} style={{ flex: 1, textAlign: 'center', fontFamily: MONO, fontSize: 12, color: G6, letterSpacing: '0.12em' }}>{c}</div>)}
             </div>
             <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
               <div style={{ width: 40, display: 'flex', flexDirection: 'column', justifyContent: 'space-around' }}>
-                {['Soft', 'Natural', 'Hard'].map(r => <div key={r} style={{ fontFamily: MONO, fontSize: 7, color: G6, writingMode: 'vertical-rl', transform: 'rotate(180deg)', letterSpacing: '0.12em', alignSelf: 'center', padding: '14px 0' }}>{r}</div>)}
+                {['Soft', 'Natural', 'Hard'].map(r => <div key={r} style={{ fontFamily: MONO, fontSize: 12, color: G6, writingMode: 'vertical-rl', transform: 'rotate(180deg)', letterSpacing: '0.12em', alignSelf: 'center', padding: '14px 0' }}>{r}</div>)}
               </div>
               <div style={{ flex: 1, border: `1px solid ${G7}`, display: 'flex', flexDirection: 'column', position: 'relative' }}>
                 {/* 현재 → 원하는 이미지 연결 화살표. 칸이 다를 때만 그린다. (2026-09-12)
@@ -729,8 +729,8 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
                         <button key={col} onClick={() => setClickedCell(isCl ? null : { row, col })} style={{ flex: 1, border: 'none', borderRight: col < 2 ? `1px solid ${G8}` : 'none', borderBottom: row < 2 ? `1px solid ${G8}` : 'none', padding: '18px 8px', cursor: 'pointer', background: isCur ? '#EEEDE8' : isDes ? 'rgba(184,150,60,0.06)' : '#FFFFFF', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, minHeight: 96 }}>
                           {isCur && <div style={{ position: 'absolute', top: 8, right: 8, width: 8, height: 8, borderRadius: '50%', background: G1 }} />}
                           {isDes && <div style={{ position: 'absolute', top: 8, right: 8, width: 8, height: 8, borderRadius: '50%', background: GOLD }} />}
-                          <span style={{ fontFamily: MONO, fontSize: 9, fontWeight: 700, letterSpacing: '0.06em', color: isCur ? G1 : isDes ? '#7A6020' : G5 }}>{cell.en}</span>
-                          <span style={{ fontSize: 11, fontWeight: 300, color: isCur ? G3 : isDes ? '#9A7C2A' : G6 }}>{cell.ko}</span>
+                          <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 700, letterSpacing: '0.06em', color: isCur ? G1 : isDes ? '#7A6020' : G5 }}>{cell.en}</span>
+                          <span style={{ fontSize: 12, fontWeight: 300, color: isCur ? G3 : isDes ? '#9A7C2A' : G6 }}>{cell.ko}</span>
                         </button>
                       );
                     })}
@@ -742,7 +742,7 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
               {clickedCell && (
                 <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
                   <div style={{ padding: '14px 16px', background: G9, border: `1px solid ${G7}`, marginTop: 12 }}>
-                    <p style={{ fontFamily: MONO, fontSize: 8, color: G5, marginBottom: 6 }}>{IMAP[clickedCell.row][clickedCell.col].en} · {IMAP[clickedCell.row][clickedCell.col].ko}</p>
+                    <p style={{ fontFamily: MONO, fontSize: 12, color: G5, marginBottom: 6 }}>{IMAP[clickedCell.row][clickedCell.col].en} · {IMAP[clickedCell.row][clickedCell.col].ko}</p>
                     <p style={{ fontSize: 13, color: G2, lineHeight: 1.7, fontWeight: 300 }}>{IMAP[clickedCell.row][clickedCell.col].desc}</p>
                   </div>
                 </motion.div>
@@ -751,7 +751,7 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div style={{ padding: '20px', border: `1px solid ${G7}` }}>
-              <p style={{ fontFamily: MONO, fontSize: 8, color: G4, marginBottom: 8 }}>CURRENT IMAGE</p>
+              <p style={{ fontFamily: MONO, fontSize: 12, color: G4, marginBottom: 8 }}>CURRENT IMAGE</p>
               <p style={{ fontSize: 22, fontWeight: 700, color: G1, marginBottom: 4 }}>{imageDirection.currentImage.type}</p>
               <p style={{ fontSize: 13, color: G4, marginBottom: 12 }}>{imageDirection.currentImage.label} · {imageDirection.currentImage.tone} × {imageDirection.currentImage.mood}</p>
               <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
@@ -760,7 +760,7 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
             </div>
             {imageDirection.desiredImage.type !== imageDirection.currentImage.type ? (
               <div style={{ padding: '20px', border: `1px solid rgba(184,150,60,0.3)`, background: 'rgba(184,150,60,0.03)' }}>
-                <p style={{ fontFamily: MONO, fontSize: 8, color: GOLD, marginBottom: 8 }}>DESIRED IMAGE</p>
+                <p style={{ fontFamily: MONO, fontSize: 12, color: GOLD, marginBottom: 8 }}>DESIRED IMAGE</p>
                 <p style={{ fontSize: 22, fontWeight: 700, color: '#7A6020', marginBottom: 4 }}>{imageDirection.desiredImage.type}</p>
                 <p style={{ fontSize: 13, color: '#9A7C2A', marginBottom: 12 }}>{imageDirection.desiredImage.label} · {imageDirection.desiredImage.tone} × {imageDirection.desiredImage.mood}</p>
                 <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
@@ -769,12 +769,12 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
               </div>
             ) : (
               <div style={{ padding: '20px', border: `1px solid ${G7}`, background: G9 }}>
-                <p style={{ fontFamily: MONO, fontSize: 8, color: G5, marginBottom: 8 }}>DESIRED IMAGE</p>
+                <p style={{ fontFamily: MONO, fontSize: 12, color: G5, marginBottom: 8 }}>DESIRED IMAGE</p>
                 <p style={{ fontSize: 14, color: G4, fontWeight: 300 }}>원하는 이미지를 선택해주세요</p>
               </div>
             )}
             <div style={{ padding: '20px', borderLeft: `2px solid ${GOLD}`, background: 'rgba(184,150,60,0.04)' }}>
-              <p style={{ fontFamily: MONO, fontSize: 8, color: GOLD, marginBottom: 8 }}>YOUR GAP</p>
+              <p style={{ fontFamily: MONO, fontSize: 12, color: GOLD, marginBottom: 8 }}>YOUR GAP</p>
               <p style={{ fontSize: 14, color: G2, lineHeight: 1.75, fontWeight: 300 }}>{imageDirection.gapSummary}</p>
             </div>
           </div>
@@ -789,8 +789,8 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
 
               {/* Left: keyword grid */}
               <div style={{ borderRight: `1px solid ${G7}`, padding: '32px 28px 28px' }}>
-                <p style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.22em', color: G3, marginBottom: 2 }}>STYLE CONSULTING</p>
-                <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.18em', color: G5, marginBottom: 24 }}>HAIR STYLE GUIDE</p>
+                <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.22em', color: G3, marginBottom: 2 }}>STYLE CONSULTING</p>
+                <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.18em', color: G5, marginBottom: 24 }}>HAIR STYLE GUIDE</p>
 
                 {/* 3×3 IMAP keyword grid */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: G7 }}>
@@ -828,7 +828,7 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
                           letterSpacing: '-0.01em',
                         }}>{cell.en.toLowerCase()}</span>
                         <span style={{
-                          fontSize: 10,
+                          fontSize: 12,
                           color: isSel ? G3 : G6,
                           fontWeight: 300,
                         }}>{cell.ko}</span>
@@ -839,7 +839,7 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
 
                 {/* Bottom: selected style names */}
                 <div style={{ marginTop: 20, paddingTop: 16, borderTop: `1px solid ${G8}`, display: 'flex', alignItems: 'baseline', gap: 16, flexWrap: 'wrap' }}>
-                  <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.18em', color: G5, flexShrink: 0 }}>FIND YOUR STYLE</p>
+                  <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.18em', color: G5, flexShrink: 0 }}>FIND YOUR STYLE</p>
                   <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                     {guideStyles.map(k => (
                       <span key={k} style={{ fontSize: 16, fontWeight: 600, color: G1, letterSpacing: '-0.01em' }}>
@@ -855,7 +855,7 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <div style={{ padding: '20px 24px 12px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: `1px solid ${G8}` }}>
                   <div style={{ flex: 1, height: 1, background: G8 }} />
-                  <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.18em', color: G5, flexShrink: 0 }}>FIND YOUR STYLE</p>
+                  <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.18em', color: G5, flexShrink: 0 }}>FIND YOUR STYLE</p>
                 </div>
                 <div style={{ flex: 1, display: 'grid', gridTemplateColumns: guideStyles.length > 1 ? 'repeat(2, 1fr)' : '1fr', gap: 1, background: G7 }}>
                   {guideStyles.map(key => {
@@ -881,7 +881,7 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
                 </div>
                 {/* Note for first selected style */}
                 <div style={{ padding: '16px 24px', borderTop: `1px solid ${G8}` }}>
-                  <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.18em', color: G5, marginBottom: 6 }}>STYLE NOTE</p>
+                  <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.18em', color: G5, marginBottom: 6 }}>STYLE NOTE</p>
                   <p style={{ fontSize: 12, color: G3, lineHeight: 1.7, fontWeight: 300 }}>{STYLE_MAP[guideStyles[0]].note}</p>
                 </div>
               </div>
@@ -898,7 +898,7 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
           {conditions.map(c => (
             <div key={c.id} style={{ background: '#FFFFFF', display: 'grid', gridTemplateColumns: '88px 1fr' }}>
               <div style={{ padding: '22px 14px', borderRight: `1px solid ${G7}`, background: G9, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 3 }}>
-                <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.14em', color: G4 }}>{c.en}</p>
+                <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.14em', color: G4 }}>{c.en}</p>
                 <p style={{ fontSize: 13, color: G2, fontWeight: 500 }}>{c.ko}</p>
               </div>
               <div style={{ padding: '22px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
@@ -924,7 +924,7 @@ function Page02({ session, hairStyle, guideStyles = [] }: {
             return (
               <div key={key} style={{ background: '#FFFFFF', display: 'grid', gridTemplateColumns: '88px 1fr' }}>
                 <div style={{ padding: '22px 14px', borderRight: `1px solid ${G7}`, background: G9, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 3 }}>
-                  <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.14em', color: G4 }}>{en}</p>
+                  <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.14em', color: G4 }}>{en}</p>
                   <p style={{ fontSize: 13, color: G2, fontWeight: 500 }}>{label}</p>
                 </div>
                 <div style={{ padding: '22px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
@@ -989,11 +989,11 @@ function PhotoSlot({ label, sub, photo, setPhoto, inputRef }: {
             <img src={photo} alt={label} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,8,6,0.55) 0%, transparent 45%)' }} />
             <div style={{ position: 'absolute', top: 16, left: 16 }}>
-              <span style={{ fontFamily: MONO, fontSize: 9, padding: '5px 12px', background: isBefore ? 'rgba(17,17,17,0.75)' : 'rgba(184,150,60,0.85)', color: '#FFFFFF', letterSpacing: '0.14em' }}>{label}</span>
+              <span style={{ fontFamily: MONO, fontSize: 12, padding: '5px 12px', background: isBefore ? 'rgba(17,17,17,0.75)' : 'rgba(184,150,60,0.85)', color: '#FFFFFF', letterSpacing: '0.14em' }}>{label}</span>
             </div>
             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '16px 20px' }}>
               <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', marginBottom: 4 }}>{sub}</p>
-              <p style={{ fontFamily: MONO, fontSize: 8, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.12em' }}>TAP TO CHANGE</p>
+              <p style={{ fontFamily: MONO, fontSize: 12, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.12em' }}>TAP TO CHANGE</p>
             </div>
           </>
         ) : (
@@ -1002,7 +1002,7 @@ function PhotoSlot({ label, sub, photo, setPhoto, inputRef }: {
               <ArrowRight size={16} color={G6} style={{ transform: 'rotate(-45deg)' }} strokeWidth={1.5} />
             </div>
             <div style={{ textAlign: 'center' }}>
-              <p style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.16em', color: isBefore ? G3 : GOLD, marginBottom: 6 }}>{label}</p>
+              <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.16em', color: isBefore ? G3 : GOLD, marginBottom: 6 }}>{label}</p>
               <p style={{ fontSize: 13, color: G5, fontWeight: 300 }}>{sub} 사진 추가</p>
             </div>
           </div>
@@ -1072,7 +1072,7 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
                 <button onClick={() => setOpenItem(openItem === item.id ? null : item.id)} style={{ display: 'flex', width: '100%', alignItems: 'center', gap: 14, padding: '16px 0', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', borderBottom: `1px solid ${G8}`, minHeight: 56 }}>
                   <div style={{ width: 18, height: 18, borderRadius: '50%', border: `1.5px solid ${subSel[item.id] && subSel[item.id] !== '유지' ? GOLD : G6}`, background: subSel[item.id] && subSel[item.id] !== '유지' ? GOLD : 'transparent', flexShrink: 0 }} />
                   <div style={{ flex: 1 }}>
-                    <span style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.14em', color: G4, display: 'block', marginBottom: 2 }}>{item.en}</span>
+                    <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.14em', color: G4, display: 'block', marginBottom: 2 }}>{item.en}</span>
                     <span style={{ fontSize: 15, fontWeight: 300, color: G3 }}>
                       {item.ko}{subSel[item.id] ? <span style={{ color: GOLD, fontWeight: 500 }}> · {subSel[item.id]}</span> : ''}
                     </span>
@@ -1097,7 +1097,7 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
             ))}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <p style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.18em', color: G4 }}>MY NEXT DIRECTION</p>
+            <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.18em', color: G4 }}>MY NEXT DIRECTION</p>
             {selectedIds.length === 0 ? (
               <div style={{ padding: '32px 24px', background: G9, border: `1px solid ${G7}` }}>
                 <p style={{ fontSize: 14, color: G5, lineHeight: 1.75, fontWeight: 300 }}>왼쪽 목록에서 다음에 바꾸고 싶은 항목을 선택해주세요.</p>
@@ -1105,13 +1105,13 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
             ) : (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                 <div style={{ padding: '24px', background: 'rgba(184,150,60,0.04)', border: `1px solid rgba(184,150,60,0.2)`, marginBottom: 12 }}>
-                  <p style={{ fontFamily: MONO, fontSize: 8, color: GOLD, marginBottom: 12 }}>SELECTED</p>
+                  <p style={{ fontFamily: MONO, fontSize: 12, color: GOLD, marginBottom: 12 }}>SELECTED</p>
                   {selectedIds.map(id => {
                     const item = NEXT_ITEMS.find(i => i.id === id);
                     return (
                       <div key={id} style={{ padding: '8px 0', borderBottom: `1px solid rgba(184,150,60,0.15)` }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <span style={{ fontFamily: MONO, fontSize: 9, color: G5 }}>{item?.en}</span>
+                          <span style={{ fontFamily: MONO, fontSize: 12, color: G5 }}>{item?.en}</span>
                           <span style={{ fontSize: 13, color: G1, fontWeight: 500 }}>{subSel[id]}</span>
                         </div>
                         {memos[id] && (
@@ -1129,10 +1129,10 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
               </motion.div>
             )}
             <div style={{ padding: '24px', background: G9, border: `1px solid ${G7}` }}>
-              <p style={{ fontFamily: MONO, fontSize: 8, color: G5, marginBottom: 8 }}>TODAY'S DESIGN</p>
+              <p style={{ fontFamily: MONO, fontSize: 12, color: G5, marginBottom: 8 }}>TODAY'S DESIGN</p>
               <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 12 }}>
                 {todayDesign.services.length > 0
-                  ? todayDesign.services.map(s => <span key={s} style={{ fontFamily: MONO, fontSize: 8, padding: '3px 10px', background: G1, color: '#FFFFFF', letterSpacing: '0.08em' }}>{s}</span>)
+                  ? todayDesign.services.map(s => <span key={s} style={{ fontFamily: MONO, fontSize: 12, padding: '3px 10px', background: G1, color: '#FFFFFF', letterSpacing: '0.08em' }}>{s}</span>)
                   : <span style={{ fontSize: 13, color: G5 }}>시술 정보 없음</span>
                 }
               </div>
@@ -1196,7 +1196,7 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
                 <div style={{ marginBottom: 24 }}>
                   {homeCare.map((tip, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 32, padding: '18px 0', borderBottom: `1px solid ${G8}` }}>
-                      <span style={{ fontFamily: MONO, fontSize: 9, color: G5, letterSpacing: '0.08em', flexShrink: 0, paddingTop: 2 }}>
+                      <span style={{ fontFamily: MONO, fontSize: 12, color: G5, letterSpacing: '0.08em', flexShrink: 0, paddingTop: 2 }}>
                         {String(i + 1).padStart(2, '0')}
                       </span>
                       <span style={{ fontSize: 14, color: G2, fontWeight: 300, lineHeight: 1.65 }}>{tip}</span>
@@ -1219,7 +1219,7 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
                           }}
                         >
                           <span style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-                            <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.14em', color: G5 }}>{care.title}</span>
+                            <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.14em', color: G5 }}>{care.title}</span>
                             <span style={{ fontSize: 14, color: G2, fontWeight: 400 }}>{SERVICE_KO[key]}</span>
                           </span>
                           <ChevronDown
@@ -1237,7 +1237,7 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
                               <div style={{ padding: '4px 0 20px' }}>
                                 {care.tips.map(tip => (
                                   <div key={tip.label} style={{ display: 'flex', alignItems: 'flex-start', gap: 20, padding: '8px 0' }}>
-                                    <span style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.12em', color: G5, width: 92, flexShrink: 0, paddingTop: 3 }}>{tip.label}</span>
+                                    <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.12em', color: G5, width: 92, flexShrink: 0, paddingTop: 3 }}>{tip.label}</span>
                                     <span style={{ fontSize: 13, color: G3, fontWeight: 300, lineHeight: 1.7 }}>{tip.text}</span>
                                   </div>
                                 ))}
@@ -1285,7 +1285,7 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
                     flexShrink: 0,
                   }} />
                   <p style={{
-                    fontFamily: MONO, fontSize: 9, letterSpacing: '0.06em',
+                    fontFamily: MONO, fontSize: 12, letterSpacing: '0.06em',
                     color: isToday ? G4 : G5,
                     marginBottom: 2, textAlign: 'center', whiteSpace: 'nowrap', fontWeight: 300,
                   }}>{item.label}</p>
@@ -1337,7 +1337,7 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
             <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 12 }}>
               {/* NEXT CARE */}
               <div style={{ border: `1px solid ${G7}`, padding: '32px 28px 36px', background: '#FFFFFF' }}>
-                <p style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.2em', color: G5, marginBottom: 20 }}>NEXT CARE</p>
+                <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.2em', color: G5, marginBottom: 20 }}>NEXT CARE</p>
                 <p style={{ fontSize: 44, fontWeight: 300, color: G1, letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 14 }}>
                   {nc ? fmtWeeks(nc.minWeeks, nc.maxWeeks) : '3–4주 후'}
                 </p>
@@ -1349,7 +1349,7 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
 
               {/* NEXT DESIGN */}
               <div style={{ border: `1px solid ${GOLD}`, padding: '32px 28px 36px', background: '#FFFFFF' }}>
-                <p style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.2em', color: GOLD, marginBottom: 20 }}>NEXT DESIGN</p>
+                <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.2em', color: GOLD, marginBottom: 20 }}>NEXT DESIGN</p>
                 <p style={{ fontSize: 44, fontWeight: 300, color: G1, letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 14 }}>
                   {nd ? fmtWeeks(nd.minWeeks, nd.maxWeeks) : '약 8주 후'}
                 </p>

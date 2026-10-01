@@ -9,7 +9,7 @@ export function BrandHeader() {
       className="fixed top-0 right-0 left-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200"
     >
       <div className="px-6 py-4 flex justify-end">
-        <span className="text-xs tracking-[0.3em] font-light text-black">
+        <span className="text-xs tracking-[0.3em] font-normal text-black">
           MERCI MOMONG
         </span>
       </div>

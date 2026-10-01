@@ -31,7 +31,7 @@ export function PageLayout({
             className="py-8 text-center border-t border-[#E5E5E5]"
             style={{ fontWeight: 400 }}
           >
-            <span className="text-[11px] tracking-[0.2em] text-[#7A7A7A]">
+            <span className="text-[12px] tracking-[0.2em] text-[#7A7A7A]">
               {pageNumber} / {totalPages}
             </span>
           </div>
@@ -47,7 +47,7 @@ export function PageLayout({
               className="flex-1 flex items-center justify-center gap-2 py-4 text-[#111111] hover:bg-[#F7F7F5] transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
-              <span className="text-[11px] tracking-[0.15em]" style={{ fontWeight: 500 }}>
+              <span className="text-[12px] tracking-[0.15em]" style={{ fontWeight: 500 }}>
                 PREV
               </span>
             </button>
@@ -59,7 +59,7 @@ export function PageLayout({
               onClick={onNext}
               className="flex-1 flex items-center justify-center gap-2 py-4 text-[#111111] hover:bg-[#F7F7F5] transition-colors"
             >
-              <span className="text-[11px] tracking-[0.15em]" style={{ fontWeight: 500 }}>
+              <span className="text-[12px] tracking-[0.15em]" style={{ fontWeight: 500 }}>
                 {nextLabel}
               </span>
               <ChevronRight className="w-4 h-4" />

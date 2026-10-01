@@ -43,7 +43,7 @@ export function CourseCard({
               {title}
             </h3>
             {recommended && (
-              <span className="px-3 py-1 bg-[#111111] text-white text-[10px] tracking-[0.15em] uppercase font-medium">
+              <span className="px-3 py-1 bg-[#111111] text-white text-[12px] tracking-[0.15em] uppercase font-medium">
                 추천
               </span>
             )}
@@ -63,7 +63,7 @@ export function CourseCard({
 
       {/* 구성 설명 */}
       <div className="mb-8">
-        <p className="text-[10px] text-[#AAAAAA] mb-3 tracking-[0.15em] uppercase font-medium">
+        <p className="text-[12px] text-[#777777] mb-3 tracking-[0.15em] uppercase font-medium">
           COMPOSITION
         </p>
         {options ? (
@@ -84,7 +84,7 @@ export function CourseCard({
 
       {/* 제공 서비스 */}
       <div className="mb-6 pb-6 border-b border-[#E5E5E5]">
-        <p className="text-[10px] text-[#AAAAAA] mb-3 tracking-[0.15em] uppercase font-medium">
+        <p className="text-[12px] text-[#777777] mb-3 tracking-[0.15em] uppercase font-medium">
           SERVICES
         </p>
         <p className="text-sm text-[#777777] leading-[1.6]">{services}</p>
@@ -92,7 +92,7 @@ export function CourseCard({
 
       {/* 하단 문구 */}
       {footer && (
-        <p className="text-xs text-[#AAAAAA] text-center">{footer}</p>
+        <p className="text-xs text-[#777777] text-center">{footer}</p>
       )}
     </motion.div>
   );

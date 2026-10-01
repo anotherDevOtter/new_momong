@@ -90,7 +90,7 @@ export function PersonalColorAnalysis({ onBack, onNext, onChange }: PersonalColo
           <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em]">
             퍼스널컬러 분석
           </h2>
-          <p className="text-sm text-[#999999]">당신에게 어울리는 퍼스널컬러를 분석합니다</p>
+          <p className="text-sm text-[#777777]">당신에게 어울리는 퍼스널컬러를 분석합니다</p>
         </motion.div>
 
         {/* 계절별 컬러 차트 */}

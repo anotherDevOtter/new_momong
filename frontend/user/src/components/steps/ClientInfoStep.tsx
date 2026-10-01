@@ -20,7 +20,7 @@ export const ClientInfoStep = ({ data, onChange, onNext, onBack }: ClientInfoSte
     <div className="max-w-2xl mx-auto px-6 py-24 space-y-12">
       <div className="text-center space-y-3">
         <h2 className="font-semibold text-[#111111] tracking-[-0.01em]">고객 기본 정보</h2>
-        <p className="text-sm text-[#999999]">정확한 컨설팅을 위해 기본 정보를 입력해주세요</p>
+        <p className="text-sm text-[#777777]">정확한 컨설팅을 위해 기본 정보를 입력해주세요</p>
       </div>
 
       <div className="space-y-8">

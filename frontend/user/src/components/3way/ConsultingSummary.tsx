@@ -199,7 +199,7 @@ export function ConsultingSummary({
                       </span>
                     ))
                   ) : (
-                    <span className="text-xs text-gray-400 font-normal">선택 없음</span>
+                    <span className="text-xs text-gray-500 font-normal">선택 없음</span>
                   )}
                 </div>
               </div>
@@ -222,7 +222,7 @@ export function ConsultingSummary({
                       </span>
                     ))
                   ) : (
-                    <span className="text-xs text-gray-400 font-normal">선택 없음</span>
+                    <span className="text-xs text-gray-500 font-normal">선택 없음</span>
                   )}
                 </div>
               </div>
@@ -263,7 +263,7 @@ export function ConsultingSummary({
                       </span>
                     ))
                   ) : (
-                    <span className="text-xs text-gray-400 font-normal">선택 없음</span>
+                    <span className="text-xs text-gray-500 font-normal">선택 없음</span>
                   )}
                 </div>
               </div>
@@ -286,7 +286,7 @@ export function ConsultingSummary({
                       </span>
                     ))
                   ) : (
-                    <span className="text-xs text-gray-400 font-normal">선택 없음</span>
+                    <span className="text-xs text-gray-500 font-normal">선택 없음</span>
                   )}
                 </div>
               </div>
@@ -317,7 +317,7 @@ export function ConsultingSummary({
               </p>
 
               <div className="space-y-2">
-                <p className="text-xs text-gray-300 font-medium mb-3">제안 전략:</p>
+                <p className="text-xs text-gray-500 font-medium mb-3">제안 전략:</p>
                 {overallSuggestion.suggestions.map((suggestion, index) => (
                   <div key={index} className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-white mt-0.5 flex-shrink-0" strokeWidth={2} />

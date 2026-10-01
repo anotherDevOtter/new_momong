@@ -41,7 +41,7 @@ export const TodayKeywordStep = ({ data, gender, onChange, onNext, onBack }: Tod
     <div className="max-w-2xl mx-auto px-6 py-24 space-y-12">
       <div className="text-center space-y-3">
         <h2 className="font-semibold text-[#111111] tracking-[-0.01em]">TODAY KEYWORD</h2>
-        <p className="text-sm text-[#999999]">오늘의 상태를 체크해주세요</p>
+        <p className="text-sm text-[#777777]">오늘의 상태를 체크해주세요</p>
       </div>
 
       <div className="space-y-10">
@@ -56,7 +56,7 @@ export const TodayKeywordStep = ({ data, gender, onChange, onNext, onBack }: Tod
           {data.faceConcerns.includes('기타') && (
             <div className="ml-6">
               <textarea
-                className="w-full px-4 py-3 border border-[#EAEAEA] text-sm text-[#111111] placeholder:text-[#999999] focus:outline-none focus:ring-1 focus:ring-[#111111] resize-none"
+                className="w-full px-4 py-3 border border-[#EAEAEA] text-sm text-[#111111] placeholder:text-[#777777] focus:outline-none focus:ring-1 focus:ring-[#111111] resize-none"
                 placeholder="기타 보완 희망 부위를 입력해주세요"
                 rows={3}
                 value={data.faceConcernsMemo}
@@ -77,7 +77,7 @@ export const TodayKeywordStep = ({ data, gender, onChange, onNext, onBack }: Tod
           {data.hairConcerns.includes('기타') && (
             <div className="ml-6">
               <textarea
-                className="w-full px-4 py-3 border border-[#EAEAEA] text-sm text-[#111111] placeholder:text-[#999999] focus:outline-none focus:ring-1 focus:ring-[#111111] resize-none"
+                className="w-full px-4 py-3 border border-[#EAEAEA] text-sm text-[#111111] placeholder:text-[#777777] focus:outline-none focus:ring-1 focus:ring-[#111111] resize-none"
                 placeholder="기타 헤어 고민을 입력해주세요"
                 rows={3}
                 value={data.hairConcernsMemo}

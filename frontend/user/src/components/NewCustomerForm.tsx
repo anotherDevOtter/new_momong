@@ -47,7 +47,7 @@ export function NewCustomerForm({
         <h2 className="text-base font-medium text-[#111111]">{title}</h2>
         <button
           onClick={onCancel}
-          className="text-[#999999] hover:text-[#111111]"
+          className="text-[#777777] hover:text-[#111111]"
           aria-label="신규 등록 취소"
         >
           <X size={18} />
@@ -60,7 +60,7 @@ export function NewCustomerForm({
             고객명 <span className="text-red-500">*</span>
           </label>
           <div className="relative">
-            <User className="w-4 h-4 text-[#999999] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <User className="w-4 h-4 text-[#777777] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={name}
@@ -76,7 +76,7 @@ export function NewCustomerForm({
             연락처 <span className="text-red-500">*</span>
           </label>
           <div className="relative">
-            <Phone className="w-4 h-4 text-[#999999] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Phone className="w-4 h-4 text-[#777777] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="tel"
               value={phone}

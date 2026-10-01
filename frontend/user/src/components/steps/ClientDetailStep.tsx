@@ -150,7 +150,7 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
         <div className="border border-[#E5E5E5] p-8">
           <div className="flex items-start gap-4">
             <div className="w-16 h-16 rounded-full bg-[#F5F5F5] flex items-center justify-center shrink-0">
-              <User size={32} className="text-[#999999]" />
+              <User size={32} className="text-[#777777]" />
             </div>
             <div className="flex-1">
               <h2 className="text-2xl font-semibold text-[#111111] mb-2">{client.name}</h2>
@@ -166,7 +166,7 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
               <div className="space-y-1 text-sm text-[#777777]">
                 {client.phone && <div className="flex items-center gap-2"><Phone size={14} />{client.phone}</div>}
                 {client.memo && <p>메모: {client.memo}</p>}
-                {client.created_at && <div className="flex items-center gap-1 text-[#999999]"><Calendar size={14} />등록일: {formatDate(client.created_at)}</div>}
+                {client.created_at && <div className="flex items-center gap-1 text-[#777777]"><Calendar size={14} />등록일: {formatDate(client.created_at)}</div>}
               </div>
             </div>
           </div>
@@ -206,7 +206,7 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
           <button
             onClick={() => setTab('history')}
             className={`px-5 py-3 text-sm transition-colors border-b-2 -mb-px ${
-              tab === 'history' ? 'border-[#111111] text-[#111111] font-medium' : 'border-transparent text-[#999999] hover:text-[#111111]'
+              tab === 'history' ? 'border-[#111111] text-[#111111] font-medium' : 'border-transparent text-[#777777] hover:text-[#111111]'
             }`}
           >
             <Scissors size={14} className="inline-block mr-1 -mt-0.5" /> 컨설팅 히스토리
@@ -214,7 +214,7 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
           <button
             onClick={() => setTab('survey')}
             className={`px-5 py-3 text-sm transition-colors border-b-2 -mb-px ${
-              tab === 'survey' ? 'border-[#111111] text-[#111111] font-medium' : 'border-transparent text-[#999999] hover:text-[#111111]'
+              tab === 'survey' ? 'border-[#111111] text-[#111111] font-medium' : 'border-transparent text-[#777777] hover:text-[#111111]'
             }`}
           >
             <ClipboardList size={14} className="inline-block mr-1 -mt-0.5" /> 사전 설문
@@ -243,18 +243,18 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
               <Scissors size={16} className="text-[#555555]" />
               <h3 className="text-sm font-semibold text-[#111111]">컨설팅 히스토리</h3>
             </div>
-            <span className="text-xs text-[#999999]">총 {consultations.length}건</span>
+            <span className="text-xs text-[#777777]">총 {consultations.length}건</span>
           </div>
 
           {isLoading ? (
             <div className="px-8 py-12 text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#111111] mx-auto mb-3" />
-              <p className="text-sm text-[#999999]">불러오는 중...</p>
+              <p className="text-sm text-[#777777]">불러오는 중...</p>
             </div>
           ) : consultations.length === 0 ? (
             <div className="px-8 py-12 text-center">
-              <Clock size={32} className="mx-auto mb-3 text-[#CCCCCC]" />
-              <p className="text-sm text-[#999999]">아직 컨설팅 기록이 없습니다.</p>
+              <Clock size={32} className="mx-auto mb-3 text-[#777777]" />
+              <p className="text-sm text-[#777777]">아직 컨설팅 기록이 없습니다.</p>
             </div>
           ) : (
             <div className="divide-y divide-[#E5E5E5]">
@@ -267,7 +267,7 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
                     >
                       <div>
                         <p className="text-sm font-medium text-[#111111]">{record.visitDate || formatDate(record.createdAt)}</p>
-                        <p className="text-xs text-[#999999] mt-0.5">담당: {record.designerName || '-'}</p>
+                        <p className="text-xs text-[#777777] mt-0.5">담당: {record.designerName || '-'}</p>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {record.faceImageType?.type && (
@@ -284,14 +284,14 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
                     <div className="flex items-center gap-2 shrink-0">
                       <button
                         onClick={() => onEditConsultation(record)}
-                        className="flex items-center gap-1 text-xs text-[#999999] hover:text-[#111111] transition-colors px-2 py-1 border border-[#E5E5E5] hover:border-[#999999]"
+                        className="flex items-center gap-1 text-xs text-[#777777] hover:text-[#111111] transition-colors px-2 py-1 border border-[#E5E5E5] hover:border-[#999999]"
                       >
                         <Pencil size={11} />
                         수정
                       </button>
                       <button
                         onClick={() => handleDelete(record.id)}
-                        className="flex items-center gap-1 text-xs text-[#999999] hover:text-red-500 transition-colors px-2 py-1 border border-[#E5E5E5] hover:border-red-300"
+                        className="flex items-center gap-1 text-xs text-[#777777] hover:text-red-500 transition-colors px-2 py-1 border border-[#E5E5E5] hover:border-red-300"
                       >
                         <Trash2 size={11} />
                         삭제
@@ -321,7 +321,7 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
           modalConsultation ? (
             <span>
               컨설팅 상세 · {modalConsultation.visitDate || formatDate(modalConsultation.createdAt)}
-              <span className="text-xs text-[#999999] font-normal ml-2">담당: {modalConsultation.designerName || '-'}</span>
+              <span className="text-xs text-[#777777] font-normal ml-2">담당: {modalConsultation.designerName || '-'}</span>
             </span>
           ) : null
         }
@@ -384,7 +384,7 @@ function ConsultationDetailView({
                 onClick={() => onCopy(url)}
                 className="shrink-0 w-8 h-8 flex items-center justify-center border border-[#E5E5E5] bg-white hover:border-[#111111] transition-colors"
               >
-                {copied ? <Check size={13} className="text-[#111111]" /> : <Copy size={13} className="text-[#999999]" />}
+                {copied ? <Check size={13} className="text-[#111111]" /> : <Copy size={13} className="text-[#777777]" />}
               </button>
             </div>
 
@@ -400,11 +400,11 @@ function ConsultationDetailView({
             </button>
 
             <div className="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E5E5]">
-              <span className="text-xs text-[#999999] w-16 shrink-0">비밀번호</span>
+              <span className="text-xs text-[#777777] w-16 shrink-0">비밀번호</span>
               <span className="text-xs font-medium text-[#111111] font-mono tracking-widest flex-1">
                 {showPassword ? shareInfo.password : '••••••••'}
               </span>
-              <button onClick={onTogglePassword} className="text-[#999999] hover:text-[#111111] transition-colors">
+              <button onClick={onTogglePassword} className="text-[#777777] hover:text-[#111111] transition-colors">
                 {showPassword ? <EyeOff size={13} /> : <Eye size={13} />}
               </button>
             </div>
@@ -412,7 +412,7 @@ function ConsultationDetailView({
         );
       })()}
       {shareInfo === null && (
-        <p className="text-xs text-[#999999]">생성된 공유 링크가 없습니다.</p>
+        <p className="text-xs text-[#777777]">생성된 공유 링크가 없습니다.</p>
       )}
 
       {/* 고객 니즈 */}
@@ -637,7 +637,7 @@ function PreSurveyList({
           <div className="flex items-center gap-2">
             <Link2 size={16} className="text-[#555555]" />
             <h3 className="text-sm font-semibold text-[#111111]">사전설문지</h3>
-            <span className="text-xs text-[#999999] ml-1">총 {surveys.length}건</span>
+            <span className="text-xs text-[#777777] ml-1">총 {surveys.length}건</span>
           </div>
           <button
             onClick={onCreate}
@@ -650,8 +650,8 @@ function PreSurveyList({
 
         {surveys.length === 0 ? (
           <div className="px-8 py-10 text-center">
-            <p className="text-sm text-[#999999]">발급된 사전설문지가 없습니다.</p>
-            <p className="text-xs text-[#CCCCCC] mt-1">위 버튼으로 새 링크를 발급해 고객님께 전달하세요.</p>
+            <p className="text-sm text-[#777777]">발급된 사전설문지가 없습니다.</p>
+            <p className="text-xs text-[#777777] mt-1">위 버튼으로 새 링크를 발급해 고객님께 전달하세요.</p>
           </div>
         ) : (
           <div className="divide-y divide-[#E5E5E5]">
@@ -675,7 +675,7 @@ function PreSurveyList({
                         <p className="text-sm font-medium text-[#111111]">
                           {filled ? `완료: ${formatDate(s.filled_at!)}` : '미작성'}
                         </p>
-                        <p className="text-xs text-[#999999] mt-0.5">발급: {formatDate(s.created_at)}</p>
+                        <p className="text-xs text-[#777777] mt-0.5">발급: {formatDate(s.created_at)}</p>
                       </div>
                     </button>
                     <div className="flex items-center gap-2 shrink-0">
@@ -707,7 +707,7 @@ function PreSurveyList({
           modalSurvey ? (
             <span>
               사전설문지 상세
-              <span className="text-xs text-[#999999] font-normal ml-2">
+              <span className="text-xs text-[#777777] font-normal ml-2">
                 {modalSurvey.filled_at
                   ? `완료: ${formatDate(modalSurvey.filled_at)}`
                   : `발급: ${formatDate(modalSurvey.created_at)} · 미작성`}
@@ -719,12 +719,12 @@ function PreSurveyList({
         {loadingId === modalSurveyId && !modalDetail ? (
           <div className="py-12 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#111111] mx-auto mb-3" />
-            <p className="text-sm text-[#999999]">불러오는 중...</p>
+            <p className="text-sm text-[#777777]">불러오는 중...</p>
           </div>
         ) : modalDetail ? (
           <PreSurveyDetailView detail={modalDetail} />
         ) : modalSurvey ? (
-          <p className="text-sm text-[#CCCCCC] py-8 text-center">불러오기 실패</p>
+          <p className="text-sm text-[#777777] py-8 text-center">불러오기 실패</p>
         ) : null}
       </Modal>
     </>
@@ -758,7 +758,7 @@ function SurveySection({
     return (
       <div className="border border-[#E5E5E5] px-8 py-12 text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#111111] mx-auto mb-3" />
-        <p className="text-sm text-[#999999]">불러오는 중...</p>
+        <p className="text-sm text-[#777777]">불러오는 중...</p>
       </div>
     );
   }
@@ -766,9 +766,9 @@ function SurveySection({
   if (surveys.length === 0) {
     return (
       <div className="border border-[#E5E5E5] px-8 py-12 text-center">
-        <ClipboardList size={32} className="mx-auto mb-3 text-[#CCCCCC]" />
-        <p className="text-sm text-[#999999]">사전 설문 기록이 없습니다.</p>
-        <p className="text-xs text-[#CCCCCC] mt-1">3WAY 컨설팅 진행 시 사전 인터뷰 단계의 답변이 여기 표시됩니다.</p>
+        <ClipboardList size={32} className="mx-auto mb-3 text-[#777777]" />
+        <p className="text-sm text-[#777777]">사전 설문 기록이 없습니다.</p>
+        <p className="text-xs text-[#777777] mt-1">3WAY 컨설팅 진행 시 사전 인터뷰 단계의 답변이 여기 표시됩니다.</p>
       </div>
     );
   }
@@ -781,11 +781,11 @@ function SurveySection({
             <p className="text-sm font-medium text-[#111111]">
               {consult.visitDate || formatDate(consult.createdAt)}
             </p>
-            <p className="text-xs text-[#999999]">담당: {consult.designerName || '-'}</p>
+            <p className="text-xs text-[#777777]">담당: {consult.designerName || '-'}</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div>
-              <p className="text-xs text-[#999999] uppercase tracking-wider mb-1">얼굴 보완 부위</p>
+              <p className="text-xs text-[#777777] uppercase tracking-wider mb-1">얼굴 보완 부위</p>
               {pre.selectedFaceAreas?.length ? (
                 <div className="flex flex-wrap gap-1">
                   {pre.selectedFaceAreas.map((a) => (
@@ -793,12 +793,12 @@ function SurveySection({
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-[#CCCCCC]">-</p>
+                <p className="text-xs text-[#777777]">-</p>
               )}
               {pre.faceAreasMemo && <p className="text-xs text-[#777777] mt-2">{pre.faceAreasMemo}</p>}
             </div>
             <div>
-              <p className="text-xs text-[#999999] uppercase tracking-wider mb-1">헤어 고민</p>
+              <p className="text-xs text-[#777777] uppercase tracking-wider mb-1">헤어 고민</p>
               {pre.selectedHairConcerns?.length ? (
                 <div className="flex flex-wrap gap-1">
                   {pre.selectedHairConcerns.map((a) => (
@@ -806,7 +806,7 @@ function SurveySection({
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-[#CCCCCC]">-</p>
+                <p className="text-xs text-[#777777]">-</p>
               )}
               {pre.hairConcernsMemo && <p className="text-xs text-[#777777] mt-2">{pre.hairConcernsMemo}</p>}
             </div>

@@ -90,12 +90,12 @@ export function PhotoUploader({
         <h4 className="text-[14px] text-[#111111]" style={{ fontWeight: 600 }}>
           {label}
         </h4>
-        <span className="text-[11px] text-[#7A7A7A]">
+        <span className="text-[12px] text-[#7A7A7A]">
           {photos.length} / {max}
         </span>
       </div>
       {hint && (
-        <p className="text-[11px] text-[#7A7A7A]" style={{ fontWeight: 400 }}>
+        <p className="text-[12px] text-[#7A7A7A]" style={{ fontWeight: 400 }}>
           {hint}
         </p>
       )}
@@ -130,14 +130,14 @@ export function PhotoUploader({
             className="aspect-square border border-dashed border-[#CCCCCC] hover:border-[#B88A5A] transition-colors flex flex-col items-center justify-center gap-1 text-[#7A7A7A] hover:text-[#B88A5A] disabled:opacity-50"
           >
             <Plus size={20} strokeWidth={1.5} />
-            <span className="text-[11px]" style={{ fontWeight: 400 }}>
+            <span className="text-[12px]" style={{ fontWeight: 400 }}>
               {uploading ? '업로드 중...' : '사진 추가'}
             </span>
           </button>
         )}
       </div>
 
-      {error && <p className="text-[11px] text-red-500">{error}</p>}
+      {error && <p className="text-[12px] text-red-500">{error}</p>}
 
       <input
         ref={inputRef}

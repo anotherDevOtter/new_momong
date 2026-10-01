@@ -142,7 +142,7 @@ export const ShareLinkModal = ({ consultationId, clientName, visitDate, designer
               {step === 'password' ? '링크 만들기' : '공유 링크'}
             </h2>
           </div>
-          <button onClick={onClose} className="text-[#999999] hover:text-[#111111] transition-colors">
+          <button onClick={onClose} className="text-[#777777] hover:text-[#111111] transition-colors">
             <X size={20} />
           </button>
         </div>
@@ -153,13 +153,13 @@ export const ShareLinkModal = ({ consultationId, clientName, visitDate, designer
               <p className="text-sm text-[#555555]">
                 고객이 링크에 접속할 때 사용할 비밀번호를 설정해주세요.
               </p>
-              <p className="text-xs text-[#999999]">
+              <p className="text-xs text-[#777777]">
                 예: 고객 전화번호 뒤 4자리
               </p>
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs text-[#999999]">비밀번호</label>
+              <label className="text-xs text-[#777777]">비밀번호</label>
               <input
                 type="text"
                 value={password}
@@ -205,7 +205,7 @@ export const ShareLinkModal = ({ consultationId, clientName, visitDate, designer
                 onClick={handleCopy}
                 className="shrink-0 w-10 h-10 flex items-center justify-center border border-[#E5E5E5] hover:border-[#111111] transition-colors"
               >
-                {copied ? <Check size={16} className="text-[#111111]" /> : <Copy size={16} className="text-[#999999]" />}
+                {copied ? <Check size={16} className="text-[#111111]" /> : <Copy size={16} className="text-[#777777]" />}
               </button>
             </div>
 

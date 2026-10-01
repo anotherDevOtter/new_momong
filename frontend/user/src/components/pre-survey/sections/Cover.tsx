@@ -24,7 +24,7 @@ export function Cover({ customerName, onNext }: CoverProps) {
 
         <div className="bg-white px-7 py-20">
           <div className="mb-20 text-center">
-            <p className="text-[9px] text-[#7A7A7A] tracking-[0.25em] uppercase" style={{ fontWeight: 500 }}>
+            <p className="text-[12px] text-[#7A7A7A] tracking-[0.25em] uppercase" style={{ fontWeight: 500 }}>
               MERCI MOMONG
             </p>
             {customerName && (

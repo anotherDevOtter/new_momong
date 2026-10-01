@@ -42,7 +42,7 @@ export function FaceAnalysisProcessing({ onComplete }: FaceAnalysisProcessingPro
         transition={{ duration: 0.6, delay: 0.2 }}
         className="mb-3 text-center"
       >
-        <p className="text-xs tracking-[0.25em] text-gray-500 font-light uppercase">
+        <p className="text-xs tracking-[0.25em] text-gray-500 font-normal uppercase">
           AI Face Analysis
         </p>
       </motion.div>
@@ -81,8 +81,8 @@ export function FaceAnalysisProcessing({ onComplete }: FaceAnalysisProcessingPro
                 className="text-center"
               >
                 <p
-                  className={`text-sm md:text-base font-light tracking-wide flex items-center gap-1 ${
-                    index === currentStep ? 'text-black' : 'text-gray-400'
+                  className={`text-sm md:text-base font-normal tracking-wide flex items-center gap-1 ${
+                    index === currentStep ? 'text-black' : 'text-gray-500'
                   }`}
                 >
                   {step.replace('…', '')}
@@ -147,7 +147,7 @@ export function FaceAnalysisProcessing({ onComplete }: FaceAnalysisProcessingPro
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 1 }}
-        className="flex items-center gap-2 text-xs text-gray-400 font-light"
+        className="flex items-center gap-2 text-xs text-gray-500 font-normal"
       >
         <Lock className="w-3 h-3" strokeWidth={1.5} />
         <span className="tracking-wide">사진 데이터는 분석 외 용도로 저장되지 않습니다.</span>

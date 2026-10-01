@@ -186,7 +186,7 @@ export function NextDirection({ onBack, onNext, onCycleDataChange }: NextDirecti
             <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em] mb-3">
               다음 디자인 방향
             </h2>
-            <p className="text-sm text-[#999999] leading-relaxed">
+            <p className="text-sm text-[#777777] leading-relaxed">
               다음 디자인 이동 방향을 선택해주세요.
               <br />
               (복수 선택 가능)
@@ -229,9 +229,9 @@ export function NextDirection({ onBack, onNext, onCycleDataChange }: NextDirecti
 
                   {/* 텍스트 영역 */}
                   <div className="flex-1 text-left">
-                    <p className="text-base font-light text-black mb-0.5">{direction.label}</p>
+                    <p className="text-base font-normal text-black mb-0.5">{direction.label}</p>
                     {direction.sublabel && (
-                      <p className="text-xs text-gray-500 font-light">{direction.sublabel}</p>
+                      <p className="text-xs text-gray-500 font-normal">{direction.sublabel}</p>
                     )}
                   </div>
                 </div>
@@ -248,10 +248,10 @@ export function NextDirection({ onBack, onNext, onCycleDataChange }: NextDirecti
           >
             <div className="flex items-center gap-2 mb-3">
               <TrendingUp className="w-5 h-5 text-blue-600" strokeWidth={2} />
-              <h3 className="text-sm font-light tracking-wide text-black">추천 이동 전략</h3>
+              <h3 className="text-sm font-normal tracking-wide text-black">추천 이동 전략</h3>
             </div>
 
-            <div className="space-y-3 text-sm font-light text-gray-700 leading-relaxed">
+            <div className="space-y-3 text-sm font-normal text-gray-700 leading-relaxed">
               <p>현재 이미지 성향은 Natural 중심입니다.</p>
               <p>
                 다음 방문 시 길이 조정 또는 볼륨 추가를 통해 Soft 방향 확장이 가능합니다.
@@ -267,7 +267,7 @@ export function NextDirection({ onBack, onNext, onCycleDataChange }: NextDirecti
             transition={{ delay: 0.7, duration: 0.6 }}
             className="bg-white rounded-2xl p-6 border border-gray-200 mb-8"
           >
-            <h3 className="text-sm font-light tracking-wide text-black mb-4">이동 난이도 가이드</h3>
+            <h3 className="text-sm font-normal tracking-wide text-black mb-4">이동 난이도 가이드</h3>
 
             {/* 인디케이터 바 */}
             <div className="space-y-3 mb-4">
@@ -284,8 +284,8 @@ export function NextDirection({ onBack, onNext, onCycleDataChange }: NextDirecti
 
                   {/* 레이블 */}
                   <span
-                    className={`text-xs font-light w-20 transition-colors ${
-                      changeLevel >= level.level ? 'text-black' : 'text-gray-400'
+                    className={`text-xs font-normal w-20 transition-colors ${
+                      changeLevel >= level.level ? 'text-black' : 'text-gray-500'
                     }`}
                   >
                     {level.label}
@@ -297,10 +297,10 @@ export function NextDirection({ onBack, onNext, onCycleDataChange }: NextDirecti
             {/* 현재 선택 상태 표시 */}
             {selectedDirections.length > 0 && (
               <div className="pt-4 border-t border-gray-200">
-                <p className="text-xs text-gray-600 font-light">
+                <p className="text-xs text-gray-600 font-normal">
                   선택한 방향: <span className="text-black">{selectedDirections.length}개 항목</span>
                 </p>
-                <p className="text-xs text-gray-600 font-light mt-1">
+                <p className="text-xs text-gray-600 font-normal mt-1">
                   예상 변화 강도:{' '}
                   <span className="text-black">
                     {changeLevels.find((l) => l.level === changeLevel)?.label || '안정 유지'}
@@ -318,7 +318,7 @@ export function NextDirection({ onBack, onNext, onCycleDataChange }: NextDirecti
             className="mb-10"
           >
             <h2 className="text-lg font-light tracking-wide text-black mb-4">DESIGN CYCLE GUIDE</h2>
-            <p className="text-sm text-gray-600 font-light mb-6">
+            <p className="text-sm text-gray-600 font-normal mb-6">
               월별 시술 계획을 설정하세요. (다중 선택 가능)
             </p>
 
@@ -335,14 +335,14 @@ export function NextDirection({ onBack, onNext, onCycleDataChange }: NextDirecti
                       isSelected ? 'border-black bg-gray-50' : 'border-gray-200 bg-white'
                     }`}
                   >
-                    <p className="text-sm font-light text-black mb-3">{month}월</p>
+                    <p className="text-sm font-normal text-black mb-3">{month}월</p>
                     
                     <div className="space-y-2 mb-3">
                       {(['cut', 'perm', 'color', 'clinic'] as ServiceType[]).map((service) => (
                         <button
                           key={service}
                           onClick={() => toggleMonthService(month, service)}
-                          className={`w-full text-left px-3 py-2 rounded-lg text-xs font-light transition-all ${
+                          className={`w-full text-left px-3 py-2 rounded-lg text-xs font-normal transition-all ${
                             monthData?.services.includes(service)
                               ? 'bg-black text-white'
                               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -361,7 +361,7 @@ export function NextDirection({ onBack, onNext, onCycleDataChange }: NextDirecti
                       value={monthData?.memo || ''}
                       onChange={(e) => updateMonthMemo(month, e.target.value)}
                       placeholder="메모..."
-                      className="w-full px-3 py-2 text-xs font-light border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-gray-400 resize-none"
+                      className="w-full px-3 py-2 text-xs font-normal border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-gray-400 resize-none"
                       rows={2}
                     />
                   </div>
@@ -372,10 +372,10 @@ export function NextDirection({ onBack, onNext, onCycleDataChange }: NextDirecti
             {/* CYCLE PLAN SUMMARY */}
             {cycleData.length > 0 && (
               <div className="bg-blue-50 rounded-xl p-6 border border-blue-100">
-                <h3 className="text-sm font-light tracking-wide text-black mb-3">
+                <h3 className="text-sm font-normal tracking-wide text-black mb-3">
                   CYCLE PLAN SUMMARY
                 </h3>
-                <div className="text-sm font-light text-gray-700 leading-relaxed whitespace-pre-line">
+                <div className="text-sm font-normal text-gray-700 leading-relaxed whitespace-pre-line">
                   {generateCycleSummary()}
                 </div>
               </div>
@@ -392,8 +392,8 @@ export function NextDirection({ onBack, onNext, onCycleDataChange }: NextDirecti
             <div className="flex items-start gap-3">
               <Info className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" strokeWidth={2} />
               <div>
-                <p className="text-xs text-gray-500 font-light mb-1">디자이너 참고용</p>
-                <p className="text-sm text-gray-700 font-light leading-relaxed">
+                <p className="text-xs text-gray-500 font-normal mb-1">디자이너 참고용</p>
+                <p className="text-sm text-gray-700 font-normal leading-relaxed">
                   현재 방향을 유지하면서 조금씩 이동하는 전략이 적합합니다. 과도한 변화보다는
                   단계적 확장을 권장합니다.
                 </p>
@@ -413,7 +413,7 @@ export function NextDirection({ onBack, onNext, onCycleDataChange }: NextDirecti
         transition={{ delay: 1, duration: 0.6 }}
         className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-4"
       >
-        <p className="text-xs text-center text-gray-500 font-light leading-relaxed max-w-2xl mx-auto">
+        <p className="text-xs text-center text-gray-500 font-normal leading-relaxed max-w-2xl mx-auto">
           디자인은 고정되지 않으며 얼굴 · 이미지 · 컨디션에 따라
           <br />
           매 방문마다 FIT은 달라질 수 있습니다.

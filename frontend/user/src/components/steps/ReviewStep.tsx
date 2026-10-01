@@ -26,7 +26,7 @@ const SectionTitle = ({ title, onEdit }: { title: string; onEdit?: () => void })
     {onEdit && (
       <button
         onClick={onEdit}
-        className="flex items-center gap-1 text-xs text-[#999999] hover:text-[#111111] transition-colors"
+        className="flex items-center gap-1 text-xs text-[#777777] hover:text-[#111111] transition-colors"
       >
         <Pencil size={11} />
         수정
@@ -40,7 +40,7 @@ const InfoItem = ({ label, value }: { label: string; value?: string | string[] }
   if (!val) return null;
   return (
     <div>
-      <div className="text-xs text-[#999999] mb-1">{label}</div>
+      <div className="text-xs text-[#777777] mb-1">{label}</div>
       <div className="text-sm font-medium text-[#111111]">{val}</div>
     </div>
   );
@@ -92,7 +92,7 @@ export const ReviewStep = ({ data, saveStatus, onSaveStatusChange, onGoToStep, o
       <div className="max-w-3xl mx-auto px-6 py-24 space-y-12">
         <div className="text-center space-y-3">
           <h2 className="font-semibold text-[#111111] tracking-[-0.01em]">컨설팅 내용 확인</h2>
-          <p className="text-sm text-[#999999]">
+          <p className="text-sm text-[#777777]">
             {completed ? '저장이 완료되었습니다' : '내용을 확인하고 완료 버튼을 눌러주세요'}
           </p>
         </div>
@@ -212,7 +212,7 @@ export const ReviewStep = ({ data, saveStatus, onSaveStatusChange, onGoToStep, o
           </div>
 
           <div className="pt-6 border-t border-[#EAEAEA]">
-            <p className="text-xs text-center text-[#999999] leading-relaxed">
+            <p className="text-xs text-center text-[#777777] leading-relaxed">
               &apos;BE YOURSELF&apos;<br />
               사람들이 자신의 아름다움을 발견하고 스스로를 사랑할 수 있도록 돕습니다.
             </p>

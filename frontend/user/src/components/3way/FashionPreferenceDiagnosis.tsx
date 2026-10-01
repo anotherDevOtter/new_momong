@@ -113,7 +113,7 @@ export function FashionPreferenceDiagnosis({ onBack, onNext }: FashionPreference
           <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em]">
             패션 선호도
           </h2>
-          <p className="text-sm text-[#999999]">선호하는 스타일과 선호하지 않는 스타일을 선택해주세요</p>
+          <p className="text-sm text-[#777777]">선호하는 스타일과 선호하지 않는 스타일을 선택해주세요</p>
         </motion.div>
 
         {/* Section 1: 선호 스타일 */}
@@ -124,7 +124,7 @@ export function FashionPreferenceDiagnosis({ onBack, onNext }: FashionPreference
           className="mb-16"
         >
           <h3 className="text-sm font-medium text-[#111111] mb-2">Q. 선호하는 패션 스타일</h3>
-          <p className="text-xs text-[#999999] mb-4">복수 선택 가능</p>
+          <p className="text-xs text-[#777777] mb-4">복수 선택 가능</p>
 
           <div className="grid grid-cols-3 gap-5">
             {fashionStyles.map((style, index) => (
@@ -154,7 +154,7 @@ export function FashionPreferenceDiagnosis({ onBack, onNext }: FashionPreference
           className="mb-16"
         >
           <h3 className="text-sm font-medium text-[#111111] mb-2">Q. 선호하지 않는 패션 스타일</h3>
-          <p className="text-xs text-[#999999] mb-4">복수 선택 가능</p>
+          <p className="text-xs text-[#777777] mb-4">복수 선택 가능</p>
 
           <div className="grid grid-cols-3 gap-5">
             {fashionStyles.map((style, index) => (

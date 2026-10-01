@@ -408,7 +408,7 @@ export function FaceAnalysisResult({ onBack, onNext, analysisResult }: FaceAnaly
                       x="85"
                       y="135"
                       fill="rgba(255, 255, 255, 0.7)"
-                      fontSize="10"
+                      fontSize="12"
                       fontWeight="300"
                     >
                       1
@@ -437,7 +437,7 @@ export function FaceAnalysisResult({ onBack, onNext, analysisResult }: FaceAnaly
                       x="85"
                       y="230"
                       fill="rgba(255, 255, 255, 0.7)"
-                      fontSize="10"
+                      fontSize="12"
                       fontWeight="300"
                     >
                       1
@@ -456,7 +456,7 @@ export function FaceAnalysisResult({ onBack, onNext, analysisResult }: FaceAnaly
                       x="85"
                       y="290"
                       fill="rgba(255, 255, 255, 0.7)"
-                      fontSize="10"
+                      fontSize="12"
                       fontWeight="300"
                     >
                       1
@@ -540,7 +540,7 @@ export function FaceAnalysisResult({ onBack, onNext, analysisResult }: FaceAnaly
                   <h3 className="text-sm font-normal text-black">이미지 밸런스 분석 요약</h3>
                   {!isEditingSummary && (
                     <button onClick={() => setIsEditingSummary(true)}>
-                      <Edit2 className="w-3.5 h-3.5 text-gray-400 hover:text-black" strokeWidth={1.5} />
+                      <Edit2 className="w-3.5 h-3.5 text-gray-500 hover:text-black" strokeWidth={1.5} />
                     </button>
                   )}
                 </div>

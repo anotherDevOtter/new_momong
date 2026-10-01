@@ -29,7 +29,7 @@ function ThreeWayPageInner() {
   }, [featuresLoading, features.threeWayEnabled, router]);
 
   if (loading || featuresLoading) {
-    return <div className="min-h-screen flex items-center justify-center bg-white"><p className="text-sm text-[#999999]">불러오는 중...</p></div>;
+    return <div className="min-h-screen flex items-center justify-center bg-white"><p className="text-sm text-[#777777]">불러오는 중...</p></div>;
   }
   if (!user || !features.threeWayEnabled) return null;
 

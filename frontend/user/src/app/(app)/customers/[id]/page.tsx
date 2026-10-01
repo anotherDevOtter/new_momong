@@ -30,7 +30,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
   }, [token, id, router]);
 
   if (loading || loadingCustomer) {
-    return <div className="min-h-screen flex items-center justify-center text-sm text-[#999999]">로딩 중...</div>;
+    return <div className="min-h-screen flex items-center justify-center text-sm text-[#777777]">로딩 중...</div>;
   }
   if (!user || !customer) return null;
 

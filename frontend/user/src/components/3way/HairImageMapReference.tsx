@@ -26,7 +26,7 @@ export function HairImageMapReference({ onClose }: HairImageMapReferenceProps) {
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
             <h2 className="text-lg font-light text-black tracking-wide">헤어 이미지맵 참고</h2>
-            <p className="text-xs text-gray-600 font-light mt-1">
+            <p className="text-xs text-gray-600 font-normal mt-1">
               실제 스타일 예시를 확인하세요
             </p>
           </div>
@@ -49,16 +49,16 @@ export function HairImageMapReference({ onClose }: HairImageMapReferenceProps) {
           {/* 하단 설명 */}
           <div className="mt-6 grid grid-cols-2 gap-4">
             <div className="bg-gray-50 rounded-xl p-4">
-              <p className="text-xs font-light text-gray-500 mb-2">가로축 (Warm ←→ Cool)</p>
-              <ul className="space-y-1 text-xs text-gray-700 font-light">
+              <p className="text-xs font-normal text-gray-500 mb-2">가로축 (Warm ←→ Cool)</p>
+              <ul className="space-y-1 text-xs text-gray-700 font-normal">
                 <li>• W: 웨이브, 부드러움, 둥근 실루엣</li>
                 <li>• C: 스트레이트, 선명함, 직선적 라인</li>
               </ul>
             </div>
 
             <div className="bg-gray-50 rounded-xl p-4">
-              <p className="text-xs font-light text-gray-500 mb-2">세로축 (Soft ↑↓ Hard)</p>
-              <ul className="space-y-1 text-xs text-gray-700 font-light">
+              <p className="text-xs font-normal text-gray-500 mb-2">세로축 (Soft ↑↓ Hard)</p>
+              <ul className="space-y-1 text-xs text-gray-700 font-normal">
                 <li>• S: 가벼움, 짧아짐, 앞머리, 질감</li>
                 <li>• H: 길어짐, 무게감, 이마 노출, 단단함</li>
               </ul>

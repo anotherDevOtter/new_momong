@@ -31,7 +31,7 @@ export const FashionStyleStep = ({ data, gender, onChange, onNext, onBack }: Fas
     <div className="max-w-6xl mx-auto px-6 py-24 space-y-12">
       <div className="text-center space-y-3">
         <h2 className="font-semibold text-[#111111] tracking-[-0.01em]">선호하는 패션 키워드</h2>
-        <p className="text-sm text-[#999999]">
+        <p className="text-sm text-[#777777]">
           마음에 드는 스타일을 자유롭게 선택해주세요 (복수 선택 가능)
         </p>
       </div>

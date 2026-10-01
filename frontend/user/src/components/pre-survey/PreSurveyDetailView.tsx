@@ -73,7 +73,7 @@ function DetailGroup({ label, children }: { label: string; children: ReactNode }
 function DetailField({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[11px] text-[#999999] uppercase tracking-wider mb-1">{label}</p>
+      <p className="text-[12px] text-[#777777] uppercase tracking-wider mb-1">{label}</p>
       <p className="text-xs text-[#111111]" style={{ fontWeight: 500 }}>{value}</p>
     </div>
   );
@@ -82,7 +82,7 @@ function DetailField({ label, value }: { label: string; value: string }) {
 function DetailChips({ label, values, note }: { label: string; values?: string[]; note?: string }) {
   return (
     <div>
-      <p className="text-[11px] text-[#999999] uppercase tracking-wider mb-1">{label}</p>
+      <p className="text-[12px] text-[#777777] uppercase tracking-wider mb-1">{label}</p>
       {values && values.length > 0 ? (
         <div className="flex flex-wrap gap-1">
           {values.map((v) => (
@@ -90,7 +90,7 @@ function DetailChips({ label, values, note }: { label: string; values?: string[]
           ))}
         </div>
       ) : (
-        <p className="text-xs text-[#CCCCCC]">-</p>
+        <p className="text-xs text-[#777777]">-</p>
       )}
       {note && <p className="text-xs text-[#777777] mt-2 leading-relaxed">기타: {note}</p>}
     </div>
@@ -110,11 +110,11 @@ function PhotoGroup({
   return (
     <div>
       <div className="flex items-baseline justify-between mb-2">
-        <p className="text-[11px] text-[#999999] uppercase tracking-wider">{label}</p>
-        <span className="text-[11px] text-[#CCCCCC]">{items.length}장</span>
+        <p className="text-[12px] text-[#777777] uppercase tracking-wider">{label}</p>
+        <span className="text-[12px] text-[#777777]">{items.length}장</span>
       </div>
       {items.length === 0 ? (
-        <p className="text-xs text-[#CCCCCC]">-</p>
+        <p className="text-xs text-[#777777]">-</p>
       ) : (
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
           {items.map((raw, i) => {

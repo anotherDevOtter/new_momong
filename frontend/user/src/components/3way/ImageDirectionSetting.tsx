@@ -314,25 +314,25 @@ export function ImageDirectionSetting({
                   <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs text-gray-700 font-normal">
                     <div className="flex items-center gap-1">
                       <span>S</span>
-                      <span className="text-gray-400">(가벼움 / 짧아짐)</span>
+                      <span className="text-gray-500">(가벼움 / 짧아짐)</span>
                     </div>
                   </div>
                   <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-gray-700 font-normal">
                     <div className="flex items-center gap-1">
                       <span>H</span>
-                      <span className="text-gray-400">(무게감 / 길어짐)</span>
+                      <span className="text-gray-500">(무게감 / 길어짐)</span>
                     </div>
                   </div>
                   <div className="absolute -left-20 top-1/2 -translate-y-1/2 text-xs text-gray-700 font-normal">
                     <div className="flex flex-col items-end gap-1">
                       <span>W</span>
-                      <span className="text-gray-400 text-right">(곡선 / 웨이브)</span>
+                      <span className="text-gray-500 text-right">(곡선 / 웨이브)</span>
                     </div>
                   </div>
                   <div className="absolute -right-20 top-1/2 -translate-y-1/2 text-xs text-gray-700 font-normal">
                     <div className="flex flex-col items-start gap-1">
                       <span>C</span>
-                      <span className="text-gray-400">(직선 / 스트레이트)</span>
+                      <span className="text-gray-500">(직선 / 스트레이트)</span>
                     </div>
                   </div>
 
@@ -353,7 +353,7 @@ export function ImageDirectionSetting({
                           {item.keywords.map((keyword, kIndex) => (
                             <p
                               key={kIndex}
-                              className="text-[10px] text-gray-600 font-normal whitespace-nowrap leading-tight"
+                              className="text-[12px] text-gray-600 font-normal whitespace-nowrap leading-tight"
                             >
                               {keyword}
                             </p>

@@ -99,7 +99,7 @@ export function CourseSelection({ onNext, onBack }: CourseSelectionProps) {
           <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em]">
             컨설팅 코스 선택
           </h2>
-          <p className="text-sm text-[#999999]">원하는 진단 범위를 선택해주세요</p>
+          <p className="text-sm text-[#777777]">원하는 진단 범위를 선택해주세요</p>
         </motion.div>
 
         {/* 코스 카드 영역 */}

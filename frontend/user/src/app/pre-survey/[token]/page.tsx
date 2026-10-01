@@ -193,7 +193,7 @@ export default function PreSurveyPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F7F7F5] px-6">
         <div className="max-w-sm text-center space-y-4 bg-white border border-[#E5E5E5] px-8 py-12">
-          <p className="text-[10px] text-[#B88A5A] tracking-[0.3em]" style={{ fontWeight: 500 }}>
+          <p className="text-[12px] text-[#B88A5A] tracking-[0.3em]" style={{ fontWeight: 500 }}>
             MERCI MOMONG
           </p>
           {justSubmitted ? (
@@ -382,7 +382,7 @@ function SubmitConfirmDialog({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-6 py-8 text-center space-y-4">
-          <p className="text-[10px] text-[#B88A5A] tracking-[0.3em]" style={{ fontWeight: 500 }}>
+          <p className="text-[12px] text-[#B88A5A] tracking-[0.3em]" style={{ fontWeight: 500 }}>
             MERCI MOMONG
           </p>
           <h3 className="text-[17px] text-[#111111]" style={{ fontWeight: 600 }}>

@@ -42,7 +42,7 @@ export function PreSurveyLinkDialog({ open, surveyToken, customerName, onClose }
       >
         <div className="flex items-center justify-between border-b border-[#E5E5E5] px-6 py-4">
           <h2 className="text-base font-semibold text-[#111111]">사전설문지 링크</h2>
-          <button onClick={onClose} className="text-[#999999] hover:text-[#111111] transition-colors">
+          <button onClick={onClose} className="text-[#777777] hover:text-[#111111] transition-colors">
             <X size={18} />
           </button>
         </div>
@@ -60,11 +60,11 @@ export function PreSurveyLinkDialog({ open, surveyToken, customerName, onClose }
               onClick={handleCopy}
               className="shrink-0 w-9 h-9 flex items-center justify-center border border-[#E5E5E5] bg-white hover:border-[#111111] transition-colors"
             >
-              {copied ? <Check size={14} className="text-[#111111]" /> : <Copy size={14} className="text-[#999999]" />}
+              {copied ? <Check size={14} className="text-[#111111]" /> : <Copy size={14} className="text-[#777777]" />}
             </button>
           </div>
 
-          <p className="text-xs text-[#999999] leading-relaxed">
+          <p className="text-xs text-[#777777] leading-relaxed">
             카카오톡 / 문자로 전송하시면 됩니다. 고객님이 작성을 완료하면 사전 설문 탭에 자동으로 표시됩니다.
           </p>
         </div>

@@ -16,7 +16,7 @@ export const ProgressBar = ({ currentStep, totalSteps, leftSlot }: ProgressBarPr
         {leftSlot}
         <div className="flex-1">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-xs text-[#999999] tracking-[0.1em] uppercase">
+            <span className="text-xs text-[#777777] tracking-[0.1em] uppercase">
               Step {currentStep} / {totalSteps - 1}
             </span>
           </div>

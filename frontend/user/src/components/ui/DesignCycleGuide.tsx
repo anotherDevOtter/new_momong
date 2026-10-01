@@ -75,14 +75,14 @@ export const DesignCycleGuide = ({ selectedMonths, onChange }: DesignCycleGuideP
                 value={d.memo}
                 onChange={(e) => updateMemo(month, e.target.value)}
                 placeholder="메모..."
-                className="w-full px-0 py-1 text-xs border-0 border-b border-[#EAEAEA] bg-transparent text-[#1C1C1C] placeholder:text-[#BBBBBB] focus:outline-none focus:border-[#111111] transition-colors"
+                className="w-full px-0 py-1 text-xs border-0 border-b border-[#EAEAEA] bg-transparent text-[#1C1C1C] placeholder:text-[#777777] focus:outline-none focus:border-[#111111] transition-colors"
               />
             </div>
           );
         })}
       </div>
       <div className="border-t border-[#EAEAEA] pt-4">
-        <div className="text-xs text-[#999999] mb-2 font-medium tracking-wide">CYCLE PLAN SUMMARY</div>
+        <div className="text-xs text-[#777777] mb-2 font-medium tracking-wide">CYCLE PLAN SUMMARY</div>
         <div className="text-sm text-[#555555] leading-relaxed p-3 bg-[#FAFAFA] border border-[#F0F0F0]">{summary}</div>
       </div>
     </div>

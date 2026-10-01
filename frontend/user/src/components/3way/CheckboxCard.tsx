@@ -35,7 +35,7 @@ export function CheckboxCard({
         `}
       >
         <div className="flex items-center justify-between">
-          <span className="text-sm font-light text-gray-800">{label}</span>
+          <span className="text-sm font-normal text-gray-800">{label}</span>
 
           {/* 체크박스 */}
           <div
@@ -68,7 +68,7 @@ export function CheckboxCard({
             onChange={(e) => onTextChange?.(e.target.value)}
             placeholder="고민 내용을 입력해주세요"
             rows={3}
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm font-light placeholder:text-gray-400 focus:outline-none focus:border-gray-400 transition-colors duration-300 resize-none"
+            className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm font-normal placeholder:text-gray-500 focus:outline-none focus:border-gray-400 transition-colors duration-300 resize-none"
           />
         </motion.div>
       )}

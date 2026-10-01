@@ -122,7 +122,7 @@ export function HairDesignProposal({
             <h1 className="text-xl md:text-2xl font-light tracking-wide text-black mb-2">
               Personalized Hair Design Proposal
             </h1>
-            <p className="text-sm text-gray-600 font-light">
+            <p className="text-sm text-gray-600 font-normal">
               오늘의 디자인 제안을 확인해주세요.
             </p>
           </motion.div>
@@ -136,16 +136,16 @@ export function HairDesignProposal({
           >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <p className="text-xs text-gray-500 font-light mb-1">현재 이미지 타입:</p>
-                <p className="text-sm text-black font-light">{imageTypeLabel || 'Neutral / Neutral'}</p>
+                <p className="text-xs text-gray-500 font-normal mb-1">현재 이미지 타입:</p>
+                <p className="text-sm text-black font-normal">{imageTypeLabel || 'Neutral / Neutral'}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 font-light mb-1">추천 전략:</p>
-                <p className="text-sm text-black font-light">{strategy || '—'}</p>
+                <p className="text-xs text-gray-500 font-normal mb-1">추천 전략:</p>
+                <p className="text-sm text-black font-normal">{strategy || '—'}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 font-light mb-1">디자인 방향 키워드:</p>
-                <p className="text-sm text-black font-light">{directionKeyword || '—'}</p>
+                <p className="text-xs text-gray-500 font-normal mb-1">디자인 방향 키워드:</p>
+                <p className="text-sm text-black font-normal">{directionKeyword || '—'}</p>
               </div>
             </div>
           </motion.div>
@@ -157,8 +157,8 @@ export function HairDesignProposal({
             transition={{ delay: 0.3, duration: 0.6 }}
             className="mb-8"
           >
-            <h2 className="text-base font-light tracking-wide text-black mb-4 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-black text-white text-xs flex items-center justify-center font-light">
+            <h2 className="text-base font-normal tracking-wide text-black mb-4 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-black text-white text-xs flex items-center justify-center font-normal">
                 1
               </span>
               길이 제안
@@ -177,7 +177,7 @@ export function HairDesignProposal({
                 >
                   {isRec('length', option.id, option.recommended) && (
                     <div className="absolute -top-2 -right-2">
-                      <div className="bg-black text-white text-[10px] px-2 py-0.5 rounded-full font-light flex items-center gap-1">
+                      <div className="bg-black text-white text-[12px] px-2 py-0.5 rounded-full font-normal flex items-center gap-1">
                         <Sparkles className="w-2.5 h-2.5" strokeWidth={2} />
                         <span>{recLabel}</span>
                       </div>
@@ -188,14 +188,14 @@ export function HairDesignProposal({
                       <Check className="w-4 h-4 text-black" strokeWidth={2} />
                     )}
                   </div>
-                  <p className="text-sm font-light text-black text-center">{option.label}</p>
+                  <p className="text-sm font-normal text-black text-center">{option.label}</p>
                 </button>
               ))}
             </div>
 
             {/* 자동 설명 */}
             <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
-              <p className="text-xs text-gray-700 font-light leading-relaxed">
+              <p className="text-xs text-gray-700 font-normal leading-relaxed">
                 {getSelectedOption(lengthOptions, selectedLength)?.description}
               </p>
             </div>
@@ -208,8 +208,8 @@ export function HairDesignProposal({
             transition={{ delay: 0.4, duration: 0.6 }}
             className="mb-8"
           >
-            <h2 className="text-base font-light tracking-wide text-black mb-4 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-black text-white text-xs flex items-center justify-center font-light">
+            <h2 className="text-base font-normal tracking-wide text-black mb-4 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-black text-white text-xs flex items-center justify-center font-normal">
                 2
               </span>
               앞머리 제안
@@ -228,7 +228,7 @@ export function HairDesignProposal({
                 >
                   {isRec('bangs', option.id, option.recommended) && (
                     <div className="absolute -top-2 -right-2">
-                      <div className="bg-black text-white text-[10px] px-2 py-0.5 rounded-full font-light flex items-center gap-1">
+                      <div className="bg-black text-white text-[12px] px-2 py-0.5 rounded-full font-normal flex items-center gap-1">
                         <Sparkles className="w-2.5 h-2.5" strokeWidth={2} />
                         <span>{recLabel}</span>
                       </div>
@@ -239,14 +239,14 @@ export function HairDesignProposal({
                       <Check className="w-4 h-4 text-black" strokeWidth={2} />
                     )}
                   </div>
-                  <p className="text-sm font-light text-black text-center">{option.label}</p>
+                  <p className="text-sm font-normal text-black text-center">{option.label}</p>
                 </button>
               ))}
             </div>
 
             {/* 자동 설명 */}
             <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
-              <p className="text-xs text-gray-700 font-light leading-relaxed">
+              <p className="text-xs text-gray-700 font-normal leading-relaxed">
                 {getSelectedOption(bangsOptions, selectedBangs)?.description}
               </p>
             </div>
@@ -259,8 +259,8 @@ export function HairDesignProposal({
             transition={{ delay: 0.5, duration: 0.6 }}
             className="mb-8"
           >
-            <h2 className="text-base font-light tracking-wide text-black mb-4 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-black text-white text-xs flex items-center justify-center font-light">
+            <h2 className="text-base font-normal tracking-wide text-black mb-4 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-black text-white text-xs flex items-center justify-center font-normal">
                 3
               </span>
               컬 / 질감
@@ -280,7 +280,7 @@ export function HairDesignProposal({
                   >
                     {isRec('curl', option.id, option.recommended) && (
                       <div className="absolute -top-2 -right-2">
-                        <div className="bg-black text-white text-[10px] px-2 py-0.5 rounded-full font-light flex items-center gap-1">
+                        <div className="bg-black text-white text-[12px] px-2 py-0.5 rounded-full font-normal flex items-center gap-1">
                           <Sparkles className="w-2.5 h-2.5" strokeWidth={2} />
                           <span>{recLabel}</span>
                         </div>
@@ -291,19 +291,19 @@ export function HairDesignProposal({
                         <Check className="w-4 h-4 text-black" strokeWidth={2} />
                       )}
                     </div>
-                    <p className="text-sm font-light text-black text-center">{option.label}</p>
+                    <p className="text-sm font-normal text-black text-center">{option.label}</p>
                   </button>
                 ))}
               </div>
 
               {/* 우측 설명 박스 */}
               <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-                <p className="text-xs text-gray-500 font-light mb-3">선택된 스타일 키워드:</p>
+                <p className="text-xs text-gray-500 font-normal mb-3">선택된 스타일 키워드:</p>
                 <div className="flex flex-wrap gap-2">
                   {getSelectedOption(curlOptions, selectedCurl)?.keywords.map((keyword, index) => (
                     <span
                       key={index}
-                      className="bg-white text-black text-xs px-3 py-1.5 rounded-full border border-gray-300 font-light"
+                      className="bg-white text-black text-xs px-3 py-1.5 rounded-full border border-gray-300 font-normal"
                     >
                       {keyword}
                     </span>
@@ -320,8 +320,8 @@ export function HairDesignProposal({
             transition={{ delay: 0.6, duration: 0.6 }}
             className="mb-8"
           >
-            <h2 className="text-base font-light tracking-wide text-black mb-4 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-black text-white text-xs flex items-center justify-center font-light">
+            <h2 className="text-base font-normal tracking-wide text-black mb-4 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-black text-white text-xs flex items-center justify-center font-normal">
                 4
               </span>
               컬러 방향
@@ -340,7 +340,7 @@ export function HairDesignProposal({
                 >
                   {isRec('color', option.id, option.recommended) && (
                     <div className="absolute -top-2 -right-2">
-                      <div className="bg-black text-white text-[10px] px-2 py-0.5 rounded-full font-light flex items-center gap-1">
+                      <div className="bg-black text-white text-[12px] px-2 py-0.5 rounded-full font-normal flex items-center gap-1">
                         <Sparkles className="w-2.5 h-2.5" strokeWidth={2} />
                         <span>{recLabel}</span>
                       </div>
@@ -351,14 +351,14 @@ export function HairDesignProposal({
                       <Check className="w-4 h-4 text-black" strokeWidth={2} />
                     )}
                   </div>
-                  <p className="text-sm font-light text-black text-center">{option.label}</p>
+                  <p className="text-sm font-normal text-black text-center">{option.label}</p>
                 </button>
               ))}
             </div>
 
             {/* 자동 설명 */}
             <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
-              <p className="text-xs text-gray-700 font-light leading-relaxed">
+              <p className="text-xs text-gray-700 font-normal leading-relaxed">
                 {getSelectedOption(colorOptions, selectedColor)?.description}
               </p>
             </div>
@@ -371,13 +371,13 @@ export function HairDesignProposal({
             transition={{ delay: 0.7, duration: 0.6 }}
             className="mb-8"
           >
-            <label className="block text-sm font-light text-black mb-2">세부 메모 (선택사항)</label>
+            <label className="block text-sm font-normal text-black mb-2">세부 메모 (선택사항)</label>
             <textarea
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
               placeholder="추가로 고려할 사항이나 고객 요청사항을 입력하세요..."
               rows={4}
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 text-sm font-light text-black placeholder-gray-400 focus:outline-none focus:border-black transition-colors resize-none"
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 text-sm font-normal text-black placeholder-gray-400 focus:outline-none focus:border-black transition-colors resize-none"
             />
           </motion.div>
 
@@ -388,40 +388,40 @@ export function HairDesignProposal({
             transition={{ delay: 0.8, duration: 0.6 }}
             className="bg-black text-white rounded-2xl p-6 mb-12"
           >
-            <h3 className="text-xs tracking-[0.2em] uppercase font-light mb-4 opacity-70">
+            <h3 className="text-xs tracking-[0.2em] uppercase font-normal mb-4 opacity-70">
               Today Design Summary
             </h3>
 
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <p className="text-xs font-light opacity-70 mb-1">길이:</p>
-                <p className="text-sm font-light">
+                <p className="text-xs font-normal opacity-70 mb-1">길이:</p>
+                <p className="text-sm font-normal">
                   {getSelectedOption(lengthOptions, selectedLength)?.label}
                 </p>
               </div>
               <div>
-                <p className="text-xs font-light opacity-70 mb-1">앞머리:</p>
-                <p className="text-sm font-light">
+                <p className="text-xs font-normal opacity-70 mb-1">앞머리:</p>
+                <p className="text-sm font-normal">
                   {getSelectedOption(bangsOptions, selectedBangs)?.label}
                 </p>
               </div>
               <div>
-                <p className="text-xs font-light opacity-70 mb-1">컬:</p>
-                <p className="text-sm font-light">
+                <p className="text-xs font-normal opacity-70 mb-1">컬:</p>
+                <p className="text-sm font-normal">
                   {getSelectedOption(curlOptions, selectedCurl)?.label}
                 </p>
               </div>
               <div>
-                <p className="text-xs font-light opacity-70 mb-1">컬러:</p>
-                <p className="text-sm font-light">
+                <p className="text-xs font-normal opacity-70 mb-1">컬러:</p>
+                <p className="text-sm font-normal">
                   {getSelectedOption(colorOptions, selectedColor)?.label}
                 </p>
               </div>
             </div>
 
             <div className="pt-4 border-t border-white/20">
-              <p className="text-xs font-light opacity-70 mb-1">예상 이미지 변화:</p>
-              <p className="text-sm font-light">자연스러움 유지 + 생기 강조</p>
+              <p className="text-xs font-normal opacity-70 mb-1">예상 이미지 변화:</p>
+              <p className="text-sm font-normal">자연스러움 유지 + 생기 강조</p>
             </div>
           </motion.div>
 

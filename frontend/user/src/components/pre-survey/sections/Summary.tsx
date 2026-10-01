@@ -20,7 +20,7 @@ interface SummaryProps {
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="pb-5 border-b border-[#E5E5E5]">
-      <h3 className="text-[10px] text-[#B88A5A] mb-3 tracking-[0.15em]" style={{ fontWeight: 600 }}>
+      <h3 className="text-[12px] text-[#B88A5A] mb-3 tracking-[0.15em]" style={{ fontWeight: 600 }}>
         {label}
       </h3>
       {children}
@@ -32,7 +32,7 @@ function Chips({ items }: { items: string[] }) {
   return (
     <div className="flex flex-wrap gap-1.5">
       {items.map((c, i) => (
-        <span key={i} className="px-2.5 py-1 bg-[#F7F7F5] text-[11px] text-[#2B2B2B]" style={{ fontWeight: 400 }}>
+        <span key={i} className="px-2.5 py-1 bg-[#F7F7F5] text-[12px] text-[#2B2B2B]" style={{ fontWeight: 400 }}>
           {c}
         </span>
       ))}
@@ -43,7 +43,7 @@ function Chips({ items }: { items: string[] }) {
 function OtherNote({ label, value }: { label: string; value?: string }) {
   if (!value) return null;
   return (
-    <p className="text-[11px] text-[#2B2B2B] leading-[1.6] bg-[#FFFBF7] p-2 mt-2" style={{ fontWeight: 400 }}>
+    <p className="text-[12px] text-[#2B2B2B] leading-[1.6] bg-[#FFFBF7] p-2 mt-2" style={{ fontWeight: 400 }}>
       <span className="text-[#B88A5A]">{label}:</span> {value}
     </p>
   );
@@ -58,16 +58,16 @@ export function Summary({ answers, currentDate, onPrev, onNext }: SummaryProps) 
           <div className="max-w-[600px] mx-auto bg-white border-2 border-[#B88A5A] shadow-xl">
             <div className="bg-white border-b-2 border-[#B88A5A] px-6 py-8">
               <div className="text-center mb-6">
-                <p className="text-[9px] text-[#B88A5A] tracking-[0.3em] mb-3" style={{ fontWeight: 500 }}>
+                <p className="text-[12px] text-[#B88A5A] tracking-[0.3em] mb-3" style={{ fontWeight: 500 }}>
                   HAIR CONSULTING
                 </p>
                 <h1 className="text-[24px] text-[#111111] mb-3" style={{ fontWeight: 400, letterSpacing: '0.05em' }}>
                   사전인터뷰 내용 요약
                 </h1>
-                <p className="text-[11px] text-[#7A7A7A] leading-[1.6] mb-3" style={{ fontWeight: 400 }}>
+                <p className="text-[12px] text-[#7A7A7A] leading-[1.6] mb-3" style={{ fontWeight: 400 }}>
                   작성하신 내용을 디자이너가 확인합니다.
                 </p>
-                <p className="text-[10px] text-[#7A7A7A] tracking-[0.1em]" style={{ fontWeight: 400 }}>
+                <p className="text-[12px] text-[#7A7A7A] tracking-[0.1em]" style={{ fontWeight: 400 }}>
                   {currentDate}
                 </p>
               </div>
@@ -86,11 +86,11 @@ export function Summary({ answers, currentDate, onPrev, onNext }: SummaryProps) 
               <Section label="BASIC INFO">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <span className="text-[10px] text-[#7A7A7A] block mb-1" style={{ fontWeight: 400 }}>나이</span>
+                    <span className="text-[12px] text-[#7A7A7A] block mb-1" style={{ fontWeight: 400 }}>나이</span>
                     <p className="text-[12px] text-[#2B2B2B]" style={{ fontWeight: 400 }}>{a.age || '-'}</p>
                   </div>
                   <div>
-                    <span className="text-[10px] text-[#7A7A7A] block mb-1" style={{ fontWeight: 400 }}>직업</span>
+                    <span className="text-[12px] text-[#7A7A7A] block mb-1" style={{ fontWeight: 400 }}>직업</span>
                     <p className="text-[12px] text-[#2B2B2B]" style={{ fontWeight: 400 }}>{a.job || '-'}</p>
                   </div>
                 </div>
@@ -143,7 +143,7 @@ export function Summary({ answers, currentDate, onPrev, onNext }: SummaryProps) 
 
               {a.treatmentPreference && (
                 <div className="pb-5">
-                  <h3 className="text-[10px] text-[#B88A5A] mb-3 tracking-[0.15em]" style={{ fontWeight: 600 }}>
+                  <h3 className="text-[12px] text-[#B88A5A] mb-3 tracking-[0.15em]" style={{ fontWeight: 600 }}>
                     TREATMENT PREFERENCE
                   </h3>
                   <p className="text-[12px] text-[#2B2B2B] leading-[1.8]" style={{ fontWeight: 400 }}>
@@ -154,10 +154,10 @@ export function Summary({ answers, currentDate, onPrev, onNext }: SummaryProps) 
             </div>
 
             <div className="bg-white border-t-2 border-[#B88A5A] px-6 py-6 text-center">
-              <p className="text-[9px] text-[#7A7A7A] tracking-[0.3em] mb-2" style={{ fontWeight: 400 }}>
+              <p className="text-[12px] text-[#7A7A7A] tracking-[0.3em] mb-2" style={{ fontWeight: 400 }}>
                 MERCI MOMONG
               </p>
-              <p className="text-[10px] text-[#7A7A7A] leading-[1.8]" style={{ fontWeight: 400 }}>
+              <p className="text-[12px] text-[#7A7A7A] leading-[1.8]" style={{ fontWeight: 400 }}>
                 작성하신 내용은 자동 저장되며 디자이너가 확인합니다.
               </p>
             </div>

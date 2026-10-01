@@ -50,7 +50,7 @@ export function NavigationButtons({
             transition-all duration-200
             ${
               nextDisabled
-                ? 'bg-[#E5E5E5] text-[#999999] cursor-not-allowed'
+                ? 'bg-[#E5E5E5] text-[#777777] cursor-not-allowed'
                 : 'bg-[#111111] text-white hover:bg-[#222222] cursor-pointer'
             }
           `}

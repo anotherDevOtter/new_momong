@@ -71,7 +71,7 @@ export default function SharePage() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#999999] hover:text-[#111111]"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#777777] hover:text-[#111111]"
             >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
@@ -88,7 +88,7 @@ export default function SharePage() {
           </button>
         </div>
 
-        <p className="text-center text-[11px] tracking-[0.2em] text-[#BBBBBB] uppercase">MERCI MOMONG</p>
+        <p className="text-center text-[12px] tracking-[0.2em] text-[#777777] uppercase">MERCI MOMONG</p>
       </div>
     </div>
   );
@@ -177,21 +177,21 @@ function AfterNoteView({ data }: { data: ConsultationData }) {
         {/* 헤더 */}
         <div className="text-center mb-10">
           <div className="text-2xl font-semibold tracking-[0.08em] text-[#1C1C1C] mb-2">AFTER NOTE</div>
-          <div className="text-xs text-[#999999] tracking-[0.02em]">Today&apos;s Design Record</div>
+          <div className="text-xs text-[#777777] tracking-[0.02em]">Today&apos;s Design Record</div>
         </div>
 
         {/* 고객 기본 정보 */}
         <div className="grid grid-cols-3 gap-5 pb-4 border-b border-[#EAEAEA]">
           <div>
-            <div className="text-[11px] text-[#999999] mb-1">고객명</div>
+            <div className="text-[12px] text-[#777777] mb-1">고객명</div>
             <div className="text-sm text-[#1C1C1C]">{data.clientInfo.name}</div>
           </div>
           <div>
-            <div className="text-[11px] text-[#999999] mb-1">방문일</div>
+            <div className="text-[12px] text-[#777777] mb-1">방문일</div>
             <div className="text-sm text-[#1C1C1C]">{data.visitDate}</div>
           </div>
           <div>
-            <div className="text-[11px] text-[#999999] mb-1">담당 디자이너</div>
+            <div className="text-[12px] text-[#777777] mb-1">담당 디자이너</div>
             <div className="text-[15px] font-semibold text-[#1C1C1C] tracking-wide">{data.designerName}</div>
           </div>
         </div>
@@ -202,7 +202,7 @@ function AfterNoteView({ data }: { data: ConsultationData }) {
           <div className="grid grid-cols-2 gap-4">
             {/* IMAGE TYPE */}
             <div className="border border-[#EAEAEA] p-4">
-              <div className="text-[11px] font-semibold text-[#6E1F2A] tracking-[0.03em] mb-3">IMAGE TYPE</div>
+              <div className="text-[12px] font-semibold text-[#6E1F2A] tracking-[0.03em] mb-3">IMAGE TYPE</div>
               {['WARM', 'NEUTRAL', 'COOL'].map((type) => {
                 const selected = data.faceImageType?.type?.toUpperCase() === type;
                 return (
@@ -210,35 +210,35 @@ function AfterNoteView({ data }: { data: ConsultationData }) {
                     <div className={`w-3.5 h-3.5 mr-2.5 flex items-center justify-center flex-shrink-0 ${selected ? 'bg-[#6E1F2A] border-2 border-[#6E1F2A]' : 'border border-[#CCCCCC]'}`}>
                       {selected && <div className="w-1.5 h-1.5 bg-white" />}
                     </div>
-                    <span className={`text-sm ${selected ? 'text-[#6E1F2A] font-semibold' : 'text-[#AAAAAA]'}`}>{type}</span>
+                    <span className={`text-sm ${selected ? 'text-[#6E1F2A] font-semibold' : 'text-[#777777]'}`}>{type}</span>
                   </div>
                 );
               })}
-              <div className="text-[10px] text-[#999999] leading-relaxed pt-2.5 border-t border-[#F5F5F5] mt-1">현재 인상 기준 최적 이미지 타입</div>
+              <div className="text-[12px] text-[#777777] leading-relaxed pt-2.5 border-t border-[#F5F5F5] mt-1">현재 인상 기준 최적 이미지 타입</div>
             </div>
 
             {/* HAIR CONDITION */}
             <div className="border border-[#EAEAEA] p-4">
-              <div className="text-[11px] font-semibold text-[#6E1F2A] tracking-[0.03em] mb-3">HAIR CONDITION</div>
+              <div className="text-[12px] font-semibold text-[#6E1F2A] tracking-[0.03em] mb-3">HAIR CONDITION</div>
               {data.hairCondition?.damageLevel && (
                 <div className="mb-2.5">
-                  <div className="text-[10px] text-[#999999] mb-0.5">손상도</div>
+                  <div className="text-[12px] text-[#777777] mb-0.5">손상도</div>
                   <div className="text-sm text-[#1C1C1C]">{data.hairCondition.damageLevel}</div>
                 </div>
               )}
               {data.hairCondition?.hairType?.length > 0 && (
                 <div className="mb-2.5">
-                  <div className="text-[10px] text-[#999999] mb-0.5">모질</div>
+                  <div className="text-[12px] text-[#777777] mb-0.5">모질</div>
                   <div className="text-sm text-[#1C1C1C]">{data.hairCondition.hairType.join(', ')}</div>
                 </div>
               )}
               {data.hairCondition?.density && (
                 <div className="mb-2.5">
-                  <div className="text-[10px] text-[#999999] mb-0.5">숱</div>
+                  <div className="text-[12px] text-[#777777] mb-0.5">숱</div>
                   <div className="text-sm text-[#1C1C1C]">{data.hairCondition.density}</div>
                 </div>
               )}
-              <div className="text-[10px] text-[#999999] leading-relaxed pt-2.5 border-t border-[#F5F5F5] mt-1">모발 컨디션 기준 조율</div>
+              <div className="text-[12px] text-[#777777] leading-relaxed pt-2.5 border-t border-[#F5F5F5] mt-1">모발 컨디션 기준 조율</div>
             </div>
           </div>
         </div>
@@ -281,7 +281,7 @@ function AfterNoteView({ data }: { data: ConsultationData }) {
         <div className="max-w-2xl mx-auto px-12 py-16 space-y-10 border-t-4 border-[#F5F5F5]">
           <div className="text-center mb-10">
             <div className="text-2xl font-semibold tracking-[0.08em] text-[#1C1C1C] mb-2">FUTURE DIRECTION</div>
-            <div className="text-xs text-[#999999] tracking-[0.02em]">Next Design Strategy</div>
+            <div className="text-xs text-[#777777] tracking-[0.02em]">Next Design Strategy</div>
           </div>
 
           {/* NEXT DIRECTION */}
@@ -316,10 +316,10 @@ function AfterNoteView({ data }: { data: ConsultationData }) {
                   .map((monthData) => (
                     <div key={monthData.month} className="flex items-center py-3 border-b border-[#EAEAEA]">
                       <div className="text-sm text-[#1C1C1C] w-14">{monthData.month}</div>
-                      <div className="text-sm text-[#999999] mx-4">—</div>
+                      <div className="text-sm text-[#777777] mx-4">—</div>
                       <div className="text-sm text-[#6E1F2A] font-semibold">
                         {monthData.services.join(', ')}
-                        {monthData.memo && <span className="text-xs text-[#999999] font-normal ml-2">({monthData.memo})</span>}
+                        {monthData.memo && <span className="text-xs text-[#777777] font-normal ml-2">({monthData.memo})</span>}
                       </div>
                     </div>
                   ))}
@@ -341,11 +341,11 @@ function AfterNoteView({ data }: { data: ConsultationData }) {
 
       {/* 푸터 */}
       <div className="max-w-2xl mx-auto px-12 py-8 text-center border-t border-[#EAEAEA]">
-        <p className="text-[10px] text-[#CCCCCC] leading-relaxed mb-2">
+        <p className="text-[12px] text-[#777777] leading-relaxed mb-2">
           디자인은 고정되지 않습니다.<br />
           얼굴, 이미지, 컨디션에 따라 매 방문마다 FIT는 달라질 수 있습니다.
         </p>
-        <p className="text-xs text-[#999999] tracking-[0.05em] font-medium">MERCI MOMONG</p>
+        <p className="text-xs text-[#777777] tracking-[0.05em] font-medium">MERCI MOMONG</p>
       </div>
     </div>
   );
