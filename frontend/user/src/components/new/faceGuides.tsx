@@ -227,11 +227,10 @@ export function guideFor(
       return <Ring c={at(P(70), 0.11, -0.075)} check />;
 
     case 'browdir': {
-      // 오른쪽 눈썹 위에서 바깥쪽을 향하는 수평 점선 화살표
+      // 오른쪽 눈썹 위에서 눈썹 안쪽 끝 → 바깥쪽 끝까지만, 수평 점선 화살표
       const inner = P(336), outer = P(300);
-      const a = at(lerp(inner, outer, 0.1), 0, -0.055);
-      const b = { x: at(lerp(inner, outer, 1.45), 0, -0.055).x, y: a.y };
-      return <Arrow2 a={a} b={b} both={false} dashed />;
+      const y = (inner.y + outer.y) / 2 - 0.055 * W;
+      return <Arrow2 a={{ x: inner.x, y }} b={{ x: outer.x, y }} both={false} dashed />;
     }
 
     case 'eyeshape':
