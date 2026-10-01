@@ -368,7 +368,7 @@ function Inner() {
   // 'new' 는 사전설문 유무에 따라 첫 화면이 달라진다. 확인 전에 그리면
   // 요약 화면이 잠깐 보였다 사라지므로, 조회가 끝날 때까지 기다린다.
   if (loading || hydrating || restoring || (selectedCourse === 'new' && hasPreSurvey === null)) {
-    return <div className="min-h-screen flex items-center justify-center bg-white"><p className="text-sm text-[#999999]">불러오는 중...</p></div>;
+    return <div className="min-h-screen flex items-center justify-center bg-white"><p className="text-sm text-[#777777]">불러오는 중...</p></div>;
   }
   if (!user || !customerData) return null;
 
@@ -581,7 +581,7 @@ function Inner() {
           {devJump && (
             <button
               onClick={() => goNext('faceAnalysis')}
-              className="fixed bottom-5 right-5 z-[9999] px-4 py-2 rounded-full bg-white border border-[#DDDDDD] shadow-lg text-[11px] text-[#666666] hover:bg-[#F5F5F5] transition-colors"
+              className="fixed bottom-5 right-5 z-[9999] px-4 py-2 rounded-full bg-white border border-[#DDDDDD] shadow-lg text-[12px] text-[#666666] hover:bg-[#F5F5F5] transition-colors"
             >
               DEV 얼굴분석 건너뛰기 →
             </button>

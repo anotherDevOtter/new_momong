@@ -516,7 +516,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
             <h2 className="text-2xl font-bold text-[#111111] tracking-[-0.01em] mb-3">
               Face Precision Analysis
             </h2>
-            <p className="text-sm text-[#999999] leading-relaxed">
+            <p className="text-sm text-[#777777] leading-relaxed">
               정확한 분석을 위해 아래 가이드를 따라 촬영해주세요.
             </p>
           </motion.div>
@@ -593,7 +593,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
                 /* 카메라 시작 전 플레이스홀더 */
                 <div className="absolute inset-0 flex flex-col items-center justify-center"
                   style={{ background: CAPTURE_BG }}>
-                  <Camera className="w-16 h-16 text-gray-400 mb-4" strokeWidth={1} />
+                  <Camera className="w-16 h-16 text-gray-500 mb-4" strokeWidth={1} />
                   <p className="text-sm text-gray-600 font-normal text-center px-6 mb-6">
                     카메라로 촬영하거나
                     <br />
@@ -624,7 +624,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
                   {cameraError && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center px-6"
                       style={{ background: CAPTURE_BG }}>
-                      <Camera className="w-12 h-12 text-gray-400 mb-3" strokeWidth={1} />
+                      <Camera className="w-12 h-12 text-gray-500 mb-3" strokeWidth={1} />
                       <p className="text-sm text-gray-700 font-medium text-center mb-2">
                         카메라를 시작할 수 없습니다
                       </p>
@@ -644,7 +644,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
                   {!isCameraReady && !cameraError && (
                     <div className="absolute inset-0 flex items-center justify-center"
                       style={{ background: CAPTURE_BG }}>
-                      <Camera className="w-16 h-16 text-gray-400 animate-pulse" strokeWidth={1} />
+                      <Camera className="w-16 h-16 text-gray-500 animate-pulse" strokeWidth={1} />
                     </div>
                   )}
                 </>
@@ -716,7 +716,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
               {(cameraStarted || previewImage) && (
                 <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-black/70 backdrop-blur-sm flex items-center gap-2">
                   {imageSource && (
-                    <span className="text-[10px] text-white/80 uppercase tracking-wider border border-white/30 rounded-full px-2 py-0.5">
+                    <span className="text-[12px] text-white/80 uppercase tracking-wider border border-white/30 rounded-full px-2 py-0.5">
                       {imageSource === 'camera' ? '촬영' : '업로드'}
                     </span>
                   )}
@@ -817,7 +817,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8, duration: 0.6 }}
-            className="flex items-center justify-center gap-2 text-xs text-gray-400 font-normal mb-8"
+            className="flex items-center justify-center gap-2 text-xs text-gray-500 font-normal mb-8"
           >
             <Lock className="w-3 h-3" strokeWidth={1.5} />
             <span>사진은 분석 외 용도로 저장되지 않습니다.</span>

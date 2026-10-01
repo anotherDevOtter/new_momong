@@ -43,7 +43,7 @@ export default function SignupPage() {
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <p className="text-xs tracking-[0.2em] text-gray-400 uppercase mb-1">Merci Momong</p>
+          <p className="text-xs tracking-[0.2em] text-gray-500 uppercase mb-1">Merci Momong</p>
           <h1 className="text-2xl font-semibold text-[#111]">회원가입</h1>
         </div>
 
@@ -133,7 +133,7 @@ export default function SignupPage() {
           </button>
         </form>
 
-        <div className="mt-6 text-center text-xs text-gray-400">
+        <div className="mt-6 text-center text-xs text-gray-500">
           이미 계정이 있으신가요?{' '}
           <Link href="/login" className="text-gray-700 hover:text-[#111] transition-colors">
             로그인

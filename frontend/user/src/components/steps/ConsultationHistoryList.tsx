@@ -112,7 +112,7 @@ export function ConsultationHistoryList({ token, onSelectCustomer }: Props) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="이름 또는 연락처로 검색"
-                className="w-full pl-8 pr-0 py-3 border-0 border-b border-[#E5E5E5] bg-transparent text-[15px] text-[#111111] placeholder:text-[#CCCCCC] focus:outline-none focus:border-[#111111] transition-colors duration-200"
+                className="w-full pl-8 pr-0 py-3 border-0 border-b border-[#E5E5E5] bg-transparent text-[15px] text-[#111111] placeholder:text-[#777777] focus:outline-none focus:border-[#111111] transition-colors duration-200"
                 style={{ fontWeight: 300 }}
               />
             </div>

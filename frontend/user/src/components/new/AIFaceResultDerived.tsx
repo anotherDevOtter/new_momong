@@ -54,10 +54,10 @@ function RankingBar({ item, index }: { item: { rank: string; area: string; pct: 
     <div ref={ref} className="mb-5 last:mb-0">
       <div className="flex items-baseline justify-between mb-1.5">
         <div className="flex items-baseline gap-1.5">
-          <span className="text-[9px] text-[#C8B89A]">{item.rank}</span>
-          <span className="text-[11px] text-[#111111]">{item.area}</span>
+          <span className="text-[12px] text-[#C8B89A]">{item.rank}</span>
+          <span className="text-[12px] text-[#111111]">{item.area}</span>
         </div>
-        <span className="text-[11px] tabular-nums" style={{ color: '#111111', fontWeight: 300 }}>{item.pct}%</span>
+        <span className="text-[12px] tabular-nums" style={{ color: '#111111', fontWeight: 300 }}>{item.pct}%</span>
       </div>
       <div className="relative h-px bg-[#EBEBEB]">
         <motion.div className="absolute left-0 top-0 h-px bg-[#111111]"
@@ -100,12 +100,12 @@ function MiniImageMap({ col, row }: { col: number | null; row: number | null }) 
     <div style={{ width: 196, flexShrink: 0 }}>
       <div className="flex items-center mb-1.5">
         <div className="h-px flex-1" style={{ background: 'linear-gradient(to right, transparent, #DDDDDA)' }} />
-        <span className="mx-2" style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.22em', color: '#BBBBB8' }}>SOFT</span>
+        <span className="mx-2" style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.22em', color: '#777777' }}>SOFT</span>
         <div className="h-px flex-1" style={{ background: 'linear-gradient(to left, transparent, #DDDDDA)' }} />
       </div>
 
       <div className="flex items-stretch gap-1">
-        <span style={{ fontFamily: MONO, fontSize: 6.5, letterSpacing: '0.2em', color: '#BBBBB8', writingMode: 'vertical-rl', transform: 'rotate(180deg)', alignSelf: 'center' }}>WARM</span>
+        <span style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.2em', color: '#777777', writingMode: 'vertical-rl', transform: 'rotate(180deg)', alignSelf: 'center' }}>WARM</span>
         <div style={{ flex: 1, border: '1px solid #E8E8E4' }}>
           {[0, 1, 2].map(r => (
             <div key={r} className="flex" style={{ borderBottom: r < 2 ? '1px solid #EFEFED' : 'none' }}>
@@ -118,10 +118,10 @@ function MiniImageMap({ col, row }: { col: number | null; row: number | null }) 
                       flex: 1, height: 52, borderRight: c < 2 ? '1px solid #EFEFED' : 'none',
                       background: on ? 'rgba(184,150,60,0.12)' : '#FFFFFF',
                     }}>
-                    <span style={{ fontFamily: MONO, fontSize: 6.5, letterSpacing: '0.1em', color: on ? '#8A6C28' : '#CCCCCA' }}>
+                    <span style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.1em', color: on ? '#8A6C28' : '#CCCCCA' }}>
                       {cell.en}
                     </span>
-                    <span style={{ fontSize: 8.5, color: on ? '#111111' : '#BBBBB8', fontWeight: on ? 600 : 400 }}>
+                    <span style={{ fontSize: 12.5, color: on ? '#111111' : '#BBBBB8', fontWeight: on ? 600 : 400 }}>
                       {cell.ko}
                     </span>
                     {on && (
@@ -134,12 +134,12 @@ function MiniImageMap({ col, row }: { col: number | null; row: number | null }) 
             </div>
           ))}
         </div>
-        <span style={{ fontFamily: MONO, fontSize: 6.5, letterSpacing: '0.2em', color: '#BBBBB8', writingMode: 'vertical-rl', alignSelf: 'center' }}>COOL</span>
+        <span style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.2em', color: '#777777', writingMode: 'vertical-rl', alignSelf: 'center' }}>COOL</span>
       </div>
 
       <div className="flex items-center mt-1.5">
         <div className="h-px flex-1" style={{ background: 'linear-gradient(to right, transparent, #DDDDDA)' }} />
-        <span className="mx-2" style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.22em', color: '#BBBBB8' }}>HARD</span>
+        <span className="mx-2" style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.22em', color: '#777777' }}>HARD</span>
         <div className="h-px flex-1" style={{ background: 'linear-gradient(to left, transparent, #DDDDDA)' }} />
       </div>
     </div>
@@ -168,13 +168,13 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
 
         {/* ── Header ─────────────────────────────────────────────── */}
         <div className="mb-6">
-          <p className="text-[10px] tracking-[0.22em] text-[#AAAAAA] mb-1.5" style={{ fontFamily: MONO }}>STEP 02 · ZONE C</p>
+          <p className="text-[12px] tracking-[0.22em] text-[#777777] mb-1.5" style={{ fontFamily: MONO }}>STEP 02 · ZONE C</p>
           <div className="flex items-end justify-between">
             <h1 className="text-[1.5rem] font-light text-[#111111] tracking-tight">최종 이미지타입</h1>
             <div className="flex items-center gap-2 mb-0.5">
               {onBack && (
                 <button onClick={onBack}
-                  className="px-3 py-2 text-[11px] tracking-[0.04em] rounded-sm border border-[#E8E8E4] text-[#888888]"
+                  className="px-3 py-2 text-[12px] tracking-[0.04em] rounded-sm border border-[#E8E8E4] text-[#777777]"
                   style={{ background: 'transparent', cursor: 'pointer' }}>
                   ← 돌아가기
                 </button>
@@ -203,14 +203,14 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
               </svg>
               <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-sm"
                 style={{ background: 'rgba(26,26,26,0.82)', backdropFilter: 'blur(6px)' }}>
-                <p className="text-white text-[8px] tracking-[0.12em]" style={{ fontFamily: MONO }}>
+                <p className="text-white text-[12px] tracking-[0.12em]" style={{ fontFamily: MONO }}>
                   {String(formScore).padStart(2, '0')} × {String(propScore).padStart(2, '0')}
                 </p>
               </div>
             </div>
             {/* C × N below photo */}
             <div className="pt-3 pb-1 text-center">
-              <p className="text-[9px] tracking-[0.18em] text-[#AAAAAA] mb-1" style={{ fontFamily: MONO }}>
+              <p className="text-[12px] tracking-[0.18em] text-[#777777] mb-1" style={{ fontFamily: MONO }}>
                 최종 이미지타입
               </p>
               <span className="text-[20px] font-light tracking-tight text-[#1A1A1A] leading-none" style={{ fontFamily: MONO }}>
@@ -227,7 +227,7 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
 
             {/* Type identity */}
             <div className="px-5 pt-5 pb-4 bg-[#F7F7F5]">
-              <p className="text-[10px] tracking-[0.28em] text-[#888888] mb-1" style={{ fontFamily: MONO }}>
+              <p className="text-[12px] tracking-[0.28em] text-[#777777] mb-1" style={{ fontFamily: MONO }}>
                 {imageType ? `${imageType.en} TYPE` : 'NOT MEASURED'}
               </p>
               <p className="text-[32px] font-bold text-[#1A1A1A] tracking-tight leading-tight">
@@ -242,7 +242,7 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
               </p>
               <div className="flex flex-wrap gap-2">
                 {(imageType?.kw ?? []).map((k: string) => (
-                  <span key={k} className="text-[11px] px-2.5 py-1 rounded-sm"
+                  <span key={k} className="text-[12px] px-2.5 py-1 rounded-sm"
                     style={{ background: '#EFEFED', color: '#555550' }}>
                     {k}
                   </span>
@@ -255,14 +255,14 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
               <MiniImageMap col={colIdx} row={rowIdx} />
               <div className="flex-1 min-w-0">
               <div className="mb-4">
-                <p className="text-[9px] tracking-[0.18em] text-[#AAAAAA] mb-2.5" style={{ fontFamily: MONO }}>
+                <p className="text-[12px] tracking-[0.18em] text-[#777777] mb-2.5" style={{ fontFamily: MONO }}>
                   WARM · NEUTRAL · COOL
                 </p>
                 {formDist.map(d => {
                   const isLead = d.pct === Math.max(...formDist.map(x => x.pct));
                   return (
                     <div key={d.label} className="flex items-center gap-3 mb-2">
-                      <span className="text-[11px] w-14 shrink-0"
+                      <span className="text-[12px] w-14 shrink-0"
                         style={{ color: isLead ? '#1A1A1A' : '#BBBBBB', fontWeight: isLead ? 600 : 400 }}>
                         {d.label}
                       </span>
@@ -272,7 +272,7 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
                           initial={{ width: 0 }} animate={{ width: `${d.pct}%` }}
                           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }} />
                       </div>
-                      <span className="text-[10px] w-7 text-right tabular-nums"
+                      <span className="text-[12px] w-7 text-right tabular-nums"
                         style={{ color: isLead ? '#1A1A1A' : '#AAAAAA', fontFamily: MONO }}>
                         {d.pct}%
                       </span>
@@ -281,14 +281,14 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
                 })}
               </div>
               <div>
-                <p className="text-[9px] tracking-[0.18em] text-[#AAAAAA] mb-2.5" style={{ fontFamily: MONO }}>
+                <p className="text-[12px] tracking-[0.18em] text-[#777777] mb-2.5" style={{ fontFamily: MONO }}>
                   SOFT · NEUTRAL · HARD
                 </p>
                 {propDist.map(d => {
                   const isLead = d.pct === Math.max(...propDist.map(x => x.pct));
                   return (
                     <div key={d.label} className="flex items-center gap-3 mb-2">
-                      <span className="text-[11px] w-14 shrink-0"
+                      <span className="text-[12px] w-14 shrink-0"
                         style={{ color: isLead ? '#1A1A1A' : '#BBBBBB', fontWeight: isLead ? 600 : 400 }}>
                         {d.label}
                       </span>
@@ -298,7 +298,7 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
                           initial={{ width: 0 }} animate={{ width: `${d.pct}%` }}
                           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }} />
                       </div>
-                      <span className="text-[10px] w-7 text-right tabular-nums"
+                      <span className="text-[12px] w-7 text-right tabular-nums"
                         style={{ color: isLead ? '#1A1A1A' : '#AAAAAA', fontFamily: MONO }}>
                         {d.pct}%
                       </span>
@@ -355,7 +355,7 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
               transition={{ delay: 0.2, duration: 0.5 }}
               className="mb-8"
             >
-              <p className="text-[9px] tracking-[0.22em] text-[#AAAAAA] mb-1" style={{ fontFamily: MONO }}>
+              <p className="text-[12px] tracking-[0.22em] text-[#777777] mb-1" style={{ fontFamily: MONO }}>
                 SECTION 02
               </p>
               <p className="text-[15px] font-light text-[#111111] tracking-tight mb-5">이미지를 결정짓는 요소</p>
@@ -376,10 +376,10 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
                             const d = radarData.find(r => r.area === payload.value);
                             return (
                               <text x={x} y={y} textAnchor="middle" dominantBaseline="middle">
-                                <tspan key="label" x={x} dy="-0.5em" style={{ fontSize: 9, fill: '#AAAAAA', fontWeight: 300 }}>
+                                <tspan key="label" x={x} dy="-0.5em" style={{ fontSize: 12, fill: '#777777', fontWeight: 400 }}>
                                   {payload.value}
                                 </tspan>
-                                <tspan key="pct" x={x} dy="1.3em" style={{ fontSize: 9, fill: '#111111', fontWeight: 500 }}>
+                                <tspan key="pct" x={x} dy="1.3em" style={{ fontSize: 12, fill: '#111111', fontWeight: 500 }}>
                                   {d ? `${d.value}%` : ''}
                                 </tspan>
                               </text>
@@ -396,7 +396,7 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
 
                   {/* 핵심 영향도 bars */}
                   <div className="pt-4" style={{ borderTop: '1px solid #F2F2F2' }}>
-                    <p className="text-[9px] tracking-[0.16em] text-[#CCCCCC] uppercase mb-4">핵심 영향도</p>
+                    <p className="text-[12px] tracking-[0.16em] text-[#777777] uppercase mb-4">핵심 영향도</p>
                     {areaRankings.map((item, i) => (
                       <RankingBar key={item.area} item={item} index={i} />
                     ))}
@@ -408,7 +408,7 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
 
                 {/* Right col: 핵심 해석 */}
                 <div className="flex-1 pl-6">
-                  <p className="text-[9px] tracking-[0.16em] text-[#CCCCCC] uppercase mb-4">핵심 해석</p>
+                  <p className="text-[12px] tracking-[0.16em] text-[#777777] uppercase mb-4">핵심 해석</p>
                   <div>
                     {allFeatures.map((f, i) => (
                       <motion.div key={f.item.id}
@@ -417,8 +417,8 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
 
                         {/* 이목구비 부위 */}
                         <div className="flex items-baseline gap-1.5 mb-1">
-                          <span className="text-[9px] text-[#C8B89A]">{RANKS[i] ?? `${i+1}`}</span>
-                          <span className="text-[10px] text-[#999999]">{f.item.title}</span>
+                          <span className="text-[12px] text-[#C8B89A]">{RANKS[i] ?? `${i+1}`}</span>
+                          <span className="text-[12px] text-[#777777]">{f.item.title}</span>
                         </div>
 
                         {/* 특징값 — 타입 결정 요인 */}
@@ -427,7 +427,7 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
                         </p>
 
                         {/* 타입 결정 이유 */}
-                        <p className="text-[9px] pl-4 mb-1" style={{ color: '#C8B89A', fontWeight: 400 }}>
+                        <p className="text-[12px] pl-4 mb-1" style={{ color: '#C8B89A', fontWeight: 400 }}>
                           {/* 합산이 Neutral 이면 '결정짓는 특징' 이 아니라 개별 매력 포인트다 */}
                           {!imageType
                             ? '타입 판정에 쓰이는 특징'
@@ -437,16 +437,16 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
                         </p>
 
                         {/* 매력 설명 */}
-                        <p className="text-[10px] text-[#AAAAAA] leading-[1.7] pl-4 mb-2" style={{ fontWeight: 300 }}>
+                        <p className="text-[12px] text-[#777777] leading-[1.7] pl-4 mb-2" style={{ fontWeight: 300 }}>
                           → {f.item.desc}
                         </p>
 
                         {/* 매력 태그 */}
                         <div className="flex items-center gap-1 pl-4">
-                          <span className="text-[8px] text-[#CCCCCC] mr-0.5">매력</span>
+                          <span className="text-[12px] text-[#777777] mr-0.5">매력</span>
                           {f.item.tags.slice(0, 3).map(t => (
-                            <span key={t} className="text-[8px] px-1.5 py-0.5"
-                              style={{ background: '#F5F5F3', color: '#888888' }}>
+                            <span key={t} className="text-[12px] px-1.5 py-0.5"
+                              style={{ background: '#F5F5F3', color: '#777777' }}>
                               {t}
                             </span>
                           ))}
@@ -466,7 +466,7 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
 
         {/* ── CTA ────────────────────────────────────────────────── */}
         <div className="border-t border-[#E8E8E4] pt-5">
-          <p className="text-[9px] tracking-[0.18em] text-[#AAAAAA] mb-3" style={{ fontFamily: MONO }}>MEASUREMENT COMPLETE</p>
+          <p className="text-[12px] tracking-[0.18em] text-[#777777] mb-3" style={{ fontFamily: MONO }}>MEASUREMENT COMPLETE</p>
           <button onClick={onNext}
             className="w-full py-5 text-[12px] tracking-[0.08em] bg-[#111111] text-white flex items-center justify-center gap-3 hover:bg-[#2A2A2A] transition-colors"
             style={{ border: 'none', cursor: 'pointer', fontWeight: 500 }}>

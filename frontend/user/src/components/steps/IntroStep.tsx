@@ -13,7 +13,7 @@ export const IntroStep = ({ onNext, onViewClients, onStart3Way }: IntroStepProps
     <div className="min-h-[calc(100vh-51px)] bg-white flex items-center justify-center px-20">
       <div className="w-full max-w-[1200px] flex flex-col items-center pt-28 pb-12">
         <div className="mb-8">
-          <p className="text-xs tracking-[0.2em] text-[#999999] uppercase">
+          <p className="text-xs tracking-[0.2em] text-[#777777] uppercase">
             Today&apos;s Design Direction
           </p>
         </div>

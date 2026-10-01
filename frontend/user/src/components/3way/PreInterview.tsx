@@ -80,7 +80,7 @@ export function PreInterview({ onBack, onNext }: PreInterviewProps) {
           <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em]">
             사전 인터뷰
           </h2>
-          <p className="text-sm text-[#999999]">고객님의 고민 사항을 선택해주세요</p>
+          <p className="text-sm text-[#777777]">고객님의 고민 사항을 선택해주세요</p>
         </motion.div>
 
         {/* 섹션 1: 얼굴 중 보완을 원하는 부위 */}
@@ -93,7 +93,7 @@ export function PreInterview({ onBack, onNext }: PreInterviewProps) {
           <h3 className="text-sm font-medium text-[#111111] mb-2">
             Q. 얼굴 중 보완을 원하는 부위
           </h3>
-          <p className="text-xs text-[#999999] mb-4">복수 선택 가능</p>
+          <p className="text-xs text-[#777777] mb-4">복수 선택 가능</p>
 
           <div className="grid grid-cols-2 gap-3">
             {faceAreas.map((area, index) => (
@@ -142,7 +142,7 @@ export function PreInterview({ onBack, onNext }: PreInterviewProps) {
           <h3 className="text-sm font-medium text-[#111111] mb-2">
             Q. 요즘 헤어 고민
           </h3>
-          <p className="text-xs text-[#999999] mb-4">복수 선택 가능</p>
+          <p className="text-xs text-[#777777] mb-4">복수 선택 가능</p>
 
           <div className="grid grid-cols-2 gap-3">
             {hairConcerns.map((concern, index) => (

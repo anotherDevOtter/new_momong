@@ -42,7 +42,7 @@ export function FashionStyle({
   return (
     <PageLayout onPrev={onPrev} onNext={onNext} pageNumber={pageNumber} totalPages={totalPages}>
       <div className="px-6 md:px-14 pt-14 pb-4 max-w-[860px] mx-auto">
-        <p className="text-[11px] tracking-[0.2em] text-[#999999] uppercase mb-2">Fashion</p>
+        <p className="text-[12px] tracking-[0.2em] text-[#777777] uppercase mb-2">Fashion</p>
         <h2 className="text-[22px] md:text-[26px] text-[#111111] mb-2" style={{ fontWeight: 600 }}>
           선호하는 패션 스타일
         </h2>
@@ -127,7 +127,7 @@ function StyleGrid({
     <div>
       <div className="flex items-baseline gap-2 mb-4">
         <h3 className="text-[15px] text-[#111111]" style={{ fontWeight: 500 }}>{title}</h3>
-        <span className="text-[12px] text-[#999999]">{hint}</span>
+        <span className="text-[12px] text-[#777777]">{hint}</span>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">

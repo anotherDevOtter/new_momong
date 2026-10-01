@@ -30,9 +30,9 @@ export default function FindIdPage() {
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <p className="text-xs tracking-[0.2em] text-gray-400 uppercase mb-1">Merci Momong</p>
+          <p className="text-xs tracking-[0.2em] text-gray-500 uppercase mb-1">Merci Momong</p>
           <h1 className="text-2xl font-semibold text-[#111]">아이디 찾기</h1>
-          <p className="text-sm text-gray-400 mt-2">가입 시 등록한 전화번호를 입력하세요</p>
+          <p className="text-sm text-gray-500 mt-2">가입 시 등록한 전화번호를 입력하세요</p>
         </div>
 
         {result ? (
@@ -74,7 +74,7 @@ export default function FindIdPage() {
           </form>
         )}
 
-        <div className="mt-6 text-center text-xs text-gray-400">
+        <div className="mt-6 text-center text-xs text-gray-500">
           <Link href="/login" className="hover:text-gray-600 transition-colors">로그인으로 돌아가기</Link>
         </div>
       </div>

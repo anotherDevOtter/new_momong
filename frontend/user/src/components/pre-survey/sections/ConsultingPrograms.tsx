@@ -56,7 +56,7 @@ export function ConsultingPrograms({ selectedProgram, onSelect, onPrev, onNext }
           <h2 className="text-[26px] text-[#111111] mb-3" style={{ fontWeight: 400, letterSpacing: '0.05em' }}>
             Consulting<br />Program
           </h2>
-          <p className="text-[11px] text-[#7A7A7A] mt-5 tracking-[0.05em]" style={{ fontWeight: 400 }}>
+          <p className="text-[12px] text-[#7A7A7A] mt-5 tracking-[0.05em]" style={{ fontWeight: 400 }}>
             메르시모몽 컨설팅 프로그램<br />
             [예약하신 컨설팅 프로그램을 클릭해 주세요]
           </p>

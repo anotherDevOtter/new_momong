@@ -76,7 +76,7 @@ export function CustomerInfo({ onBack, onNext }: CustomerInfoProps) {
           className="text-center mb-12 space-y-3"
         >
           <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em]">고객 정보</h2>
-          <p className="text-sm text-[#999999]">정확한 컨설팅을 위해 기본 정보를 입력해주세요</p>
+          <p className="text-sm text-[#777777]">정확한 컨설팅을 위해 기본 정보를 입력해주세요</p>
         </motion.div>
 
         {/* 입력 필드 영역 */}

@@ -98,8 +98,8 @@ export function PremiumReport({
         {/* 상단 툴바 */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div className="flex items-center gap-4">
-            <h2 className="text-sm font-light text-black tracking-wide">MERCI MOMONG</h2>
-            <span className="text-xs text-gray-500 font-light">
+            <h2 className="text-sm font-normal text-black tracking-wide">MERCI MOMONG</h2>
+            <span className="text-xs text-gray-500 font-normal">
               {safePage + 1} / {totalPages}
             </span>
           </div>
@@ -139,12 +139,12 @@ export function PremiumReport({
               disabled={currentPage === 0}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                 currentPage === 0
-                  ? 'text-gray-300 cursor-not-allowed'
+                  ? 'text-gray-500 cursor-not-allowed'
                   : 'text-black hover:bg-gray-100'
               }`}
             >
               <ChevronLeft className="w-5 h-5" strokeWidth={2} />
-              <span className="text-sm font-light">이전</span>
+              <span className="text-sm font-normal">이전</span>
             </button>
 
             {/* 페이지 인디케이터 */}
@@ -166,11 +166,11 @@ export function PremiumReport({
               disabled={currentPage === totalPages - 1}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                 currentPage === totalPages - 1
-                  ? 'text-gray-300 cursor-not-allowed'
+                  ? 'text-gray-500 cursor-not-allowed'
                   : 'text-black hover:bg-gray-100'
               }`}
             >
-              <span className="text-sm font-light">다음</span>
+              <span className="text-sm font-normal">다음</span>
               <ChevronRight className="w-5 h-5" strokeWidth={2} />
             </button>
           </div>
@@ -191,7 +191,7 @@ function CoverPage({ pageNumber, customerName, consultDate, designerName, onDesi
     >
       {/* 페이지 번호 */}
       <div className="text-right mb-4">
-        <span className="text-xs text-gray-400 font-light">Page {pageNumber}</span>
+        <span className="text-xs text-gray-500 font-normal">Page {pageNumber}</span>
       </div>
       
       <div>
@@ -201,7 +201,7 @@ function CoverPage({ pageNumber, customerName, consultDate, designerName, onDesi
           HAIR REPORT
         </h1>
 
-        <div className="space-y-3 text-sm font-light text-gray-700">
+        <div className="space-y-3 text-sm font-normal text-gray-700">
           <p>
             <span className="text-gray-500">고객명</span>
             <span className="ml-8 text-black">{customerName}</span>
@@ -224,7 +224,7 @@ function CoverPage({ pageNumber, customerName, consultDate, designerName, onDesi
 
       <div className="text-center border-t border-gray-200 pt-8">
         <p className="text-lg font-light tracking-[0.1em] text-black mb-4">BE YOURSELF</p>
-        <p className="text-sm font-light text-gray-600">
+        <p className="text-sm font-normal text-gray-600">
           사람들이 자신의 아름다움을 발견하고 스스로를 사랑할 수 있도록 돕습니다.
         </p>
       </div>
@@ -244,7 +244,7 @@ function FaceStructurePage({ pageNumber, ratios }: { pageNumber: number; ratios?
     >
       {/* 페이지 번호 */}
       <div className="text-right mb-4">
-        <span className="text-xs text-gray-400 font-light">Page {pageNumber}</span>
+        <span className="text-xs text-gray-500 font-normal">Page {pageNumber}</span>
       </div>
       
       <h2 className="text-2xl font-light tracking-[0.05em] text-black mb-8 pb-4 border-b border-gray-200">
@@ -258,13 +258,13 @@ function FaceStructurePage({ pageNumber, ratios }: { pageNumber: number; ratios?
             <div className="w-48 h-64 border-2 border-gray-300 rounded-full mx-auto mb-4 relative">
               {/* 가로세로 비율 표시 */}
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <p className="text-xs font-light text-gray-600">{faceRatio}</p>
+                <p className="text-xs font-normal text-gray-600">{faceRatio}</p>
               </div>
               {/* 상중하 구분선 */}
               <div className="absolute top-1/3 left-0 right-0 h-px bg-gray-300"></div>
               <div className="absolute top-2/3 left-0 right-0 h-px bg-gray-300"></div>
             </div>
-            <p className="text-xs text-gray-500 font-light">얼굴 구조 시각화</p>
+            <p className="text-xs text-gray-500 font-normal">얼굴 구조 시각화</p>
           </div>
         </div>
 
@@ -279,7 +279,7 @@ function FaceStructurePage({ pageNumber, ratios }: { pageNumber: number; ratios?
       </div>
 
       <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100">
-        <p className="text-sm font-light text-gray-700 leading-relaxed">
+        <p className="text-sm font-normal text-gray-700 leading-relaxed">
           고객님의 얼굴 구조는 균형형 기반으로 안정적인 비율을 가지고 있습니다. 과도한 보완보다
           방향 설정이 중요합니다.
         </p>
@@ -303,7 +303,7 @@ function ImageAxisPage({ pageNumber, imageType = { warmCool: 'N', softHard: 'N' 
     >
       {/* 페이지 번호 */}
       <div className="text-right mb-4">
-        <span className="text-xs text-gray-400 font-light">Page {pageNumber}</span>
+        <span className="text-xs text-gray-500 font-normal">Page {pageNumber}</span>
       </div>
       
       <h2 className="text-2xl font-light tracking-[0.05em] text-black mb-8 pb-4 border-b border-gray-200">
@@ -317,25 +317,25 @@ function ImageAxisPage({ pageNumber, imageType = { warmCool: 'N', softHard: 'N' 
             {/* 가로축 */}
             <div className="absolute top-1/2 left-0 right-0 h-px bg-gray-300"></div>
             <div className="absolute top-1/2 left-0 transform -translate-y-1/2 -translate-x-full pr-4">
-              <p className="text-xs font-light text-gray-600">Soft</p>
+              <p className="text-xs font-normal text-gray-600">Soft</p>
             </div>
             <div className="absolute top-1/2 right-0 transform -translate-y-1/2 translate-x-full pl-4">
-              <p className="text-xs font-light text-gray-600">Hard</p>
+              <p className="text-xs font-normal text-gray-600">Hard</p>
             </div>
 
             {/* 세로축 */}
             <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gray-300"></div>
             <div className="absolute left-1/2 top-0 transform -translate-x-1/2 -translate-y-full pb-4">
-              <p className="text-xs font-light text-gray-600">Cool</p>
+              <p className="text-xs font-normal text-gray-600">Cool</p>
             </div>
             <div className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-full pt-4">
-              <p className="text-xs font-light text-gray-600">Warm</p>
+              <p className="text-xs font-normal text-gray-600">Warm</p>
             </div>
 
             {/* 현재 위치 */}
             <div className="absolute transform -translate-x-1/2 -translate-y-1/2" style={{ left: posX, top: posY }}>
               <div className="w-4 h-4 bg-black rounded-full"></div>
-              <p className="text-xs font-light text-black mt-2 whitespace-nowrap">
+              <p className="text-xs font-normal text-black mt-2 whitespace-nowrap">
                 {toneLabel} / {balanceLabel}
               </p>
             </div>
@@ -345,17 +345,17 @@ function ImageAxisPage({ pageNumber, imageType = { warmCool: 'N', softHard: 'N' 
 
       <div className="space-y-4 mb-8">
         <div className="flex justify-between items-center py-3 border-b border-gray-200">
-          <span className="text-sm font-light text-gray-600">Tone Axis</span>
-          <span className="text-sm font-light text-black">{toneLabel}</span>
+          <span className="text-sm font-normal text-gray-600">Tone Axis</span>
+          <span className="text-sm font-normal text-black">{toneLabel}</span>
         </div>
         <div className="flex justify-between items-center py-3 border-b border-gray-200">
-          <span className="text-sm font-light text-gray-600">Balance Axis</span>
-          <span className="text-sm font-light text-black">{balanceLabel}</span>
+          <span className="text-sm font-normal text-gray-600">Balance Axis</span>
+          <span className="text-sm font-normal text-black">{balanceLabel}</span>
         </div>
       </div>
 
       <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100">
-        <p className="text-sm font-light text-gray-700 leading-relaxed">
+        <p className="text-sm font-normal text-gray-700 leading-relaxed">
           기본 이미지가 안정적이기 때문에 강한 이동보다 정교한 조율이 효과적입니다.
         </p>
       </div>
@@ -373,7 +373,7 @@ function PersonalColorPage({ pageNumber }: { pageNumber: number }) {
     >
       {/* 페이지 번호 */}
       <div className="text-right mb-4">
-        <span className="text-xs text-gray-400 font-light">Page {pageNumber}</span>
+        <span className="text-xs text-gray-500 font-normal">Page {pageNumber}</span>
       </div>
       
       <h2 className="text-2xl font-light tracking-[0.05em] text-black mb-8 pb-4 border-b border-gray-200">
@@ -390,7 +390,7 @@ function PersonalColorPage({ pageNumber }: { pageNumber: number }) {
 
         {/* 컬러 팔레트 */}
         <div>
-          <p className="text-xs text-gray-500 font-light mb-3">추천 컬러 팔레트</p>
+          <p className="text-xs text-gray-500 font-normal mb-3">추천 컬러 팔레트</p>
           <div className="grid grid-cols-5 gap-2">
             <div className="aspect-square bg-gray-700 rounded-lg"></div>
             <div className="aspect-square bg-gray-600 rounded-lg"></div>
@@ -407,19 +407,19 @@ function PersonalColorPage({ pageNumber }: { pageNumber: number }) {
       </div>
 
       <div className="space-y-3 mb-8">
-        <h3 className="text-sm font-light text-black mb-4">추천 컬러 전략</h3>
+        <h3 className="text-sm font-normal text-black mb-4">추천 컬러 전략</h3>
         <div className="flex items-start gap-3">
           <div className="w-1.5 h-1.5 bg-black rounded-full mt-2"></div>
-          <p className="text-sm font-light text-gray-700">명도 중심 조절</p>
+          <p className="text-sm font-normal text-gray-700">명도 중심 조절</p>
         </div>
         <div className="flex items-start gap-3">
           <div className="w-1.5 h-1.5 bg-black rounded-full mt-2"></div>
-          <p className="text-sm font-light text-gray-700">과한 채도 변화 지양</p>
+          <p className="text-sm font-normal text-gray-700">과한 채도 변화 지양</p>
         </div>
       </div>
 
       <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100">
-        <p className="text-sm font-light text-gray-700 leading-relaxed">
+        <p className="text-sm font-normal text-gray-700 leading-relaxed">
           명도 조절을 통한 이미지 조율이 가장 효과적입니다. 과도한 채도 변화는 피부톤과 부조화를
           일으킬 수 있습니다.
         </p>
@@ -438,7 +438,7 @@ function HairTexturePage({ pageNumber }: { pageNumber: number }) {
     >
       {/* 페이지 번호 */}
       <div className="text-right mb-4">
-        <span className="text-xs text-gray-400 font-light">Page {pageNumber}</span>
+        <span className="text-xs text-gray-500 font-normal">Page {pageNumber}</span>
       </div>
       
       <h2 className="text-2xl font-light tracking-[0.05em] text-black mb-8 pb-4 border-b border-gray-200">
@@ -447,7 +447,7 @@ function HairTexturePage({ pageNumber }: { pageNumber: number }) {
 
       <div className="space-y-6 mb-10">
         <div>
-          <h3 className="text-sm font-light text-black mb-4">모질 분석</h3>
+          <h3 className="text-sm font-normal text-black mb-4">모질 분석</h3>
           <div className="space-y-3">
             <DataRow label="손상도" value="약손상" status="안정" />
             <DataRow label="모질 상태" value="반곱슬" status="—" />
@@ -458,30 +458,30 @@ function HairTexturePage({ pageNumber }: { pageNumber: number }) {
         </div>
 
         <div>
-          <h3 className="text-sm font-light text-black mb-4">시술 가능 범위</h3>
+          <h3 className="text-sm font-normal text-black mb-4">시술 가능 범위</h3>
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <p className="text-sm font-light text-gray-700">자연스러운 웨이브 펌</p>
+              <p className="text-sm font-normal text-gray-700">자연스러운 웨이브 펌</p>
             </div>
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <p className="text-sm font-light text-gray-700">명도 조절 컬러</p>
+              <p className="text-sm font-normal text-gray-700">명도 조절 컬러</p>
             </div>
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-              <p className="text-sm font-light text-gray-700">스트레이트 펌 (유지력 낮음)</p>
+              <p className="text-sm font-normal text-gray-700">스트레이트 펌 (유지력 낮음)</p>
             </div>
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-              <p className="text-sm font-light text-gray-700">강한 탈색 (손상 위험)</p>
+              <p className="text-sm font-normal text-gray-700">강한 탈색 (손상 위험)</p>
             </div>
           </div>
         </div>
       </div>
 
       <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100">
-        <p className="text-sm font-light text-gray-700 leading-relaxed">
+        <p className="text-sm font-normal text-gray-700 leading-relaxed">
           직선 유지력은 낮으나 자연스러운 S계열 디자인은 안정적입니다. 숱이 많은 편이므로 무게
           제거 설계가 중요합니다.
         </p>
@@ -500,7 +500,7 @@ function TodayDesignPage({ pageNumber }: { pageNumber: number }) {
     >
       {/* 페이지 번호 */}
       <div className="text-right mb-4">
-        <span className="text-xs text-gray-400 font-light">Page {pageNumber}</span>
+        <span className="text-xs text-gray-500 font-normal">Page {pageNumber}</span>
       </div>
       
       <h2 className="text-2xl font-light tracking-[0.05em] text-black mb-8 pb-4 border-b border-gray-200">
@@ -531,7 +531,7 @@ function TodayDesignPage({ pageNumber }: { pageNumber: number }) {
       </div>
 
       <div className="mt-10 bg-black text-white rounded-xl p-6">
-        <p className="text-sm font-light leading-relaxed">
+        <p className="text-sm font-normal leading-relaxed">
           오늘의 디자인은 과도한 변화가 아닌, 고객님의 본래 이미지를 명확하게 만드는 정교한
           조율입니다.
         </p>
@@ -550,7 +550,7 @@ function ImageMovementPage({ pageNumber }: { pageNumber: number }) {
     >
       {/* 페이지 번호 */}
       <div className="text-right mb-4">
-        <span className="text-xs text-gray-400 font-light">Page {pageNumber}</span>
+        <span className="text-xs text-gray-500 font-normal">Page {pageNumber}</span>
       </div>
       
       <h2 className="text-2xl font-light tracking-[0.05em] text-black mb-8 pb-4 border-b border-gray-200">
@@ -563,8 +563,8 @@ function ImageMovementPage({ pageNumber }: { pageNumber: number }) {
           <div className="flex items-center justify-between mb-6">
             <div className="text-center">
               <div className="w-16 h-16 bg-black rounded-full mx-auto mb-2"></div>
-              <p className="text-xs font-light text-gray-600">현재</p>
-              <p className="text-xs font-light text-black">Neutral</p>
+              <p className="text-xs font-normal text-gray-600">현재</p>
+              <p className="text-xs font-normal text-black">Neutral</p>
             </div>
 
             <div className="flex-1 mx-4">
@@ -577,8 +577,8 @@ function ImageMovementPage({ pageNumber }: { pageNumber: number }) {
 
             <div className="text-center">
               <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-2"></div>
-              <p className="text-xs font-light text-gray-600">가능 범위</p>
-              <p className="text-xs font-light text-black">Chic</p>
+              <p className="text-xs font-normal text-gray-600">가능 범위</p>
+              <p className="text-xs font-normal text-black">Chic</p>
             </div>
           </div>
         </div>
@@ -587,43 +587,43 @@ function ImageMovementPage({ pageNumber }: { pageNumber: number }) {
       <div className="space-y-6 mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-6 h-6 rounded-full bg-green-500 text-white text-xs flex items-center justify-center font-light">
+            <div className="w-6 h-6 rounded-full bg-green-500 text-white text-xs flex items-center justify-center font-normal">
               1
             </div>
-            <h3 className="text-sm font-light text-black">안정 유지</h3>
+            <h3 className="text-sm font-normal text-black">안정 유지</h3>
           </div>
-          <p className="text-sm font-light text-gray-700 ml-9">
+          <p className="text-sm font-normal text-gray-700 ml-9">
             현재 디자인 유지 / 소폭 조율만 진행
           </p>
         </div>
 
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-6 h-6 rounded-full bg-yellow-500 text-white text-xs flex items-center justify-center font-light">
+            <div className="w-6 h-6 rounded-full bg-yellow-500 text-white text-xs flex items-center justify-center font-normal">
               2
             </div>
-            <h3 className="text-sm font-light text-black">소폭 확장</h3>
+            <h3 className="text-sm font-normal text-black">소폭 확장</h3>
           </div>
-          <p className="text-sm font-light text-gray-700 ml-9">
+          <p className="text-sm font-normal text-gray-700 ml-9">
             길이 조정 또는 컬러 명도 변화로 Fresh 요소 추가
           </p>
         </div>
 
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-6 h-6 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-light">
+            <div className="w-6 h-6 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-normal">
               3
             </div>
-            <h3 className="text-sm font-light text-black">이미지 전환</h3>
+            <h3 className="text-sm font-normal text-black">이미지 전환</h3>
           </div>
-          <p className="text-sm font-light text-gray-700 ml-9">
+          <p className="text-sm font-normal text-gray-700 ml-9">
             Neutral → Chic 방향 이동 시 직선 기반 + 명도 대비 필요
           </p>
         </div>
       </div>
 
       <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100">
-        <p className="text-sm font-light text-gray-700 leading-relaxed">
+        <p className="text-sm font-normal text-gray-700 leading-relaxed">
           이미지 이동은 단계적으로 진행하는 것이 안정적입니다. 급격한 변화보다 방향성을 유지한
           확장이 효과적입니다.
         </p>
@@ -642,7 +642,7 @@ function PersonalNotePage({ pageNumber, designerName }: { pageNumber: number; de
     >
       {/* 페이지 번호 */}
       <div className="text-right mb-4">
-        <span className="text-xs text-gray-400 font-light">Page {pageNumber}</span>
+        <span className="text-xs text-gray-500 font-normal">Page {pageNumber}</span>
       </div>
       
       <h2 className="text-2xl font-light tracking-[0.05em] text-black mb-8 pb-4 border-b border-gray-200">
@@ -650,19 +650,19 @@ function PersonalNotePage({ pageNumber, designerName }: { pageNumber: number; de
       </h2>
 
       <div className="space-y-6 mb-10">
-        <p className="text-sm font-light text-gray-700 leading-relaxed">
+        <p className="text-sm font-normal text-gray-700 leading-relaxed">
           고객님은 구조적으로 균형이 좋은 타입입니다.
         </p>
 
-        <p className="text-sm font-light text-gray-700 leading-relaxed">
+        <p className="text-sm font-normal text-gray-700 leading-relaxed">
           강한 변화를 주기보다 정교한 방향 설정이 더 큰 차이를 만듭니다.
         </p>
 
-        <p className="text-sm font-light text-gray-700 leading-relaxed">
+        <p className="text-sm font-normal text-gray-700 leading-relaxed">
           이 설계는 단기 트렌드가 아니라 고객님의 고유 이미지를 기준으로 합니다.
         </p>
 
-        <p className="text-sm font-light text-gray-700 leading-relaxed">
+        <p className="text-sm font-normal text-gray-700 leading-relaxed">
           모발 건강과 이미지 방향을 함께 고려한 장기 플랜으로, 매 방문마다 상태를 점검하며
           조율해나갈 것입니다.
         </p>
@@ -670,17 +670,17 @@ function PersonalNotePage({ pageNumber, designerName }: { pageNumber: number; de
 
       {/* AFTER NOTE 추가 문구 */}
       <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 mb-8">
-        <p className="text-sm font-light text-gray-700 leading-relaxed mb-3">
+        <p className="text-sm font-normal text-gray-700 leading-relaxed mb-3">
           본 디자인은 단발적 시술이 아닌 단계적 이미지 설계 플랜에 따라 진행됩니다.
         </p>
-        <p className="text-sm font-light text-gray-700 leading-relaxed">
+        <p className="text-sm font-normal text-gray-700 leading-relaxed">
           설계된 방문 사이클에 따라 이미지 완성도가 높아집니다.
         </p>
       </div>
 
       <div className="border-t border-gray-200 pt-8">
-        <p className="text-xs text-gray-500 font-light mb-2">Designer</p>
-        <p className="text-base font-light text-black">{designerName}</p>
+        <p className="text-xs text-gray-500 font-normal mb-2">Designer</p>
+        <p className="text-base font-normal text-black">{designerName}</p>
       </div>
     </motion.div>
   );
@@ -696,19 +696,19 @@ function ClosingPage({ pageNumber }: { pageNumber: number }) {
     >
       {/* 페이지 번호 */}
       <div className="absolute top-12 right-12">
-        <span className="text-xs text-gray-400 font-light">Page {pageNumber}</span>
+        <span className="text-xs text-gray-500 font-normal">Page {pageNumber}</span>
       </div>
       
       <h1 className="text-4xl font-light tracking-[0.15em] text-black mb-12">MERCI MOMONG</h1>
 
-      <p className="text-sm font-light text-gray-700 leading-relaxed max-w-md">
+      <p className="text-sm font-normal text-gray-700 leading-relaxed max-w-md">
         모든 사람들이 자신의 아름다움을 발견하고
         <br />
         스스로 사랑할 수 있도록 돕습니다.
       </p>
 
       <div className="mt-16 pt-8 border-t border-gray-200 w-full max-w-md">
-        <p className="text-xs text-gray-400 font-light">
+        <p className="text-xs text-gray-500 font-normal">
           © 2024 MERCI MOMONG. All rights reserved.
         </p>
       </div>
@@ -720,11 +720,11 @@ function ClosingPage({ pageNumber }: { pageNumber: number }) {
 function DataRow({ label, value, status }: { label: string; value: string; status: string }) {
   return (
     <div className="flex justify-between items-center py-3 border-b border-gray-200">
-      <span className="text-sm font-light text-gray-600">{label}</span>
+      <span className="text-sm font-normal text-gray-600">{label}</span>
       <div className="flex items-center gap-3">
-        <span className="text-sm font-light text-black">{value}</span>
+        <span className="text-sm font-normal text-black">{value}</span>
         {status !== '—' && (
-          <span className="text-xs font-light text-gray-500 bg-gray-100 px-2 py-1 rounded">
+          <span className="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded">
             {status}
           </span>
         )}
@@ -737,10 +737,10 @@ function DesignItem({ label, value, explanation }: { label: string; value: strin
   return (
     <div className="pb-6 border-b border-gray-200 last:border-0">
       <div className="flex justify-between items-center mb-3">
-        <span className="text-sm font-light text-gray-600">{label}</span>
-        <span className="text-base font-light text-black">{value}</span>
+        <span className="text-sm font-normal text-gray-600">{label}</span>
+        <span className="text-base font-normal text-black">{value}</span>
       </div>
-      <p className="text-sm font-light text-gray-700 leading-relaxed">{explanation}</p>
+      <p className="text-sm font-normal text-gray-700 leading-relaxed">{explanation}</p>
     </div>
   );
 }
@@ -785,13 +785,13 @@ function DesignCycleMasterPlanPage({ pageNumber, cycleData }: { pageNumber: numb
     >
       {/* 페이지 번호 */}
       <div className="text-right mb-4">
-        <span className="text-xs text-gray-400 font-light">Page {pageNumber}</span>
+        <span className="text-xs text-gray-500 font-normal">Page {pageNumber}</span>
       </div>
       
       <h2 className="text-2xl font-light tracking-[0.05em] text-black mb-3 pb-4 border-b border-gray-200">
         DESIGN CYCLE MASTER PLAN
       </h2>
-      <p className="text-sm text-gray-600 font-light mb-10">단계적 이미지 설계를 위한 방문 전략</p>
+      <p className="text-sm text-gray-600 font-normal mb-10">단계적 이미지 설계를 위한 방문 전략</p>
 
       {/* 타임라인 */}
       <div className="space-y-6 mb-10">
@@ -803,13 +803,13 @@ function DesignCycleMasterPlanPage({ pageNumber, cycleData }: { pageNumber: numb
             return (
               <div key={month.month} className={`border-l-2 pl-6 ${index === 0 ? 'border-black' : 'border-gray-300'}`}>
                 <div className="flex items-center gap-3 mb-2">
-                  <span className="text-xs text-gray-500 font-light">{index + 1}회차</span>
-                  <span className="text-xs text-gray-400">|</span>
-                  <span className="text-xs text-gray-500 font-light">{monthNames[month.month - 1]}</span>
+                  <span className="text-xs text-gray-500 font-normal">{index + 1}회차</span>
+                  <span className="text-xs text-gray-500">|</span>
+                  <span className="text-xs text-gray-500 font-normal">{monthNames[month.month - 1]}</span>
                 </div>
-                <h3 className="text-base font-light text-black mb-2">{services}</h3>
+                <h3 className="text-base font-normal text-black mb-2">{services}</h3>
                 {month.memo && (
-                  <p className="text-sm font-light text-gray-600 mt-2 italic">
+                  <p className="text-sm font-normal text-gray-600 mt-2 italic">
                     {month.memo}
                   </p>
                 )}
@@ -818,7 +818,7 @@ function DesignCycleMasterPlanPage({ pageNumber, cycleData }: { pageNumber: numb
           })
         ) : (
           <div className="border-l-2 border-gray-300 pl-6">
-            <p className="text-sm text-gray-500 font-light">
+            <p className="text-sm text-gray-500 font-normal">
               사이클 계획이 설정되지 않았습니다. 상담을 통해 맞춤 플랜을 설계합니다.
             </p>
           </div>
@@ -826,7 +826,7 @@ function DesignCycleMasterPlanPage({ pageNumber, cycleData }: { pageNumber: numb
       </div>
 
       <div className="bg-black text-white rounded-xl p-6">
-        <p className="text-sm font-light leading-relaxed">
+        <p className="text-sm font-normal leading-relaxed">
           {generateStrategy()}
         </p>
       </div>
@@ -845,7 +845,7 @@ function NextDirectionSummaryPage({ pageNumber }: { pageNumber: number }) {
     >
       {/* 페이지 번호 */}
       <div className="text-right mb-4">
-        <span className="text-xs text-gray-400 font-light">Page {pageNumber}</span>
+        <span className="text-xs text-gray-500 font-normal">Page {pageNumber}</span>
       </div>
       
       <h2 className="text-2xl font-light tracking-[0.05em] text-black mb-8 pb-4 border-b border-gray-200">
@@ -854,26 +854,26 @@ function NextDirectionSummaryPage({ pageNumber }: { pageNumber: number }) {
 
       <div className="space-y-6 mb-10">
         <div>
-          <h3 className="text-base font-light text-black mb-3">다음 방문 시 권장 방향</h3>
+          <h3 className="text-base font-normal text-black mb-3">다음 방문 시 권장 방향</h3>
           <ul className="space-y-3">
             <li className="flex items-start gap-3">
               <div className="w-1.5 h-1.5 bg-black rounded-full mt-2"></div>
-              <p className="text-sm font-light text-gray-700">길이 유지 또는 소폭 조정</p>
+              <p className="text-sm font-normal text-gray-700">길이 유지 또는 소폭 조정</p>
             </li>
             <li className="flex items-start gap-3">
               <div className="w-1.5 h-1.5 bg-black rounded-full mt-2"></div>
-              <p className="text-sm font-light text-gray-700">볼륨 조정을 통한 Soft 방향 확장 가능</p>
+              <p className="text-sm font-normal text-gray-700">볼륨 조정을 통한 Soft 방향 확장 가능</p>
             </li>
             <li className="flex items-start gap-3">
               <div className="w-1.5 h-1.5 bg-black rounded-full mt-2"></div>
-              <p className="text-sm font-light text-gray-700">손상 회복 후 컬러 변화 고려</p>
+              <p className="text-sm font-normal text-gray-700">손상 회복 후 컬러 변화 고려</p>
             </li>
           </ul>
         </div>
 
         <div>
-          <h3 className="text-base font-light text-black mb-3">이미지 이동 가능 범위</h3>
-          <p className="text-sm font-light text-gray-700 leading-relaxed">
+          <h3 className="text-base font-normal text-black mb-3">이미지 이동 가능 범위</h3>
+          <p className="text-sm font-normal text-gray-700 leading-relaxed">
             현재 Neutral 기반에서 Soft 또는 Chic 방향으로 확장 가능합니다. 급격한 변화보다는
             단계적 조율이 안정적입니다.
           </p>
@@ -881,7 +881,7 @@ function NextDirectionSummaryPage({ pageNumber }: { pageNumber: number }) {
       </div>
 
       <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100">
-        <p className="text-sm font-light text-gray-700 leading-relaxed">
+        <p className="text-sm font-normal text-gray-700 leading-relaxed">
           디자인은 고정되지 않으며 얼굴, 이미지, 컨디션에 따라 매 방문마다 최적의 방향으로
           조율됩니다.
         </p>

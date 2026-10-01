@@ -123,7 +123,7 @@ function FitPageInner() {
   }, [currentStep]);
 
   if (loading || hydrating) {
-    return <div className="min-h-screen flex items-center justify-center bg-white"><p className="text-sm text-[#999999]">불러오는 중...</p></div>;
+    return <div className="min-h-screen flex items-center justify-center bg-white"><p className="text-sm text-[#777777]">불러오는 중...</p></div>;
   }
   if (!user) return null;
 
@@ -276,7 +276,7 @@ function FitPageInner() {
           router.push('/');
         }
       }}
-      className="text-xs text-gray-400 hover:text-gray-700 px-2 py-1 border border-gray-200 rounded hover:border-gray-400 transition-colors whitespace-nowrap"
+      className="text-xs text-gray-500 hover:text-gray-700 px-2 py-1 border border-gray-200 rounded hover:border-gray-400 transition-colors whitespace-nowrap"
     >
       처음으로
     </button>

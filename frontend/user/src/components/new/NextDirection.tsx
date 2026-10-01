@@ -567,14 +567,14 @@ export function NextDirection({
   };
 
   const SectionLabel = ({ children }: { children: string }) => (
-    <p style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.22em', color: '#AAAAAA', marginBottom: 20 }}>{children}</p>
+    <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.22em', color: '#777777', marginBottom: 20 }}>{children}</p>
   );
 
   const SectionHeader = ({ label, title, sub }: { label: string; title: string; sub?: string }) => (
     <div className="pb-5 mb-8" style={{ borderBottom: '1px solid #E8E8E4' }}>
       <SectionLabel>{label}</SectionLabel>
-      <h2 style={{ fontSize: 27, fontWeight: 300, color: '#111111', letterSpacing: '-0.01em', lineHeight: 1.1 }}>{title}</h2>
-      {sub && <p style={{ fontSize: 12, color: '#AAAAAA', marginTop: 4, fontWeight: 300 }}>{sub}</p>}
+      <h2 style={{ fontSize: 27, fontWeight: 400, color: '#111111', letterSpacing: '-0.01em', lineHeight: 1.1 }}>{title}</h2>
+      {sub && <p style={{ fontSize: 12, color: '#777777', marginTop: 4, fontWeight: 400 }}>{sub}</p>}
     </div>
   );
 
@@ -586,16 +586,16 @@ export function NextDirection({
 
         {/* Page header */}
         <div className="mb-6">
-          <p style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '0.22em', color: '#AAAAAA', marginBottom: 6 }}>NEXT DIRECTION</p>
+          <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.22em', color: '#777777', marginBottom: 6 }}>NEXT DIRECTION</p>
           <div className="flex items-end justify-between">
             <h1 style={{ fontSize: '1.5rem', fontWeight: 300, color: '#111111', letterSpacing: '-0.01em' }}>퍼스널 리포트</h1>
             <div className="flex items-center gap-2 mb-0.5">
               <button onClick={onBack}
-                style={{ padding: '8px 12px', fontSize: 11, letterSpacing: '0.04em', border: '1px solid #E8E8E4', color: '#888888', background: 'transparent', cursor: 'pointer', borderRadius: 2 }}>
+                style={{ padding: '8px 12px', fontSize: 12, letterSpacing: '0.04em', border: '1px solid #E8E8E4', color: '#777777', background: 'transparent', cursor: 'pointer', borderRadius: 2 }}>
                 ← 돌아가기
               </button>
               <button onClick={onNext}
-                style={{ padding: '9px 16px', fontSize: 11.5, letterSpacing: '0.06em', background: '#1A1A1A', color: '#FFFFFF', border: 'none', cursor: 'pointer', fontWeight: 500, borderRadius: 2 }}>
+                style={{ padding: '9px 16px', fontSize: 12.5, letterSpacing: '0.06em', background: '#1A1A1A', color: '#FFFFFF', border: 'none', cursor: 'pointer', fontWeight: 500, borderRadius: 2 }}>
                 리포트 생성 →
               </button>
             </div>
@@ -629,15 +629,15 @@ export function NextDirection({
                       border: `1.5px solid ${isSelected ? '#1A1A1A' : '#CCCCCA'}`,
                       transition: 'all 0.18s ease',
                     }} />
-                    <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.18em', color: isSelected ? '#888880' : '#CCCCCA', width: 70, flexShrink: 0, transition: 'color 0.18s' }}>{dir.en}</span>
+                    <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.18em', color: isSelected ? '#888880' : '#CCCCCA', width: 70, flexShrink: 0, transition: 'color 0.18s' }}>{dir.en}</span>
                     <div style={{ flex: 1 }}>
                       <p style={{ fontSize: 15, fontWeight: isSelected ? 500 : 300, color: isSelected ? '#111111' : '#777773', letterSpacing: '-0.01em', transition: 'all 0.18s', marginBottom: 2 }}>{dir.label}</p>
                       {/* 고른 값은 행을 펼쳐야만 보였다. 접힌 상태에서도 보이게. (2026-09-11) */}
-                      <p style={{ fontSize: 11, fontWeight: 300, color: selectedOpt ? '#8A7B4E' : '#BBBBB6', letterSpacing: '-0.01em' }}>
+                      <p style={{ fontSize: 12, fontWeight: 400, color: selectedOpt ? '#8A7B4E' : '#BBBBB6', letterSpacing: '-0.01em' }}>
                         {selectedOpt ?? dir.sublabel}
                       </p>
                       {dirMemo[dir.id] && (
-                        <p style={{ fontSize: 11, fontWeight: 300, color: '#888880', marginTop: 2 }}>
+                        <p style={{ fontSize: 12, fontWeight: 400, color: '#777777', marginTop: 2 }}>
                           {dirMemo[dir.id]}
                         </p>
                       )}
@@ -718,18 +718,18 @@ export function NextDirection({
                       <img src={photo} alt={label} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
                       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,8,6,0.5) 0%, transparent 45%)' }} />
                       <div style={{ position: 'absolute', top: 12, left: 12 }}>
-                        <span style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.14em', padding: '4px 10px', color: '#FFFFFF', background: label === 'BEFORE' ? 'rgba(17,17,17,0.75)' : 'rgba(184,150,60,0.85)' }}>{label}</span>
+                        <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.14em', padding: '4px 10px', color: '#FFFFFF', background: label === 'BEFORE' ? 'rgba(17,17,17,0.75)' : 'rgba(184,150,60,0.85)' }}>{label}</span>
                       </div>
-                      <p style={{ position: 'absolute', bottom: 12, left: 14, fontSize: 11, color: 'rgba(255,255,255,0.5)', fontFamily: MONO, letterSpacing: '0.1em' }}>TAP TO CHANGE</p>
+                      <p style={{ position: 'absolute', bottom: 12, left: 14, fontSize: 12, color: 'rgba(255,255,255,0.5)', fontFamily: MONO, letterSpacing: '0.1em' }}>TAP TO CHANGE</p>
                     </>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 12, padding: 24 }}>
                       <div style={{ width: 40, height: 40, borderRadius: '50%', border: '1.5px solid #CCCCCA', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <span style={{ fontSize: 20, color: '#CCCCCA', lineHeight: 1 }}>+</span>
+                        <span style={{ fontSize: 20, color: '#777777', lineHeight: 1 }}>+</span>
                       </div>
                       <div style={{ textAlign: 'center' }}>
-                        <p style={{ fontFamily: MONO, fontSize: 8, letterSpacing: '0.16em', color: label === 'BEFORE' ? '#555550' : '#B8963C', marginBottom: 4 }}>{label}</p>
-                        <p style={{ fontSize: 11, color: '#AAAAAA', fontWeight: 300 }}>{sub} 사진 추가</p>
+                        <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.16em', color: label === 'BEFORE' ? '#555550' : '#B8963C', marginBottom: 4 }}>{label}</p>
+                        <p style={{ fontSize: 12, color: '#777777', fontWeight: 400 }}>{sub} 사진 추가</p>
                       </div>
                     </div>
                   )}
@@ -748,8 +748,8 @@ export function NextDirection({
             <SectionLabel>TODAY SERVICE</SectionLabel>
             <div className="flex items-end justify-between gap-4">
               <div>
-                <h2 style={{ fontSize: 27, fontWeight: 300, color: '#111111', letterSpacing: '-0.01em', lineHeight: 1.1 }}>오늘의 시술</h2>
-                <p style={{ fontSize: 12, color: '#AAAAAA', marginTop: 4, fontWeight: 300 }}>진행한 시술을 모두 선택해주세요</p>
+                <h2 style={{ fontSize: 27, fontWeight: 400, color: '#111111', letterSpacing: '-0.01em', lineHeight: 1.1 }}>오늘의 시술</h2>
+                <p style={{ fontSize: 12, color: '#777777', marginTop: 4, fontWeight: 400 }}>진행한 시술을 모두 선택해주세요</p>
               </div>
               <div style={{ display: 'flex', border: '1px solid #E0E0DC', overflow: 'hidden', flexShrink: 0 }}>
                 {(['female', 'male'] as const).map(g => (
@@ -787,7 +787,7 @@ export function NextDirection({
                   }}
                 >
                   <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.12em', color: '#555550' }}>{meta.label}</span>
-                  <span style={{ fontSize: 15, fontWeight: 400, color: '#AAAAAA' }}>{meta.ko}</span>
+                  <span style={{ fontSize: 15, fontWeight: 400, color: '#777777' }}>{meta.ko}</span>
                 </button>
               );
             })}
@@ -801,13 +801,13 @@ export function NextDirection({
               return (
                 <motion.div key={key} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.18 }} style={{ overflow: 'hidden' }}>
                   <div style={{ padding: '11px 0', borderTop: '1px solid #EEEEE9', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                    <span style={{ fontFamily: MONO, fontSize: 7.5, letterSpacing: '0.14em', color: '#AAAAAA', flexShrink: 0, minWidth: 62 }}>{SERVICES[key].label}</span>
+                    <span style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.14em', color: '#777777', flexShrink: 0, minWidth: 62 }}>{SERVICES[key].label}</span>
                     <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                       {opts.map(opt => {
                         const active = selected.includes(opt);
                         return (
                           <button key={opt} onClick={() => toggleDetail(key, opt)} style={{
-                            padding: '4px 11px', fontSize: 11, fontWeight: 300,
+                            padding: '4px 11px', fontSize: 12, fontWeight: 400,
                             border: `1px solid ${active ? '#B8963C' : '#E0E0DC'}`,
                             background: active ? 'rgba(184,150,60,0.07)' : 'transparent',
                             color: active ? '#B8963C' : '#888880',
@@ -832,12 +832,12 @@ export function NextDirection({
               {/* Home care summary */}
               {homeCare.length > 0 && (
                 <div style={{ background: '#F8F7F4', padding: '18px 18px', marginBottom: 12 }}>
-                  <p style={{ fontFamily: MONO, fontSize: 7.5, letterSpacing: '0.18em', color: '#AAAAAA', marginBottom: 14 }}>HOME CARE SUMMARY</p>
+                  <p style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.18em', color: '#777777', marginBottom: 14 }}>HOME CARE SUMMARY</p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
                     {homeCare.map((tip, i) => (
                       <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                        <span style={{ fontFamily: MONO, fontSize: 8, color: '#B8963C', letterSpacing: '0.1em', flexShrink: 0, paddingTop: 2 }}>{String(i + 1).padStart(2, '0')}</span>
-                        <span style={{ fontSize: 12.5, color: '#555550', fontWeight: 300, lineHeight: 1.65 }}>{tip}</span>
+                        <span style={{ fontFamily: MONO, fontSize: 12, color: '#B8963C', letterSpacing: '0.1em', flexShrink: 0, paddingTop: 2 }}>{String(i + 1).padStart(2, '0')}</span>
+                        <span style={{ fontSize: 12.5, color: '#555550', fontWeight: 400, lineHeight: 1.65 }}>{tip}</span>
                       </div>
                     ))}
                   </div>
@@ -856,8 +856,8 @@ export function NextDirection({
                         style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '15px 4px', textAlign: 'left' }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                          <span style={{ fontFamily: MONO, fontSize: 7.5, letterSpacing: '0.14em', color: '#AAAAAA', width: 60, flexShrink: 0 }}>{SERVICES[key].label}</span>
-                          <span style={{ fontSize: 14, fontWeight: 300, color: '#333330', letterSpacing: '-0.005em' }}>{care.title}</span>
+                          <span style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.14em', color: '#777777', width: 60, flexShrink: 0 }}>{SERVICES[key].label}</span>
+                          <span style={{ fontSize: 14, fontWeight: 400, color: '#333330', letterSpacing: '-0.005em' }}>{care.title}</span>
                         </div>
                         <ChevronDown size={14} color="#AAAAAA" style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
                       </button>
@@ -867,8 +867,8 @@ export function NextDirection({
                             <div style={{ padding: '4px 4px 20px 72px', display: 'flex', flexDirection: 'column', gap: 10 }}>
                               {care.tips.map((tip, ti) => (
                                 <div key={ti} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                                  <span style={{ fontFamily: MONO, fontSize: 7.5, letterSpacing: '0.12em', color: '#CCCCCA', flexShrink: 0, paddingTop: 3, minWidth: 82 }}>{tip.label}</span>
-                                  <span style={{ fontSize: 12.5, color: '#555550', fontWeight: 300, lineHeight: 1.7 }}>{tip.text}</span>
+                                  <span style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.12em', color: '#777777', flexShrink: 0, paddingTop: 3, minWidth: 82 }}>{tip.label}</span>
+                                  <span style={{ fontSize: 12.5, color: '#555550', fontWeight: 400, lineHeight: 1.7 }}>{tip.text}</span>
                                 </div>
                               ))}
                             </div>
@@ -892,7 +892,7 @@ export function NextDirection({
               <div className="grid grid-cols-2" style={{ gap: 10 }}>
                 {/* NEXT CARE */}
                 <div style={{ border: '1px solid #E8E8E4', padding: '18px 16px' }}>
-                  <p style={{ fontFamily: MONO, fontSize: 7.5, letterSpacing: '0.18em', color: '#AAAAAA', marginBottom: 14 }}>NEXT CARE</p>
+                  <p style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.18em', color: '#777777', marginBottom: 14 }}>NEXT CARE</p>
                   {nextCare ? (
                     <>
                       <p style={{ fontSize: 24, fontWeight: 300, color: '#111111', letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 8 }}>
@@ -902,35 +902,35 @@ export function NextDirection({
                       </p>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
                         {nextCare.services.map(s => (
-                          <span key={s} style={{ fontFamily: MONO, fontSize: 7.5, letterSpacing: '0.09em', padding: '2px 7px', border: '1px solid #E0E0DC', color: '#888880' }}>{s}</span>
+                          <span key={s} style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.09em', padding: '2px 7px', border: '1px solid #E0E0DC', color: '#777777' }}>{s}</span>
                         ))}
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                        <span style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.12em', color: careOverride ? '#B8963C' : '#CCCCCA' }}>{careOverride ? 'CUSTOM' : 'AUTO'}</span>
-                        {careOverride && <button onClick={() => setCareOverride(null)} style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.1em', color: '#AAAAAA', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>RESET</button>}
-                        {!careEditMode && <button onClick={() => { setCareEditMode(true); setCareWeeksInput(String(nextCare.minWeeks)); }} style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.1em', color: '#888880', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>수정</button>}
+                        <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.12em', color: careOverride ? '#B8963C' : '#CCCCCA' }}>{careOverride ? 'CUSTOM' : 'AUTO'}</span>
+                        {careOverride && <button onClick={() => setCareOverride(null)} style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.1em', color: '#777777', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>RESET</button>}
+                        {!careEditMode && <button onClick={() => { setCareEditMode(true); setCareWeeksInput(String(nextCare.minWeeks)); }} style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.1em', color: '#777777', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>수정</button>}
                       </div>
                       <AnimatePresence>
                         {careEditMode && (
                           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: 'hidden' }}>
                             <div style={{ marginTop: 10, display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                               <input type="number" value={careWeeksInput} onChange={e => setCareWeeksInput(e.target.value)} min={1} max={52} style={{ width: 48, fontSize: 12, border: '1px solid #CCCCCA', padding: '4px 6px', outline: 'none', textAlign: 'center' }} />
-                              <span style={{ fontSize: 11, color: '#AAAAAA' }}>주</span>
-                              <button onClick={() => { const w = parseInt(careWeeksInput); if (w > 0) setCareOverride({ minWeeks: w, maxWeeks: w, services: nextCare.services }); setCareEditMode(false); }} style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.1em', padding: '4px 10px', background: '#1A1A1A', color: '#FFFFFF', border: 'none', cursor: 'pointer' }}>완료</button>
-                              <button onClick={() => setCareEditMode(false)} style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.1em', color: '#AAAAAA', background: 'none', border: 'none', cursor: 'pointer' }}>취소</button>
+                              <span style={{ fontSize: 12, color: '#777777' }}>주</span>
+                              <button onClick={() => { const w = parseInt(careWeeksInput); if (w > 0) setCareOverride({ minWeeks: w, maxWeeks: w, services: nextCare.services }); setCareEditMode(false); }} style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.1em', padding: '4px 10px', background: '#1A1A1A', color: '#FFFFFF', border: 'none', cursor: 'pointer' }}>완료</button>
+                              <button onClick={() => setCareEditMode(false)} style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.1em', color: '#777777', background: 'none', border: 'none', cursor: 'pointer' }}>취소</button>
                             </div>
                           </motion.div>
                         )}
                       </AnimatePresence>
                     </>
                   ) : (
-                    <p style={{ fontSize: 12, color: '#CCCCCA', fontWeight: 300 }}>케어 시술 없음</p>
+                    <p style={{ fontSize: 12, color: '#777777', fontWeight: 400 }}>케어 시술 없음</p>
                   )}
                 </div>
 
                 {/* NEXT DESIGN */}
                 <div style={{ border: '1px solid #E8E8E4', padding: '18px 16px' }}>
-                  <p style={{ fontFamily: MONO, fontSize: 7.5, letterSpacing: '0.18em', color: '#AAAAAA', marginBottom: 14 }}>NEXT DESIGN</p>
+                  <p style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.18em', color: '#777777', marginBottom: 14 }}>NEXT DESIGN</p>
                   {nextDesign ? (
                     <>
                       <p style={{ fontSize: 24, fontWeight: 300, color: '#111111', letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 8 }}>
@@ -940,29 +940,29 @@ export function NextDirection({
                       </p>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
                         {nextDesign.services.map(s => (
-                          <span key={s} style={{ fontFamily: MONO, fontSize: 7.5, letterSpacing: '0.09em', padding: '2px 7px', border: '1px solid #E0E0DC', color: '#888880' }}>{s}</span>
+                          <span key={s} style={{ fontFamily: MONO, fontSize: 12.5, letterSpacing: '0.09em', padding: '2px 7px', border: '1px solid #E0E0DC', color: '#777777' }}>{s}</span>
                         ))}
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                        <span style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.12em', color: designOverride ? '#B8963C' : '#CCCCCA' }}>{designOverride ? 'CUSTOM' : 'AUTO'}</span>
-                        {designOverride && <button onClick={() => setDesignOverride(null)} style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.1em', color: '#AAAAAA', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>RESET</button>}
-                        {!designEditMode && <button onClick={() => { setDesignEditMode(true); setDesignWeeksInput(String(nextDesign.minWeeks)); }} style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.1em', color: '#888880', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>수정</button>}
+                        <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.12em', color: designOverride ? '#B8963C' : '#CCCCCA' }}>{designOverride ? 'CUSTOM' : 'AUTO'}</span>
+                        {designOverride && <button onClick={() => setDesignOverride(null)} style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.1em', color: '#777777', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>RESET</button>}
+                        {!designEditMode && <button onClick={() => { setDesignEditMode(true); setDesignWeeksInput(String(nextDesign.minWeeks)); }} style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.1em', color: '#777777', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>수정</button>}
                       </div>
                       <AnimatePresence>
                         {designEditMode && (
                           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: 'hidden' }}>
                             <div style={{ marginTop: 10, display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                               <input type="number" value={designWeeksInput} onChange={e => setDesignWeeksInput(e.target.value)} min={1} max={52} style={{ width: 48, fontSize: 12, border: '1px solid #CCCCCA', padding: '4px 6px', outline: 'none', textAlign: 'center' }} />
-                              <span style={{ fontSize: 11, color: '#AAAAAA' }}>주</span>
-                              <button onClick={() => { const w = parseInt(designWeeksInput); if (w > 0) setDesignOverride({ minWeeks: w, maxWeeks: w, services: nextDesign.services }); setDesignEditMode(false); }} style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.1em', padding: '4px 10px', background: '#1A1A1A', color: '#FFFFFF', border: 'none', cursor: 'pointer' }}>완료</button>
-                              <button onClick={() => setDesignEditMode(false)} style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.1em', color: '#AAAAAA', background: 'none', border: 'none', cursor: 'pointer' }}>취소</button>
+                              <span style={{ fontSize: 12, color: '#777777' }}>주</span>
+                              <button onClick={() => { const w = parseInt(designWeeksInput); if (w > 0) setDesignOverride({ minWeeks: w, maxWeeks: w, services: nextDesign.services }); setDesignEditMode(false); }} style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.1em', padding: '4px 10px', background: '#1A1A1A', color: '#FFFFFF', border: 'none', cursor: 'pointer' }}>완료</button>
+                              <button onClick={() => setDesignEditMode(false)} style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.1em', color: '#777777', background: 'none', border: 'none', cursor: 'pointer' }}>취소</button>
                             </div>
                           </motion.div>
                         )}
                       </AnimatePresence>
                     </>
                   ) : (
-                    <p style={{ fontSize: 12, color: '#CCCCCA', fontWeight: 300 }}>디자인 시술 없음</p>
+                    <p style={{ fontSize: 12, color: '#777777', fontWeight: 400 }}>디자인 시술 없음</p>
                   )}
                 </div>
               </div>
@@ -985,7 +985,7 @@ export function NextDirection({
                     <p style={{ fontSize: 17, fontWeight: 500, letterSpacing: '-0.01em', color: '#111111', marginBottom: 2, lineHeight: 1.3 }}>
                       {weekToMonthHint(0)}
                     </p>
-                    <p style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.08em', color: '#111111', fontWeight: 500, lineHeight: 1.4 }}>
+                    <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.08em', color: '#111111', fontWeight: 500, lineHeight: 1.4 }}>
                       오늘
                     </p>
                   </div>
@@ -1001,7 +1001,7 @@ export function NextDirection({
                         }}>{SERVICE_KO[k]}</span>
                       ))}
                     </div>
-                    <p style={{ fontFamily: MONO, fontSize: 7, letterSpacing: '0.12em', color: '#CCCCCA', marginTop: 7 }}>오늘 진행한 시술</p>
+                    <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.12em', color: '#777777', marginTop: 7 }}>오늘 진행한 시술</p>
                   </div>
                 </div>
 
@@ -1021,7 +1021,7 @@ export function NextDirection({
                         <p className="text-left" style={{ fontSize: 17, fontWeight: 500, letterSpacing: '-0.01em', color: isReview ? '#B8963C' : '#111111', marginBottom: 2, lineHeight: 1.3 }}>
                           {ev.monthHint}
                         </p>
-                        <p className="text-left" style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.08em', color: isReview ? '#C9AE72' : '#AAAAA5', lineHeight: 1.4 }}>
+                        <p className="text-left" style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.08em', color: isReview ? '#C9AE72' : '#AAAAA5', lineHeight: 1.4 }}>
                           {ev.label}
                         </p>
                       </div>
@@ -1043,7 +1043,7 @@ export function NextDirection({
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                             {ev.services.map(s => (
                               <span key={s} style={{
-                                fontFamily: MONO, fontSize: 10, letterSpacing: '0.09em',
+                                fontFamily: MONO, fontSize: 12, letterSpacing: '0.09em',
                                 padding: '4px 10px',
                                 border: `1px solid ${isReview ? 'rgba(184,150,60,0.35)' : '#DDDDD9'}`,
                                 color: isReview ? '#B8963C' : '#AAAAAA',
@@ -1065,7 +1065,7 @@ export function NextDirection({
 
       {/* Fixed bottom bar */}
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: 'rgba(255,255,255,0.96)', backdropFilter: 'blur(8px)', borderTop: '1px solid #E8E8E4', padding: '14px 24px', zIndex: 40 }}>
-        <p style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.18em', color: '#CCCCCA', textAlign: 'center', lineHeight: 1.8 }}>
+        <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.18em', color: '#777777', textAlign: 'center', lineHeight: 1.8 }}>
           디자인은 고정되지 않으며 얼굴 · 이미지 · 컨디션에 따라 매 방문마다 FIT은 달라질 수 있습니다.
         </p>
       </div>

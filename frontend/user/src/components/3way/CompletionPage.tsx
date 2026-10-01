@@ -39,14 +39,14 @@ export function CompletionPage({ onDownloadPDF, onShareLink, onGoHome }: Complet
           <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em] mb-6">
             리포트 완성
           </h2>
-          <p className="text-sm text-[#999999] leading-relaxed">
+          <p className="text-sm text-[#777777] leading-relaxed">
             고객님의
             <br />
             3WAY 프리미엄 이미지 설계 리포트가
             <br />
             완성되었습니다
           </p>
-          <p className="text-sm text-[#999999] leading-relaxed mt-6">
+          <p className="text-sm text-[#777777] leading-relaxed mt-6">
             오늘의 디자인은 단순한 시술이 아닌
             <br />
             구조 기반 이미지 설계입니다
@@ -88,7 +88,7 @@ export function CompletionPage({ onDownloadPDF, onShareLink, onGoHome }: Complet
           </div>
 
           <div className="pt-6 border-t border-[#E5E5E5]">
-            <p className="text-[11px] text-[#AAAAAA] text-center tracking-[0.02em]" style={{ fontWeight: 300 }}>
+            <p className="text-[12px] text-[#777777] text-center tracking-[0.02em]" style={{ fontWeight: 300 }}>
               PDF로 저장하거나
               <br />
               링크로 공유할 수 있습니다
@@ -141,7 +141,7 @@ export function CompletionPage({ onDownloadPDF, onShareLink, onGoHome }: Complet
           transition={{ delay: 1, duration: 0.8 }}
           className="text-center pt-10 border-t border-[#E5E5E5]"
         >
-          <p className="text-[11px] tracking-[0.25em] text-[#111111] mb-5 uppercase" style={{ fontWeight: 400 }}>
+          <p className="text-[12px] tracking-[0.25em] text-[#111111] mb-5 uppercase" style={{ fontWeight: 400 }}>
             BE YOURSELF
           </p>
           <p className="text-[12px] leading-[1.8] text-[#777777]" style={{ fontWeight: 300 }}>

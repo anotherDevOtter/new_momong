@@ -32,7 +32,7 @@ export const HairStyleProposalStep = ({ data, gender, onChange, onNext, onBack }
     <div className="max-w-4xl mx-auto px-6 py-24 space-y-12">
       <div className="text-center space-y-3">
         <h2 className="font-semibold text-[#111111] tracking-[-0.01em]">FIT 헤어스타일 제안</h2>
-        <p className="text-sm text-[#999999]">원하는 길이를 선택해주세요</p>
+        <p className="text-sm text-[#777777]">원하는 길이를 선택해주세요</p>
       </div>
 
       <div className={`grid grid-cols-2 gap-4 ${gender === 'female' ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}>

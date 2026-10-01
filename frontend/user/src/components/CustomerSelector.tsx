@@ -65,31 +65,31 @@ export function CustomerSelector({
           {onCancel && (
             <button
               onClick={onCancel}
-              className="text-sm text-[#999999] hover:text-[#111111] mb-4 inline-flex items-center gap-1"
+              className="text-sm text-[#777777] hover:text-[#111111] mb-4 inline-flex items-center gap-1"
             >
               ← 뒤로
             </button>
           )}
           <h1 className="text-2xl font-semibold tracking-[-0.01em] text-[#111111] mb-2">{title}</h1>
-          <p className="text-sm text-[#999999]">{subtitle}</p>
+          <p className="text-sm text-[#777777]">{subtitle}</p>
         </div>
 
         {/* 검색 박스 */}
         <div className="relative mb-6">
-          <Search className="w-4 h-4 text-[#999999] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="w-4 h-4 text-[#777777] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="이름 또는 전화번호로 검색"
-            className="w-full pl-10 pr-4 py-3 border border-[#E5E5E5] rounded-lg text-sm text-[#111111] placeholder-[#BBBBBB] focus:outline-none focus:border-[#111111]"
+            className="w-full pl-10 pr-4 py-3 border border-[#E5E5E5] rounded-lg text-sm text-[#111111] placeholder-[#888888] focus:outline-none focus:border-[#111111]"
           />
         </div>
 
         {/* 고객 리스트 */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xs text-[#999999] uppercase tracking-wider">
+            <h2 className="text-xs text-[#777777] uppercase tracking-wider">
               {search.trim() ? `검색 결과 (${filtered.length})` : `최근 고객 (${filtered.length})`}
             </h2>
             <button
@@ -100,7 +100,7 @@ export function CustomerSelector({
             </button>
           </div>
           {filtered.length === 0 ? (
-            <div className="text-center py-12 text-sm text-[#999999] border border-dashed border-[#E5E5E5] rounded-lg">
+            <div className="text-center py-12 text-sm text-[#777777] border border-dashed border-[#E5E5E5] rounded-lg">
               {search.trim() ? '검색 결과가 없습니다' : '등록된 고객이 없습니다'}
             </div>
           ) : (
@@ -119,7 +119,7 @@ export function CustomerSelector({
                   >
                     <ChevronLeft size={14} /> 이전
                   </button>
-                  <span className="text-xs text-[#999999]">
+                  <span className="text-xs text-[#777777]">
                     {safePage + 1} / {totalPages}
                   </span>
                   <button
@@ -158,7 +158,7 @@ function CustomerCard({ customer, onClick }: { customer: CustomerSummary; onClic
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-3 mb-1">
             <span className="text-base font-medium text-[#111111]">{customer.name}</span>
-            <span className="text-xs text-[#999999]">{customer.phone}</span>
+            <span className="text-xs text-[#777777]">{customer.phone}</span>
           </div>
           {(customer.lastVisitDate || customer.lastCourse || customer.lastImageType) && (
             <div className="flex items-center gap-3 text-xs text-[#777777] mt-2">
@@ -180,7 +180,7 @@ function CustomerCard({ customer, onClick }: { customer: CustomerSummary; onClic
         </div>
         <ArrowRight
           size={18}
-          className="text-[#CCCCCC] group-hover:text-[#111111] transition-colors flex-shrink-0 mt-1"
+          className="text-[#777777] group-hover:text-[#111111] transition-colors flex-shrink-0 mt-1"
         />
       </div>
     </button>

@@ -45,7 +45,7 @@ export const HairConditionStep = ({ data, gender, onChange, onNext, onBack }: Ha
     <div className="max-w-2xl mx-auto px-6 py-24 space-y-12">
       <div className="text-center space-y-3">
         <h2 className="font-semibold text-[#111111] tracking-[-0.01em]">모질 분석 및 스타일 해석</h2>
-        <p className="text-sm text-[#999999]">현재 모발 상태를 체크해주세요</p>
+        <p className="text-sm text-[#777777]">현재 모발 상태를 체크해주세요</p>
       </div>
 
       <div className="space-y-10">

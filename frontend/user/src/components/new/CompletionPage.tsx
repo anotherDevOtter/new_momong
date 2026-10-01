@@ -45,7 +45,7 @@ export function CompletionPage({ onDownloadPDF, onShareLink, onGoHome, courseLab
           <p className="text-[30px] leading-[1.3] text-[#111111] mt-6 mb-4" style={{ fontWeight: 200 }}>
             &apos;BE yourself&apos;
           </p>
-          <p className="text-[12px] leading-[1.8] text-[#999995]" style={{ fontWeight: 300 }}>
+          <p className="text-[12px] leading-[1.8] text-[#777777]" style={{ fontWeight: 300 }}>
             모든 사람들이 자신의 아름다움을 발견하고
             <br />
             스스로를 사랑할 수 있도록 돕습니다.
@@ -71,9 +71,9 @@ export function CompletionPage({ onDownloadPDF, onShareLink, onGoHome, courseLab
               key={ch.num}
               className={i === 0 ? 'text-center' : 'text-center pt-8 mt-8 border-t border-[#E5E5E3]'}
             >
-              <p className="text-[11px] text-[#BBBBB6] mb-1" style={{ fontWeight: 300 }}>{ch.num}</p>
+              <p className="text-[12px] text-[#777777] mb-1" style={{ fontWeight: 300 }}>{ch.num}</p>
               <p className="text-[13px] tracking-[0.12em] text-[#111111] mb-1" style={{ fontWeight: 500 }}>{ch.title}</p>
-              <p className="text-[12px] text-[#999995] mb-4" style={{ fontWeight: 300 }}>{ch.ko}</p>
+              <p className="text-[12px] text-[#777777] mb-4" style={{ fontWeight: 300 }}>{ch.ko}</p>
               {ch.items.map(it => (
                 <p key={it} className="text-[13px] leading-[2] text-[#333330]" style={{ fontWeight: 300 }}>{it}</p>
               ))}

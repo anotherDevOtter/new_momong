@@ -30,18 +30,18 @@ export const AfterNoteStep = ({ data, onChange, onBack, onComplete }: AfterNoteS
     <div className="max-w-3xl mx-auto px-6 py-24 space-y-12">
       <div className="text-center space-y-3">
         <h2 className="font-semibold text-[#111111] tracking-[-0.01em]">AFTER NOTE</h2>
-        <p className="text-sm text-[#999999]">최종 정보를 입력하고 완료하세요</p>
+        <p className="text-sm text-[#777777]">최종 정보를 입력하고 완료하세요</p>
       </div>
 
       <div className="bg-white border border-[#EAEAEA] p-8 space-y-6">
         {/* 고객 기본 정보 */}
         <div className="grid grid-cols-3 gap-4 pb-6 border-b border-[#EAEAEA]">
           <div>
-            <div className="text-xs text-[#999999] mb-1">고객명</div>
+            <div className="text-xs text-[#777777] mb-1">고객명</div>
             <div className="text-sm font-medium">{data.clientInfo.name}</div>
           </div>
           <div>
-            <div className="text-xs text-[#999999] mb-1">방문일</div>
+            <div className="text-xs text-[#777777] mb-1">방문일</div>
             <div className="text-sm">{data.visitDate}</div>
           </div>
           <Input
@@ -56,8 +56,8 @@ export const AfterNoteStep = ({ data, onChange, onBack, onComplete }: AfterNoteS
         <div>
           <h3 className="mb-3 font-semibold text-[#111111] text-sm tracking-[-0.01em]">이미지 타입 & 모발 상태</h3>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div><span className="text-[#999999]">타입: </span>{data.faceImageType.type.toUpperCase()}</div>
-            <div><span className="text-[#999999]">손상도: </span>{data.hairCondition.damageLevel}</div>
+            <div><span className="text-[#777777]">타입: </span>{data.faceImageType.type.toUpperCase()}</div>
+            <div><span className="text-[#777777]">손상도: </span>{data.hairCondition.damageLevel}</div>
           </div>
         </div>
 
@@ -120,7 +120,7 @@ export const AfterNoteStep = ({ data, onChange, onBack, onComplete }: AfterNoteS
         </div>
 
         <div className="pt-6 border-t border-[#EAEAEA]">
-          <p className="text-xs text-center text-[#999999] leading-relaxed">
+          <p className="text-xs text-center text-[#777777] leading-relaxed">
             &apos;BE YOURSELF&apos;<br />
             사람들이 자신의 아름다움을 발견하고 스스로를 사랑할 수 있도록 돕습니다.
           </p>

@@ -39,7 +39,7 @@ export function Modal({ open, onClose, title, children, footer, maxWidth = 'max-
         {(title || true) && (
           <div className="flex items-center justify-between border-b border-[#E5E5E5] px-6 py-4 shrink-0">
             <div className="text-base font-semibold text-[#111111]">{title}</div>
-            <button onClick={onClose} className="text-[#999999] hover:text-[#111111] transition-colors">
+            <button onClick={onClose} className="text-[#777777] hover:text-[#111111] transition-colors">
               <X size={18} />
             </button>
           </div>

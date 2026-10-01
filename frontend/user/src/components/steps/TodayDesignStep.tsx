@@ -39,7 +39,7 @@ const DesignField = ({ label, options, selectedOptions, onOptionsChange, memo, o
 
   return (
     <div className="space-y-3">
-      <label className="block text-sm text-[#555555]">{label} <span className="text-[#999999]">*</span></label>
+      <label className="block text-sm text-[#555555]">{label} <span className="text-[#777777]">*</span></label>
       <div className="flex flex-wrap gap-3">
         {options.map((option) => {
           const isSelected = selectedOptions.includes(option);
@@ -54,13 +54,13 @@ const DesignField = ({ label, options, selectedOptions, onOptionsChange, memo, o
         })}
       </div>
       <div className="pt-2">
-        <label className="block text-xs text-[#999999] mb-2">세부사항 메모</label>
+        <label className="block text-xs text-[#777777] mb-2">세부사항 메모</label>
         <textarea
           value={memo}
           onChange={(e) => onMemoChange(e.target.value)}
           placeholder="디자인 디테일 메모 입력"
           rows={2}
-          className="w-full px-0 py-2 border-0 border-b border-[#EAEAEA] bg-transparent text-sm text-[#111111] placeholder:text-[#999999] focus:outline-none focus:border-[#111111] resize-none transition-colors"
+          className="w-full px-0 py-2 border-0 border-b border-[#EAEAEA] bg-transparent text-sm text-[#111111] placeholder:text-[#777777] focus:outline-none focus:border-[#111111] resize-none transition-colors"
         />
       </div>
     </div>
@@ -137,7 +137,7 @@ export const TodayDesignStep = ({
     <div className="max-w-2xl mx-auto px-6 py-24 space-y-12">
       <div className="text-center space-y-3">
         <h2 className="font-semibold text-[#111111] tracking-[-0.01em]">TODAY DESIGN 정리</h2>
-        <p className="text-sm text-[#999999]">오늘의 디자인 요소를 입력해주세요</p>
+        <p className="text-sm text-[#777777]">오늘의 디자인 요소를 입력해주세요</p>
       </div>
 
       <div className="space-y-8">
@@ -181,7 +181,7 @@ export const TodayDesignStep = ({
           <strong> {clientName}</strong>님께 가장 어울리는 방향으로 제안되었습니다.
         </p>
         {isHighDamage && (
-          <p className="text-sm text-[#999999]">
+          <p className="text-sm text-[#777777]">
             모발 컨디션을 고려해 과한 디자인 요소는 배제하고 회복을 우선한 방향으로 조율했습니다.
           </p>
         )}
@@ -189,7 +189,7 @@ export const TodayDesignStep = ({
 
       <div className="space-y-6">
         <h3 className="font-semibold text-[#111111] tracking-[-0.01em]">NEXT DIRECTION</h3>
-        <p className="text-sm text-[#999999]">다음 디자인 제안 방향을 선택해주세요</p>
+        <p className="text-sm text-[#777777]">다음 디자인 제안 방향을 선택해주세요</p>
 
         <div className="space-y-4">
           <NextDirectionField

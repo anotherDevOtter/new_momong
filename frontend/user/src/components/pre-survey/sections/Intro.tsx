@@ -122,18 +122,18 @@ function ImageCardGrid({
                   : <X size={12} color="white" strokeWidth={2.5} />}
               </div>
             )}
-            <p className="text-[10px] text-[#CCCCCC] uppercase mb-2 tracking-[0.12em]" style={{ fontWeight: 300 }}>
+            <p className="text-[12px] text-[#777777] uppercase mb-2 tracking-[0.12em]" style={{ fontWeight: 300 }}>
               {card.en}
             </p>
             <p
-              className={`text-[15px] mb-4 ${on && mode === 'dislike' ? 'text-[#AAAAAA]' : 'text-[#111111]'}`}
+              className={`text-[15px] mb-4 ${on && mode === 'dislike' ? 'text-[#777777]' : 'text-[#111111]'}`}
               style={{ fontWeight: 400 }}
             >
               {card.ko}
             </p>
             <div className="flex flex-col items-center gap-1">
               {card.keywords.map((kw) => (
-                <p key={kw} className="text-[10px] text-[#DDDDDD] leading-tight" style={{ fontWeight: 300 }}>
+                <p key={kw} className="text-[12px] text-[#DDDDDD] leading-tight" style={{ fontWeight: 300 }}>
                   {kw}
                 </p>
               ))}
@@ -208,7 +208,7 @@ function StyleCardGrid({
               )}
             </div>
             <p
-              className={`mt-2.5 text-[12px] tracking-[0.02em] ${on ? 'text-[#111111]' : 'text-[#AAAAAA]'}`}
+              className={`mt-2.5 text-[12px] tracking-[0.02em] ${on ? 'text-[#111111]' : 'text-[#777777]'}`}
               style={{ fontWeight: 300 }}
             >
               {label}
@@ -272,7 +272,7 @@ export function Intro({
 
         <div className="mb-20 space-y-8">
           <div>
-            <label className="text-[11px] text-[#7A7A7A] mb-3 block tracking-[0.05em]" style={{ fontWeight: 500 }}>
+            <label className="text-[12px] text-[#7A7A7A] mb-3 block tracking-[0.05em]" style={{ fontWeight: 500 }}>
               나이
             </label>
             <input
@@ -284,7 +284,7 @@ export function Intro({
             />
           </div>
           <div>
-            <label className="text-[11px] text-[#7A7A7A] mb-3 block tracking-[0.05em]" style={{ fontWeight: 500 }}>
+            <label className="text-[12px] text-[#7A7A7A] mb-3 block tracking-[0.05em]" style={{ fontWeight: 500 }}>
               직업
             </label>
             <input
@@ -310,7 +310,7 @@ export function Intro({
               평소 추구하시는 이미지나 스타일을 선택해 주세요. <br />
               최대 {MAX}개까지 선택하실 수 있습니다.
             </p>
-            <p className="text-[11px] text-[#B88A5A] mt-2" style={{ fontWeight: 400 }}>
+            <p className="text-[12px] text-[#B88A5A] mt-2" style={{ fontWeight: 400 }}>
               {preferences.length} / {MAX}
             </p>
           </div>
@@ -328,7 +328,7 @@ export function Intro({
                   <p className="text-[12px] text-[#7A7A7A] leading-[1.5] max-w-[300px] mx-auto" style={{ fontWeight: 400 }}>
                     마음에 드는 스타일을 최대 {MAX}개 선택해 주세요.
                   </p>
-                  <p className="text-[11px] text-[#B88A5A] mt-2" style={{ fontWeight: 400 }}>
+                  <p className="text-[12px] text-[#B88A5A] mt-2" style={{ fontWeight: 400 }}>
                     {preferredStyles.length} / {MAX}
                   </p>
                 </div>
@@ -369,7 +369,7 @@ export function Intro({
                     mode="prefer"
                   />
                 ) : (
-                  <p className="text-[13px] text-[#999999] text-center">위에서 먼저 선택해 주세요.</p>
+                  <p className="text-[13px] text-[#777777] text-center">위에서 먼저 선택해 주세요.</p>
                 )}
               </div>
             </>
@@ -401,7 +401,7 @@ export function Intro({
             >
               피하고 싶은 이미지나 스타일이 있다면 선택해 주세요. 최대 {MAX}개까지 선택하실 수 있습니다.
             </p>
-            <p className="text-[11px] text-[#B88A5A] mt-2" style={{ fontWeight: 400 }}>
+            <p className="text-[12px] text-[#B88A5A] mt-2" style={{ fontWeight: 400 }}>
               {dislikes.length} / {MAX}
             </p>
           </div>
@@ -420,7 +420,7 @@ export function Intro({
                   <p className="text-[12px] text-[#7A7A7A] leading-[1.5] max-w-[300px] mx-auto" style={{ fontWeight: 400 }}>
                     피하고 싶은 스타일이 있다면 최대 {MAX}개 선택해 주세요.
                   </p>
-                  <p className="text-[11px] text-[#B88A5A] mt-2" style={{ fontWeight: 400 }}>
+                  <p className="text-[12px] text-[#B88A5A] mt-2" style={{ fontWeight: 400 }}>
                     {dislikedStyles.length} / {MAX}
                   </p>
                 </div>
@@ -433,7 +433,7 @@ export function Intro({
                     mode="dislike"
                   />
                 ) : (
-                  <p className="text-[13px] text-[#999999] text-center">위에서 성별을 먼저 선택해 주세요.</p>
+                  <p className="text-[13px] text-[#777777] text-center">위에서 성별을 먼저 선택해 주세요.</p>
                 )}
               </div>
             </>

@@ -270,7 +270,7 @@ function PctBar({ label, pct }: { label: string; pct: number }) {
       <div className="flex-1 h-[3px] bg-[#E8E8E4] rounded-full overflow-hidden">
         <motion.div className="h-full bg-[#1A1A1A] rounded-full" initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} />
       </div>
-      <span className="text-[11px] text-[#A6A6A2] w-7 text-right" style={{ fontFamily: MONO }}>{pct}%</span>
+      <span className="text-[12px] text-[#777777] w-7 text-right" style={{ fontFamily: MONO }}>{pct}%</span>
     </div>
   );
 }
@@ -295,9 +295,9 @@ function AdjustSlider({ pos, l, r, onChange }: { pos: number; l: string; r: stri
       </div>
       {/* 양끝 단어와 가운데 수치의 폰트를 맞춘다 — 예전에는 단어만 본문 폰트라 따로 놀았다 (2026-09-11) */}
       <div className="flex justify-between mt-1.5" style={{ fontFamily: MONO }}>
-        <span className="text-[10px] text-[#AAAAAA]" style={{ letterSpacing: '0.04em' }}>{l}</span>
-        <span className="text-[10px] text-[#1A1A1A] font-semibold" style={{ letterSpacing: '0.04em' }}>{Math.round(pos * 100)}</span>
-        <span className="text-[10px] text-[#AAAAAA]" style={{ letterSpacing: '0.04em' }}>{r}</span>
+        <span className="text-[12px] text-[#777777]" style={{ letterSpacing: '0.04em' }}>{l}</span>
+        <span className="text-[12px] text-[#1A1A1A] font-semibold" style={{ letterSpacing: '0.04em' }}>{Math.round(pos * 100)}</span>
+        <span className="text-[12px] text-[#777777]" style={{ letterSpacing: '0.04em' }}>{r}</span>
       </div>
     </div>
   );
@@ -412,7 +412,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
 
         {/* ── Header ───────────────────────────────────────────────── */}
         <div className="mb-6">
-          <p className="text-[11px] tracking-[0.2em] text-[#AAAAAA] mb-1.5" style={{ fontFamily: MONO }}>STEP 02</p>
+          <p className="text-[12px] tracking-[0.2em] text-[#777777] mb-1.5" style={{ fontFamily: MONO }}>STEP 02</p>
           <div className="flex items-end justify-between">
             <h1 className="text-[1.6rem] font-light text-[#111111] tracking-tight">이목구비 집중 분석</h1>
             {/* 다른 화면과 같은 모양의 뒤로가기. onBack 이 없으면 그리지 않는다. */}
@@ -420,7 +420,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
               {onBack && (
                 <button
                   onClick={onBack}
-                  className="px-3 py-2 text-[11px] tracking-[0.04em] rounded-sm border border-[#E8E8E4] text-[#888888]"
+                  className="px-3 py-2 text-[12px] tracking-[0.04em] rounded-sm border border-[#E8E8E4] text-[#777777]"
                   style={{ background: 'transparent', cursor: 'pointer' }}>
                   ← 돌아가기
                 </button>
@@ -485,7 +485,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                 className="relative pb-3 mr-8 text-[14px] tracking-tight"
                 style={{ fontWeight: i === zoneIdx ? 600 : 400, color: i === zoneIdx ? '#1A1A1A' : '#AAAAAA', background: 'none', border: 'none', cursor: 'pointer' }}>
                 {z.name}
-                <span className="ml-1.5 text-[10px]" style={{ color: '#CCCCCC', fontFamily: MONO }}>{z.count}</span>
+                <span className="ml-1.5 text-[12px]" style={{ color: '#777777', fontFamily: MONO }}>{z.count}</span>
                 {i === zoneIdx && <motion.div layoutId="ztab" className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#1A1A1A]" />}
               </button>
             ))}
@@ -539,13 +539,13 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                                  color: flatIdx <= 0 ? '#CCCCCC' : '#444444',
                                  cursor: flatIdx <= 0 ? 'default' : 'pointer' }}>‹</button>
                       <div>
-                        <p className="text-[9px] tracking-[0.18em] text-[#AAAAAA]" style={{ fontFamily: MONO }}>
+                        <p className="text-[12px] tracking-[0.18em] text-[#777777]" style={{ fontFamily: MONO }}>
                           ADJUST POINTS · {flatIdx + 1}/{flatItems.length}
                         </p>
                         <p className="text-[14px] text-[#1A1A1A] mt-0.5">
                           {current.num}. {current.title}
                           {isUnmeasured(current.id) && (
-                            <span className="ml-2 text-[10px] text-[#B08A3E]">미측정</span>
+                            <span className="ml-2 text-[12px] text-[#B08A3E]">미측정</span>
                           )}
                         </p>
                       </div>
@@ -561,7 +561,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                       {/* 분석 결과 on/off — 작은 화면과 같은 스위치를 쓴다 */}
                       <button
                         onClick={() => setOverlayOn(v => !v)}
-                        className="px-2.5 py-1.5 text-[11px] rounded-sm"
+                        className="px-2.5 py-1.5 text-[12px] rounded-sm"
                         style={{ background: overlayOn ? '#1A1A1A' : 'transparent',
                                  color: overlayOn ? '#FFFFFF' : '#666666',
                                  border: '1px solid ' + (overlayOn ? '#1A1A1A' : '#DDDDDD'), cursor: 'pointer' }}>
@@ -569,7 +569,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                       </button>
                       <button
                         onClick={() => setZoomOpen(false)}
-                        className="px-3 py-1.5 text-[11px] text-[#666666] rounded-sm"
+                        className="px-3 py-1.5 text-[12px] text-[#666666] rounded-sm"
                         style={{ background: 'transparent', border: '1px solid #DDDDDD', cursor: 'pointer' }}>
                         닫기
                       </button>
@@ -601,7 +601,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                   </div>
 
                   <div className="px-5 py-3 border-t border-[#E8E8E4]">
-                    <p className="text-[10px] text-[#999999] leading-relaxed">
+                    <p className="text-[12px] text-[#777777] leading-relaxed">
                       {landmarks
                         ? '얼굴 좌표로 그린 가이드선입니다. 값은 오른쪽 슬라이더로 조정해주세요.'
                         : '얼굴을 찾지 못했습니다. 사진을 보고 오른쪽 슬라이더로 직접 잡아주세요.'}
@@ -631,7 +631,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                     {(
                       <button
                         onClick={() => setZoomOpen(true)}
-                        className="absolute bottom-2 right-2 px-2 py-1 rounded-sm text-[10px] tracking-[0.04em] text-white"
+                        className="absolute bottom-2 right-2 px-2 py-1 rounded-sm text-[12px] tracking-[0.04em] text-white"
                         style={{ background: 'rgba(26,26,26,0.75)', backdropFilter: 'blur(6px)', border: 'none', cursor: 'pointer' }}>
                         크게 보기 ⤢
                       </button>
@@ -655,7 +655,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                 {(
                   <button
                     onClick={() => setZoomOpen(true)}
-                    className="absolute bottom-2 right-2 px-2 py-1 rounded-sm text-[10px] tracking-[0.04em] text-white"
+                    className="absolute bottom-2 right-2 px-2 py-1 rounded-sm text-[12px] tracking-[0.04em] text-white"
                     style={{ background: 'rgba(26,26,26,0.75)', backdropFilter: 'blur(6px)', border: 'none', cursor: 'pointer' }}>
                     크게 보기 ⤢
                   </button>
@@ -666,16 +666,16 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                   style={{ background: 'rgba(26,26,26,0.75)', backdropFilter: 'blur(6px)' }}>
                   <motion.div className="w-1.5 h-1.5 rounded-full bg-white"
                     animate={{ opacity: [1, 0.2, 1] }} transition={{ duration: 2.2, repeat: Infinity }} />
-                  <span className="text-[8px] tracking-[0.16em] text-white" style={{ fontFamily: MONO }}>ANALYZING</span>
+                  <span className="text-[12px] tracking-[0.16em] text-white" style={{ fontFamily: MONO }}>ANALYZING</span>
                 </div>
                 <div className="absolute top-2 right-2 px-1.5 py-1 rounded-sm"
                   style={{ background: 'rgba(26,26,26,0.75)', backdropFilter: 'blur(6px)' }}>
-                  <span className="text-[8px] tracking-[0.12em] text-white" style={{ fontFamily: MONO }}>
+                  <span className="text-[12px] tracking-[0.12em] text-white" style={{ fontFamily: MONO }}>
                     {stepIdx + 1}/{items.length}
                   </span>
                 </div>
                 <button onClick={() => setGuideline(g => !g)}
-                  className="absolute bottom-2 left-2 px-2 py-1 rounded-sm text-[9px] tracking-wider transition-colors"
+                  className="absolute bottom-2 left-2 px-2 py-1 rounded-sm text-[12px] tracking-wider transition-colors"
                   style={{
                     fontFamily: MONO,
                     background: guideline ? '#1A1A1A' : 'rgba(255,255,255,0.85)',
@@ -687,7 +687,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                 </button>
                 {/* 측정선을 끄고 맨 얼굴을 볼 수 있게 한다. 크게 보기에서도 같은 상태가 유지된다 */}
                 <button onClick={() => setOverlayOn(v => !v)}
-                  className="absolute bottom-2 left-[70px] px-2 py-1 rounded-sm text-[9px] tracking-wider transition-colors"
+                  className="absolute bottom-2 left-[70px] px-2 py-1 rounded-sm text-[12px] tracking-wider transition-colors"
                   style={{
                     fontFamily: MONO,
                     background: overlayOn ? '#1A1A1A' : 'rgba(255,255,255,0.85)',
@@ -701,7 +701,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
 
               {/* Type display — centered below photo */}
               <div className="flex flex-col items-center text-center pt-3">
-                <p style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.2em', color: '#AAAAAA', marginBottom: 4 }}>
+                <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.2em', color: '#777777', marginBottom: 4 }}>
                   최종  이미지타입
                 </p>
                 <p style={{ fontSize: 20, fontWeight: 700, color: '#111111', letterSpacing: '-0.01em', lineHeight: 1.1 }}>
@@ -728,9 +728,9 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                         }}>
                         <div className="flex items-center gap-1.5 min-w-0">
                           {done[it.id] && (
-                            <span style={{ fontSize: 8, color: isSel ? 'rgba(255,255,255,0.5)' : '#AAAAAA', flexShrink: 0 }}>✓</span>
+                            <span style={{ fontSize: 12, color: isSel ? 'rgba(255,255,255,0.5)' : '#AAAAAA', flexShrink: 0 }}>✓</span>
                           )}
-                          <span className="text-[11px] truncate"
+                          <span className="text-[12px] truncate"
                             style={{ color: isSel ? '#FFFFFF' : '#333333', fontWeight: isSel ? 500 : 400 }}>
                             {it.num}. {it.title}
                           </span>
@@ -743,7 +743,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                           // 등급 글자를 달고도 미측정으로 세어졌다.
                           const pending = posMap[it.id] == null;
                           return (
-                            <span className="text-[9px] w-5 text-center shrink-0 ml-1 rounded-sm py-0.5"
+                            <span className="text-[12px] w-5 text-center shrink-0 ml-1 rounded-sm py-0.5"
                               title={
                                 pending
                                   ? (isUnmeasured(it.id)
@@ -768,13 +768,13 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
 
                 {/* Axis count summary */}
                 <div className="pt-2.5 border-t border-[#E8E8E4]" style={{ paddingBottom: 2 }}>
-                  <p className="text-[8px] tracking-[0.16em] text-[#AAAAAA] mb-1.5" style={{ fontFamily: MONO }}>
+                  <p className="text-[12px] tracking-[0.16em] text-[#777777] mb-1.5" style={{ fontFamily: MONO }}>
                     {axisLabels.join(' · ')}
                   </p>
                   <div className="flex gap-2">
                     {axisLabels.map(label => (
                       <div key={label} className="flex items-baseline gap-1">
-                        <span className="text-[10px] text-[#888888]">{label}</span>
+                        <span className="text-[12px] text-[#777777]">{label}</span>
                         <span className="text-[16px] font-light text-[#1A1A1A]" style={{ fontFamily: MONO }}>
                           {axisCounts[label] ?? 0}
                         </span>
@@ -798,13 +798,13 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                           <motion.span key={liveType}
                             initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
                             transition={{ duration: 0.15 }}
-                            className="text-[9px] px-1.5 py-px bg-[#1A1A1A] rounded-sm text-white shrink-0 mt-0.5 ml-2"
+                            className="text-[12px] px-1.5 py-px bg-[#1A1A1A] rounded-sm text-white shrink-0 mt-0.5 ml-2"
                             style={{ fontFamily: MONO }}>
                             {liveType}
                           </motion.span>
                         </AnimatePresence>
                       </div>
-                      <p className="text-[10px] text-[#888888] mb-3">
+                      <p className="text-[12px] text-[#777777] mb-3">
                         현재 값 — <span className="text-[#1A1A1A] font-medium">{deriveValue(current, pos)}</span>
                       </p>
 
@@ -814,7 +814,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                           (2) 모듈은 있는데 이 사진에서 등급이 안 나온 항목 */}
                       {posMap[current.id] == null && (
                         <div className="mb-3 px-2.5 py-2 rounded-sm border border-[#E8E4D8] bg-[#FBF8F0]">
-                          <p className="text-[10px] text-[#8A7645] leading-relaxed">
+                          <p className="text-[12px] text-[#8A7645] leading-relaxed">
                             {isUnmeasured(current.id)
                               ? '자동 분석 모듈이 없는 항목입니다.'
                               : '이 사진에서는 자동 분석이 등급을 내지 못했습니다.'}
@@ -825,7 +825,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                       )}
                       {posMap[current.id] != null && isUnmeasured(current.id) && (
                         <div className="mb-3 px-2.5 py-2 rounded-sm border border-[#DDE6DD] bg-[#F3F7F3]">
-                          <p className="text-[10px] text-[#4C7A55] leading-relaxed">
+                          <p className="text-[12px] text-[#4C7A55] leading-relaxed">
                             디자이너가 직접 정한 값입니다. 자동 분석 결과가 아닙니다.
                           </p>
                         </div>
@@ -840,19 +840,19 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
 
                       <div className="my-3 h-px bg-[#E8E8E4]" />
 
-                      <p className="text-[9px] tracking-[0.2em] text-[#AAAAAA] mb-1" style={{ fontFamily: MONO }}>이미지 영향</p>
+                      <p className="text-[12px] tracking-[0.2em] text-[#777777] mb-1" style={{ fontFamily: MONO }}>이미지 영향</p>
                       <AnimatePresence mode="wait">
                         <motion.p key={liveDesc}
                           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                           transition={{ duration: 0.2 }}
-                          className="text-[11px] leading-[1.75] mb-3"
+                          className="text-[12px] leading-[1.75] mb-3"
                           style={{ color: liveType === 'Cool' ? '#1C3070' : liveType === 'Hard' ? '#7A3A10' : '#333333' }}>
                           {liveDesc}
                         </motion.p>
                       </AnimatePresence>
 
                       <div className="bg-[#F7F7F5] rounded-sm p-3 mb-4">
-                        <p className="text-[9px] tracking-[0.2em] text-[#AAAAAA] mb-1" style={{ fontFamily: MONO }}>대표 성향</p>
+                        <p className="text-[12px] tracking-[0.2em] text-[#777777] mb-1" style={{ fontFamily: MONO }}>대표 성향</p>
                         <AnimatePresence mode="wait">
                           <motion.p key={liveType}
                             initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
@@ -862,7 +862,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                           </motion.p>
                         </AnimatePresence>
                         <div className="flex flex-wrap gap-1 mb-2">
-                          {liveTags.map(t => <span key={t} className="text-[10px] text-[#888888]">{t}</span>)}
+                          {liveTags.map(t => <span key={t} className="text-[12px] text-[#777777]">{t}</span>)}
                         </div>
                         {liveBd.map(b => <PctBar key={b.label} {...b} />)}
                       </div>
@@ -871,7 +871,7 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                           값이 이미 있으면(자동 분석 or 디자이너 확정) 버튼 대신 출처만 표시한다 —
                           슬라이더는 계속 움직일 수 있고, 움직이면 '디자이너 확정' 으로 바뀐다. */}
                       <div className="flex items-center justify-between pt-3 border-t border-[#E8E8E4]">
-                        <p className="text-[9px] tracking-[0.16em] text-[#AAAAAA]" style={{ fontFamily: MONO }}>MEASUREMENT</p>
+                        <p className="text-[12px] tracking-[0.16em] text-[#777777]" style={{ fontFamily: MONO }}>MEASUREMENT</p>
                         {posMap[current.id] == null ? (
                           <button
                             onClick={() => {
@@ -882,13 +882,13 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
                               // 확정했으면 손이 멈추지 않게 다음 항목으로 넘긴다.
                               goItem(1);
                             }}
-                            className="px-3 py-1.5 text-[11px] tracking-[0.06em] rounded-sm transition-colors"
+                            className="px-3 py-1.5 text-[12px] tracking-[0.06em] rounded-sm transition-colors"
                             style={{ background: '#1A1A1A', color: '#FFFFFF', border: 'none', cursor: 'pointer' }}>
                             측정 완료 →
                           </button>
                         ) : (
                           <span
-                            className="px-2.5 py-1.5 text-[10px] tracking-[0.06em] rounded-sm"
+                            className="px-2.5 py-1.5 text-[12px] tracking-[0.06em] rounded-sm"
                             style={{ background: '#F2F4F2', color: '#4C7A55' }}>
                             {done[current.id] || isUnmeasured(current.id) ? '✓ 디자이너 확정' : '✓ 자동 측정됨'}
                           </span>

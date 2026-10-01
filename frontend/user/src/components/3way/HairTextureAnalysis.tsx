@@ -172,7 +172,7 @@ export function HairTextureAnalysis({ onBack, onNext, onChange, startEmpty }: Ha
             <h2 className="text-2xl font-semibold text-[#111111] tracking-[-0.01em] mb-3">
               모질 분석 및 스타일 해석
             </h2>
-            <p className="text-sm text-[#999999]">
+            <p className="text-sm text-[#777777]">
               현재 모발 상태를 기반으로 디자인 가능 범위를 설정합니다.
             </p>
           </motion.div>
@@ -184,8 +184,8 @@ export function HairTextureAnalysis({ onBack, onNext, onChange, startEmpty }: Ha
             transition={{ delay: 0.2, duration: 0.6 }}
             className="mb-8"
           >
-            <h2 className="text-base font-light tracking-wide text-black mb-4 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-black text-white text-xs flex items-center justify-center font-light">
+            <h2 className="text-base font-normal tracking-wide text-black mb-4 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-black text-white text-xs flex items-center justify-center font-normal">
                 1
               </span>
               손상도
@@ -214,7 +214,7 @@ export function HairTextureAnalysis({ onBack, onNext, onChange, startEmpty }: Ha
                       <Check className="w-4 h-4 text-black" strokeWidth={2} />
                     )}
                   </div>
-                  <p className="text-sm font-light text-black text-center">{option.label}</p>
+                  <p className="text-sm font-normal text-black text-center">{option.label}</p>
                 </button>
               ))}
             </div>
@@ -227,7 +227,7 @@ export function HairTextureAnalysis({ onBack, onNext, onChange, startEmpty }: Ha
                   : 'bg-blue-50/50 border-blue-100'
               }`}
             >
-              <p className="text-xs text-gray-700 font-light leading-relaxed">
+              <p className="text-xs text-gray-700 font-normal leading-relaxed">
                 {damageLevels.find((d) => d.id === damageLevel)?.description}
               </p>
             </div>
@@ -240,8 +240,8 @@ export function HairTextureAnalysis({ onBack, onNext, onChange, startEmpty }: Ha
             transition={{ delay: 0.3, duration: 0.6 }}
             className="mb-8"
           >
-            <h2 className="text-base font-light tracking-wide text-black mb-4 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-black text-white text-xs flex items-center justify-center font-light">
+            <h2 className="text-base font-normal tracking-wide text-black mb-4 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-black text-white text-xs flex items-center justify-center font-normal">
                 2
               </span>
               모질 상태
@@ -263,14 +263,14 @@ export function HairTextureAnalysis({ onBack, onNext, onChange, startEmpty }: Ha
                       <Check className="w-4 h-4 text-black" strokeWidth={2} />
                     )}
                   </div>
-                  <p className="text-sm font-light text-black text-center">{option.label}</p>
+                  <p className="text-sm font-normal text-black text-center">{option.label}</p>
                 </button>
               ))}
             </div>
 
             {/* 자동 해석 */}
             <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
-              <p className="text-xs text-gray-700 font-light leading-relaxed">
+              <p className="text-xs text-gray-700 font-normal leading-relaxed">
                 {hairTypes.find((h) => h.id === hairType)?.interpretation}
               </p>
             </div>
@@ -283,8 +283,8 @@ export function HairTextureAnalysis({ onBack, onNext, onChange, startEmpty }: Ha
             transition={{ delay: 0.4, duration: 0.6 }}
             className="mb-8"
           >
-            <h2 className="text-base font-light tracking-wide text-black mb-4 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-black text-white text-xs flex items-center justify-center font-light">
+            <h2 className="text-base font-normal tracking-wide text-black mb-4 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-black text-white text-xs flex items-center justify-center font-normal">
                 3
               </span>
               굵기
@@ -306,14 +306,14 @@ export function HairTextureAnalysis({ onBack, onNext, onChange, startEmpty }: Ha
                       <Check className="w-4 h-4 text-black" strokeWidth={2} />
                     )}
                   </div>
-                  <p className="text-sm font-light text-black text-center">{option.label}</p>
+                  <p className="text-sm font-normal text-black text-center">{option.label}</p>
                 </button>
               ))}
             </div>
 
             {/* 자동 해석 */}
             <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
-              <p className="text-xs text-gray-700 font-light leading-relaxed">
+              <p className="text-xs text-gray-700 font-normal leading-relaxed">
                 {thicknessOptions.find((t) => t.id === thickness)?.interpretation}
               </p>
             </div>
@@ -326,8 +326,8 @@ export function HairTextureAnalysis({ onBack, onNext, onChange, startEmpty }: Ha
             transition={{ delay: 0.5, duration: 0.6 }}
             className="mb-8"
           >
-            <h2 className="text-base font-light tracking-wide text-black mb-4 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-black text-white text-xs flex items-center justify-center font-light">
+            <h2 className="text-base font-normal tracking-wide text-black mb-4 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-black text-white text-xs flex items-center justify-center font-normal">
                 4
               </span>
               숱
@@ -349,14 +349,14 @@ export function HairTextureAnalysis({ onBack, onNext, onChange, startEmpty }: Ha
                       <Check className="w-4 h-4 text-black" strokeWidth={2} />
                     )}
                   </div>
-                  <p className="text-sm font-light text-black text-center">{option.label}</p>
+                  <p className="text-sm font-normal text-black text-center">{option.label}</p>
                 </button>
               ))}
             </div>
 
             {/* 자동 해석 */}
             <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
-              <p className="text-xs text-gray-700 font-light leading-relaxed">
+              <p className="text-xs text-gray-700 font-normal leading-relaxed">
                 {densityOptions.find((d) => d.id === density)?.interpretation}
               </p>
             </div>
@@ -369,8 +369,8 @@ export function HairTextureAnalysis({ onBack, onNext, onChange, startEmpty }: Ha
             transition={{ delay: 0.6, duration: 0.6 }}
             className="mb-8"
           >
-            <h2 className="text-base font-light tracking-wide text-black mb-4 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-black text-white text-xs flex items-center justify-center font-light">
+            <h2 className="text-base font-normal tracking-wide text-black mb-4 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-black text-white text-xs flex items-center justify-center font-normal">
                 5
               </span>
               곱슬 정도
@@ -392,14 +392,14 @@ export function HairTextureAnalysis({ onBack, onNext, onChange, startEmpty }: Ha
                       <Check className="w-4 h-4 text-black" strokeWidth={2} />
                     )}
                   </div>
-                  <p className="text-sm font-light text-black text-center">{option.label}</p>
+                  <p className="text-sm font-normal text-black text-center">{option.label}</p>
                 </button>
               ))}
             </div>
 
             {/* 자동 해석 */}
             <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
-              <p className="text-xs text-gray-700 font-light leading-relaxed">
+              <p className="text-xs text-gray-700 font-normal leading-relaxed">
                 {curlCoverageOptions.find((c) => c.id === curlCoverage)?.interpretation}
               </p>
             </div>
@@ -412,7 +412,7 @@ export function HairTextureAnalysis({ onBack, onNext, onChange, startEmpty }: Ha
             transition={{ delay: 0.7, duration: 0.6 }}
             className="bg-black text-white rounded-2xl p-6 mb-12"
           >
-            <h3 className="text-xs tracking-[0.2em] uppercase font-light mb-4 opacity-70">
+            <h3 className="text-xs tracking-[0.2em] uppercase font-normal mb-4 opacity-70">
               모질 종합 해석
             </h3>
 
@@ -420,7 +420,7 @@ export function HairTextureAnalysis({ onBack, onNext, onChange, startEmpty }: Ha
               {interpretation.map((item, index) => (
                 <li key={index} className="flex items-start gap-3">
                   <Check className="w-4 h-4 mt-0.5 flex-shrink-0" strokeWidth={2} />
-                  <span className="text-sm font-light">{item}</span>
+                  <span className="text-sm font-normal">{item}</span>
                 </li>
               ))}
             </ul>
