@@ -57,7 +57,7 @@ export function NewCustomerForm({
       <div className="space-y-5">
         <div>
           <label className="block text-sm text-[#555555] mb-2">
-            고객명 <span className="text-red-500">*</span>
+            고객명 <span className="text-[#9A3B3B]">*</span>
           </label>
           <div className="relative">
             <User className="w-4 h-4 text-[#999999] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -73,7 +73,7 @@ export function NewCustomerForm({
 
         <div>
           <label className="block text-sm text-[#555555] mb-2">
-            연락처 <span className="text-red-500">*</span>
+            연락처 <span className="text-[#9A3B3B]">*</span>
           </label>
           <div className="relative">
             <Phone className="w-4 h-4 text-[#999999] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />

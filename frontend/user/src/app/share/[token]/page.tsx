@@ -77,7 +77,7 @@ export default function SharePage() {
             </button>
           </div>
 
-          {error && <p className="text-xs text-red-500">{error}</p>}
+          {error && <p className="text-xs text-[#9A3B3B]">{error}</p>}
 
           <button
             onClick={handleVerify}
@@ -202,15 +202,15 @@ function AfterNoteView({ data }: { data: ConsultationData }) {
           <div className="grid grid-cols-2 gap-4">
             {/* IMAGE TYPE */}
             <div className="border border-[#EAEAEA] p-4">
-              <div className="text-[11px] font-semibold text-[#6E1F2A] tracking-[0.03em] mb-3">IMAGE TYPE</div>
+              <div className="text-[11px] font-semibold text-[#4B2928] tracking-[0.03em] mb-3">IMAGE TYPE</div>
               {['WARM', 'NEUTRAL', 'COOL'].map((type) => {
                 const selected = data.faceImageType?.type?.toUpperCase() === type;
                 return (
                   <div key={type} className="flex items-center mb-2.5">
-                    <div className={`w-3.5 h-3.5 mr-2.5 flex items-center justify-center flex-shrink-0 ${selected ? 'bg-[#6E1F2A] border-2 border-[#6E1F2A]' : 'border border-[#CCCCCC]'}`}>
+                    <div className={`w-3.5 h-3.5 mr-2.5 flex items-center justify-center flex-shrink-0 ${selected ? 'bg-[#4B2928] border-2 border-[#4B2928]' : 'border border-[#CCCCCC]'}`}>
                       {selected && <div className="w-1.5 h-1.5 bg-white" />}
                     </div>
-                    <span className={`text-sm ${selected ? 'text-[#6E1F2A] font-semibold' : 'text-[#AAAAAA]'}`}>{type}</span>
+                    <span className={`text-sm ${selected ? 'text-[#4B2928] font-semibold' : 'text-[#AAAAAA]'}`}>{type}</span>
                   </div>
                 );
               })}
@@ -219,7 +219,7 @@ function AfterNoteView({ data }: { data: ConsultationData }) {
 
             {/* HAIR CONDITION */}
             <div className="border border-[#EAEAEA] p-4">
-              <div className="text-[11px] font-semibold text-[#6E1F2A] tracking-[0.03em] mb-3">HAIR CONDITION</div>
+              <div className="text-[11px] font-semibold text-[#4B2928] tracking-[0.03em] mb-3">HAIR CONDITION</div>
               {data.hairCondition?.damageLevel && (
                 <div className="mb-2.5">
                   <div className="text-[10px] text-[#999999] mb-0.5">손상도</div>
@@ -290,13 +290,13 @@ function AfterNoteView({ data }: { data: ConsultationData }) {
               <div className="text-sm font-semibold tracking-[0.05em] text-[#1C1C1C] mb-4">NEXT DIRECTION</div>
               <div className="flex flex-wrap gap-3 mb-3">
                 {data.nextDirection.lengthChange?.map((v) => (
-                  <span key={v} className="px-4 py-2 border border-[#6E1F2A] text-xs text-[#6E1F2A] font-semibold">길이 변화 ({v})</span>
+                  <span key={v} className="px-4 py-2 border border-[#4B2928] text-xs text-[#4B2928] font-semibold">길이 변화 ({v})</span>
                 ))}
                 {data.nextDirection.colorChange?.map((v) => (
-                  <span key={v} className="px-4 py-2 border border-[#6E1F2A] text-xs text-[#6E1F2A] font-semibold">컬러 변화 ({v})</span>
+                  <span key={v} className="px-4 py-2 border border-[#4B2928] text-xs text-[#4B2928] font-semibold">컬러 변화 ({v})</span>
                 ))}
                 {data.nextDirection.others?.map((v, i) => (
-                  <span key={i} className="px-4 py-2 border border-[#6E1F2A] text-xs text-[#6E1F2A] font-semibold">{v}</span>
+                  <span key={i} className="px-4 py-2 border border-[#4B2928] text-xs text-[#4B2928] font-semibold">{v}</span>
                 ))}
               </div>
             </div>
@@ -317,7 +317,7 @@ function AfterNoteView({ data }: { data: ConsultationData }) {
                     <div key={monthData.month} className="flex items-center py-3 border-b border-[#EAEAEA]">
                       <div className="text-sm text-[#1C1C1C] w-14">{monthData.month}</div>
                       <div className="text-sm text-[#999999] mx-4">—</div>
-                      <div className="text-sm text-[#6E1F2A] font-semibold">
+                      <div className="text-sm text-[#4B2928] font-semibold">
                         {monthData.services.join(', ')}
                         {monthData.memo && <span className="text-xs text-[#999999] font-normal ml-2">({monthData.memo})</span>}
                       </div>

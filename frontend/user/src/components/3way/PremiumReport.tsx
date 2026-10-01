@@ -278,7 +278,7 @@ function FaceStructurePage({ pageNumber, ratios }: { pageNumber: number; ratios?
         </div>
       </div>
 
-      <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100">
+      <div className="bg-[#F5F3EE] rounded-xl p-6 border border-[#E4E4E0]">
         <p className="text-sm font-light text-gray-700 leading-relaxed">
           고객님의 얼굴 구조는 균형형 기반으로 안정적인 비율을 가지고 있습니다. 과도한 보완보다
           방향 설정이 중요합니다.
@@ -354,7 +354,7 @@ function ImageAxisPage({ pageNumber, imageType = { warmCool: 'N', softHard: 'N' 
         </div>
       </div>
 
-      <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100">
+      <div className="bg-[#F5F3EE] rounded-xl p-6 border border-[#E4E4E0]">
         <p className="text-sm font-light text-gray-700 leading-relaxed">
           기본 이미지가 안정적이기 때문에 강한 이동보다 정교한 조율이 효과적입니다.
         </p>
@@ -418,7 +418,7 @@ function PersonalColorPage({ pageNumber }: { pageNumber: number }) {
         </div>
       </div>
 
-      <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100">
+      <div className="bg-[#F5F3EE] rounded-xl p-6 border border-[#E4E4E0]">
         <p className="text-sm font-light text-gray-700 leading-relaxed">
           명도 조절을 통한 이미지 조율이 가장 효과적입니다. 과도한 채도 변화는 피부톤과 부조화를
           일으킬 수 있습니다.
@@ -461,26 +461,26 @@ function HairTexturePage({ pageNumber }: { pageNumber: number }) {
           <h3 className="text-sm font-light text-black mb-4">시술 가능 범위</h3>
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-[#B5B5B0] rounded-full"></div>
               <p className="text-sm font-light text-gray-700">자연스러운 웨이브 펌</p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-[#B5B5B0] rounded-full"></div>
               <p className="text-sm font-light text-gray-700">명도 조절 컬러</p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-[#777777] rounded-full"></div>
               <p className="text-sm font-light text-gray-700">스트레이트 펌 (유지력 낮음)</p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-[#4B2928] rounded-full"></div>
               <p className="text-sm font-light text-gray-700">강한 탈색 (손상 위험)</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100">
+      <div className="bg-[#F5F3EE] rounded-xl p-6 border border-[#E4E4E0]">
         <p className="text-sm font-light text-gray-700 leading-relaxed">
           직선 유지력은 낮으나 자연스러운 S계열 디자인은 안정적입니다. 숱이 많은 편이므로 무게
           제거 설계가 중요합니다.
@@ -587,7 +587,7 @@ function ImageMovementPage({ pageNumber }: { pageNumber: number }) {
       <div className="space-y-6 mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-6 h-6 rounded-full bg-green-500 text-white text-xs flex items-center justify-center font-light">
+            <div className="w-6 h-6 rounded-full bg-[#777777] text-white text-xs flex items-center justify-center font-light">
               1
             </div>
             <h3 className="text-sm font-light text-black">안정 유지</h3>
@@ -599,7 +599,7 @@ function ImageMovementPage({ pageNumber }: { pageNumber: number }) {
 
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-6 h-6 rounded-full bg-yellow-500 text-white text-xs flex items-center justify-center font-light">
+            <div className="w-6 h-6 rounded-full bg-[#555555] text-white text-xs flex items-center justify-center font-light">
               2
             </div>
             <h3 className="text-sm font-light text-black">소폭 확장</h3>
@@ -611,7 +611,7 @@ function ImageMovementPage({ pageNumber }: { pageNumber: number }) {
 
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-6 h-6 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-light">
+            <div className="w-6 h-6 rounded-full bg-[#9A3B3B] text-white text-xs flex items-center justify-center font-light">
               3
             </div>
             <h3 className="text-sm font-light text-black">이미지 전환</h3>
@@ -622,7 +622,7 @@ function ImageMovementPage({ pageNumber }: { pageNumber: number }) {
         </div>
       </div>
 
-      <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100">
+      <div className="bg-[#F5F3EE] rounded-xl p-6 border border-[#E4E4E0]">
         <p className="text-sm font-light text-gray-700 leading-relaxed">
           이미지 이동은 단계적으로 진행하는 것이 안정적입니다. 급격한 변화보다 방향성을 유지한
           확장이 효과적입니다.
@@ -880,7 +880,7 @@ function NextDirectionSummaryPage({ pageNumber }: { pageNumber: number }) {
         </div>
       </div>
 
-      <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100">
+      <div className="bg-[#F5F3EE] rounded-xl p-6 border border-[#E4E4E0]">
         <p className="text-sm font-light text-gray-700 leading-relaxed">
           디자인은 고정되지 않으며 얼굴, 이미지, 컨디션에 따라 매 방문마다 최적의 방향으로
           조율됩니다.

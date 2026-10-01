@@ -54,7 +54,7 @@ function RankingBar({ item, index }: { item: { rank: string; area: string; pct: 
     <div ref={ref} className="mb-5 last:mb-0">
       <div className="flex items-baseline justify-between mb-1.5">
         <div className="flex items-baseline gap-1.5">
-          <span className="text-[9px] text-[#C8B89A]">{item.rank}</span>
+          <span className="text-[9px] text-[#777777]">{item.rank}</span>
           <span className="text-[11px] text-[#111111]">{item.area}</span>
         </div>
         <span className="text-[11px] tabular-nums" style={{ color: '#111111', fontWeight: 300 }}>{item.pct}%</span>
@@ -417,7 +417,7 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
 
                         {/* 이목구비 부위 */}
                         <div className="flex items-baseline gap-1.5 mb-1">
-                          <span className="text-[9px] text-[#C8B89A]">{RANKS[i] ?? `${i+1}`}</span>
+                          <span className="text-[9px] text-[#777777]">{RANKS[i] ?? `${i+1}`}</span>
                           <span className="text-[10px] text-[#999999]">{f.item.title}</span>
                         </div>
 
@@ -427,7 +427,7 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
                         </p>
 
                         {/* 타입 결정 이유 */}
-                        <p className="text-[9px] pl-4 mb-1" style={{ color: '#C8B89A', fontWeight: 400 }}>
+                        <p className="text-[9px] pl-4 mb-1" style={{ color: '#777777', fontWeight: 400 }}>
                           {/* 합산이 Neutral 이면 '결정짓는 특징' 이 아니라 개별 매력 포인트다 */}
                           {!imageType
                             ? '타입 판정에 쓰이는 특징'

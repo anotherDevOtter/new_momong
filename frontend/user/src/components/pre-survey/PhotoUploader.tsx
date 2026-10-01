@@ -127,7 +127,7 @@ export function PhotoUploader({
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
-            className="aspect-square border border-dashed border-[#CCCCCC] hover:border-[#B88A5A] transition-colors flex flex-col items-center justify-center gap-1 text-[#7A7A7A] hover:text-[#B88A5A] disabled:opacity-50"
+            className="aspect-square border border-dashed border-[#CCCCCC] hover:border-[#4B2928] transition-colors flex flex-col items-center justify-center gap-1 text-[#7A7A7A] hover:text-[#4B2928] disabled:opacity-50"
           >
             <Plus size={20} strokeWidth={1.5} />
             <span className="text-[11px]" style={{ fontWeight: 400 }}>
@@ -137,7 +137,7 @@ export function PhotoUploader({
         )}
       </div>
 
-      {error && <p className="text-[11px] text-red-500">{error}</p>}
+      {error && <p className="text-[11px] text-[#9A3B3B]">{error}</p>}
 
       <input
         ref={inputRef}

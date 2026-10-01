@@ -535,7 +535,7 @@ export function FaceAnalysisResult({ onBack, onNext, analysisResult }: FaceAnaly
               </div>
 
               {/* 하단 요약 박스 */}
-              <div className="bg-blue-50/50 rounded-xl p-5 border border-blue-100">
+              <div className="bg-[#F5F3EE] rounded-xl p-5 border border-[#E4E4E0]">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-normal text-black">이미지 밸런스 분석 요약</h3>
                   {!isEditingSummary && (

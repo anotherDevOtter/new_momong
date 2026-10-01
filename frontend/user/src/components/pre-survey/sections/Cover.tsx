@@ -28,7 +28,7 @@ export function Cover({ customerName, onNext }: CoverProps) {
               MERCI MOMONG
             </p>
             {customerName && (
-              <p className="mt-6 text-[12px] text-[#B88A5A] tracking-[0.1em]" style={{ fontWeight: 500 }}>
+              <p className="mt-6 text-[12px] text-[#4B2928] tracking-[0.1em]" style={{ fontWeight: 500 }}>
                 {customerName} 고객님께 드리는 인터뷰
               </p>
             )}

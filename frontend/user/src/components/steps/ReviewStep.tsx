@@ -239,7 +239,7 @@ export const ReviewStep = ({ data, saveStatus, onSaveStatusChange, onGoToStep, o
             </button>
           )}
           {saveStatus === 'failed' && (
-            <p className="text-xs text-center text-red-400">저장에 실패했습니다. 다시 시도해주세요.</p>
+            <p className="text-xs text-center text-[#9A3B3B]">저장에 실패했습니다. 다시 시도해주세요.</p>
           )}
           {completed && (
             <Button onClick={() => onSaveStatusChange('idle')} variant="secondary" fullWidth>

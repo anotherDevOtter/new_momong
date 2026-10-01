@@ -279,7 +279,7 @@ export function Intro({
               type="text"
               value={age}
               onChange={(e) => onChangeAge(e.target.value)}
-              className="w-full border-b border-[#E5E5E5] pb-3 text-[15px] text-[#111111] bg-transparent focus:outline-none focus:border-[#B88A5A] transition-colors"
+              className="w-full border-b border-[#E5E5E5] pb-3 text-[15px] text-[#111111] bg-transparent focus:outline-none focus:border-[#4B2928] transition-colors"
               style={{ fontWeight: 400 }}
             />
           </div>
@@ -291,7 +291,7 @@ export function Intro({
               type="text"
               value={job}
               onChange={(e) => onChangeJob(e.target.value)}
-              className="w-full border-b border-[#E5E5E5] pb-3 text-[15px] text-[#111111] bg-transparent focus:outline-none focus:border-[#B88A5A] transition-colors"
+              className="w-full border-b border-[#E5E5E5] pb-3 text-[15px] text-[#111111] bg-transparent focus:outline-none focus:border-[#4B2928] transition-colors"
               style={{ fontWeight: 400 }}
             />
           </div>
@@ -310,7 +310,7 @@ export function Intro({
               평소 추구하시는 이미지나 스타일을 선택해 주세요. <br />
               최대 {MAX}개까지 선택하실 수 있습니다.
             </p>
-            <p className="text-[11px] text-[#B88A5A] mt-2" style={{ fontWeight: 400 }}>
+            <p className="text-[11px] text-[#4B2928] mt-2" style={{ fontWeight: 400 }}>
               {preferences.length} / {MAX}
             </p>
           </div>
@@ -328,7 +328,7 @@ export function Intro({
                   <p className="text-[12px] text-[#7A7A7A] leading-[1.5] max-w-[300px] mx-auto" style={{ fontWeight: 400 }}>
                     마음에 드는 스타일을 최대 {MAX}개 선택해 주세요.
                   </p>
-                  <p className="text-[11px] text-[#B88A5A] mt-2" style={{ fontWeight: 400 }}>
+                  <p className="text-[11px] text-[#4B2928] mt-2" style={{ fontWeight: 400 }}>
                     {preferredStyles.length} / {MAX}
                   </p>
                 </div>
@@ -401,7 +401,7 @@ export function Intro({
             >
               피하고 싶은 이미지나 스타일이 있다면 선택해 주세요. 최대 {MAX}개까지 선택하실 수 있습니다.
             </p>
-            <p className="text-[11px] text-[#B88A5A] mt-2" style={{ fontWeight: 400 }}>
+            <p className="text-[11px] text-[#4B2928] mt-2" style={{ fontWeight: 400 }}>
               {dislikes.length} / {MAX}
             </p>
           </div>
@@ -420,7 +420,7 @@ export function Intro({
                   <p className="text-[12px] text-[#7A7A7A] leading-[1.5] max-w-[300px] mx-auto" style={{ fontWeight: 400 }}>
                     피하고 싶은 스타일이 있다면 최대 {MAX}개 선택해 주세요.
                   </p>
-                  <p className="text-[11px] text-[#B88A5A] mt-2" style={{ fontWeight: 400 }}>
+                  <p className="text-[11px] text-[#4B2928] mt-2" style={{ fontWeight: 400 }}>
                     {dislikedStyles.length} / {MAX}
                   </p>
                 </div>

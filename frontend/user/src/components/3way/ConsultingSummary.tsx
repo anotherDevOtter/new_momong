@@ -229,7 +229,7 @@ export function ConsultingSummary({
             </div>
 
             {/* 자동 해석 */}
-            <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
+            <div className="bg-[#F5F3EE] rounded-xl p-4 border border-[#E4E4E0]">
               <p className="text-xs text-gray-700 font-normal leading-relaxed">
                 {generateImageAnalysis()}
               </p>
@@ -293,7 +293,7 @@ export function ConsultingSummary({
             </div>
 
             {/* 자동 해석 */}
-            <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
+            <div className="bg-[#F5F3EE] rounded-xl p-4 border border-[#E4E4E0]">
               <p className="text-xs text-gray-700 font-normal leading-relaxed">
                 {generateFashionAnalysis()}
               </p>
