@@ -616,7 +616,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
                       playsInline
                       muted
                       className="absolute inset-0 w-full h-full object-cover"
-                      style={{ transform: 'scale(1.5)' }}
+                      style={{ transform: 'scaleX(-1) scale(1.5)' }}
                     />
                   )}
 
@@ -664,7 +664,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
                   rx="120"
                   ry="160"
                   fill="none"
-                  stroke={faceInOval ? 'rgba(74, 222, 128, 0.9)' : 'rgba(255, 255, 255, 0.45)'}
+                  stroke={faceInOval ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.6)'}
                   initial={{ strokeWidth: 1 }}
                   animate={{ strokeWidth: faceInOval ? 2.5 : 1.2 }}
                   transition={{ duration: 0.25 }}
