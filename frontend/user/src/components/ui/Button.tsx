@@ -18,8 +18,9 @@ export function buttonClass(variant: Variant = 'primary', fullWidth = false) {
     'transition-colors duration-200 disabled:cursor-not-allowed',
     'disabled:bg-[#DCE4E9] disabled:text-[#777777] disabled:border-transparent',
     variant === 'primary' && 'bg-[#4B2928] text-white hover:bg-[#3A3432] active:bg-[#292625]',
-    variant === 'secondary' && 'border border-[#4B2928] bg-white text-[#4B2928] hover:bg-[#F5F3EE] active:bg-[#EDE8E3]',
-    variant === 'ghost' && 'bg-transparent text-[#555555] hover:bg-[#EFEFED] active:bg-[#E4E4E0]',
+    variant === 'secondary' &&
+      'border border-[#4B2928] bg-transparent text-[#4B2928] hover:bg-[#4B2928]/5 active:bg-[#4B2928]/10',
+    variant === 'ghost' && 'bg-transparent text-[#555555] hover:bg-[#292625]/5 active:bg-[#292625]/10',
     fullWidth && 'w-full'
   );
 }
