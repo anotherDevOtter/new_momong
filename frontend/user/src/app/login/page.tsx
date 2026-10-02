@@ -3,6 +3,7 @@
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { buttonClass } from '@/components/ui/Button';
 import { useAuth } from '@/contexts/AuthContext';
 
 function RegisteredBanner() {
@@ -102,7 +103,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#111] text-white rounded-lg py-2.5 text-sm font-medium disabled:opacity-50 transition-opacity"
+            className={buttonClass("primary", true)}
           >
             {loading ? '로그인 중...' : '로그인'}
           </button>

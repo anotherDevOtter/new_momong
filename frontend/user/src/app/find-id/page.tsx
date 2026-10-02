@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { buttonClass } from '@/components/ui/Button';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function FindIdPage() {
@@ -67,7 +68,7 @@ export default function FindIdPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#111] text-white rounded-lg py-2.5 text-sm font-medium disabled:opacity-50 transition-opacity"
+              className={buttonClass("primary", true)}
             >
               {loading ? '조회 중...' : '아이디 찾기'}
             </button>

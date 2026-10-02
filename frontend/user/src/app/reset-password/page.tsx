@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { buttonClass } from '@/components/ui/Button';
 import { useAuth } from '@/contexts/AuthContext';
 
 type Step = 'form' | 'done';
@@ -117,7 +118,7 @@ export default function ResetPasswordPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#111] text-white rounded-lg py-2.5 text-sm font-medium disabled:opacity-50 transition-opacity"
+              className={buttonClass("primary", true)}
             >
               {loading ? '처리 중...' : '비밀번호 변경'}
             </button>
