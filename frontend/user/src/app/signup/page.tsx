@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { buttonClass } from '@/components/ui/Button';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatPhone } from '@/lib/utils';
 
@@ -127,7 +128,7 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#111] text-white rounded-lg py-2.5 text-sm font-medium disabled:opacity-50 transition-opacity"
+            className={buttonClass("primary", true)}
           >
             {loading ? '처리 중...' : '가입하기'}
           </button>

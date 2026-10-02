@@ -5,3 +5,14 @@ body {
   color: #111111;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
 }
+
+/* 버튼 공통 반응 — 손가락으로 누르면 살짝 작아지고, 키보드로 이동하면 테두리가 보인다.
+   scale 속성을 따로 써서 버튼에 이미 걸린 transform(위치 이동 등)과 겹치지 않는다. */
+button:not(:disabled):active {
+  scale: 0.98;
+}
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #4B2928;
+  outline-offset: 2px;
+}

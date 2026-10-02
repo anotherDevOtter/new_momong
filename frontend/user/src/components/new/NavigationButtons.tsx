@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { buttonClass } from '@/components/ui/Button';
 
 interface NavigationButtonsProps {
   onBack?: () => void;
@@ -29,11 +30,7 @@ export function NavigationButtons({
     >
       {/* 이전 버튼 */}
       {showBack && onBack && (
-        <button
-          onClick={onBack}
-          className="group inline-flex items-center justify-center gap-2 px-10 py-5 bg-white border border-[#111111] text-[#111111] text-[13px] tracking-[0.02em] transition-all duration-200 hover:bg-[#FAFAFA]"
-          style={{ fontWeight: 400 }}
-        >
+        <button onClick={onBack} className={buttonClass('secondary')}>
           <ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
           <span>{backLabel}</span>
         </button>
@@ -41,27 +38,10 @@ export function NavigationButtons({
 
       {/* 다음 버튼 */}
       {showNext && onNext && (
-        <button
-          onClick={onNext}
-          disabled={nextDisabled}
-          className={`
-            group flex-1 inline-flex items-center justify-center gap-2 px-10 py-5
-            text-[13px] tracking-[0.02em]
-            transition-all duration-200
-            ${
-              nextDisabled
-                ? 'bg-[#E5E5E5] text-[#999999] cursor-not-allowed'
-                : 'bg-[#111111] text-white hover:bg-[#222222] cursor-pointer'
-            }
-          `}
-          style={{ fontWeight: 400 }}
-        >
+        <button onClick={onNext} disabled={nextDisabled} className={buttonClass('primary', true)}>
           <span>{nextLabel}</span>
           {!nextDisabled && (
-            <motion.span
-              whileHover={{ x: 3 }}
-              transition={{ duration: 0.2 }}
-            >
+            <motion.span whileHover={{ x: 3 }} transition={{ duration: 0.2 }}>
               <ArrowRight className="w-4 h-4" strokeWidth={1.5} />
             </motion.span>
           )}
