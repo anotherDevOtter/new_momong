@@ -238,6 +238,21 @@ const OVERLAYS: Record<string, React.ReactNode> = {
   ),
 };
 
+/**
+ * 형태·비율 타입 예시 사진 슬롯.
+ * 사진이 준비되면 photo 에 경로(예: '/new/type-form-warm.jpg')만 넣으면 된다. 비어 있으면 자리만 보인다.
+ */
+const TYPE_EXAMPLES: { zone: string; cols: number; fit?: boolean; types: { label: string; photo: string }[] }[] = [
+  { zone: '형태', cols: 2, types: [{ label: '귀여운', photo: '/new/type-form-warm.jpg' }, { label: '세련된', photo: '/new/type-form-cool.jpg' }] },
+  { zone: '비율', cols: 2, types: [{ label: '귀여운 · 순진한', photo: '/new/type-prop-left.jpg' }, { label: '부드러운 · 여성스러운', photo: '/new/type-prop-right.jpg' },
+    { label: '산뜻한 · 청초한', photo: '/new/type-prop-left2.jpg' }, { label: '현대적인 · 지적인', photo: '/new/type-prop-right2.jpg' }] },
+  // 형태/비율은 가로 Warm–Cool, 세로 위 Soft · 아래 Hard 의 2×2
+  { zone: '형태/비율', cols: 2, fit: true, types: [
+    { label: '귀여운 · 순진한', photo: '/new/type-warm-soft.jpg' }, { label: '청초한 · 산뜻한', photo: '/new/type-cool-soft.jpg' },
+    { label: '부드러운 · 여성스러운', photo: '/new/type-warm-hard.jpg' }, { label: '현대적인 · 지적인', photo: '/new/type-cool-hard.jpg' },
+  ] },
+];
+
 const ZONES = [
   { tag: 'A', name: '형태 분석', count: '10항목', items: FORM },
   { tag: 'B', name: '비율 분석', count: '10항목', items: PROP },
@@ -305,6 +320,8 @@ function AdjustSlider({ pos, l, r, onChange }: { pos: number; l: string; r: stri
 
 export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, measurements, values }: Props) {
   const [zoneIdx, setZoneIdx]     = useState(0);
+  // 타입 예시 섹션의 상단 바 선택 (위쪽 형태/비율 분석 탭과는 따로 움직인다)
+  const [exampleIdx, setExampleIdx] = useState(0);
   const [stepIdx, setStepIdx]     = useState(0);
   const [guideline, setGuideline] = useState(false);
   const [done, setDone]           = useState<Record<string, boolean>>({});
@@ -903,6 +920,43 @@ export function AIFaceFeature({ onNext, onBack, facePhotoUrl, initialPosMap, mea
             </>
           );
         })()}
+
+        {/* ── 타입 예시 사진 ─────────────────────────────────────────── */}
+        <section className="mt-12 pt-8 border-t border-[#DCE4E9]">
+          <p className="text-[12px] tracking-[0.2em] text-[#777777] mb-1.5" style={{ fontFamily: MONO }}>TYPE EXAMPLES</p>
+          <h2 className="text-[1.1rem] font-light text-[#292625] tracking-tight mb-1">타입 예시</h2>
+          <p className="text-[12px] text-[#777777] mb-4">타입별로 어떤 인상인지 예시 사진으로 비교해 보세요.</p>
+
+          {/* 상단 바 — 형태 / 비율을 누르면 해당 예시가 보인다 */}
+          <div className="flex border-b border-[#E0E0E0] mb-4">
+            {TYPE_EXAMPLES.map((ex, i) => (
+              <button key={ex.zone} onClick={() => setExampleIdx(i)}
+                className="relative pb-3 mr-8 text-[14px] tracking-tight"
+                style={{ fontWeight: i === exampleIdx ? 600 : 400, color: i === exampleIdx ? '#292625' : '#AAAAAA', background: 'none', border: 'none', cursor: 'pointer' }}>
+                {ex.zone}
+                {i === exampleIdx && <motion.div layoutId="extab" className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#4B2928]" />}
+              </button>
+            ))}
+          </div>
+          {/* fit: 웹에서 4장이 스크롤 없이 한 화면에 꽉 차도록, 화면 높이에 맞춰 폭을 정한다 (최대는 본문 폭) */}
+          <div className="grid gap-3 mx-auto"
+            style={{
+              gridTemplateColumns: `repeat(${TYPE_EXAMPLES[exampleIdx].cols}, minmax(0, 1fr))`,
+              ...(TYPE_EXAMPLES[exampleIdx].fit ? { maxWidth: 'max(300px, calc((100vh - 245px) * 0.75 + 12px))' } : {}),
+            }}>
+            {TYPE_EXAMPLES[exampleIdx].types.map(t => (
+              <figure key={t.label} className="m-0">
+                <div className="relative overflow-hidden bg-[#F9F9F7] rounded-sm flex items-center justify-center"
+                  style={{ aspectRatio: '3 / 4', border: t.photo ? 'none' : '1px dashed #CCCCCA' }}>
+                  {t.photo
+                    ? <img src={t.photo} alt={`${TYPE_EXAMPLES[exampleIdx].zone} ${t.label} 예시`} className="w-full h-full object-cover" />
+                    : <span className="text-[12px] text-[#AAAAAA]">예시 사진 준비 중</span>}
+                </div>
+                <figcaption className="mt-2 text-center text-[14px] text-[#292625]">{t.label}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );
