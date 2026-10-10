@@ -7,52 +7,35 @@
 
 ## 1. 시스템 구성도
 
-```
-                          ┌────────────────────────────────────┐
-                          │         사용자 (디자이너)           │
-                          │      https://www.merci-momong.com  │
-                          └─────────────────┬──────────────────┘
-                                            │
-                                            ▼
-              ┌──────────────────────────────────────────────────┐
-              │             user frontend (Next.js)               │
-              │      AWS Amplify, repo path: frontend/user        │
-              └──────┬────────────────────────────┬──────────────┘
-                     │ JWT bearer                  │ direct PUT
-                     ▼                              ▼
-              ┌────────────────┐       ┌──────────────────────────┐
-              │   backend EB    │◄──────┤  S3 momong-staging       │
-              │   (NestJS)      │  GET  │  /face-analysis/<uid>/.. │
-              │ Application:    │ presign│ /elasticbeanstalk-...    │
-              │ momong-staging  │        └──────────────────────────┘
-              └──┬──────────┬───┘
-   PG TypeORM   │          │     POST /analyze-url
-  ┌─────────────▼─┐        ▼
-  │   RDS         │   ┌──────────────────────────────┐
-  │  PostgreSQL   │   │  face_landmark Python EB     │
-  │ tables: users │   │ (FastAPI, MediaPipe, OpenCV) │
-  │ consultations │   │ Application:                  │
-  │ face_analysis │   │ momong-face-analyze-staging  │
-  │ _results 등    │   └──────────────────────────────┘
-  └───────────────┘
+2026-10-11 부터 운영(prod)은 Lightsail 이다. 예전 EB · RDS · Python 서버는 1주 관찰 후 내린다 ([deploy/lightsail/DECOMMISSION.md](./deploy/lightsail/DECOMMISSION.md)).
 
-> ⚠ 위 그림은 **지금 운영(배포 전)** 구조다. 브랜치 `feat/face-measure-web`(2026-10-10)부터 얼굴 측정은
-> 브라우저가 하고 백엔드는 Python 을 부르지 않는다. 배포 · 인프라 이전 후 그림: [INFRA-MIGRATION.md §3](./INFRA-MIGRATION.md).
-
-                          ┌────────────────────────────────────┐
-                          │      관리자 (운영팀)                │
-                          │      https://admin.merci-momong.com │
-                          └─────────────────┬──────────────────┘
-                                            │
-                                            ▼
-              ┌──────────────────────────────────────────────────┐
-              │            admin frontend (Next.js)               │
-              │      AWS Amplify, repo path: frontend/admin       │
-              └─────────────────────────┬────────────────────────┘
-                                        │
-                                        ▼ JWT bearer (admin)
-                              (위와 동일한 backend EB 호출)
 ```
+   디자이너 https://www.merci-momong.com        운영팀 https://admin.merci-momong.com
+                    │                                        │
+                    ▼                                        ▼
+   ┌─────────────────────────────────┐     ┌─────────────────────────────────┐
+   │ user frontend (Next.js)          │     │ admin frontend (Next.js)         │
+   │ Amplify new_momong-user (main)   │     │ Amplify new_momong-admin (admin) │
+   │ 얼굴 측정: 브라우저 (MediaPipe+TS) │     │ 얼굴 측정 테스트: 브라우저         │
+   └───────┬──────────────┬──────────┘     └──────────────┬──────────────────┘
+           │ JWT bearer   │ presigned PUT                  │ JWT bearer (admin)
+           ▼              ▼                                ▼
+   ┌───────────────────────────────────────────┐   ┌───────────────────────────┐
+   │ Lightsail momong-prod-api (3.36.224.81)   │   │ S3 momong-prod (비공개)     │
+   │ https://manager-api.merci-momong.com/api  │──►│ face-analysis/ · pre-surveys/│
+   │ Docker: caddy(HTTPS) → api(NestJS :3200)   │   │ 읽을 때마다 presigned GET   │
+   └───────────────────┬───────────────────────┘   └───────────────────────────┘
+                       │ TypeORM (SSL)
+                       ▼
+   ┌───────────────────────────────────────────┐
+   │ Lightsail DB momong-prod-db                │
+   │ PostgreSQL 18.6 · DB momong_prod · 비공개   │
+   └───────────────────────────────────────────┘
+```
+
+- 얼굴 측정은 브라우저가 하고 백엔드는 결과를 검증 · 저장만 한다. Python 서버(`face_landmark`)는 운영에서 쓰지 않는다.
+- 사진 주소는 서명 없이 저장하고, API 가 응답할 때 새로 서명한다 (`S3Service.refreshOwnUrls`).
+- 이전 기록: [INFRA-MIGRATION.md](./INFRA-MIGRATION.md) · 전환 런북: [deploy/lightsail/README.md](./deploy/lightsail/README.md)
 
 ---
 
@@ -61,16 +44,16 @@
 | 영역 | 기술 | 비고 |
 |---|---|---|
 | Backend | NestJS 11 + TypeORM | port 3200 (local) |
-| DB | PostgreSQL 15 | RDS (운영), 로컬 자체 설치 |
+| DB | PostgreSQL 18 (운영) / 17 (로컬) | Lightsail DB `momong-prod-db` (운영), 로컬 Postgres.app `momong_dev` |
 | Frontend (user) | Next.js 16 + React 19 + Tailwind v4 | port 3203 (local) |
 | Frontend (admin) | Next.js 16 + React 19 + Tailwind v4 | port 3202 (local) |
 | 인증 | JWT (HS256) | secret = `JWT_SECRET` env |
-| 얼굴 자동 측정 | 브라우저 — MediaPipe FaceLandmarker 0.10.35 + TS 판정 (`frontend/*/src/lib/face-measure`) | 2026-10-10 부터. 예전: Python `face_landmark/` (운영은 이전 배포 전까지) |
+| 얼굴 자동 측정 | 브라우저 — MediaPipe FaceLandmarker 0.10.35 + TS 판정 (`frontend/*/src/lib/face-measure`) | 2026-10-11 운영 반영. 예전 Python `face_landmark/` 는 안 쓴다 |
 | 클라이언트 얼굴 검출 | `@mediapipe/tasks-vision` | CDN 모델, 픽스된 버전 0.10.35 |
 | 애니메이션 | `motion/react` | |
-| 이미지 저장 | AWS S3 (`momong-staging`) | presigned URL PUT/GET |
+| 이미지 저장 | AWS S3 (`momong-prod`, 로컬 `momong-dev`) | presigned URL PUT/GET. DB 에는 서명 없는 주소 |
 | E2E 테스트 | Playwright | `e2e/` 디렉토리 |
-| 배포 (backend) | GitHub Actions → S3 → EB | `.github/workflows/deploy-backend.yml` |
+| 배포 (backend) | GitHub Actions → Docker 이미지 → Lightsail (SSH) | `.github/workflows/deploy-backend.yml`, `deploy/lightsail/` |
 | 배포 (frontend) | AWS Amplify (auto on push) | `amplify.yml` |
 
 ---
@@ -106,8 +89,11 @@ new_momong/
 │  │  ├─ 001_create_face_analysis_results.sql
 │  │  ├─ 002_add_source_to_face_analysis_results.sql
 │  │  ├─ 003_create_pre_surveys.sql
-│  │  └─ 004_create_module_configs.sql
-│  └─ Procfile                    EB 실행 (web: node dist/main)
+│  │  ├─ 004_create_module_configs.sql
+│  │  ├─ 005_face_measure_keys.sql   (+ .down) 결과 키 → 화면 항목 id
+│  │  └─ 006_s3_bucket_rename.sql    (+ .down) 사진 주소 버킷 변경 · 서명 제거
+│  ├─ Dockerfile                  운영 이미지 (node:22, migrations 포함)
+│  └─ Procfile                    예전 EB 용 — 정리 때 삭제
 ├─ frontend/
 │  ├─ user/                       디자이너용 (3203)
 │  │  └─ src/
@@ -132,7 +118,8 @@ new_momong/
 │        ├─ app/                  /dashboard, /users, /features, /face-analysis-test, /face-modules
 │        ├─ components/           AdminHeader, AdminFaceAnalysisCapture, FaceOverlay, useFaceDetector
 │        └─ utils/                api.ts, auth.ts, face-analysis-api.ts, image-resize.ts
-├─ .github/workflows/             deploy-backend.yml (GitHub Actions → EB)
+├─ .github/workflows/             deploy-backend.yml (GitHub Actions → Lightsail)
+├─ deploy/lightsail/              docker-compose · Caddyfile · 서버 세팅 · 런북 · 예전 인프라 정리(DECOMMISSION.md)
 ├─ amplify.yml                    Amplify 빌드 설정 (user/admin 동시 정의)
 ├─ e2e/                           Playwright E2E
 ├─ figma/                         Figma Make 원본 (참고용)
@@ -194,7 +181,7 @@ TypeScript 도 `react` / `@mediapipe/tasks-vision` 을 해석하지 못한다.
   "wncFinal": "W",               // 빠른 조회용 캐시
   "snhFinal": "N",
   "imageType": "W / N",
-  "faceImageUrl": "https://momong-staging.s3.../face-analysis/<uid>/<uuid>.jpg"
+  "faceImageUrl": "https://momong-prod.s3.../face-analysis/<uid>/<uuid>.jpg"   // 서명 없이 저장
 }
 ```
 
@@ -241,7 +228,7 @@ TypeScript 도 `react` / `@mediapipe/tasks-vision` 을 해석하지 못한다.
 ### 5-0. 헬스 체크
 | 메서드 | 경로 | 가드 | 설명 |
 |---|---|---|---|
-| GET | `/` | 공개 | EB 헬스 체크. `{ status, uptime, timestamp }` (프리픽스 제외 대상) |
+| GET | `/` | 공개 | 헬스 체크 (배포 워크플로가 확인). `{ status, uptime, timestamp }` (프리픽스 제외 대상) |
 
 ### 5-1. 인증/유저 (`/api/auth`)
 | 메서드 | 경로 | 가드 | 설명 |
@@ -394,19 +381,20 @@ frontend `FaceOverlay` 가 그릴 수 있는 도형:
 
 ## 7. S3 / 환경 분리
 
-| 환경 | S3 버킷 | EB 환경 | DB |
-|---|---|---|---|
-| 로컬 dev | `momong-dev` (localhost CORS) | localhost backend (Python 은 `test` 코스 비교용 선택) | 로컬 PostgreSQL |
-| 운영 | `momong-staging` (`*.merci-momong.com` CORS) | `Momong-staging-env` + `momong-face-analyze-staging-env` | RDS |
+환경은 prod(AWS) · dev(로컬) 둘뿐이다. staging 은 없다.
 
-> 운영 EB 환경명에 'staging' 이 들어가지만 실제 운영용. 환경은 prod(AWS) · dev(로컬) 둘뿐이고,
-> 인프라 이전 때 `momong-prod-*` 이름으로 정리한다 — [INFRA-MIGRATION.md §10](./INFRA-MIGRATION.md).
+| 환경 | S3 버킷 | 백엔드 | DB |
+|---|---|---|---|
+| dev (로컬) | `momong-dev` (localhost CORS) | localhost:3200 (Python 은 `test` 코스 비교용 선택) | Postgres.app `momong_dev` |
+| prod | `momong-prod` (`https://*.merci-momong.com` CORS) | Lightsail `momong-prod-api` | Lightsail `momong-prod-db` / `momong_prod` |
+
+> 예전 운영 자원(`momong-staging` 버킷 · EB `Momong-staging-env` · `momong-face-analyze-staging-env` · RDS `momong-staging`)은
+> 이름에 staging 이 있지만 실제 운영이었다. 2026-10-11 전환 후 [DECOMMISSION.md](./deploy/lightsail/DECOMMISSION.md) 일정대로 내린다.
 
 ### S3 키 구조
 - 사용자 얼굴 사진: `face-analysis/<userId>/<uuid>.<ext>`
 - admin 테스트: `face-analysis/admin/<uuid>.<ext>`
 - 사전설문 사진: `pre-surveys/<customerId>/<uuid>.<ext>`
-- backend 배포 아티팩트: `elasticbeanstalk-artifacts/fit-hair-deploy-<sha>.zip`
 
 ### S3Client 옵션 (브라우저 PUT 호환)
 `S3Service`(`backend/src/storage/s3.service.ts`) 의 `S3Client` 인스턴스는 다음 옵션 필수:
@@ -420,68 +408,75 @@ new S3Client({
 ```
 AWS SDK v3 가 기본으로 추가하는 CRC32 체크섬 헤더 때문에 브라우저 fetch PUT 이 SignatureDoesNotMatch 로 거부되던 문제를 해결. face-analysis 와 pre-surveys 양쪽 모두에 영향.
 
-### CORS 정책 (`momong-staging`)
+### CORS 정책 (`momong-prod`)
 ```json
-AllowedOrigins: ["http://localhost:3002", "https://*.merci-momong.com"]
+AllowedOrigins: ["https://*.merci-momong.com"]
 AllowedMethods: ["PUT", "POST", "GET", "HEAD"]
 ```
+버킷은 퍼블릭 접근 차단. 접근은 IAM 사용자 `momong-prod-s3` (이 버킷만 허용하는 인라인 정책) 키로만.
 
 ---
 
 ## 8. 배포 흐름
 
 ### 8-1. Backend (자동)
-1. `git push origin main` → GitHub Actions 트리거 ([.github/workflows/deploy-backend.yml](.github/workflows/deploy-backend.yml))
-2. Node 22 build → zip → S3 업로드
-3. EB `create-application-version` + `update-environment`
-4. 5-10분 후 운영 반영
+1. `main` 에 `backend/` · `deploy/lightsail/` 변경 push → GitHub Actions ([.github/workflows/deploy-backend.yml](.github/workflows/deploy-backend.yml))
+2. Docker 이미지 빌드 → 파일로 저장 → SSH 로 서버에 복사
+3. 서버 `~/momong` 에서 `docker load` → `docker compose up -d`
+4. 서버 안에서 `GET /` 응답 확인. 2분 정도
+- Secrets: `LIGHTSAIL_HOST` · `LIGHTSAIL_USER` · `LIGHTSAIL_SSH_KEY`
+- 서버 관리 명령 (로그 · 재시작): [deploy/lightsail/README.md](./deploy/lightsail/README.md) "서버 관리"
 
 ### 8-2. Frontend (자동)
-- Amplify 가 GitHub `main` watch → push 감지 → 자동 빌드/배포
-- user / admin 별도 앱으로 등록되어 있어야 양쪽 다 자동 배포
+- user: Amplify `new_momong-user` 가 `main` 을 watch
+- admin: Amplify `new_momong-admin` 은 **`admin` 브랜치**를 watch — `main` 반영 후 `git push origin origin/main:admin` 필요 (2026-10-18 정리 때 `main` 으로 바꿀 예정)
 - `amplify.yml` 에 각 앱의 appRoot 정의 (`frontend/user`, `frontend/admin`)
 - 빌드 시간: 각 3-5분
 
-### 8-3. Python 서버 (face_landmark) — 종료 예정
-- 별도 EB 환경 (`momong-face-analyze-staging-env`)
-- 별도 repo, 별도 배포 파이프라인 (해당 repo 의 CI 사용 또는 수동)
-- 브라우저 측정 배포 후 1주 관찰하고 종료한다 (INFRA-MIGRATION)
+### 8-3. Python 서버 (face_landmark) — 운영에서 안 씀
+- 예전 EB `momong-face-analyze-staging-env` 는 2026-10-18 종료 예정, 저장소 배포 워크플로도 그때 끈다
+- 로컬에서는 `test` 코스 비교용으로만 띄운다
 
 ### 8-4. DB 마이그레이션 (수동)
 - **`synchronize` 는 모든 환경에서 꺼져 있다** (2026-10-10, TODO D1). 구조 변경은 `backend/migrations/*.sql` 로만
 - 빈 DB: `000_baseline_schema.sql` 한 번 (앱 테이블 9개, 001~004 포함)
-- 운영 · 기존 DB: 아직 적용 안 한 번호만 psql/pgAdmin 으로 수동 실행
+- 운영 · 기존 DB: 아직 적용 안 한 번호만 psql 로 수동 실행 (운영 DB 는 비공개라 서버에 설치된 `psql` 18 로 실행)
   - `001_create_face_analysis_results.sql` (테이블 생성)
   - `002_add_source_to_face_analysis_results.sql` (source 컬럼)
   - `003_create_pre_surveys.sql` (pre_surveys 테이블 + 인덱스 3개)
   - `004_create_module_configs.sql` (module_configs 테이블 — 첫 부팅 시 24개 시드 자동 삽입)
-  - `005_face_measure_keys.sql` (+ `.down.sql`) — 측정 결과 · module_configs 의 키를 모듈 번호 → 화면 항목 id. **브라우저 측정 백엔드를 띄우기 직전에** 적용
+  - `005_face_measure_keys.sql` (+ `.down.sql`) — 측정 결과 · module_configs 의 키를 모듈 번호 → 화면 항목 id
+  - `006_s3_bucket_rename.sql` (+ `.down.sql`) — 사진 주소의 버킷 변경 · 서명 제거 (`-v old_bucket=… -v new_bucket=…`)
+  - 운영 `momong_prod` 는 2026-10-11 전환 때 005 · 006 까지 적용됨
 
 ---
 
-## 9. 환경 변수 (운영 EB)
+## 9. 환경 변수 (운영)
 
-### Backend (`Momong-staging-env` Configuration)
+### Backend (서버 `~/momong/.env.prod`, Git 에 넣지 않음)
+
+틀과 설명: [deploy/lightsail/.env.prod.example](./deploy/lightsail/.env.prod.example)
 
 | 키 | 용도 |
 |---|---|
-| `NODE_ENV=production` | SSL ON (synchronize 는 코드에서 항상 OFF) |
-| `DB_HOST/PORT/USERNAME/PASSWORD/DATABASE` | RDS 접근 |
-| `JWT_SECRET` | JWT 서명 |
+| `NODE_ENV=production` · `PORT=3200` | SSL ON (synchronize 는 코드에서 항상 OFF) |
+| `DB_HOST/PORT/USERNAME/PASSWORD/DATABASE` | Lightsail DB `momong-prod-db` / `momong_prod` |
+| `JWT_SECRET` | JWT 서명 (2026-10-11 새로 만듦 → 전환 때 모두 재로그인) |
+| `ADMIN_*` · `ADMIN_SEED_*` | 관리자 시드 (계정이 이미 있어 실제로는 안 쓰임) |
 | `ALLOWED_ORIGINS` | `https://www.merci-momong.com,https://admin.merci-momong.com` |
-| `FRONTEND_URL` | 공유 링크 base URL |
-| `PYTHON_SERVER_URL` | face_landmark EB URL — 브라우저 측정 배포 후에는 쓰지 않는다 (제거) |
-| `AWS_REGION` | `ap-northeast-2` |
-| `AWS_S3_BUCKET` | `momong-staging` |
-| `AWS_ACCESS_KEY_ID` / `SECRET_ACCESS_KEY` | (또는 IAM Instance Profile) |
+| `FRONTEND_URL` | 공유 링크 base URL (`https://www.merci-momong.com`) |
+| `AWS_REGION` · `AWS_S3_BUCKET` | `ap-northeast-2` · `momong-prod` |
+| `AWS_ACCESS_KEY_ID` / `SECRET_ACCESS_KEY` | IAM 사용자 `momong-prod-s3` |
 | `AWS_PRESIGNED_EXPIRES_IN` | 기본 300 |
 | `SWAGGER_USER` / `SWAGGER_PASSWORD` | Swagger Basic Auth |
+
+`PYTHON_SERVER_URL` 은 더 이상 쓰지 않는다.
 
 ### Frontend (Amplify Environment Variables)
 
 | 키 | 값 (운영) |
 |---|---|
-| `NEXT_PUBLIC_API_URL` | `https://api.merci-momong.com/api` (또는 backend EB URL) |
+| `NEXT_PUBLIC_API_URL` | `https://manager-api.merci-momong.com/api` |
 
 ---
 
@@ -491,19 +486,19 @@ AllowedMethods: ["PUT", "POST", "GET", "HEAD"]
 
 | 항목 | 로컬 | 운영 |
 |---|---|---|
-| DB | localhost PostgreSQL | RDS |
-| backend | `npm run start:dev` (3200) | EB (auto deploy) |
+| DB | Postgres.app `momong_dev` | Lightsail DB `momong_prod` |
+| backend | `npm run start:dev` (3200) | Lightsail Docker (GitHub Actions 자동 배포) |
 | user frontend | `PORT=3203 npm run dev` | Amplify |
 | admin frontend | `PORT=3202 npm run dev` | Amplify |
-| Python 서버 | (선택) `python -m uvicorn application:app --port 3201` — `test` 코스 비교용 | 별도 EB (종료 예정) |
-| S3 | `momong-dev` (CORS: localhost) | `momong-staging` (CORS: `*.merci-momong.com`) |
+| Python 서버 | (선택) `python -m uvicorn application:app --port 3201` — `test` 코스 비교용 | 없음 |
+| S3 | `momong-dev` (CORS: localhost) | `momong-prod` (CORS: `*.merci-momong.com`) |
 | 인증 | 자동 시드 admin (`admin@momong.com` / `!Password1234`) | env 통한 강한 시드 |
 
 ---
 
 ## 11. 보안/운영 메모
 
-- **face_landmark 운영 환경명에 'staging'** — 브라우저 측정 배포 후 서버째 종료 예정 (INFRA-MIGRATION)
 - **JWT secret** — env 로 강제. 운영에선 절대 default 사용 금지
 - **얼굴 이미지 원본 보존 정책** — 현재 영구. S3 lifecycle 정책 (30일/90일) 추후 검토
-- **Backend EB Application 이름이 `momong-staging`** — application name 만 그렇고 환경은 실제 운영. Lightsail `momong-prod-api` 로 옮기며 정리 (INFRA-MIGRATION §10)
+- **운영 DB 는 비공개** — 맥에서는 DataGrip SSH 터널(서버 3.36.224.81 경유)로만 접속. 읽기 전용 연결 권장
+- **운영 DB 의 빈 예전 테이블 4개** (`image_detection_results` · `image_detection_types` · `image_analysis_result_files` · `manager`) — 옛 momong_backend 것, 코드에서 안 씀. 정리 때 삭제 검토

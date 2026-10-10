@@ -81,6 +81,11 @@ export class PreSurveysService {
   async saveAnswers(token: string, answers: Record<string, unknown>, submit = false): Promise<PreSurvey> {
     const survey = await this.repo.findOne({ where: { token } });
     if (!survey) throw new NotFoundException('사전설문지를 찾을 수 없습니다');
+    // 공개 엔드포인트라 토큰만 있으면 호출할 수 있다. 사진은 이 설문 업로드 경로 것만 받는다 —
+    // 읽을 때 우리 버킷 주소면 서명해 주므로 남의 사진 키를 끼워 넣지 못하게 (TODO S7)
+    if (this.s3.disallowedKeys(answers, [`pre-surveys/${survey.customer_id}/`], survey.answers).length) {
+      throw new BadRequestException('저장할 수 없는 사진 주소가 있습니다');
+    }
     survey.answers = answers;
     if (submit) survey.filled_at = new Date();
     return this.repo.save(survey);

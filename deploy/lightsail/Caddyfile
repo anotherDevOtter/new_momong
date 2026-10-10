@@ -1,5 +1,13 @@
 # API 도메인 → 백엔드. 인증서는 DNS 가 이 서버(고정 IP)를 가리키면 Caddy 가 자동으로 받는다.
 manager-api.merci-momong.com {
 	encode gzip
+	# 보안 헤더 (TODO S9). API 는 화면을 그리지 않으므로 다른 사이트 안에 넣을 일이 없다
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "no-referrer"
+		-X-Powered-By
+	}
 	reverse_proxy api:3200
 }

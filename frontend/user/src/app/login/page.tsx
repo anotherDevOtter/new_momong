@@ -43,8 +43,9 @@ export default function LoginPage() {
   // 로컬 전용: 테스트 계정 자동 로그인.
   // 계정은 .env.local 로 덮어쓴다 (소스 수정 불필요 — 로컬 diff 가 남지 않게).
   const isDev = process.env.NODE_ENV === 'development';
-  const TEST_EMAIL = process.env.NEXT_PUBLIC_TEST_EMAIL || 'test@local.dev';
-  const TEST_PASSWORD = process.env.NEXT_PUBLIC_TEST_PASSWORD || 'test1234';
+  // isDev 일 때만 읽어서 운영 빌드에는 기본 계정 문자열이 들어가지 않게 한다 (TODO S8)
+  const TEST_EMAIL = isDev ? process.env.NEXT_PUBLIC_TEST_EMAIL || 'test@local.dev' : '';
+  const TEST_PASSWORD = isDev ? process.env.NEXT_PUBLIC_TEST_PASSWORD || 'test1234' : '';
   async function handleTestLogin() {
     setError('');
     setLoading(true);

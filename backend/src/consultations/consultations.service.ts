@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Consultation } from './consultations.entity';
@@ -17,6 +17,25 @@ export class ConsultationsService {
 
   private generateId(): string {
     return `consult_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+  }
+
+  /**
+   * 상담에 넣는 우리 버킷 사진은 본인 촬영본 · 이 고객의 사전설문 사진 · 이미 내 상담에 있던 것만 허용한다.
+   * 읽을 때 우리 버킷 주소는 모두 서명하므로(refreshOwnUrls) 남의 사진 키를 끼워 넣지 못하게 막는다 (TODO S7)
+   */
+  private async assertPhotoKeys(userId: string, customerId: string | undefined | null, clientInfo: unknown, stored?: unknown) {
+    const prefixes = [`face-analysis/${userId}/`];
+    if (customerId) prefixes.push(`pre-surveys/${customerId}/`);
+    const rest = this.s3.disallowedKeys(clientInfo, prefixes, stored);
+    for (const key of rest) {
+      // 예전 촬영본(face-analysis/anonymous/…)을 다른 상담에서 다시 쓰는 경우: 내 상담에 이미 있던 사진이면 허용
+      const mine = await this.repo
+        .createQueryBuilder('c')
+        .where('c.user_id = :userId', { userId })
+        .andWhere('c.client_info::text LIKE :k', { k: `%${key.replace(/[\\%_]/g, (m) => '\\' + m)}%` })
+        .getExists();
+      if (!mine) throw new BadRequestException('상담에 저장할 수 없는 사진 주소가 있습니다');
+    }
   }
 
   // 상담 기록 안의 사진 주소는 읽을 때마다 새로 서명한다 (DB 에는 서명 없는 주소 — S3Service.refreshOwnUrls)
@@ -67,6 +86,8 @@ export class ConsultationsService {
       }
     }
 
+    await this.assertPhotoKeys(userId, customerId, dto.clientInfo);
+
     const consultation = this.repo.create({
       id,
       user_id: userId,
@@ -115,7 +136,10 @@ export class ConsultationsService {
     const record = await this.repo.findOne({ where: { id, user_id: userId } });
     if (!record) throw new NotFoundException('컨설팅을 찾을 수 없습니다');
 
-    if (dto.clientInfo !== undefined) record.client_info = dto.clientInfo;
+    if (dto.clientInfo !== undefined) {
+      await this.assertPhotoKeys(userId, record.customer_id, dto.clientInfo, record.client_info);
+      record.client_info = dto.clientInfo;
+    }
     if (dto.todayKeyword !== undefined) record.today_keyword = dto.todayKeyword;
     if (dto.fashionStyle !== undefined) record.fashion_style = dto.fashionStyle;
     if (dto.faceImageType !== undefined) record.face_image_type = dto.faceImageType;

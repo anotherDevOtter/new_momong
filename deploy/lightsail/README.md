@@ -201,6 +201,8 @@ docker compose restart api         # 재시작
 
 ## D. 정리 (1주 관찰 후)
 
+> 단계별 방법은 [DECOMMISSION.md](DECOMMISSION.md) (2026-10-18 · 2026-11-11 일정)
+
 - EB 환경 2개 종료: `Momong-staging-env` · `momong-face-analyze-staging-env` (로드밸런서 · EC2 · IP 같이 사라짐)
 - RDS `momong-staging`: **최종 스냅샷** 만들고 삭제 (안의 예전 DB `momong-staging` · `momong-dev` 도 같이. 덤프 · CSV 는 `momong-database/migration-backup/`)
 - S3 `momong-staging`: 한 달 정도 둔 뒤 삭제

@@ -2,6 +2,9 @@
 
 > 지금은 **로컬 전용**이다. 이 문서는 배포 시점에 무엇을 해야 하는지 적어둔 것이고,
 > 아직 아무것도 배포하지 않았다.
+>
+> ⚠ 2026-10-11 운영이 EB 에서 Lightsail 로 바뀌었다. 아래 배포 · 환경변수 설명은 새 구성 기준으로 고쳤다
+> ([ARCHITECTURE.md §8 · §9](./ARCHITECTURE.md#8-배포-흐름)).
 > 2026-09-02
 
 ---
@@ -42,7 +45,7 @@
 
 ## 3. 배포 절차 (실행하지 않음)
 
-> `git push origin main` 이 곧 자동 배포다 — 백엔드 EB, 프론트 Amplify.
+> `git push origin main` 이 곧 자동 배포다 — 백엔드 Lightsail(GitHub Actions), 프론트 Amplify (admin 은 `admin` 브랜치도 push).
 > **운영 담당이 판단해서 실행할 것.**
 
 ### 3-1. 커밋 전 점검
@@ -59,15 +62,15 @@ npx tsc --noEmit
 
 ### 3-2. 환경 변수 확인
 
-로컬 `.env` 는 전부 로컬을 가리키고 있다. **운영은 EB / Amplify 환경변수로 주입**되므로
+로컬 `.env` 는 전부 로컬을 가리키고 있다. **운영은 서버 `~/momong/.env.prod` / Amplify 환경변수로 주입**되므로
 로컬 값이 커밋되지 않는지 확인한다 (`.env` 는 `.gitignore` 에 있음).
 
 | | 로컬 | 운영 |
 |---|---|---|
 | `NEXT_PUBLIC_API_URL` | `http://localhost:3200/api` | `https://manager-api.merci-momong.com/api` |
-| `PORT` / `PYTHON_SERVER_URL` | `3200` / `localhost:3201` | EB 환경변수 |
+| `PORT` | `3200` | `.env.prod` (`PYTHON_SERVER_URL` 은 더 이상 안 씀) |
 | `ALLOWED_ORIGINS` · `FRONTEND_URL` | `localhost:3202,3203` | 운영 도메인 |
-| `S3_BUCKET` (face_landmark) | `momong-dev` | `momong-staging` 등 |
+| `AWS_S3_BUCKET` | `momong-dev` | `momong-prod` |
 
 ### 3-3. 새로 추가된 것
 

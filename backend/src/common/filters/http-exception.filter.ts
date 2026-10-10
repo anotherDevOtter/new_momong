@@ -51,11 +51,17 @@ export class AllExceptionsFilter implements ExceptionFilter {
       this.logger.warn(`[${status}] ${where} user=${userId} msg=${message}`);
     }
 
+    // HttpException 이 아닌 오류(DB 등)의 원문은 로그에만 남기고 운영 응답에는 내보내지 않는다 (TODO M3)
+    const publicMessage =
+      !(exception instanceof HttpException) && process.env.NODE_ENV === 'production'
+        ? '서버 오류가 발생했습니다'
+        : message;
+
     response.status(status).json({
       success: false,
       statusCode: status,
       code,
-      message,
+      message: publicMessage,
       path: request.originalUrl,
       timestamp: new Date().toISOString(),
     });

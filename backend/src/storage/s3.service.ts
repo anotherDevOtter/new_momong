@@ -108,12 +108,46 @@ export class S3Service {
 
   /** 이 URL 이 우리 버킷의 객체인지 (분석 결과 저장 시 촬영본 URL 검증용) */
   isOwnBucketUrl(url: string): boolean {
+    return this.ownKey(url) !== null;
+  }
+
+  /** 우리 버킷 주소면 객체 키, 아니면 null. 서명(쿼리)은 무시한다 */
+  ownKey(url: string): string | null {
     try {
       const loc = this.extractS3Location(new URL(url));
-      return !!loc && !!this.bucketName && loc.bucket === this.bucketName;
+      return loc && this.bucketName && loc.bucket === this.bucketName ? loc.key : null;
     } catch {
-      return false;
+      return null;
     }
+  }
+
+  /** JSON 안의 우리 버킷 사진 키를 모두 모은다 */
+  collectOwnKeys(value: unknown, out: Set<string> = new Set()): Set<string> {
+    if (typeof value === 'string') {
+      if (value.startsWith('https://')) {
+        const key = this.ownKey(value);
+        if (key) out.add(key);
+      }
+    } else if (Array.isArray(value)) {
+      for (const v of value) this.collectOwnKeys(v, out);
+    } else if (value && typeof value === 'object') {
+      for (const v of Object.values(value as Record<string, unknown>)) this.collectOwnKeys(v, out);
+    }
+    return out;
+  }
+
+  /**
+   * 저장하려는 JSON 의 우리 버킷 사진이 허용된 경로 아래에 있는지 확인한다.
+   * 읽을 때 우리 버킷 주소면 모두 서명해 주므로(refreshOwnUrls), 남의 사진 키를 끼워 넣어
+   * 서명 주소를 받아 가지 못하게 저장 단계에서 막는다. (TODO S7, 2026-10-11)
+   * `alreadyStored` 의 키는 예전부터 있던 것이라 통과 (D2 버그로 예전 촬영본은 `face-analysis/anonymous/`).
+   * 허용되지 않은 키 목록을 돌려준다.
+   */
+  disallowedKeys(value: unknown, prefixes: string[], alreadyStored?: unknown): string[] {
+    const stored = alreadyStored === undefined ? new Set<string>() : this.collectOwnKeys(alreadyStored);
+    return [...this.collectOwnKeys(value)].filter(
+      (key) => !stored.has(key) && !prefixes.some((p) => key.startsWith(p)),
+    );
   }
 
   private extractS3Location(url: URL): { bucket: string; key: string } | null {

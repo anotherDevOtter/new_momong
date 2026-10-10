@@ -24,7 +24,7 @@
 중간 배포는 같은 코드를 두 번 내보내는 셈.
 
 - 작업은 로컬 `main` 에서 진행. 개편 착수 전 지점은 태그 `backup/2026-08-22-pre-overhaul` 에 보존.
-- `main` push = 자동 배포(GitHub Actions 백엔드 EB + Amplify 프론트)라 **준비되기 전엔 push 금지.**
+- `main` push = 자동 배포(GitHub Actions 백엔드 → Lightsail + Amplify 프론트)라 **준비되기 전엔 push 금지.**
   단 `main` 이외 브랜치 push 는 배포를 트리거하지 않는다 (`deploy-backend.yml` 이 `branches: [main]`).
 
 **나중에 배포할 때 반드시**: push 전에 운영 DB 에 `backend/migrations/004_create_module_configs.sql`
@@ -68,9 +68,9 @@
 | # | 항목 | 소요 | 내용 |
 |---|---|:--:|---|
 | **S4** | 어드민 기본 비밀번호가 평문 로그로 남음 | 20분 | [admin.service.ts](backend/src/admin/admin.service.ts) `onModuleInit` 의 `logger.warn` 이 `admin@momong.com / !Password1234` 를 그대로 출력 → CloudWatch 에 평문 적재. 로그에서 비밀번호 제거 + 시드 비밀번호를 랜덤 생성 또는 `ADMIN_SEED_PASSWORD` 필수화 |
-| **S6** | env 어드민 우회 경로 | 10분 | `AdminService.login` 이 `ADMIN_EMAIL`/`ADMIN_PASSWORD` 를 **해시 없이 평문 비교**로 통과시킨다. DB 어드민 계정으로 통일하고 이 경로 삭제. 삭제 전 해당 계정 사용자가 있는지만 확인 |
-| **M3** | 500 에러가 내부 메시지를 노출 | 15분 | [http-exception.filter.ts](backend/src/common/filters/http-exception.filter.ts) 가 non-`HttpException` 일 때 `exception.message` 를 그대로 응답에 담아 TypeORM/Postgres 원문(테이블·컬럼명)이 나간다. production 에선 generic 메시지로 |
-| **D2** | 얼굴분석 `user_id` 가 항상 NULL | 5분 + 백필 30분 | [face-analysis.controller.ts](backend/src/face-analysis/face-analysis.controller.ts) 가 `req.user.sub` 을 읽는데 [jwt.strategy.ts](backend/src/auth/jwt.strategy.ts) `validate` 는 `{ id, ... }` 를 반환한다 (**`sub` 없음**). 다른 컨트롤러는 전부 `req.user.id`. → `face_analysis_results.user_id` 가 실제 컨설팅에서도 NULL, S3 키도 `face-analysis/anonymous/`. **수정은 `.sub` → `.id` 한 줄** |
+| **S6** (서버 `.env.prod` 의 `ADMIN_EMAIL/PASSWORD` 값 확인 필요) | env 어드민 우회 경로 | 10분 | `AdminService.login` 이 `ADMIN_EMAIL`/`ADMIN_PASSWORD` 를 **해시 없이 평문 비교**로 통과시킨다. DB 어드민 계정으로 통일하고 이 경로 삭제. 삭제 전 해당 계정 사용자가 있는지만 확인 |
+| **M3** ✅ 2026-10-11 | 500 에러가 내부 메시지를 노출 | 15분 | [http-exception.filter.ts](backend/src/common/filters/http-exception.filter.ts) 가 non-`HttpException` 일 때 `exception.message` 를 그대로 응답에 담아 TypeORM/Postgres 원문(테이블·컬럼명)이 나간다. production 에선 generic 메시지로 |
+| **D2** ✅ 2026-10-10 (코드만, 백필 안 함) | 얼굴분석 `user_id` 가 항상 NULL | 5분 + 백필 30분 | [face-analysis.controller.ts](backend/src/face-analysis/face-analysis.controller.ts) 가 `req.user.sub` 을 읽는데 [jwt.strategy.ts](backend/src/auth/jwt.strategy.ts) `validate` 는 `{ id, ... }` 를 반환한다 (**`sub` 없음**). 다른 컨트롤러는 전부 `req.user.id`. → `face_analysis_results.user_id` 가 실제 컨설팅에서도 NULL, S3 키도 `face-analysis/anonymous/`. **수정은 `.sub` → `.id` 한 줄** |
 | **D3** | `customerId` 소유 검증 누락 | 15분 | `POST /face-analysis/analyze` 가 `body.customerId` 를 검증 없이 저장. consultations 는 `customersService.findOne(userId, id)` 로 확인하는데 여기만 빠졌다 |
 
 > **D2 백필**: `customer_id` 가 있는 행은 `customers.user_id` 로 역추적 가능.
@@ -82,17 +82,29 @@
 |---|---|:--:|---|
 | **S2** | JWT 시크릿 하드코딩 폴백 | 20분 | 4곳(`auth.module` · `admin.module` · `face-analysis.module` · `jwt.strategy`) 전부 `config.get('JWT_SECRET', 'fit-hair-secret-key')`. 미설정 시 **저장소에 적힌 문자열로 서명·검증** → 토큰 위조 + `admin:true` 위조 가능. 폴백 제거하고 **미설정이면 부팅 실패**로. 공통 팩토리로 묶을 것<br>⚠️ **시크릿을 바꾸면 기존 토큰 전부 무효화 → 로그인 중인 디자이너 전원 로그아웃.** 영업시간 외 배포 |
 | **D1** ✅ 2026-10-10 | `synchronize` 가 NODE_ENV 하나에 달림 — **해결: 항상 `false` 로 고정**, 빈 DB 는 `migrations/000_baseline_schema.sql`. 운영 스키마는 앱 테이블 기준 코드와 일치 확인 (INFRA-MIGRATION B2) | 10분 + 확인 | [app.module.ts](backend/src/app.module.ts) `synchronize: config.get('NODE_ENV') !== 'production'`. **정확히 `'production'` 이 아니면 TypeORM 이 운영 RDS 스키마를 자동 변경한다.** 그런데 파이프라인 어디에도 `NODE_ENV` 설정이 없다 — `deploy-backend.yml` · `Procfile`(`web: node dist/main`) · `.ebextensions`(비어 있음) 전부.<br>바로 아랫줄 `ssl: NODE_ENV !== 'development'` 이 미설정/production 을 똑같이 처리해서 **"DB 붙으니 맞겠지" 가 성립하지 않는다.**<br>→ ① **EB 환경변수에 `NODE_ENV=production` 있는지 확인** ② 켜져 있었다면 운영 스키마가 마이그레이션 SQL 과 어긋났는지 대조 ③ `synchronize: false` 고정 (수동 마이그레이션을 쓰므로 켤 이유 없음) |
-| **S5** | 레이트리밋 전무 | 1시간 | 로그인 · 어드민 로그인 · 비밀번호 재설정 · 아이디 찾기 · 공유링크 검증 전부 무제한. `@nestjs/throttler` 미도입<br>⚠️ **EB 는 로드밸런서 뒤 → `trust proxy` 설정 없으면 모든 요청이 같은 IP 로 보여 전체가 한 버킷에 묶인다** |
+| **S5** | 레이트리밋 전무 | 1시간 | 로그인 · 어드민 로그인 · 비밀번호 재설정 · 아이디 찾기 · 공유링크 검증 전부 무제한. `@nestjs/throttler` 미도입<br>⚠️ **운영 백엔드는 Caddy 뒤 (2026-10-11 Lightsail, 예전 EB 는 로드밸런서 뒤) → `trust proxy` 설정 없으면 모든 요청이 같은 IP 로 보여 전체가 한 버킷에 묶인다** |
 | **M2** | 사전설문 제출 후에도 덮어쓰기 가능 | 30분 | `saveAnswers` 가 `filled_at` 을 검사하지 않는다 (`createUploadUrl` 은 검사 — 비일관). 게다가 `survey.answers = answers` **통째 교체**라 자동저장이 부분 데이터를 보내면 기존 답변 손실. 토큰만 있으면 누구나 호출 가능한 공개 엔드포인트<br>착수 전 프론트가 전체를 보내는지 부분을 보내는지 확인할 것 |
 
 ### 배치 C — 별도 판단 필요
 
 | # | 항목 | 소요 | 결정할 것 |
 |---|---|:--:|---|
-| **S1** | 🔴 **비밀번호 재설정에 인증이 없다 → 계정 탈취** | ~2시간 | `POST /api/auth/reset-password` 는 가드가 없고, `email` + `ownerName` 일치만 확인하면 즉시 비밀번호를 바꾼다. 이메일 인증·토큰·기존 비밀번호 확인·레이트리밋 **전부 없음**. 둘 다 비밀이 아니고(상호·대표명은 공개 정보), 옆의 `POST /auth/find-id` 는 전화번호로 마스킹 이메일까지 알려준다<br>**결정 (2026-08-30): 이메일/SMS 연동이 없어 보류.**<br>제안했던 대안 — **어드민 경유 재설정** (요청 기록 → 어드민 승인 → 임시 비밀번호 1회 발급 → 강제 변경). 가입도 어드민 승인제라 운영 모델이 그대로 유지되고 외부 연동이 필요 없다<br>최소 조치(20분): 레이트리밋 + 확인 항목에 **전화번호 추가**(email+ownerName+phone) |
+| **S1** ⚠ 2026-10-11 위험 감수 (사용자 결정, 현재 방식 유지) | 🔴 **비밀번호 재설정에 인증이 없다 → 계정 탈취** | ~2시간 | `POST /api/auth/reset-password` 는 가드가 없고, `email` + `ownerName` 일치만 확인하면 즉시 비밀번호를 바꾼다. 이메일 인증·토큰·기존 비밀번호 확인·레이트리밋 **전부 없음**. 둘 다 비밀이 아니고(상호·대표명은 공개 정보), 옆의 `POST /auth/find-id` 는 전화번호로 마스킹 이메일까지 알려준다<br>**결정 (2026-08-30): 이메일/SMS 연동이 없어 보류.**<br>제안했던 대안 — **어드민 경유 재설정** (요청 기록 → 어드민 승인 → 임시 비밀번호 1회 발급 → 강제 변경). 가입도 어드민 승인제라 운영 모델이 그대로 유지되고 외부 연동이 필요 없다<br>최소 조치(20분): 레이트리밋 + 확인 항목에 **전화번호 추가**(email+ownerName+phone) |
 | **S3** | 공유 링크 비밀번호 평문 저장 | ~2시간 | [shares.entity.ts](backend/src/shares/shares.entity.ts) `password_plain` 에 bcrypt 해시와 **평문을 같이** 저장하고 `GET /shares/by-consultation/:id` 가 평문을 반환. DB 유출 시 즉시 노출<br>**제품 변경**: 재발급 방식으로 바꾸면 디자이너가 비밀번호를 다시 볼 수 없다 → 프론트에 "재발급" 버튼 필요 + 컬럼 DROP 마이그레이션 |
 | **M1** | ValidationPipe 의 조용한 삭제 | 1줄 but 위험 | `whitelist: true, forbidNonWhitelisted: false` — DTO 에 없는 필드를 **에러 없이** 버린다. 3WAY 데이터 유실 사고의 근본 원인<br>⚠️ `forbidNonWhitelisted: true` 로 바꾸면 여분 필드를 보내던 **모든 호출이 400 으로 깨진다.** 프론트가 일부러 `client_info.threeWay` 로 우회 중이라 특히 위험. **테스트 없이 건드리지 말 것** |
 | **M4** | 얼굴분석 짝짓기 기준이 `face_image_url` | 2~3시간 | `listBySource` / `getRecordById` / `deleteRecordById` 가 URL 로 WNC+SNH 를 묶는다. 같은 이미지를 두 번 분석하면 4행이 되어 짝짓기가 어긋나고 **삭제가 의도보다 많이 지운다**(`delete({ face_image_url, source })`). `image_id` 컬럼 추가 마이그레이션 + 백필 + 메서드 3개 수정 |
+
+### 2026-10-11 전환 후 점검에서 추가로 찾은 것
+
+| # | 항목 | 내용 |
+|---|---|---|
+| **P1** ✅ 2026-10-11 (next 16.4.0 · NestJS 11.2.7, 남은 것 swagger 내부 js-yaml moderate 1건) | 의존성 취약점 | `next` 16.1.6 critical (16.4 로 올리면 해결, 같은 메이저) · NestJS `core` · `platform-express` · `config` · `swagger` high (11.x 안에서 해결). `npm audit --omit=dev` |
+| **S7** ✅ 2026-10-11 (저장 시 경로 검사) | 버킷 전체에 GET 서명 | `S3Service` 가 **우리 버킷이기만 하면** 어떤 키든 서명한다. `analyze` 의 `faceImageUrl` · 상담 `client_info` · 사전설문 `answers`(공개 토큰으로 저장 가능)에 남의 사진 키를 넣으면 서명 주소를 돌려받는다. 키가 UUID 라 추측은 어렵다 → 키 접두사(`face-analysis/<userId>/` · `pre-surveys/<customerId>/`)로 제한 |
+| **S8** ✅ 2026-10-11 | 관리자 웹 운영 코드에 로컬 기본 계정 문자열 | `admin/login/page.tsx` 의 `TEST_EMAIL/PASSWORD` 기본값(`admin@momong.com` / `!Password1234`)이 운영 번들에 들어간다 (버튼은 숨김). 운영 관리자는 다른 이메일이지만 `isDev` 일 때만 읽도록. user 쪽도 같은 구조 |
+| **S9** ✅ 2026-10-11 (Caddyfile · next.config, 배포 시 caddy reload) | 보안 헤더 없음 | API · 웹 모두 HSTS · `X-Frame-Options` 없음, `X-Powered-By` 노출. Caddyfile `header` 와 Next `headers()` 로 추가 |
+| **S10** ✅ 2026-10-11 | 거절 · 삭제된 디자이너 토큰이 7일간 유효 | `JwtStrategy.validate` 가 `status` 를 보지 않는다 |
+| **S11** | 업로드 크기를 S3 가 강제하지 않음 | `contentLength` 는 선택값이고 서명에 안 들어간다 → presigned PUT 으로 큰 파일 업로드 가능 (로그인 · 토큰 필요) |
+| 정리 | `/dev-screens` 운영에서 열림 · `Procfile` | DECOMMISSION 5단계에서 삭제 |
 
 ### M5 — 테스트가 1개뿐
 
@@ -103,7 +115,7 @@
 
 - 소유권 검증이 대체로 일관 — customers · consultations · pre-surveys · shares 전부 `where: { id, user_id }` (예외는 위 D3)
 - S3 presigned URL 구현이 견고 — 버킷 소유 검증(`loc.bucket !== bucketName` 이면 서명 거부), 이미 서명된 URL 재서명 방지, virtual-hosted/path-style 양쪽 파싱
-- `Procfile` 은 `web: node dist/main` 로 정상 (package.json `start: nest start` 는 EB 에서 안 쓰임)
+- (EB 시절) `Procfile` 은 `web: node dist/main` 로 정상. 2026-10-11 부터 운영은 Dockerfile `node dist/main` — Procfile 은 정리 때 삭제
 - 비밀번호는 bcrypt(rounds 10) 해시 저장, 로그인 실패 메시지가 이메일/비번을 구분하지 않음
 
 ---
@@ -140,8 +152,8 @@
 - 현재 상태: 별도 참고만 (3WAY 컨설팅 시 prefill 없음)
 
 ### Q5. 운영 환경 명칭 정리
-- 현재 backend EB `Momong-staging-env` + Python `momong-face-analyze-staging-env` 이 실제 운영
-- staging 명칭 정리 → **2026-10-11 결정: prod(AWS) · dev(로컬) 두 환경으로, 인프라 이전 때 `momong-prod-*` 로 정리** (INFRA-MIGRATION §10)
+- (2026-10-11 전까지) backend EB `Momong-staging-env` + Python `momong-face-analyze-staging-env` 이 실제 운영
+- staging 명칭 정리 → **2026-10-11 결정: prod(AWS) · dev(로컬) 두 환경으로, 인프라 이전 때 `momong-prod-*` 로 정리** (INFRA-MIGRATION §10) — ✅ 2026-10-11 전환 완료
 
 ---
 
@@ -410,17 +422,16 @@ backend / frontend / Python 서버 변경분 운영 배포 시 매번 확인.
   - ℹ️ **이미 22행이 들어있는 DB** 는 시드가 다시 돌지 않는다. SNH 7·8 은 다음 분석 때
     `ensureModules` 가 숨김(`display:false`)으로 **자동 추가**하므로 수동 INSERT 불필요.
 - [ ] 필요하면 운영 DB 에 SQL 수동 실행
-- [ ] 새 환경변수 추가? → EB Configuration 에 추가
-- [ ] face_landmark Python 서버 변경? → 별도 배포 필요
+- [ ] 새 환경변수 추가? → 서버 `~/momong/.env.prod` 에 추가 (`deploy/lightsail/.env.prod.example` 도 같이)
 
 ### Push (자동 배포 트리거)
 - [ ] `git push origin main`
 - [ ] GitHub Actions backend deploy 성공 확인 ([Actions](https://github.com/anotherDevOtter/new_momong/actions))
-- [ ] Amplify user/admin 빌드 성공 확인 (Amplify 콘솔)
+- [ ] Amplify user/admin 빌드 성공 확인 (Amplify 콘솔) — admin 은 `git push origin origin/main:admin` 해야 빌드된다 (브랜치를 `main` 으로 바꾸기 전까지)
 
 ### 검증 (배포 직후)
 - [ ] backend `/api/docs` 접근 (새 endpoint `pre-surveys/*`, `module-configs` 보이는지)
-- [ ] backend `GET /` 가 `{ status: 'ok', uptime, timestamp }` 반환 (EB 헬스 체크)
+- [ ] backend `GET /` 가 `{ status: 'ok', uptime, timestamp }` 반환 (배포 워크플로도 확인한다)
 - [ ] admin `/face-modules` 진입 → 모듈 24개 목록 보이고 토글/저장 되는지 (SNH 7·8 은 숨김 상태로 존재)
 - [ ] user 메인 페이지 로드 OK
 - [ ] admin 로그인 + 페이지 로드 OK
@@ -437,4 +448,4 @@ backend / frontend / Python 서버 변경분 운영 배포 시 매번 확인.
 ### 롤백 (문제 발생 시)
 - 코드: `git revert <commit>` + `git push` → 다시 자동 배포
 - DB: 신규 테이블/컬럼은 DROP/ALTER 로 복구 (데이터 0건이면 즉시)
-- EB: 콘솔에서 이전 application version 으로 즉시 rollback 가능
+- 서버: 이미지는 `momong-api:latest` 하나만 둔다 → 위 `git revert` + push 로 이전 코드를 다시 빌드 · 배포 (2분 정도)

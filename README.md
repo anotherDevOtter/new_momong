@@ -104,7 +104,7 @@ python -m uvicorn application:app --port 3201   # http://localhost:3201
 
 ## 환경 변수
 
-상세는 각 폴더의 `.env.example`. **운영 환경 변수 매트릭스는 [ARCHITECTURE.md §9](./ARCHITECTURE.md#9-환경-변수-운영-eb)**.
+상세는 각 폴더의 `.env.example`. **운영 환경 변수 매트릭스는 [ARCHITECTURE.md §9](./ARCHITECTURE.md#9-환경-변수-운영)**.
 
 ### backend/.env (로컬 dev)
 
@@ -151,15 +151,15 @@ user 얼굴분석 결과 표가 이 설정대로 렌더된다. 처음 보는 측
 키는 화면 항목 id(`faceline`, `facelen` …)이고, 웹으로 옮기지 않은 예전 모듈 7개만 번호 키(`1`, `4` …)로 남아 있다.
 
 ### 새 어드민 추가
-- Swagger `POST /api/admin/auth/register` (기존 어드민 토큰 필요)
-- 또는 DB 에 직접 bcrypt 해시 INSERT
+- DB `admin_accounts` 에 bcrypt 해시로 직접 INSERT (가입 API `POST /api/admin/auth/register` 는 2026-10-10 삭제)
 
 ### DB 스키마 변경
-- dev: 엔티티 수정만 → `synchronize: true` 가 자동 반영
-- 운영: `backend/migrations/*.sql` 작성 + 운영 DB 에 수동 실행
+- dev · 운영 모두 `synchronize: false` — 엔티티를 고치면 `backend/migrations/*.sql` 도 같이 작성
+- dev: 로컬 `momong_dev` 에 psql 로 실행 / 운영: 서버(`3.36.224.81`)에서 psql 18 로 `momong_prod` 에 실행
 
 ### 운영 배포
-- `git push origin main` → GitHub Actions (backend EB) + Amplify (frontend) **자동 트리거**
+- `git push origin main` → GitHub Actions (backend → Lightsail) + Amplify user **자동 트리거**
+- admin 은 Amplify 가 `admin` 브랜치를 보고 있어 `git push origin origin/main:admin` 도 필요 (2026-10-18 정리 때 `main` 으로 바꿀 예정)
 - DB 마이그레이션 필요 시 push 전에 운영 DB 에 수동 실행
 - 자세한 흐름: [ARCHITECTURE.md §8](./ARCHITECTURE.md#8-배포-흐름)
 

@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Query, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -72,8 +72,9 @@ export class FaceAnalysisController {
     // JwtStrategy.validate 는 { id, email, … } 를 돌려준다 (sub 아님).
     // 예전에는 .sub 를 읽어 항상 undefined → user_id 가 비고 S3 경로가 anonymous 였다 (2026-10-10 수정)
     const userId = (req.user as { id?: string } | undefined)?.id;
+    if (!userId) throw new UnauthorizedException();
     const data = await this.service.saveMeasurement({
-      userId: userId || null,
+      userId,
       customerId: body.customerId || null,
       faceImageUrl: body.faceImageUrl,
       imageId: body.imageId,
@@ -82,6 +83,7 @@ export class FaceAnalysisController {
       engine: body.engine,
       clientProvidedData: body.clientProvidedData || null,
       source: 'consultation',
+      keyPrefix: FaceAnalysisService.keyPrefix(userId),
     });
     // 버킷이 비공개라 업로드에 쓴 publicUrl 로는 이미지를 못 읽는다.
     // 프론트가 촬영본을 화면에 표시할 수 있도록 GET presigned URL 을 함께 준다
@@ -115,6 +117,7 @@ export class FaceAnalysisController {
       engine: body.engine,
       clientProvidedData: null,
       source: 'admin_test',
+      keyPrefix: FaceAnalysisService.keyPrefix('admin'),
     });
     // 프론트가 원본 이미지를 표시할 수 있도록 GET presigned URL 도 함께 반환
     const faceImageDownloadUrl = await this.s3.createDownloadPresignedUrl(body.faceImageUrl);

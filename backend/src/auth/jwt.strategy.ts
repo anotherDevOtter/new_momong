@@ -24,7 +24,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: JwtPayload) {
     const user = await this.usersRepo.findOne({ where: { id: payload.sub } });
-    if (!user) throw new UnauthorizedException();
+    // 로그인 뒤 거절된 계정도 토큰 만료(7일)를 기다리지 않고 바로 막는다 (TODO S10)
+    if (!user || user.status !== 'approved') throw new UnauthorizedException();
     return { id: user.id, email: user.email, storeName: user.store_name, ownerName: user.owner_name };
   }
 }

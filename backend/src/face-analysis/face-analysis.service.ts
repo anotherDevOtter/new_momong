@@ -32,13 +32,18 @@ export class FaceAnalysisService {
     return Object.entries(group?.results ?? {}).map(([key, m]) => ({ key, name: m?.name }));
   }
 
+  /** 촬영본 S3 경로. 디자이너는 본인 id, admin 테스트는 'admin' */
+  static keyPrefix(userId: string | undefined): string {
+    return `face-analysis/${userId || 'anonymous'}/`;
+  }
+
   /**
    * 클라이언트에서 S3 에 PUT 할 수 있는 presigned URL 발급.
    * key 는 `face-analysis/<userId>/<uuid>.<ext>` 패턴으로 생성.
    */
   async createUploadUrl(opts: { userId?: string; contentType: string; ext?: string }) {
     const ext = (opts.ext || this.extFromContentType(opts.contentType)).replace('.', '');
-    const key = `face-analysis/${opts.userId || 'anonymous'}/${randomUUID()}.${ext}`;
+    const key = `${FaceAnalysisService.keyPrefix(opts.userId)}${randomUUID()}.${ext}`;
     return this.s3.createUploadPresignedUrl({ key, contentType: opts.contentType });
   }
 
@@ -56,6 +61,8 @@ export class FaceAnalysisService {
     engine?: unknown;
     clientProvidedData?: Record<string, unknown> | null;
     source?: AnalysisSource;
+    /** 촬영본 키가 이 경로로 시작해야 한다 — 업로드 URL 발급이 만든 본인 경로 (TODO S7) */
+    keyPrefix: string;
   }): Promise<{
     wnc: GroupResult;
     snh: GroupResult;
@@ -63,8 +70,10 @@ export class FaceAnalysisService {
     wncId: string;
     snhId: string;
   }> {
-    // 촬영본은 반드시 우리 버킷에 올라간 것이어야 한다 (임의 URL 저장 방지)
-    if (!opts.faceImageUrl || !this.s3.isOwnBucketUrl(opts.faceImageUrl)) {
+    // 촬영본은 반드시 본인이 업로드 URL 발급으로 올린 것이어야 한다.
+    // 임의 URL 저장을 막고, 남의 사진 키를 넣어 서명 주소(faceImageDownloadUrl)를 받아 가는 것도 막는다 (TODO S7)
+    const key = opts.faceImageUrl ? this.s3.ownKey(opts.faceImageUrl) : null;
+    if (!key || !key.startsWith(opts.keyPrefix)) {
       throw new BadRequestException('faceImageUrl 은 업로드 URL 발급으로 올린 이미지여야 합니다');
     }
     const engine = parseEngine(opts.engine);
