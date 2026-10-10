@@ -52,8 +52,9 @@ export const LEGACY_KEY: Record<Axis, Record<string, string>> = {
  * 모듈이 아직 없는 browdir · eyefront · nosehigh 도 나중에 측정이 생기면 그대로 받도록 열어 둔다.
  */
 export const ALLOWED_KEYS: Record<Axis, Set<string>> = {
-  WNC: new Set([...Object.keys(LEGACY_KEY.WNC), 'browdir', 'eyefront', 'nosehigh']),
-  SNH: new Set(Object.keys(LEGACY_KEY.SNH)),
+  // '1' 피부톤 · '10' 코 폭 — 1way 표에만 있는 항목. 예전 번호 키 그대로 받는다 (2026-10-11)
+  WNC: new Set([...Object.keys(LEGACY_KEY.WNC), 'browdir', 'eyefront', 'nosehigh', '1']),
+  SNH: new Set([...Object.keys(LEGACY_KEY.SNH), '10']),
 };
 
 // ── 검증 ─────────────────────────────────────────────────────────────────

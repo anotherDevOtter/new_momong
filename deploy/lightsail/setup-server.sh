@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Lightsail 인스턴스 momong-prod-api (Ubuntu 24.04) 처음 한 번만 실행한다.
-#   Docker · Docker Compose, PostgreSQL 17 클라이언트(DB 복원용), 스왑 2GB, ~/momong 폴더
+#   Docker · Docker Compose, PostgreSQL 18 클라이언트(DB 복원 · 백업용, 17 서버에도 접속된다), 스왑 2GB, ~/momong 폴더
 # 사용: 서버에 접속해서  bash setup-server.sh
 set -euo pipefail
 
@@ -14,10 +14,10 @@ if ! command -v docker >/dev/null; then
 fi
 sudo usermod -aG docker "$USER"
 
-echo "== PostgreSQL 17 클라이언트 (pg_dump 17.6 이 만든 덤프를 읽으려면 17.6 이상)"
+echo "== PostgreSQL 18 클라이언트 (운영 DB 가 18 이면 pg_dump 도 18 이상이어야 한다. 17.6 덤프도 읽는다)"
 sudo apt-get install -y curl ca-certificates postgresql-common
 sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
-sudo apt-get install -y postgresql-client-17
+sudo apt-get install -y postgresql-client-18
 psql --version
 
 echo "== 스왑 2GB (1GB 인스턴스 메모리 여유)"

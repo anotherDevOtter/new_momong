@@ -21,8 +21,8 @@ const sharp = requireUser('sharp');
 
 /** 화면 항목 id → 기존 Python 모듈 번호 */
 export const PY_KEY: Record<'wnc' | 'snh', Record<string, string>> = {
-  wnc: { faceline: '2', cheek: '3', browshape: '5', eyeshape: '6', eyetail: '7', nosewidth: '8', lips: '9' },
-  snh: { facelen: '2', thirds: '11', broweye: '4', eyelid: '7', intereye: '5', eyeouter: '6', noselen: '9', philtrum: '12', mouthwidth: '13', chinlen: '14' },
+  wnc: { faceline: '2', cheek: '3', browshape: '5', eyeshape: '6', eyetail: '7', nosewidth: '8', lips: '9', '1': '1' },
+  snh: { facelen: '2', thirds: '11', broweye: '4', eyelid: '7', intereye: '5', eyeouter: '6', noselen: '9', philtrum: '12', mouthwidth: '13', chinlen: '14', '10': '10' },
 };
 
 const arg = (name: string, def?: string) => {

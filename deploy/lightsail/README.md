@@ -8,7 +8,7 @@
 | 새 자원 | 이름 |
 |---|---|
 | Lightsail 인스턴스 | `momong-prod-api` (Ubuntu 24.04, 1GB, 서울) + 고정 IP `momong-prod-ip` |
-| Lightsail 관리형 DB | `momong-prod-db` (PostgreSQL 17, 서울, 공개 모드 끔) — DB 이름 `momong_prod` |
+| Lightsail 관리형 DB | `momong-prod-db` (PostgreSQL 18, 서울, 공개 모드 끔) — DB 이름 `momong_prod` |
 | S3 버킷 | `momong-prod` |
 | IAM 사용자 | `momong-prod-s3` (`momong-prod` 버킷만) |
 
@@ -19,8 +19,14 @@
 ### A-1 🧑 S3 버킷 `momong-prod`
 
 1. S3 → 버킷 만들기: 이름 `momong-prod`, 리전 서울, **퍼블릭 액세스 모두 차단**(기본값).
-2. 예전 버킷 `momong-staging` → 권한 → **CORS** 내용을 복사해 `momong-prod` 에 그대로 붙인다.
-3. 예전 버킷 → 관리 → **수명 주기 규칙**이 있으면 같게 만든다 (`elasticbeanstalk-artifacts/` 관련 규칙은 제외).
+2. 예전 버킷 `momong-staging` 의 CORS 를 바탕으로 **localhost 를 뺀** CORS 를 `momong-prod` 에 넣는다 (로컬은 `momong-dev` 버킷을 쓴다):
+   ```json
+   [{ "AllowedHeaders": ["*"], "AllowedMethods": ["PUT", "POST", "GET", "HEAD"],
+      "AllowedOrigins": ["https://*.merci-momong.com"],
+      "ExposeHeaders": ["ETag", "x-amz-version-id"], "MaxAgeSeconds": 3000 }]
+   ```
+   버킷 만들 때 **버킷 네임스페이스는 글로벌**(기본값). 계정 리전 네임스페이스는 주소 형식이 달라질 수 있다.
+3. 예전 버킷 → 관리 → 수명 주기 규칙 — 2026-10-11 확인: 없음.
 
 ### A-2 🧑 IAM 사용자 `momong-prod-s3`
 
@@ -38,18 +44,31 @@ IAM → 사용자 만들기 `momong-prod-s3` (콘솔 접근 없음) → 인라�
 
 → 액세스 키 만들기 → 키 · 비밀값을 **맥 메모(EB 환경 변수 옆)** 에 적어 둔다. (A-5 에서 넣는다)
 
-### A-3 🧑 Lightsail DB `momong-prod-db`
+### A-3 🧑 Lightsail DB `momong-prod-db` — 먼저 만든다 (생성에 10~20분)
 
-Lightsail → 데이터베이스 → 만들기: 서울 · **PostgreSQL 17** · 가장 작은 표준 플랜 · 이름 `momong-prod-db`.
-마스터 사용자 이름 · 비밀번호를 메모에 적는다. **공개 모드는 끈 채로** 둔다.
-→ 만들어지면 **엔드포인트**를 메모에 적는다.
+1. https://lightsail.aws.amazon.com → **데이터베이스** 탭 → **데이터베이스 생성**
+2. 위치: 서울 `ap-northeast-2`, 가용 영역 기본(a)
+3. 데이터베이스: **PostgreSQL 18.x** (18 중 최신. 17 도 된다 — 운영 덤프는 17.9. 18 은 지원 기간이 1년 더 길다. A-7 리허설로 확인)
+4. 로그인 자격 증명: 사용자 이름 기본 `dbmasteruser`, 비밀번호는 "강력한 암호 생성" 그대로 (만든 뒤 볼 수 있다)
+5. 마스터 데이터베이스 이름: **기본값 그대로** (`momong_prod` 는 C-2 에서 만든다)
+6. 플랜: **표준** 가장 작은 것 (1GB). 고가용성 없음
+7. 이름 `momong-prod-db` → 생성 → "사용 가능" 까지 대기
+8. **연결 세부 정보**의 엔드포인트 · 사용자 이름 · 비밀번호를 메모에 적는다
+9. 네트워킹 탭: **퍼블릭 모드 꺼짐** 확인 (기본값)
 
-### A-4 🧑 Lightsail 인스턴스 `momong-prod-api`
+### A-4 🧑 Lightsail 인스턴스 `momong-prod-api` — DB 를 기다리는 동안
 
-1. Lightsail → 인스턴스 → 만들기: 서울 · Linux · **Ubuntu 24.04 LTS** · 1GB 플랜 · 이름 `momong-prod-api`.
-2. 네트워킹 → **고정 IP 만들기 · 연결** (`momong-prod-ip`). IP 를 메모에 적는다.
-3. 네트워킹 → IPv4 방화벽: **HTTP 80 · HTTPS 443 추가**, SSH 22 는 그대로 (GitHub 배포가 SSH 로 들어온다. 비밀번호 로그인은 꺼져 있고 키로만 들어간다).
-4. 계정 → SSH 키 → 서울 기본 키(.pem) 내려받기.
+1. **인스턴스** 탭 → **인스턴스 생성**
+2. 위치: 서울, 가용 영역 **DB 와 같은 a**
+3. 플랫폼 Linux/Unix → **OS 전용** → **Ubuntu 24.04 LTS**
+4. SSH 키: 서울 기본 키 그대로
+5. 네트워킹 유형: **듀얼 스택** (IPv6 전용 X — 고정 IPv4 필요)
+6. 플랜: 듀얼 스택 **1GB RAM**
+7. 이름 `momong-prod-api` → 생성
+8. 인스턴스 → **네트워킹** 탭
+   - **고정 IP 생성** → 이 인스턴스에 연결, 이름 `momong-prod-ip` → IP 를 메모에
+   - **IPv4 방화벽** → 규칙 추가 **HTTPS 443** (HTTP 80 · SSH 22 는 이미 있다. GitHub 배포가 SSH 로 들어오므로 22 는 모두 허용 그대로, 키로만 접속된다)
+9. 오른쪽 위 **계정 → SSH 키** → 서울 **기본 키 다운로드** (`LightsailDefaultKey-ap-northeast-2.pem`)
 
 ### A-5 🖥 서버 첫 세팅
 
@@ -61,7 +80,7 @@ ssh -i ~/Downloads/LightsailDefaultKey-ap-northeast-2.pem ubuntu@<고정IP>
 ```
 서버에서:
 ```bash
-bash setup-server.sh            # Docker · psql 17 · 스왑 · ~/momong
+bash setup-server.sh            # Docker · psql 18 · 스왑 · ~/momong
 exit                            # Docker 권한 적용을 위해 다시 접속
 ```
 다시 접속한 뒤 **환경 변수 넣기 ← 메모의 값은 여기서 넣는다**:
@@ -79,7 +98,7 @@ GitHub 저장소 → Settings → Secrets and variables → Actions → New repo
 
 ### A-7 🖥 리허설 (권장) — 2026-10-10 덤프로 복원해 보기
 
-C-2 · C-3 을 지금 있는 덤프로 한 번 해 본다. 확장 `uuid-ossp` 가 되는지, 시간이 얼마나 걸리는지 본다. 끝나면:
+C-2 · C-3 을 지금 있는 덤프로 한 번 해 본다. **17 → 18 복원이 오류 없이 되는지**, 확장 `uuid-ossp` 가 되는지, 시간이 얼마나 걸리는지 본다. 끝나면:
 ```bash
 psql "host=$DB_HOST user=$DB_USERNAME dbname=postgres sslmode=require" -c "DROP DATABASE momong_prod;"
 ```
@@ -185,7 +204,9 @@ docker compose restart api         # 재시작
 - EB 환경 2개 종료: `Momong-staging-env` · `momong-face-analyze-staging-env` (로드밸런서 · EC2 · IP 같이 사라짐)
 - RDS `momong-staging`: **최종 스냅샷** 만들고 삭제 (안의 예전 DB `momong-staging` · `momong-dev` 도 같이. 덤프 · CSV 는 `momong-database/migration-backup/`)
 - S3 `momong-staging`: 한 달 정도 둔 뒤 삭제
+- S3 `elasticbeanstalk-ap-northeast-2-…`: EB 가 만든 배포 · 로그 버킷. EB 종료 뒤 삭제 (사진 없음)
 - `face_landmark` 저장소 배포 워크플로 끄기
 - Amplify 앱 이름 → `momong-prod-user` · `momong-prod-admin` (선택)
 - `test` 코스 · 비교 화면 삭제 후 배포 (INFRA-MIGRATION C5)
 - 다음 달 청구서로 절감 확인
+- (참고) 운영 DB 를 맥에서 백업하려면 `pg_dump` 18 필요: `brew install postgresql@18`

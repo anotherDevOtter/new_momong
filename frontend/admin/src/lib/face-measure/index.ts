@@ -26,6 +26,8 @@ export const FORM_MEASURES: Record<string, MeasureFn> = {
   eyetail: form.eyetail,
   nosewidth: form.nosewidth,
   lips: form.lips,
+  // 1way 표에만 있는 항목 — 예전 모듈 번호 키 그대로 (module_configs · FaceAnalysisResult 가 '1' 을 쓴다)
+  '1': form.skintone,
 };
 
 /** 비율 (화면 PROP) */
@@ -40,6 +42,8 @@ export const PROP_MEASURES: Record<string, MeasureFn> = {
   philtrum: prop.philtrum,
   mouthwidth: prop.mouthwidth,
   chinlen: prop.chinlen,
+  // 1way 표에만 있는 항목 — 예전 모듈 번호 키 그대로 ('10' = 코 폭)
+  '10': prop.nosebreadth,
 };
 
 export interface GroupResult<G extends string> {

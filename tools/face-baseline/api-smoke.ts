@@ -53,7 +53,10 @@ async function main() {
   ok(saved.status === 201 || saved.status === 200, '측정 결과 저장', `${saved.status} wnc=${d?.wnc?.final} snh=${d?.snh?.final} 항목 ${d?.metadata?.total_modules}`);
   ok(!!d?.wncId && !!d?.snhId, '저장 id 반환', `${d?.wncId?.slice(0, 8)} / ${d?.snhId?.slice(0, 8)}`);
   ok(d?.wnc?.final === measured.wnc.final && d?.snh?.final === measured.snh.final, '서버 재계산 final = 브라우저 final');
-  ok(Object.keys(d?.wnc?.results ?? {}).every((k: string) => /^[a-z]+$/.test(k)), '결과 키 = 화면 항목 id', Object.keys(d?.wnc?.results ?? {}).join(','));
+  // 화면 항목 id + 1way 표 전용 예전 번호 키('1' 피부톤 · '10' 코 폭)
+  const keysOk = (g: { results?: Record<string, unknown> } | undefined, extra: string) =>
+    Object.keys(g?.results ?? {}).every((k) => /^[a-z]+$/.test(k) || k === extra);
+  ok(keysOk(d?.wnc, '1') && keysOk(d?.snh, '10'), '결과 키 = 화면 항목 id (+ 1 · 10)', `${Object.keys(d?.wnc?.results ?? {}).length + Object.keys(d?.snh?.results ?? {}).length}개`);
   ok(d?.wnc?.engine?.name === ENGINE.name, 'engine 표시 저장');
 
   // 3) 촬영본 GET presigned URL 이 실제로 열리는지

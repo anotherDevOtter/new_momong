@@ -1,12 +1,13 @@
 // ⚠ frontend/user/src/lib/face-measure/form.ts 의 복사본 — user · admin 은 독립 앱이라 코드를 공유할 수 없다 (ARCHITECTURE §3-1).
 //   고칠 때는 두 곳을 같이 고친다.
 
-// 형태 (Warm / Neutral / Cool) 7개 항목.
+// 형태 (Warm / Neutral / Cool) 7개 항목 + 1way 표 전용 피부톤.
 // 각 함수 위에 원본 Python 모듈 이름을 적었다. 계산 · 기준값 · 설명 문구는 원본 그대로다.
 
-import { absSobelYWrapped, bitwise, canny, clahe, closeRow, grayRoi, threshold } from './imageops';
+import { absSobelYWrapped, bitwise, canny, clahe, closeRow, grayRoi, meanLabL, threshold } from './imageops';
 import { angleAt, deg, dist, dot, floorDiv, fmt, line, P, polyline, pt, round, text, toPt, xy } from './geometry';
 import type { FormGrade, MeasureInput, MeasureResult, MeasurementShape } from './types';
+
 
 const size = (i: MeasureInput) => ({ w: i.image.width, h: i.image.height });
 const imageSize = (w: number, h: number) => ({ width: w, height: h });
@@ -305,6 +306,52 @@ export function lips(input: MeasureInput): MeasureResult | null {
     grade,
     value: round(ratio, 3),
     description: `입술 두께/너비 비율 ${fmt(ratio, 2)} (${grade})`,
+    measurement: { image_size: imageSize(w, h), shapes },
+  };
+}
+
+/**
+ * 피부톤 ← WNC_TYPE_01_skin_tone (키는 예전 번호 '1' 그대로 — 1way 표 · module_configs 가 이 키를 쓴다)
+ * new 코스 화면에는 없는 항목이다. 2026-10-11 1way 전환 점검 중 추가.
+ */
+export function skintone(input: MeasureInput): MeasureResult | null {
+  const { w, h } = size(input);
+  const lm = input.landmarks;
+  const forehead = pt(lm, 10, w, h);
+  const regions: { center: P; name: string }[] = [
+    { center: [forehead[0], Math.max(0, forehead[1] - 50)], name: 'forehead' },
+    { center: pt(lm, 205, w, h), name: 'left_cheek' },
+    { center: pt(lm, 425, w, h), name: 'right_cheek' },
+    { center: pt(lm, 4, w, h), name: 'nose' },
+  ];
+  const S = 20;
+  const boxes: { x1: number; y1: number; x2: number; y2: number; l: number; name: string }[] = [];
+  const lValues: number[] = [];
+  for (const r of regions) {
+    const [cx, cy] = r.center;
+    const x1 = Math.max(0, cx - S);
+    const y1 = Math.max(0, cy - S);
+    const x2 = Math.min(w, cx + S);
+    const y2 = Math.min(h, cy + S);
+    if (x2 > x1 && y2 > y1) {
+      const meanL = meanLabL(input.image, x1, y1, x2, y2);
+      lValues.push(meanL);
+      boxes.push({ x1, y1, x2, y2, l: meanL / 2.55, name: r.name });
+    }
+  }
+  if (!lValues.length) return null;
+  const avg = lValues.reduce((a, b) => a + b, 0) / lValues.length / 2.55;
+  // ⚠ 원본 기준값(≤19 W, ≤22 N)이 실제 피부 L 값(60~70대)과 맞지 않아 거의 항상 C 가 나온다 — 원본 그대로
+  const grade: FormGrade = avg <= 19 ? 'W' : avg <= 22 ? 'N' : 'C';
+  const shapes: MeasurementShape[] = boxes.flatMap((b) => [
+    { type: 'rectangle' as const, points: [xy(b.x1, b.y1), xy(b.x2, b.y2)], stroke: '#FFFFFF', stroke_width: 2, dashed: false, label: `${b.name} L:${fmt(b.l, 1)}` },
+    text(xy(b.x1, Math.max(b.y1 - 5, 0)), `L:${fmt(b.l, 1)}`, 14),
+  ]);
+  return {
+    name: '피부톤',
+    grade,
+    value: round(avg, 2),
+    description: `평균 피부 밝기 L값 ${fmt(avg, 1)} (${grade})`,
     measurement: { image_size: imageSize(w, h), shapes },
   };
 }

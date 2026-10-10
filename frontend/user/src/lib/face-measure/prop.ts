@@ -1,4 +1,4 @@
-// 비율 (Soft / Neutral / Hard) 10개 항목.
+// 비율 (Soft / Neutral / Hard) 10개 항목 + 1way 표 전용 코 폭.
 // 각 함수 위에 원본 Python 모듈 이름을 적었다. 계산 · 기준값 · 설명 문구는 원본 그대로다.
 // 예외: 얼굴 길이 · 턱 길이는 원본이 Haar 얼굴 검출 상자를 쓴다 → 랜드마크로 상자를 추정한다 (아래 HAAR_*).
 
@@ -419,6 +419,35 @@ export function chinlen(input: MeasureInput): MeasureResult | null {
       shapes: [
         line(toPt(below), toPt(chin), '턱 길이', true),
         text(xy(50, 50), `CHIN LENGTH: ${fmt(ratio, 3)} (${grade})`, 18),
+      ],
+    },
+  };
+}
+
+/**
+ * 코 폭 ← SNH_TYPE_10_nose_width (키는 예전 번호 '10' 그대로 — 1way 표 · module_configs 가 이 키를 쓴다)
+ * new 코스 화면에는 없는 항목이다 (화면의 '코 너비'는 WNC 08 코 형태). 2026-10-11 1way 전환 점검 중 추가.
+ */
+export function nosebreadth(input: MeasureInput): MeasureResult | null {
+  const { w, h } = size(input);
+  const l = pt(input.landmarks, 48, w, h);
+  const r = pt(input.landmarks, 278, w, h);
+  const ratio = Math.abs(r[0] - l[0]) / faceWidth(input);
+  const grade: PropGrade = ratio <= 0.182 ? 'S' : ratio < 0.222 ? 'N' : 'H';
+  const vl = Math.trunc(faceHeight(input) * 0.3);
+  return {
+    name: '코 폭',
+    grade,
+    value: round(ratio, 3),
+    description: `코폭 비율 ${fmt(ratio, 3)} (${grade})`,
+    measurement: {
+      image_size: imageSize(w, h),
+      shapes: [
+        line(toPt(l), xy(r[0], l[1]), '코폭', true),
+        line(xy(l[0], l[1] - vl), xy(l[0], l[1] + vl), '왼쪽 콧망울 기준선', true),
+        line(xy(r[0], r[1] - vl), xy(r[0], r[1] + vl), '오른쪽 콧망울 기준선', true),
+        text(xy(50, 50), `NOSE_WIDTH: ${grade}`, 18),
+        text(xy(50, 80), `RATIO: ${fmt(ratio, 3)}`, 18),
       ],
     },
   };

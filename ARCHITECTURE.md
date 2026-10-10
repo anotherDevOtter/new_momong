@@ -337,9 +337,9 @@ TypeScript 도 `react` / `@mediapipe/tasks-vision` 을 해석하지 못한다.
 
 - 측정은 **브라우저**: `frontend/user/src/lib/face-measure/` (admin 은 같은 코드의 복사본 `frontend/admin/src/lib/face-measure/`)
   - 랜드마크: `@mediapipe/tasks-vision` FaceLandmarker 0.10.35 (CPU)
-  - 판정: Python 모듈 17개를 TS 로 옮긴 것 (`form.ts` 7 · `prop.ts` 10). CLAHE · Canny · Sobel 등은 `imageops.ts` 에 직접 구현
+  - 판정: Python 모듈 19개를 TS 로 옮긴 것 (`form.ts` 7+1 · `prop.ts` 10+1). 17개는 new 화면 항목 id 키, 1way 표 전용 피부톤 · 코 폭은 예전 번호 키 `1` · `10`. CLAHE · Canny · Sobel 등은 `imageops.ts` 에 직접 구현
   - 촬영본을 **업로드 전에** 측정 → 얼굴을 못 찾으면 올리지 않는다 → 업로드 → `POST /face-analysis/analyze` 로 결과 저장
-- 화면에 없는 Python 모듈 7개는 옮기지 않았다. 화면 항목 중 눈썹 방향 · 눈 앞머리 · 코 높이는 측정 모듈이 없다
+- 옮기지 않은 Python 모듈 5개 (WNC 4 윤곽 · 10 입술산, SNH 1 피부톤밝기 · 3 눈썹두께 · 8 눈밑지방) — 어느 화면에도 표시되지 않는다. 화면 항목 중 눈썹 방향 · 눈 앞머리 · 코 높이는 측정 모듈이 없다
 - Python 과의 비교 · 검증 도구: `tools/face-baseline/` (기준값 · 비교 · 비교 이미지 · API 점검)
 - 이식 계획 · 검증 결과: [INFRA-MIGRATION.md §1-1 · §6](./INFRA-MIGRATION.md)
 

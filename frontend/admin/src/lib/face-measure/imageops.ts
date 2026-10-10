@@ -35,6 +35,29 @@ export function grayRoi(img: RgbImage, x0: number, y0: number, x1: number, y1: n
   return { width: w, height: h, data: out };
 }
 
+/**
+ * cv2.cvtColor(BGR2Lab) 의 L 채널(8비트, 0~255) 평균 — 영역 [x0,x1) × [y0,y1).
+ * sRGB 감마를 풀고 Y 를 구해 L* = 116·∛Y − 16 → ×255/100 반올림. (OpenCV 는 표 · 정수 근사라 ±1 차이가 날 수 있다)
+ */
+export function meanLabL(img: RgbImage, x0: number, y0: number, x1: number, y1: number): number {
+  const lin = (v: number) => {
+    const c = v / 255;
+    return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  };
+  let sum = 0;
+  let n = 0;
+  for (let y = y0; y < y1; y++) {
+    let i = (y * img.width + x0) * img.channels;
+    for (let x = x0; x < x1; x++, i += img.channels) {
+      const Y = 0.212671 * lin(img.data[i]) + 0.71516 * lin(img.data[i + 1]) + 0.072169 * lin(img.data[i + 2]);
+      const L = Y > 0.008856 ? 116 * Math.cbrt(Y) - 16 : 903.3 * Y;
+      sum += Math.min(255, Math.max(0, Math.round((L * 255) / 100)));
+      n++;
+    }
+  }
+  return n ? sum / n : 0;
+}
+
 /** cvRound: 가장 가까운 정수, .5 는 짝수로 */
 function cvRound(v: number): number {
   const f = Math.floor(v);
