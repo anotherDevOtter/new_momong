@@ -17,8 +17,8 @@
    ```bash
    createuser -s postgres
    psql -U postgres -c "ALTER USER postgres WITH PASSWORD 'password';"
-   psql -U postgres -c "CREATE DATABASE fit_hair;"
-   psql -U postgres -d fit_hair -f backend/migrations/000_baseline_schema.sql   # 테이블 생성
+   psql -U postgres -c "CREATE DATABASE momong_dev;"
+   psql -U postgres -d momong_dev -f backend/migrations/000_baseline_schema.sql   # 테이블 생성
    ```
    > 백엔드는 DB 구조를 자동으로 바꾸지 않는다(`synchronize: false`). 빈 DB 는 위 기준 SQL 로 테이블을 만들고,
    > 이후 구조 변경은 `backend/migrations/` 에 번호를 붙인 SQL 로 한다.
@@ -112,7 +112,7 @@ python -m uvicorn application:app --port 3201   # http://localhost:3201
 |---|---|---|
 | `PORT` | 3200 | API 포트 |
 | `NODE_ENV` | development | `development` 가 아니면 SSL ON (synchronize 는 항상 OFF) |
-| `DB_*` | localhost/postgres/password/fit_hair | PostgreSQL |
+| `DB_*` | localhost/postgres/password/momong_dev | PostgreSQL (로컬 DB 이름은 `momong_dev`, 2026-10-11 `fit_hair` 에서 변경) |
 | `JWT_SECRET` | (default) | 토큰 서명 키 (운영 변경 필수) |
 | `ALLOWED_ORIGINS` | `http://localhost:3203,3202` | CORS |
 | `FRONTEND_URL` | http://localhost:3203 | 공유 링크 base |
@@ -193,7 +193,7 @@ new_momong/
 
 | 증상 | 원인/해결 |
 |---|---|
-| `database "fit_hair" does not exist` | 위 "사전 준비" 의 `CREATE DATABASE` 실행 |
+| `database "momong_dev" does not exist` | 위 "사전 준비" 의 `CREATE DATABASE` 실행. 예전 이름 `fit_hair` 로 만들었다면 `ALTER DATABASE fit_hair RENAME TO momong_dev;` |
 | `relation "users" does not exist` | 빈 DB — `backend/migrations/000_baseline_schema.sql` 실행 |
 | CORS 차단 | backend `ALLOWED_ORIGINS` 에 프론트 origin 추가 후 backend 재시작 |
 | 어드민 로그인 안됨 | 자동 시드 계정 시도. 안되면 `admin_accounts` 비우고 재부팅 |

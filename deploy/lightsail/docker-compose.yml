@@ -1,0 +1,40 @@
+# Lightsail 인스턴스 momong-prod-api 에서 실행한다 (서버의 ~/momong 폴더).
+#   api   — NestJS 백엔드. 이미지는 GitHub Actions 가 빌드해 서버에 올린다 (momong-api:latest)
+#   caddy — HTTPS 자동 발급 + api 로 전달. 로드밸런서 대신 쓴다
+# 설정값은 같은 폴더의 .env.prod (Git 에 넣지 않는다). 방법: README.md
+
+services:
+  api:
+    image: momong-api:latest
+    env_file: .env.prod
+    restart: always
+    # 서버 안에서만 직접 확인할 수 있게 127.0.0.1 에만 연다 (외부는 caddy 를 거친다)
+    ports:
+      - "127.0.0.1:3200:3200"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  caddy:
+    image: caddy:2
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+volumes:
+  caddy_data:
+  caddy_config:

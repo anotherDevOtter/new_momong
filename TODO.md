@@ -141,7 +141,7 @@
 
 ### Q5. 운영 환경 명칭 정리
 - 현재 backend EB `Momong-staging-env` + Python `momong-face-analyze-staging-env` 이 실제 운영
-- staging 명칭 정리할지 (운영용 환경 새로 만들고 이름 분리)
+- staging 명칭 정리 → **2026-10-11 결정: prod(AWS) · dev(로컬) 두 환경으로, 인프라 이전 때 `momong-prod-*` 로 정리** (INFRA-MIGRATION §10)
 
 ---
 

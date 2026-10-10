@@ -35,7 +35,7 @@ import { RequestLoggerMiddleware } from './common/middleware/request-logger.midd
         port: config.get<number>('DB_PORT', 5432),
         username: config.get('DB_USERNAME', 'postgres'),
         password: config.get('DB_PASSWORD', 'password'),
-        database: config.get('DB_DATABASE', 'fit_hair'),
+        database: config.get('DB_DATABASE', 'momong_dev'),
         entities: [User, Customer, Consultation, ConsultationShare, AdminAccount, FeatureSettings, ImageDetectionResult, PreSurvey, ModuleConfig],
         // 스키마는 migrations/*.sql 로만 바꾼다 (TODO D1, 2026-10-10).
         // 예전에는 NODE_ENV 가 정확히 'production' 이 아니면 켜져서, 설정이 빠진 환경에서

@@ -1,0 +1,5 @@
+# API 도메인 → 백엔드. 인증서는 DNS 가 이 서버(고정 IP)를 가리키면 Caddy 가 자동으로 받는다.
+manager-api.merci-momong.com {
+	encode gzip
+	reverse_proxy api:3200
+}

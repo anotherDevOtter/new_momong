@@ -3,11 +3,11 @@
 --
 -- 새로 만든 빈 DB 에 앱 테이블 9개를 만든다 (데이터 없음).
 -- 2026-10-10 부터 TypeORM synchronize 를 끄면서(TODO D1) 빈 DB 에 테이블이 자동으로 생기지 않게 되어 추가했다.
--- 로컬 fit_hair 의 구조를 pg_dump --schema-only 로 뜬 것이고, 운영 fit_hair 의 앱 테이블 구조와 같다
+-- 로컬 DB(momong_dev, 옛 이름 fit_hair)의 구조를 pg_dump --schema-only 로 뜬 것이고, 운영 DB 의 앱 테이블 구조와 같다
 -- (INFRA-MIGRATION B2 에서 컬럼 · 제약 · 인덱스 비교).
 --
 -- 사용: 빈 DB 에 한 번만. 이미 테이블이 있는 DB(운영 · 기존 로컬)에는 실행하지 않는다.
---   psql -d fit_hair -f migrations/000_baseline_schema.sql
+--   psql -d momong_dev -f migrations/000_baseline_schema.sql
 -- 001~004 는 이 안에 이미 반영되어 있다. 005 는 이 파일로 만든 빈 DB 에는 필요 없다(시드가 새 키로 들어간다).
 -- 엔티티를 바꾸면 이 파일이 아니라 새 번호의 마이그레이션 SQL 을 추가한다.
 -- ============================================================================

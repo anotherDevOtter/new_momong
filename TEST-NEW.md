@@ -142,7 +142,7 @@ http://localhost:3203/3way/consulting?course=new&customerId=<UUID>&step=<화면>
 ```bash
 cd new_momong/backend
 PGPASSWORD=$(grep '^DB_PASSWORD=' .env | cut -d= -f2-) \
-psql -h localhost -U postgres -d fit_hair -c \
+psql -h localhost -U postgres -d momong_dev -c \
 "SELECT client_info->'threeWay'->'consultData' FROM consultations ORDER BY created_at DESC LIMIT 1;"
 ```
 

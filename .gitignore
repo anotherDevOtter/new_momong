@@ -13,6 +13,7 @@ out/
 .env*.local
 .env.development
 .env.staging
+.env.prod
 .env.production
 
 # Logs

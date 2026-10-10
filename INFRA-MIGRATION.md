@@ -425,3 +425,71 @@ RDS 인스턴스(이름 `momong-staging`) 안에 DB 가 3개 있다.
   → **이전(D-2~D-4)의 기준 덤프로 쓸 수 있다.** 확장은 `uuid-ossp` 하나 — Lightsail DB 지원 여부 확인 필요 (2-10 리허설).
 - **RDS 스냅샷: 완료** (2026-10-10, 사용자)
 - **S3 사진: 백업하지 않음** — 이전에서 S3 는 건드리지 않는다 (2026-10-10 사용자 결정)
+
+---
+
+## 10. 환경 · 이름 정리 — `staging` 없애고 `prod` / `dev` 로 (2026-10-11 계획)
+
+### 원칙
+
+- 환경은 둘뿐이다. **prod = AWS 에 올라간 것 (실제 운영)**, **dev = 로컬**.
+- 지금 `staging` 이 붙은 것은 이름만 그렇고 **전부 실제 운영**이다. 별도 스테이징 환경은 없다.
+- AWS 자원 이름: `momong-prod-<역할>` · 로컬/개발 자원: `momong-dev…` · Postgres DB 이름은 하이픈 대신 밑줄 (`momong_prod`, `momong_dev`).
+- 인프라 이전(§7)에서 **새로 만드는 자원은 처음부터 prod 이름**으로 만든다. 이름만 바꾸려고 따로 작업하지 않는다.
+
+### 바뀌는 이름
+
+| 대상 | 지금 | 바뀐 뒤 | 언제 · 어떻게 |
+|---|---|---|---|
+| 백엔드 서버 | EB 앱 `momong-staging` / 환경 `Momong-staging-env` | Lightsail 인스턴스 `momong-prod-api` | 2단계 생성 시. EB 는 관찰 후 삭제 |
+| Python 서버 | EB `momong-face-analyze-staging(-env)` | (없어짐) | 브라우저 측정 배포 · 관찰 후 삭제 |
+| DB 서버 | RDS 인스턴스 `momong-staging` | Lightsail DB `momong-prod-db` | 2단계 생성 시. RDS 는 관찰 후 삭제 |
+| 운영 DB 이름 | `fit_hair` | `momong_prod` | 전환 당일 복원할 때 새 이름으로 (덤프는 DB 이름과 무관) |
+| 예전 DB 2개 | RDS 안 `momong-staging` · `momong-dev` | (옮기지 않음) | 2026-10-10 덤프 · CSV 로 보관 완료. RDS 와 함께 삭제 |
+| 로컬 DB 이름 | `fit_hair` | `momong_dev` | 지금. `ALTER DATABASE … RENAME` + `.env` · 기본값 · 문서 |
+| 운영 사진 버킷 | S3 `momong-staging` | `momong-prod` ✅ | 전환 때 같이 (아래 "S3 버킷" A안) |
+| 개발 사진 버킷 | S3 `momong-dev` | 그대로 | 이미 dev 이름 |
+| 배포 산출물 | S3 `momong-staging/elasticbeanstalk-artifacts/` | (없어짐) | Lightsail 배포는 이미지 빌드 → SSH. 정리 때 삭제 |
+| 웹 (Amplify) | 앱 이름 확인 필요 | `momong-prod-user` · `momong-prod-admin` *(N3)* | Amplify 콘솔에서 이름만 변경 (주소 · 배포 무관) |
+| 도메인 | `manager-api` · `www` · `admin.merci-momong.com` | 그대로 | 고객 · 매장이 쓰는 주소라 유지 |
+| 백엔드 배포 워크플로 | `deploy-backend.yml` → EB `momong-staging` | Lightsail `momong-prod-api` 로 | 2-8 과 함께 |
+| Python 배포 워크플로 | `face_landmark/.github/workflows/deploy.yml` → EB staging | 끈다 | 1-8 |
+| DataGrip 연결 | `momong-staging` (기본 DB `postgres`) · `Local-Momong-Dev` | `Momong Prod` (기본 DB `momong_prod`) · `Momong Dev` | 사용자. 기본 DB 를 `postgres` 로 두면 덤프가 빈 파일이 된다 (2026-10-10 첫 덤프) |
+
+### S3 버킷 — 결정 필요 (N1)
+
+S3 버킷은 이름을 바꿀 수 없다. `momong-prod` 로 바꾸려면 새 버킷을 만들어 옮겨야 하고, **DB 안에 저장된 사진 주소 1,231개**도 함께 고쳐야 한다
+(2026-10-10 운영 덤프 기준: `pre_surveys` 1,024 · `face_analysis_results` 180 · `consultations` 27).
+
+| 안 | 내용 | 일 |
+|---|---|---|
+| **A. 이번 전환 때 같이** (추천) | 새 버킷 `momong-prod` + CORS · 수명주기 복사 → 사진 미리 복사(`aws s3 sync`) → 전환 당일 남은 것 한 번 더 복사 → 복원한 DB 에서 주소 일괄 치환 SQL → 백엔드 `AWS_S3_BUCKET=momong-prod` | 점검 시간 +10~20분. 옛 버킷은 1주 관찰 후 삭제 |
+| B. 그대로 둔다 | 버킷만 `momong-staging` 이름 유지. 문서에 "이름만 staging, 실제 prod" 로 적는다 | 없음. 이름 불일치가 남는다 |
+| C. 나중에 따로 | 인프라 이전이 안정된 뒤 같은 절차를 별도 점검으로 | 점검 한 번 더 |
+
+> 2026-10-10 에는 "S3 는 건드리지 않는다" 로 정했다. A · C 를 고르면 그 결정을 바꾸는 것이다.
+
+### 순서
+
+| # | 작업 | 위치 | 언제 |
+|---|---|---|---|
+| N-1 | 이 표 확정 (N1 · N2 · N3 결정) | — | 지금 |
+| N-2 | **로컬 정리** — DB `fit_hair` → `momong_dev`, `backend/.env` · `app.module.ts` 기본값 · `.env.example` · 문서의 staging 표현, `TEST-NEW` 등 | 로컬 | ✅ 2026-10-11. DB 이름은 사용자가 바꿈, 설정 · 문서는 정리. `backend/.env.example` 의 사진 버킷이 운영 버킷으로 적혀 있던 것도 `momong-dev` 로 고침. 남은 staging 표기는 실제 운영 자원 이름(EB · RDS · 버킷 · 배포 워크플로)뿐 — 전환 때 바뀐다 |
+| N-3 | **배포 워크플로 · 설정을 prod 이름으로 준비** — Lightsail 용 `deploy-backend.yml`, 서버 `.env.prod` 목록 (값은 Git 밖) | 로컬 | ✅ 2026-10-11 — 아래 파일 |
+
+**전환 준비 파일 (2026-10-11, 브랜치 `feat/face-measure-web`)**
+- 런북: [`deploy/lightsail/README.md`](./deploy/lightsail/README.md) — A 준비 · B 당일 · C 명령어 · D 정리, 되돌리기
+- 서버: `backend/Dockerfile` · `deploy/lightsail/docker-compose.yml`(api + Caddy) · `Caddyfile` · `setup-server.sh` · `.env.prod.example`(키별 [EB]/[새]/[고정])
+- 배포: `.github/workflows/deploy-backend.yml` 를 EB → Lightsail 로 교체 (main 에 merge 될 때부터 동작)
+- 사진 주소: `backend/migrations/006_s3_bucket_rename.sql` (+ down). 로컬 복사본에서 적용 · 재적용 · 되돌리기 확인, 운영 덤프의 주소 문자열 1,231개 전부 정상 변환 확인 (운영 데이터는 복원하지 않음)
+- 확인 못 한 것: Docker 이미지 빌드 (이 맥에 Docker 없음) — 첫 배포(C-5) 때 서버에서 확인
+- 발견 · 수정: 상담 기록의 사진 주소가 5분짜리 서명 주소로 저장되고 있었다 (같은 날 다시 열면 사진이 안 보임). 2026-10-11 수정 — 저장은 서명 없는 원래 주소, 읽을 때 백엔드가 새로 서명 (`S3Service.refreshOwnUrls`, 상담 조회 · 공유 확인). 예전에 서명째 저장된 기록도 다시 열린다 (로컬 확인). 006 은 버킷 이전 때 주소를 원래 형태로 정리한다
+| N-4 | **AWS 새 자원 생성** — `momong-prod-api` · `momong-prod-db`(DB `momong_prod`) · (A 안이면) S3 `momong-prod` + IAM `momong-prod-s3` | 운영 | 2단계 준비 (2-2 ~ 2-5) |
+| N-5 | **전환 당일** — 덤프 → `momong_prod` 에 복원 → 005 키 변환 → (A 안) 사진 마지막 복사 + 주소 치환 → DNS | 운영 | D-1 ~ D-7 |
+| N-6 | **정리** — EB 2개 · RDS(예전 DB 2개 포함) · (A 안) 옛 버킷 삭제, Amplify 이름 변경, DataGrip 연결 이름 | 운영 | 1주 관찰 후 |
+
+### 결정이 필요한 것
+
+- **N1** S3 버킷 — ✅ **바꾼다** (2026-10-11 사용자). 시점은 A안(이번 전환 때 같이)으로 계획
+- **N2** DB 이름 — ✅ `momong_prod` / `momong_dev` (로컬은 2026-10-11 변경 완료)
+- **N3** Amplify 앱 이름도 바꿀지 (기능 영향 없음)

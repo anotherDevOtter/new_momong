@@ -84,6 +84,28 @@ export class S3Service {
     return getSignedUrl(this.s3Client, cmd, { expiresIn: this.presignedUrlExpiresIn });
   }
 
+  /**
+   * 저장된 JSON(상담 기록 등) 안의 우리 버킷 사진 주소를 모두 새 GET 서명 주소로 바꿔 돌려준다.
+   * 예전에 서명 주소를 그대로 저장한 기록(5분 뒤 만료)도 서명을 떼고 다시 서명하므로 다시 열린다.
+   * DB 에는 서명 없는 원래 주소를 저장하고, 읽을 때만 이걸로 서명한다. (2026-10-11)
+   */
+  async refreshOwnUrls<T>(value: T): Promise<T> {
+    if (typeof value === 'string') {
+      if (!value.startsWith('https://') || !this.isOwnBucketUrl(value)) return value;
+      return (await this.createDownloadPresignedUrl(value.split('?')[0])) as unknown as T;
+    }
+    if (Array.isArray(value)) {
+      return (await Promise.all(value.map((v) => this.refreshOwnUrls(v)))) as unknown as T;
+    }
+    if (value && typeof value === 'object') {
+      const entries = await Promise.all(
+        Object.entries(value as Record<string, unknown>).map(async ([k, v]) => [k, await this.refreshOwnUrls(v)] as const),
+      );
+      return Object.fromEntries(entries) as T;
+    }
+    return value;
+  }
+
   /** 이 URL 이 우리 버킷의 객체인지 (분석 결과 저장 시 촬영본 URL 검증용) */
   isOwnBucketUrl(url: string): boolean {
     try {

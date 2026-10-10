@@ -9,6 +9,7 @@ import { randomBytes } from 'crypto';
 import * as bcrypt from 'bcrypt';
 import { ConsultationShare } from './shares.entity';
 import { Consultation } from '../consultations/consultations.entity';
+import { S3Service } from '../storage/s3.service';
 
 @Injectable()
 export class SharesService {
@@ -17,6 +18,7 @@ export class SharesService {
     private readonly shareRepo: Repository<ConsultationShare>,
     @InjectRepository(Consultation)
     private readonly consultationRepo: Repository<Consultation>,
+    private readonly s3: S3Service,
   ) {}
 
   async createShare(
@@ -85,7 +87,7 @@ export class SharesService {
       visitDate: c.visit_date,
       designerName: c.designer_name,
       afterNote: c.after_note,
-      clientInfo: c.client_info,
+      clientInfo: await this.s3.refreshOwnUrls(c.client_info),
       todayKeyword: c.today_keyword,
       fashionStyle: c.fashion_style,
       faceImageType: c.face_image_type,

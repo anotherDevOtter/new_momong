@@ -511,7 +511,9 @@ function Inner() {
                 summaryItems: faceResultData?.summaryItems,
                 warmCool: faceResultData?.warmCool,
                 softHard: faceResultData?.softHard,
-                faceImageUrl,
+                // 화면 표시용은 5분짜리 서명 주소라 서명을 떼고 원래 주소만 저장한다.
+                // 다시 읽을 때 백엔드가 새로 서명해 준다 (S3Service.refreshOwnUrls, 2026-10-11)
+                faceImageUrl: faceImageUrl ? faceImageUrl.split('?')[0] : null,
               }
             : null,
           // B1: 이전에 저장 누락되던 디자이너 입력값들

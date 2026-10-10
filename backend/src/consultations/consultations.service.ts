@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Consultation } from './consultations.entity';
 import { CreateConsultationDto } from './dto/create-consultation.dto';
 import { CustomersService } from '../customers/customers.service';
+import { S3Service } from '../storage/s3.service';
 
 @Injectable()
 export class ConsultationsService {
@@ -11,20 +12,22 @@ export class ConsultationsService {
     @InjectRepository(Consultation)
     private readonly repo: Repository<Consultation>,
     private readonly customersService: CustomersService,
+    private readonly s3: S3Service,
   ) {}
 
   private generateId(): string {
     return `consult_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
   }
 
-  private toRecord(consultation: Consultation) {
+  // 상담 기록 안의 사진 주소는 읽을 때마다 새로 서명한다 (DB 에는 서명 없는 주소 — S3Service.refreshOwnUrls)
+  private async toRecord(consultation: Consultation) {
     return {
       id: consultation.id,
       createdAt: consultation.created_at,
       visitDate: consultation.visit_date,
       designerName: consultation.designer_name,
       afterNote: consultation.after_note,
-      clientInfo: consultation.client_info,
+      clientInfo: await this.s3.refreshOwnUrls(consultation.client_info),
       todayKeyword: consultation.today_keyword,
       fashionStyle: consultation.fashion_style,
       faceImageType: consultation.face_image_type,
@@ -83,7 +86,7 @@ export class ConsultationsService {
     });
 
     const saved = await this.repo.save(consultation);
-    return { id, consultation: this.toRecord(saved) };
+    return { id, consultation: await this.toRecord(saved) };
   }
 
   async findAll(userId: string) {
@@ -91,13 +94,13 @@ export class ConsultationsService {
       where: { user_id: userId },
       order: { created_at: 'DESC' },
     });
-    return records.map((r) => this.toRecord(r));
+    return Promise.all(records.map((r) => this.toRecord(r)));
   }
 
   async findOne(userId: string, id: string) {
     const record = await this.repo.findOne({ where: { id, user_id: userId } });
     if (!record) throw new NotFoundException('컨설팅을 찾을 수 없습니다');
-    return this.toRecord(record);
+    return await this.toRecord(record);
   }
 
   async findByCustomerId(userId: string, customerId: string) {
@@ -105,7 +108,7 @@ export class ConsultationsService {
       where: { user_id: userId, customer_id: customerId },
       order: { created_at: 'DESC' },
     });
-    return records.map((r) => this.toRecord(r));
+    return Promise.all(records.map((r) => this.toRecord(r)));
   }
 
   async update(userId: string, id: string, dto: CreateConsultationDto) {
@@ -126,7 +129,7 @@ export class ConsultationsService {
     if (dto.afterNote !== undefined) record.after_note = dto.afterNote;
 
     const saved = await this.repo.save(record);
-    return { consultation: this.toRecord(saved) };
+    return { consultation: await this.toRecord(saved) };
   }
 
   async remove(userId: string, id: string): Promise<void> {

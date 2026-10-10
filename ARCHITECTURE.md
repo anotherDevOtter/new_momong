@@ -399,7 +399,8 @@ frontend `FaceOverlay` 가 그릴 수 있는 도형:
 | 로컬 dev | `momong-dev` (localhost CORS) | localhost backend (Python 은 `test` 코스 비교용 선택) | 로컬 PostgreSQL |
 | 운영 | `momong-staging` (`*.merci-momong.com` CORS) | `Momong-staging-env` + `momong-face-analyze-staging-env` | RDS |
 
-> 운영 EB 환경명에 'staging' 이 들어가지만 실제 운영용. 명칭 정리는 미루어둠.
+> 운영 EB 환경명에 'staging' 이 들어가지만 실제 운영용. 환경은 prod(AWS) · dev(로컬) 둘뿐이고,
+> 인프라 이전 때 `momong-prod-*` 이름으로 정리한다 — [INFRA-MIGRATION.md §10](./INFRA-MIGRATION.md).
 
 ### S3 키 구조
 - 사용자 얼굴 사진: `face-analysis/<userId>/<uuid>.<ext>`
@@ -502,7 +503,7 @@ AllowedMethods: ["PUT", "POST", "GET", "HEAD"]
 
 ## 11. 보안/운영 메모
 
-- **face_landmark 운영 환경명에 'staging'** — 별도 production 환경 분리 권장 (작업 미루어둠)
+- **face_landmark 운영 환경명에 'staging'** — 브라우저 측정 배포 후 서버째 종료 예정 (INFRA-MIGRATION)
 - **JWT secret** — env 로 강제. 운영에선 절대 default 사용 금지
 - **얼굴 이미지 원본 보존 정책** — 현재 영구. S3 lifecycle 정책 (30일/90일) 추후 검토
-- **Backend EB Application 이름이 `momong-staging`** — application name 만 그렇고 환경은 실제 운영
+- **Backend EB Application 이름이 `momong-staging`** — application name 만 그렇고 환경은 실제 운영. Lightsail `momong-prod-api` 로 옮기며 정리 (INFRA-MIGRATION §10)
