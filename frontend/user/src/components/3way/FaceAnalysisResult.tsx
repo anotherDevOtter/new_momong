@@ -25,23 +25,24 @@ type RowCfg = { key: string; label: string };
 
 // 표시는 서버 module-configs(SSOT)가 결정. 아래는 조회 실패 시 안전망(폴백).
 // 바인딩은 모듈번호(key)로 직접 → 라벨 역조회로 인한 "죽은 모듈" 버그 구조적으로 불가능.
+// 키: 측정 결과 키 = 화면 항목 id (2026-10-10). 피부톤 · 코 폭은 웹으로 옮기지 않은 예전 모듈 번호 그대로.
 const WNC_FALLBACK: RowCfg[] = [
   { key: '1', label: '피부톤' },
-  { key: '2', label: '페이스라인' },
-  { key: '3', label: '광대 발달 정도' },
-  { key: '5', label: '눈썹 형태' },
-  { key: '6', label: '눈 형태' },
-  { key: '8', label: '코 형태' },
-  { key: '9', label: '입술 형태' },
+  { key: 'faceline', label: '페이스라인' },
+  { key: 'cheek', label: '광대 발달 정도' },
+  { key: 'browshape', label: '눈썹 형태' },
+  { key: 'eyeshape', label: '눈 형태' },
+  { key: 'nosewidth', label: '코 형태' },
+  { key: 'lips', label: '입술 형태' },
 ];
 
 const SNH_FALLBACK: RowCfg[] = [
-  { key: '2', label: '얼굴 길이' },
-  { key: '4', label: '눈썹과 눈 거리' },
-  { key: '5', label: '눈과 눈사이 거리' },
-  { key: '11', label: '중안부' },
+  { key: 'facelen', label: '얼굴 길이' },
+  { key: 'broweye', label: '눈썹과 눈 거리' },
+  { key: 'intereye', label: '눈과 눈사이 거리' },
+  { key: 'thirds', label: '중안부' },
   { key: '10', label: '코 폭' },
-  { key: '13', label: '입 폭' },
+  { key: 'mouthwidth', label: '입 폭' },
 ];
 
 // module-configs[] → 축별 표시행 (display 필터 + order 정렬)
@@ -128,8 +129,8 @@ export function FaceAnalysisResult({ onBack, onNext, analysisResult }: FaceAnaly
     const fmt = (v?: number | null) => (v != null ? `${v.toFixed(2)} : 1` : '- : 1');
     return {
       vertical: '1 : 1 : 1',
-      face: fmt(snhResults?.['2']?.value),
-      midSection: fmt(snhResults?.['11']?.value),
+      face: fmt(snhResults?.facelen?.value),
+      midSection: fmt(snhResults?.thirds?.value),
     };
   });
 

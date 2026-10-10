@@ -11,6 +11,8 @@ import {
   AnalyzeResponse,
 } from '@/utils/face-analysis-api';
 import { prepareImageForAnalysis } from '@/utils/image-resize';
+import { measureFaceFromFile } from '@/lib/face-measure/browser';
+import { ENGINE } from '@/lib/face-measure';
 
 /** 촬영 영역 배경 — 기존 회색(#F6F6F4) 대신 밝은 단색 (2026-09-06) */
 const CAPTURE_BG = '#F7F7F5';
@@ -75,6 +77,10 @@ function friendlyAnalyzeError(raw: string): string {
   const m = raw.toLowerCase();
   if (m.includes('detectmultiscale') || m.includes('!empty()') || m.includes('cascade')) {
     return '얼굴 분석 서버에 문제가 있어 분석하지 못했습니다. 잠시 후 다시 시도하거나 담당자에게 알려주세요.';
+  }
+  // 브라우저 측정 모델(MediaPipe wasm · 모델 파일)을 못 불러온 경우
+  if (m.includes('wasm') || m.includes('.task') || m.includes('facelandmarker') || m.includes('emscripten')) {
+    return '얼굴 측정 모델을 불러오지 못했습니다. 인터넷 연결을 확인하고 다시 시도해주세요.';
   }
   if (m.includes('얼굴을 감지') || m.includes('no face') || m.includes('face not')) {
     return '사진에서 얼굴을 찾지 못했습니다. 정면으로, 얼굴이 화면에 크게 담기도록 다시 촬영해주세요.';
@@ -387,16 +393,27 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
       // 1-1) 3MB / 2048px 초과 시 자동 리사이즈 (재압축 최소화)
       const { file } = await prepareImageForAnalysis(rawFile);
 
-      // 2) S3 presigned URL 발급 (백엔드가 3MB 한도 확인)
+      // 2) 브라우저에서 얼굴 자동 측정 — 업로드할 파일 그대로 (2026-10-10, 예전에는 서버 Python)
+      //    얼굴을 못 찾으면 올리지 않고 바로 다시 찍게 한다
+      const measured = await measureFaceFromFile(file);
+      if (!measured) throw new Error('얼굴을 감지할 수 없습니다');
+
+      // 3) S3 presigned URL 발급 (백엔드가 3MB 한도 확인)
       const { uploadUrl, publicUrl } = await requestUploadUrl(file.type, undefined, file.size);
 
-      // 3) S3 에 직접 업로드
+      // 4) S3 에 직접 업로드
       await uploadToS3(uploadUrl, file, file.type);
 
-      // 4) 분석 호출
-      const result = await analyzeFace({ faceImageUrl: publicUrl });
+      // 5) 측정 결과 저장 (서버는 검증 후 저장만 한다)
+      const result = await analyzeFace({
+        faceImageUrl: publicUrl,
+        wnc: measured.result.wnc,
+        snh: measured.result.snh,
+        engine: ENGINE,
+      });
+      result.clientTiming = { landmarkMs: measured.landmarkMs, measureMs: measured.measureMs };
 
-      // 5) 결과 + 업로드된 S3 URL 을 상위로 전달 → consultation 저장 시 함께 보관
+      // 6) 결과 + 업로드된 S3 URL 을 상위로 전달 → consultation 저장 시 함께 보관
       onNext(result, publicUrl);
     } catch (e) {
       // 서버·라이브러리 원문(OpenCV assertion 등)을 그대로 띄우면 고객 앞에서 보게 된다.
@@ -772,7 +789,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
 
                   {/* 프리뷰 모드: 분석 / 다시 (촬영 또는 파일 선택)
                       - 카메라: 가이드 안에 얼굴 들어와야 분석 가능
-                      - 업로드: MediaPipe 검출 실패해도 분석 가능 (Python Face Mesh 가 더 견고) */}
+                      - 업로드: 미리보기 검출이 실패해도 분석은 시도한다 (측정 단계에서 얼굴을 못 찾으면 안내) */}
                   <button
                     onClick={handleConfirm}
                     disabled={(imageSource === 'camera' && !faceInOval) || isAnalyzing}

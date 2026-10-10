@@ -100,16 +100,6 @@ export class ConsultationsService {
     return this.toRecord(record);
   }
 
-  async findByCustomerPhone(userId: string, phone: string) {
-    const records = await this.repo
-      .createQueryBuilder('c')
-      .where('c.user_id = :userId', { userId })
-      .andWhere("c.client_info->>'phone' = :phone", { phone })
-      .orderBy('c.created_at', 'DESC')
-      .getMany();
-    return records.map((r) => this.toRecord(r));
-  }
-
   async findByCustomerId(userId: string, customerId: string) {
     const records = await this.repo.find({
       where: { user_id: userId, customer_id: customerId },

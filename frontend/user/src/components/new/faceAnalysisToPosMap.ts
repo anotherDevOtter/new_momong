@@ -2,7 +2,7 @@ import type { AnalyzeResponse, Measurement } from '@/utils/face-analysis-api';
 import { FORM, PROP, IMAP, computeScores, dominantOf, dominantIdx } from './faceAnalysisData';
 
 // ─────────────────────────────────────────────────────────────────────────
-// 실제 얼굴 분석 결과(Python)를 시안 화면이 읽는 posMap 으로 옮긴다.
+// 실제 얼굴 측정 결과(브라우저 lib/face-measure)를 시안 화면이 읽는 posMap 으로 옮긴다.
 //
 // 시안 화면(AIFaceFeature · AIFaceResultDerived · HairConsulting)은
 // posMap[항목id] = 0~1 위치값만 본다.
@@ -17,38 +17,16 @@ const POS_LOW = 0.17;   // W / S
 const POS_MID = 0.50;   // N
 const POS_HIGH = 0.83;  // C / H
 
-// 시안 항목 id → 우리 모듈 키.
-// 라벨을 맞춰 이어붙인 것이고, 표에 없는 항목은 시안 기본값(defaultPos)이 그대로 쓰인다.
+// 측정 결과의 키 = 시안 항목 id (2026-10-10 부터. 예전 모듈 번호 키 기록은 migrations/005 로 바꿨다).
+// 아래 목록에 있는 항목만 자동 측정된다. 없는 항목은 시안 기본값(defaultPos)이 그대로 쓰인다.
 //
 // ⚠ 근사로 이은 것 (라벨이 정확히 같지는 않다)
-//     nosewidth ← 코 형태      · lips   ← 입술 형태
+//     nosewidth ← 코 형태      · lips   ← 입술 두께
 //     thirds    ← 중안부
-// ⚠ 우리 분석에 대응 항목이 아예 없는 것 — 기본값으로 남는다
+// ⚠ 자동 측정 모듈이 아예 없는 것 — 기본값으로 남는다
 //     browdir(눈썹 방향) · eyefront(눈 앞머리) · nosehigh(코 높이)
-// ⚠ 우리에만 있고 시안이 안 쓰는 것 — 화면에 나오지 않는다
-//     WNC 피부톤 · 윤곽라인 · 입술산 형태 / SNH 피부톤(밝기) · 눈썹 두께 · 코 폭
-const FORM_TO_WNC: Record<string, string> = {
-  faceline:  '2',   // 페이스라인
-  cheek:     '3',   // 광대 발달 정도
-  browshape: '5',   // 눈썹 형태
-  eyeshape:  '6',   // 눈 형태
-  eyetail:   '7',   // 눈꼬리 각도
-  nosewidth: '8',   // 코 형태        (근사)
-  lips:      '9',   // 입술 형태      (근사)
-};
-
-const PROP_TO_SNH: Record<string, string> = {
-  facelen:    '2',  // 얼굴 길이
-  broweye:    '4',  // 눈썹과 눈 거리
-  intereye:   '5',  // 눈과 눈사이 거리
-  eyeouter:   '6',  // 눈 바깥 여백
-  eyelid:     '7',  // 쌍꺼풀 형태
-  noselen:    '9',  // 코 길이
-  thirds:     '11', // 중안부         (근사)
-  philtrum:   '12', // 인중 길이
-  mouthwidth: '13', // 입 폭
-  chinlen:    '14', // 턱 길이
-};
+const FORM_MEASURED = ['faceline', 'cheek', 'browshape', 'eyeshape', 'eyetail', 'nosewidth', 'lips'];
+const PROP_MEASURED = ['facelen', 'broweye', 'intereye', 'eyeouter', 'eyelid', 'noselen', 'thirds', 'philtrum', 'mouthwidth', 'chinlen'];
 
 function gradeToPos(grade: string | undefined): number | null {
   switch (grade) {
@@ -63,16 +41,16 @@ export function faceAnalysisToPosMap(result: AnalyzeResponse | null | undefined)
   if (!result) return {};
   const posMap: Record<string, number> = {};
 
-  const fill = (table: Record<string, string>, modules: Record<string, { grade?: string }> | undefined) => {
+  const fill = (ids: string[], modules: Record<string, { grade?: string }> | undefined) => {
     if (!modules) return;
-    for (const [itemId, moduleKey] of Object.entries(table)) {
-      const pos = gradeToPos(modules[moduleKey]?.grade);
+    for (const itemId of ids) {
+      const pos = gradeToPos(modules[itemId]?.grade);
       if (pos !== null) posMap[itemId] = pos;
     }
   };
 
-  fill(FORM_TO_WNC, result.wnc?.results);
-  fill(PROP_TO_SNH, result.snh?.results);
+  fill(FORM_MEASURED, result.wnc?.results);
+  fill(PROP_MEASURED, result.snh?.results);
 
   return posMap;
 }
@@ -88,18 +66,18 @@ export function faceAnalysisToMeasurements(
   const out: Record<string, Measurement | null> = {};
 
   const fill = (
-    table: Record<string, string>,
+    ids: string[],
     modules: Record<string, { measurement?: Measurement | null }> | undefined,
   ) => {
     if (!modules) return;
-    for (const [itemId, moduleKey] of Object.entries(table)) {
-      const m = modules[moduleKey]?.measurement;
+    for (const itemId of ids) {
+      const m = modules[itemId]?.measurement;
       if (m) out[itemId] = m;
     }
   };
 
-  fill(FORM_TO_WNC, result.wnc?.results);
-  fill(PROP_TO_SNH, result.snh?.results);
+  fill(FORM_MEASURED, result.wnc?.results);
+  fill(PROP_MEASURED, result.snh?.results);
 
   return out;
 }
@@ -115,18 +93,18 @@ export function faceAnalysisToNumbers(
   const out: Record<string, number> = {};
 
   const fill = (
-    table: Record<string, string>,
+    ids: string[],
     modules: Record<string, { value?: number | null }> | undefined,
   ) => {
     if (!modules) return;
-    for (const [itemId, moduleKey] of Object.entries(table)) {
-      const v = modules[moduleKey]?.value;
+    for (const itemId of ids) {
+      const v = modules[itemId]?.value;
       if (typeof v === 'number' && Number.isFinite(v)) out[itemId] = v;
     }
   };
 
-  fill(FORM_TO_WNC, result.wnc?.results);
-  fill(PROP_TO_SNH, result.snh?.results);
+  fill(FORM_MEASURED, result.wnc?.results);
+  fill(PROP_MEASURED, result.snh?.results);
 
   return out;
 }
@@ -139,20 +117,20 @@ export function faceAnalysisToValues(
   const out: Record<string, string> = {};
 
   const fill = (
-    table: Record<string, string>,
+    ids: string[],
     modules: Record<string, { value?: number | null; description?: string | null }> | undefined,
   ) => {
     if (!modules) return;
-    for (const [itemId, moduleKey] of Object.entries(table)) {
-      const m = modules[moduleKey];
+    for (const itemId of ids) {
+      const m = modules[itemId];
       if (!m) continue;
       const text = m.description ?? (m.value != null ? String(m.value) : null);
       if (text) out[itemId] = text;
     }
   };
 
-  fill(FORM_TO_WNC, result.wnc?.results);
-  fill(PROP_TO_SNH, result.snh?.results);
+  fill(FORM_MEASURED, result.wnc?.results);
+  fill(PROP_MEASURED, result.snh?.results);
 
   return out;
 }
@@ -163,8 +141,8 @@ export function faceAnalysisToValues(
  * (분석 결과 유무와 무관하게 매핑 표만 보므로, 건너뛰기로 넘어와도 같은 결과가 나온다.)
  */
 export const ANALYZED_ITEM_IDS: string[] = [
-  ...Object.keys(FORM_TO_WNC),
-  ...Object.keys(PROP_TO_SNH),
+  ...FORM_MEASURED,
+  ...PROP_MEASURED,
 ];
 
 

@@ -36,6 +36,9 @@
   │ _results 등    │   └──────────────────────────────┘
   └───────────────┘
 
+> ⚠ 위 그림은 **지금 운영(배포 전)** 구조다. 브랜치 `feat/face-measure-web`(2026-10-10)부터 얼굴 측정은
+> 브라우저가 하고 백엔드는 Python 을 부르지 않는다. 배포 · 인프라 이전 후 그림: [INFRA-MIGRATION.md §3](./INFRA-MIGRATION.md).
+
                           ┌────────────────────────────────────┐
                           │      관리자 (운영팀)                │
                           │      https://admin.merci-momong.com │
@@ -62,7 +65,7 @@
 | Frontend (user) | Next.js 16 + React 19 + Tailwind v4 | port 3203 (local) |
 | Frontend (admin) | Next.js 16 + React 19 + Tailwind v4 | port 3202 (local) |
 | 인증 | JWT (HS256) | secret = `JWT_SECRET` env |
-| 얼굴 분석 | FastAPI + MediaPipe + OpenCV | 별도 repo `face_landmark/` |
+| 얼굴 자동 측정 | 브라우저 — MediaPipe FaceLandmarker 0.10.35 + TS 판정 (`frontend/*/src/lib/face-measure`) | 2026-10-10 부터. 예전: Python `face_landmark/` (운영은 이전 배포 전까지) |
 | 클라이언트 얼굴 검출 | `@mediapipe/tasks-vision` | CDN 모델, 픽스된 버전 0.10.35 |
 | 애니메이션 | `motion/react` | |
 | 이미지 저장 | AWS S3 (`momong-staging`) | presigned URL PUT/GET |
@@ -92,10 +95,11 @@ new_momong/
 │  │  │  ├─ module-config.entity.ts      (table: module_configs)
 │  │  │  ├─ module-configs.service.ts    (조회/수정 + 24개 시드 + 새 모듈 자동생성)
 │  │  │  └─ module-configs.controller.ts (공개 조회 + admin 수정)
-│  │  ├─ face-analysis/           얼굴 분석 (Python 호출 + S3 + DB)
+│  │  ├─ storage/                 S3 presigned URL (s3.service.ts — 얼굴 사진 · 사전설문 사진)
+│  │  ├─ face-analysis/           얼굴 측정 결과 저장 (측정은 브라우저)
 │  │  │  ├─ face-analysis.entity.ts        (table: face_analysis_results)
-│  │  │  ├─ python-analysis.service.ts     (Python 호출 + S3 presign)
-│  │  │  ├─ face-analysis.service.ts       (분석 호출 + DB 저장 + 기록 조회)
+│  │  │  ├─ face-measure.ts                (결과 검증 · 키 표 · final 재계산)
+│  │  │  ├─ face-analysis.service.ts       (검증 후 DB 저장 + 기록 조회)
 │  │  │  └─ face-analysis.controller.ts    (user/admin 분리 endpoint)
 │  │  └─ common/                  미들웨어/필터
 │  ├─ migrations/                 운영 DB 수동 마이그레이션 SQL
@@ -177,7 +181,7 @@ TypeScript 도 `react` / `@mediapipe/tasks-vision` 을 해석하지 못한다.
 | `feature_settings` | id(=1), fit_enabled, three_way_enabled, course_*_enabled | 싱글톤 |
 | `face_analysis_results` | id, user_id, customer_id, detection_type(WNC/SNH), source(consultation/admin_test), face_image_url, python_analysis_result(jsonb), client_provided_data(jsonb), detected_at | 한 분석 = WNC + SNH 2행 |
 | `pre_surveys` | id, user_id, customer_id, token(unique), answers(jsonb), filled_at, created_at, updated_at | 디자이너 발급 토큰으로 고객이 방문 전 작성. 사진 URL 도 answers 안에 raw S3 URL 로 저장 |
-| `module_configs` | id, axis(WNC/SNH), module_key, label, sort_order, display, unit, updated_at | 얼굴분석 모듈의 **표시** 설정 (전역). `(axis, module_key)` unique. 측정값(Python)과 분리된 표시 SSOT — 상세는 [docs/face-analysis-dynamic-architecture.md](./docs/face-analysis-dynamic-architecture.md) |
+| `module_configs` | id, axis(WNC/SNH), module_key, label, sort_order, display, unit, updated_at | 얼굴분석 모듈의 **표시** 설정 (전역). `(axis, module_key)` unique. 측정값과 분리된 표시 SSOT — 상세는 [docs/face-analysis-dynamic-architecture.md](./docs/archive/face-analysis-dynamic-architecture.md) |
 
 ### 4-1. consultation 에서 얼굴 분석 결과 참조
 
@@ -198,13 +202,18 @@ TypeScript 도 `react` / `@mediapipe/tasks-vision` 을 해석하지 못한다.
 
 ### 4-2. face_analysis_results.python_analysis_result jsonb 구조
 
+> 컬럼 이름은 예전 그대로지만 2026-10-10 부터 내용은 **브라우저 측정 결과**다.
+> `results` 키 = 화면 항목 id (`faceline`, `facelen` …). 예전 Python 기록도 `migrations/005` 로 같은 키로 바꿨고,
+> 웹으로 옮기지 않은 7개 모듈(WNC 1·4·10, SNH 1·3·8·10)만 예전 번호 키로 남아 있다.
+
 ```jsonc
 {
-  "final": "W",                    // 다수결 W/N/C 또는 S/N/H
-  "counts": { "W": 6, "N": 3, "C": 1 },
+  "final": "W",                    // 다수결 W/N/C 또는 S/N/H — 서버가 results 로 다시 계산
+  "counts": { "W": 4, "N": 2, "C": 1 },
+  "engine": { "name": "face-measure-web", "version": "1.0-mp0.10.35" },  // 브라우저 측정 기록만
   "results": {
-    "1": {
-      "name": "피부톤",
+    "faceline": {
+      "name": "페이스라인",
       "grade": "W",
       "value": 1.42,                // optional, 모듈마다 다름
       "description": "...",          // optional
@@ -272,11 +281,10 @@ TypeScript 도 `react` / `@mediapipe/tasks-vision` 을 해석하지 못한다.
 | 메서드 | 경로 | 가드 | 설명 |
 |---|---|---|---|
 | POST | `/upload-url` | J | PUT presigned URL 발급 |
-| POST | `/analyze` | J | Python 호출 + DB 저장 (`source=consultation`) |
+| POST | `/analyze` | J | 브라우저 측정 결과 검증 + 저장 (`source=consultation`). 촬영본은 우리 버킷 URL 만 |
 | POST | `/admin/upload-url` | A | admin 테스트용 presigned URL |
-| POST | `/analyze-test` | A | `source=admin_test` |
+| POST | `/analyze-test` | A | 위와 같음, `source=admin_test` |
 | GET | `/admin/history?limit=N` | A | admin_test 기록 목록 |
-| GET | `/admin/:id` | A | 단건 상세 |
 | DELETE | `/admin/:id` | A | WNC/SNH 짝 삭제 |
 
 ### 5-6. 사전설문지 (`/api/pre-surveys`)
@@ -310,13 +318,12 @@ TypeScript 도 `react` / `@mediapipe/tasks-vision` 을 해석하지 못한다.
 | PATCH | `/api/admin/module-configs/:id` | A | 라벨/순서/노출/단위 수정 (admin `/face-modules`) |
 
 > 분석 응답에 설정에 없는 `module_key` 가 오면 백엔드가 행을 **자동 생성**(`display:false`)한다.
-> 설계 배경: [docs/face-analysis-dynamic-architecture.md](./docs/face-analysis-dynamic-architecture.md)
+> 설계 배경: [docs/face-analysis-dynamic-architecture.md](./docs/archive/face-analysis-dynamic-architecture.md)
 
 ### 5-9. Admin (`/api/admin`)
 | 메서드 | 경로 | 가드 | 설명 |
 |---|---|---|---|
 | POST | `/auth/login` | 공개 | 어드민 로그인 |
-| POST | `/auth/register` | 조건부 | 어드민 계정 추가. **어드민이 하나도 없으면 인증 불필요, 있으면 Bearer 토큰 필요** (부트스트랩용) |
 | GET | `/users` | A | 전체 디자이너 목록 |
 | GET | `/stats` | A | 가입/승인 통계 |
 | PATCH | `/users/:id/approve` | A | 디자이너 승인 |
@@ -324,11 +331,25 @@ TypeScript 도 `react` / `@mediapipe/tasks-vision` 을 해석하지 못한다.
 
 ---
 
-## 6. face_landmark Python 서버
+## 6. 얼굴 자동 측정
+
+### 6-0. 지금 구조 (2026-10-10 ~)
+
+- 측정은 **브라우저**: `frontend/user/src/lib/face-measure/` (admin 은 같은 코드의 복사본 `frontend/admin/src/lib/face-measure/`)
+  - 랜드마크: `@mediapipe/tasks-vision` FaceLandmarker 0.10.35 (CPU)
+  - 판정: Python 모듈 17개를 TS 로 옮긴 것 (`form.ts` 7 · `prop.ts` 10). CLAHE · Canny · Sobel 등은 `imageops.ts` 에 직접 구현
+  - 촬영본을 **업로드 전에** 측정 → 얼굴을 못 찾으면 올리지 않는다 → 업로드 → `POST /face-analysis/analyze` 로 결과 저장
+- 화면에 없는 Python 모듈 7개는 옮기지 않았다. 화면 항목 중 눈썹 방향 · 눈 앞머리 · 코 높이는 측정 모듈이 없다
+- Python 과의 비교 · 검증 도구: `tools/face-baseline/` (기준값 · 비교 · 비교 이미지 · API 점검)
+- 이식 계획 · 검증 결과: [INFRA-MIGRATION.md §1-1 · §6](./INFRA-MIGRATION.md)
+
+### 6-1 ~ 6-3. (예전) face_landmark Python 서버
+
+> 운영은 이전 배포 전까지 이 서버를 쓴다. 배포 · 1주 관찰 후 종료 예정. 아래는 기록용.
 
 별도 repo: `/Users/won/Development Project/NAS-Projects/02-Work/W007-MerciMomong/face_landmark/`
 
-### 6-1. 구조
+#### 구조
 - FastAPI 앱 (`application.py`) — `/analyze`, `/analyze-url`, `/analyze-base64`, `/health`
 - `analyze_face.py` — subprocess 진입점, 모듈 24개 호출
 - `modules/` — **24개 = WNC 10 + SNH 14** (`WNC_TYPE_01_skin_tone.py` 등). 디렉토리 파일 수 = 레지스트리 등록 수
@@ -338,7 +359,7 @@ TypeScript 도 `react` / `@mediapipe/tasks-vision` 을 해석하지 못한다.
   - 두 모듈은 `module_configs` 에 `display:false` 로 시드된다. 노출하려면 admin `/face-modules` 에서 켠다.
 - MediaPipe Face Mesh 468 landmarks + OpenCV 영상 분석
 
-### 6-2. 분석 모듈 분류
+#### 분석 모듈 분류
 
 **WNC (Warm / Neutral / Cool) — 10 모듈**
 1 피부톤 · 2 턱각도 · 3 광대발달 · 4 윤곽라인 · 5 눈썹형태
@@ -351,7 +372,7 @@ TypeScript 도 `react` / `@mediapipe/tasks-vision` 을 해석하지 못한다.
 
 각 모듈은 `{grade, value, description, measurement}` 반환. measurement 는 오버레이 좌표 데이터.
 
-### 6-3. measurement schema
+#### measurement schema (웹 측정도 같은 규격)
 
 frontend `FaceOverlay` 가 그릴 수 있는 도형:
 - `point`, `line`, `polyline`, `polygon`, `rectangle`, `circle`, `text`
@@ -375,7 +396,7 @@ frontend `FaceOverlay` 가 그릴 수 있는 도형:
 
 | 환경 | S3 버킷 | EB 환경 | DB |
 |---|---|---|---|
-| 로컬 dev | `momong-dev` (localhost CORS) | localhost backend + Python | 로컬 PostgreSQL |
+| 로컬 dev | `momong-dev` (localhost CORS) | localhost backend (Python 은 `test` 코스 비교용 선택) | 로컬 PostgreSQL |
 | 운영 | `momong-staging` (`*.merci-momong.com` CORS) | `Momong-staging-env` + `momong-face-analyze-staging-env` | RDS |
 
 > 운영 EB 환경명에 'staging' 이 들어가지만 실제 운영용. 명칭 정리는 미루어둠.
@@ -387,7 +408,7 @@ frontend `FaceOverlay` 가 그릴 수 있는 도형:
 - backend 배포 아티팩트: `elasticbeanstalk-artifacts/fit-hair-deploy-<sha>.zip`
 
 ### S3Client 옵션 (브라우저 PUT 호환)
-`PythonAnalysisService` 의 `S3Client` 인스턴스는 다음 옵션 필수:
+`S3Service`(`backend/src/storage/s3.service.ts`) 의 `S3Client` 인스턴스는 다음 옵션 필수:
 ```ts
 new S3Client({
   region,
@@ -420,17 +441,20 @@ AllowedMethods: ["PUT", "POST", "GET", "HEAD"]
 - `amplify.yml` 에 각 앱의 appRoot 정의 (`frontend/user`, `frontend/admin`)
 - 빌드 시간: 각 3-5분
 
-### 8-3. Python 서버 (face_landmark)
+### 8-3. Python 서버 (face_landmark) — 종료 예정
 - 별도 EB 환경 (`momong-face-analyze-staging-env`)
 - 별도 repo, 별도 배포 파이프라인 (해당 repo 의 CI 사용 또는 수동)
+- 브라우저 측정 배포 후 1주 관찰하고 종료한다 (INFRA-MIGRATION)
 
 ### 8-4. DB 마이그레이션 (수동)
-- dev: TypeORM `synchronize: true` 자동 스키마 적용
-- 운영: `backend/migrations/*.sql` 을 psql/pgAdmin 으로 수동 실행
+- **`synchronize` 는 모든 환경에서 꺼져 있다** (2026-10-10, TODO D1). 구조 변경은 `backend/migrations/*.sql` 로만
+- 빈 DB: `000_baseline_schema.sql` 한 번 (앱 테이블 9개, 001~004 포함)
+- 운영 · 기존 DB: 아직 적용 안 한 번호만 psql/pgAdmin 으로 수동 실행
   - `001_create_face_analysis_results.sql` (테이블 생성)
   - `002_add_source_to_face_analysis_results.sql` (source 컬럼)
   - `003_create_pre_surveys.sql` (pre_surveys 테이블 + 인덱스 3개)
   - `004_create_module_configs.sql` (module_configs 테이블 — 첫 부팅 시 24개 시드 자동 삽입)
+  - `005_face_measure_keys.sql` (+ `.down.sql`) — 측정 결과 · module_configs 의 키를 모듈 번호 → 화면 항목 id. **브라우저 측정 백엔드를 띄우기 직전에** 적용
 
 ---
 
@@ -440,12 +464,12 @@ AllowedMethods: ["PUT", "POST", "GET", "HEAD"]
 
 | 키 | 용도 |
 |---|---|
-| `NODE_ENV=production` | TypeORM synchronize OFF + SSL ON |
+| `NODE_ENV=production` | SSL ON (synchronize 는 코드에서 항상 OFF) |
 | `DB_HOST/PORT/USERNAME/PASSWORD/DATABASE` | RDS 접근 |
 | `JWT_SECRET` | JWT 서명 |
 | `ALLOWED_ORIGINS` | `https://www.merci-momong.com,https://admin.merci-momong.com` |
 | `FRONTEND_URL` | 공유 링크 base URL |
-| `PYTHON_SERVER_URL` | face_landmark EB URL |
+| `PYTHON_SERVER_URL` | face_landmark EB URL — 브라우저 측정 배포 후에는 쓰지 않는다 (제거) |
 | `AWS_REGION` | `ap-northeast-2` |
 | `AWS_S3_BUCKET` | `momong-staging` |
 | `AWS_ACCESS_KEY_ID` / `SECRET_ACCESS_KEY` | (또는 IAM Instance Profile) |
@@ -470,7 +494,7 @@ AllowedMethods: ["PUT", "POST", "GET", "HEAD"]
 | backend | `npm run start:dev` (3200) | EB (auto deploy) |
 | user frontend | `PORT=3203 npm run dev` | Amplify |
 | admin frontend | `PORT=3202 npm run dev` | Amplify |
-| Python 서버 | `cd face_landmark && python application.py` (3201) | 별도 EB |
+| Python 서버 | (선택) `python -m uvicorn application:app --port 3201` — `test` 코스 비교용 | 별도 EB (종료 예정) |
 | S3 | `momong-dev` (CORS: localhost) | `momong-staging` (CORS: `*.merci-momong.com`) |
 | 인증 | 자동 시드 admin (`admin@momong.com` / `!Password1234`) | env 통한 강한 시드 |
 

@@ -37,6 +37,7 @@ import { PremiumReport as NewPremiumReport } from '@/components/new/PremiumRepor
 // 시안3 구조(표지+4장). new 코스만 쓴다 — 공유 링크의 옛 기록은 아직 위쪽 V1 이 그린다.
 import { PremiumReport as NewPremiumReportV2 } from '@/components/new/PremiumReportV2';
 import { CompletionPage as NewCompletionPage } from '@/components/new/CompletionPage';
+import { FaceMeasureCompare } from '@/components/new/FaceMeasureCompare';
 import { preSurveyToPreInterview, EMPTY_PRE_INTERVIEW, type PreInterviewData as NewPreInterviewData } from '@/components/new/preSurveyToPreInterview';
 import { faceAnalysisToPosMap, faceAnalysisToMeasurements, faceAnalysisToValues, faceAnalysisToNumbers, deriveImageType } from '@/components/new/faceAnalysisToPosMap';
 import { designScreenRecommendation, strategyOf } from '@/components/new/hairPrescription';
@@ -51,7 +52,9 @@ type PageKey =
   | 'imageDirection' | 'hairDesign' | 'hairTexture'
   | 'nextDirection' | 'preSurveyReview' | 'completion'
   // ↓ 'new' 코스(시안 이식) 전용 화면. 기존 코스는 쓰지 않는다.
-  | 'aiFaceFeature' | 'aiFaceResultDerived' | 'hairConsulting';
+  | 'aiFaceFeature' | 'aiFaceResultDerived' | 'hairConsulting'
+  // ↓ 'test' 코스 전용 — 웹 측정 · Python 측정 비교
+  | 'measureCompare';
 
 // ─────────────────────────────────────────────────────────────────────────
 // 코스별 단계 구성. 배열 순서 = 진행 순서.
@@ -125,6 +128,15 @@ const COURSE_STEPS: Record<string, PageKey[]> = {
   ],
 };
 
+// 'test' — 'new' 와 같은 화면에 '웹 · Python 측정 비교' 화면을 하나 끼운 개발 전용 코스.
+// 얼굴 자동 측정을 Python 서버에서 브라우저로 옮기는 작업(INFRA-MIGRATION 1단계)을 실제 흐름에서 확인한다.
+// 촬영 → (Python 분석) → 비교 화면에서 같은 사진을 브라우저로 측정 → 고른 쪽 결과로 이목구비 화면.
+// 웹 측정이 본선으로 들어가면 지운다.
+COURSE_STEPS['test'] = COURSE_STEPS['new'].flatMap((s): PageKey[] => (s === 'faceProcessing' ? [s, 'measureCompare'] : [s]));
+
+/** 'new' 화면 흐름을 쓰는 코스 */
+const usesNewFlow = (course: string) => course === 'new' || course === 'test';
+
 // 짧은 전환 화면 — 진행률에 세지 않고, "이전" 으로 되돌아가지도 않는다.
 const TRANSIENT_STEPS: PageKey[] = ['faceProcessing'];
 
@@ -137,7 +149,7 @@ function stepsFor(course: string, opts?: StepOpts): PageKey[] {
   // 알 수 없는 코스는 1WAY 로 떨어뜨린다 — 실제로 열려있는 코스가 1WAY 하나이고,
   // 진단 축이 가장 적어 없는 화면을 요구하지 않는 가장 안전한 기본값이다.
   const base = COURSE_STEPS[course] ?? COURSE_STEPS['1way'];
-  if (course === 'new' && opts?.noPreSurvey) return base.filter((s) => s !== 'summary');
+  if (usesNewFlow(course) && opts?.noPreSurvey) return base.filter((s) => s !== 'summary');
   return base;
 }
 
@@ -176,6 +188,7 @@ function Inner() {
   // 코스 선택을 거치면 항상 course 가 붙지만, 주소를 직접 친 경우를 대비한 기본값.
   // 현재 열려있는 코스가 1WAY 하나뿐이라 1way 로 둔다.
   const selectedCourse = searchParams.get('course') || '1way';
+  const isNewFlow = usesNewFlow(selectedCourse);
   const customerId = searchParams.get('customerId');
   const occupation = searchParams.get('occupation') || '';
 
@@ -187,7 +200,7 @@ function Inner() {
   // 사전설문 조회 결과. 'new' 에서 요약(INFO) 화면을 넣을지 결정한다.
   //   null = 아직 확인 전 · true = 있음 · false = 없음
   const [hasPreSurvey, setHasPreSurvey] = useState<boolean | null>(
-    selectedCourse === 'new' ? null : false,
+    isNewFlow ? null : false,
   );
 
   // 사전설문 유무에 따라 'new' 의 화면 목록이 달라진다 (요약 화면 포함 여부).
@@ -220,6 +233,9 @@ function Inner() {
   const [afterPhoto, setAfterPhoto] = useState<string | null>(null);
   const [directionSubSel, setDirectionSubSel] = useState<Record<string, string>>({});
   const [faceAnalysisResult, setFaceAnalysisResult] = useState<AnalyzeResponse | null>(null);
+  // 'test' 코스 — 촬영 화면이 측정 · 저장한 원래 결과. 비교 화면에서 Python 쪽을 고르면
+  // faceAnalysisResult 만 바뀌고 이건 그대로 남는다 (다시 비교 화면으로 돌아올 때 쓴다)
+  const [capturedFaceResult, setCapturedFaceResult] = useState<AnalyzeResponse | null>(null);
   const [faceImageUrl, setFaceImageUrl] = useState<string | null>(null);
   // 디자이너가 확정/수정한 다운스트림 입력값 (저장 + step 간 연동)
   const [faceResultData, setFaceResultData] = useState<FaceResultData | null>(null);
@@ -289,9 +305,9 @@ function Inner() {
   // 같은 날 기록만 되살린다. 재방문 고객의 지난 방문 값을 미리 채워 두면
   // 디자이너가 못 보고 그대로 저장해 엉뚱한 기록이 남는다. (2026-09-11)
   const [restored, setRestored] = useState<Record<string, unknown> | null>(null);
-  const [restoring, setRestoring] = useState(selectedCourse === 'new');
+  const [restoring, setRestoring] = useState(isNewFlow);
   useEffect(() => {
-    if (selectedCourse !== 'new' || !token || !customerId) { setRestoring(false); return; }
+    if (!isNewFlow || !token || !customerId) { setRestoring(false); return; }
     let cancelled = false;
     (async () => {
       try {
@@ -322,12 +338,12 @@ function Inner() {
       }
     })();
     return () => { cancelled = true; };
-  }, [selectedCourse, token, customerId]);
+  }, [isNewFlow, token, customerId]);
 
   // 'new' 코스는 사전 인터뷰 화면을 뺐으므로, 고객이 방문 전 작성한 사전설문을 대신 읽는다.
   // 제출된 것 중 가장 최근 1건. 없으면 빈 값으로 두고 화면은 그대로 띄운다.
   useEffect(() => {
-    if (selectedCourse !== 'new' || !token || !customerId) return;
+    if (!isNewFlow || !token || !customerId) return;
     let cancelled = false;
     (async () => {
       try {
@@ -350,7 +366,7 @@ function Inner() {
       }
     })();
     return () => { cancelled = true; };
-  }, [selectedCourse, token, customerId]);
+  }, [isNewFlow, token, customerId]);
 
   // currentPage 는 첫 렌더에 굳는다. 그 시점엔 사전설문 조회가 아직 끝나지 않아
   // 'summary' 로 잡힐 수 있으므로, 조회 결과가 나온 뒤 목록에 없는 화면이면 보정한다.
@@ -367,7 +383,7 @@ function Inner() {
 
   // 'new' 는 사전설문 유무에 따라 첫 화면이 달라진다. 확인 전에 그리면
   // 요약 화면이 잠깐 보였다 사라지므로, 조회가 끝날 때까지 기다린다.
-  if (loading || hydrating || restoring || (selectedCourse === 'new' && hasPreSurvey === null)) {
+  if (loading || hydrating || restoring || (isNewFlow && hasPreSurvey === null)) {
     return <div className="min-h-screen flex items-center justify-center bg-white"><p className="text-sm text-[#999999]">불러오는 중...</p></div>;
   }
   if (!user || !customerData) return null;
@@ -415,6 +431,7 @@ function Inner() {
   const handleFaceAnalysisBack = () => goBack('faceAnalysis');
   const handleFaceAnalysisNext = (result: AnalyzeResponse, imageUrl: string) => {
     setFaceAnalysisResult(result);
+    setCapturedFaceResult(result);
     // 화면 표시는 GET presigned URL 로 한다. 업로드에 쓴 imageUrl 은 비공개 버킷이라 읽히지 않는다.
     setFaceImageUrl(result.faceImageDownloadUrl || imageUrl);
     goNext('faceAnalysis');
@@ -467,6 +484,7 @@ function Inner() {
         '2way-skeleton': '2WAY (Skeleton Image)',
         '1way': '1WAY',
         'new': '1WAY (신규 이식 · 개발)',
+        'test': '1WAY (웹 측정 테스트 · 개발)',
       };
       // F6: 알 수 없는 코스는 '1WAY' 로 단정하지 않고 받은 값 그대로 보존
       const courseName = COURSE_NAMES[selectedCourse] || selectedCourse;
@@ -502,14 +520,14 @@ function Inner() {
           imageDirection: imageDirectionData,
           hairDesign: hairDesignData,
           hairTexture: hairTextureData,
-          cycleData: selectedCourse === 'new' ? newCycleData : cycleData,
+          cycleData: isNewFlow ? newCycleData : cycleData,
           imagePreferenceData,
           fashionPreferenceData,
           preInterviewData,
 
           // ── 'new' 코스 전용 ────────────────────────────────────────
           // 시안 화면들은 값을 자기 안에만 들고 있어 저장되지 않던 것들.
-          ...(selectedCourse === 'new'
+          ...(isNewFlow
             ? {
                 // 사전설문에서 끌어온 값 (사전 인터뷰 화면을 뺐으므로 이게 그 자리)
                 newPreInterview: newPreInterviewData,
@@ -536,7 +554,7 @@ function Inner() {
 
   // 'new' 코스는 리포트 안에 PDF 저장이 들어 있다 → 완료 화면에서는 리포트를 다시 연다.
   const handleDownloadPDF = () => {
-    if (selectedCourse === 'new') { setShowReport(true); return; }
+    if (isNewFlow) { setShowReport(true); return; }
     alert('PDF 다운로드 기능은 추후 연동 예정입니다.');
   };
   /**
@@ -590,7 +608,21 @@ function Inner() {
       );
     }
     if (currentPage === 'faceProcessing') {
-      return <NewFaceAnalysisProcessing onComplete={() => setCurrentPage('aiFaceFeature')} />;
+      return <NewFaceAnalysisProcessing onComplete={() => goNext('faceProcessing')} />;
+    }
+    if (currentPage === 'measureCompare') {
+      return (
+        <FaceMeasureCompare
+          imageUrl={faceImageUrl}
+          webResult={capturedFaceResult}
+          onBack={() => goBack('measureCompare')}
+          onNext={(result) => {
+            setFaceAnalysisResult(result);
+            setFaceResultPosMap({});   // 고른 결과로 이목구비 화면을 새로 시작한다
+            goNext('measureCompare');
+          }}
+        />
+      );
     }
     if (currentPage === 'aiFaceFeature') {
       return (
@@ -747,7 +779,7 @@ function Inner() {
   };
 
   const renderPage = () => {
-    if (selectedCourse === 'new') return renderNewCourse();
+    if (isNewFlow) return renderNewCourse();
     if (currentPage === 'preInterview') return <PreInterview onBack={handlePreInterviewBack} onNext={handlePreInterviewNext} />;
     if (currentPage === 'imagePreference') return <ImagePreferenceDiagnosis onBack={handleImagePreferenceBack} onNext={handleImagePreferenceNext} />;
     if (currentPage === 'fashionPreference') return <FashionPreferenceDiagnosis onBack={handleFashionPreferenceBack} onNext={handleFashionPreferenceNext} />;
@@ -825,6 +857,7 @@ function Inner() {
     '2way-skeleton': '2WAY 골격',
     '1way': '1WAY',
     'new': '1WAY · 신규',
+    'test': '1WAY · 웹 측정 테스트',
   };
   const courseChipLabel = COURSE_CHIP[selectedCourse] || selectedCourse;
 
@@ -836,6 +869,7 @@ function Inner() {
           totalSteps={visibleSteps.length + 1}
           leftSlot={
             // 'new' 는 코스 칩을 띄우지 않는다 — 이 코스가 곧 1WAY 가 되므로 구분 표시가 불필요하다.
+            // 'test' 는 띄운다 — 지금 웹 측정 테스트 중이라는 걸 화면에서 알 수 있게.
             selectedCourse === 'new' ? undefined : (
               <span className="shrink-0 inline-flex items-center rounded-full bg-[#111111] text-white text-xs font-medium px-3 py-1 tracking-wide">
                 {courseChipLabel}

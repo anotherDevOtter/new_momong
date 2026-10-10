@@ -79,7 +79,7 @@ export default function FaceAnalysisTestPage() {
       <main className="max-w-6xl mx-auto px-6 py-8">
         <h1 className="text-xl font-medium text-[#111111] mb-1">얼굴 분석 테스트</h1>
         <p className="text-sm text-[#666666] mb-6">
-          face_landmark 분석 도구.{' '}
+          브라우저 얼굴 자동 측정(웹) 테스트.{' '}
           <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">source=admin_test</code> 로 DB 에 저장됩니다.
         </p>
 
@@ -251,12 +251,22 @@ interface ResultViewProps {
   setSelectedModule: (m: ModuleEntry | null) => void;
 }
 
+// 결과 키 = 화면 항목 id (2026-10-10). 화면 순서대로 보여주고, 예전 모듈 번호 키(옮기지 않은 7개)는 뒤에 번호순.
+const KEY_ORDER = [
+  'faceline', 'cheek', 'browshape', 'browdir', 'eyeshape', 'eyetail', 'eyefront', 'nosewidth', 'nosehigh', 'lips',
+  'facelen', 'thirds', 'broweye', 'eyelid', 'intereye', 'eyeouter', 'noselen', 'philtrum', 'mouthwidth', 'chinlen',
+];
+const keyRank = (k: string) => {
+  const i = KEY_ORDER.indexOf(k);
+  return i >= 0 ? i : 100 + (Number(k) || 0);
+};
+
 function ResultView({ result, selectedModule, setSelectedModule }: ResultViewProps) {
   const wncModules: ModuleEntry[] = Object.entries(result.wnc.results)
-    .sort(([a], [b]) => Number(a) - Number(b))
+    .sort(([a], [b]) => keyRank(a) - keyRank(b))
     .map(([key, module]) => ({ key, module, kind: 'WNC' as const }));
   const snhModules: ModuleEntry[] = Object.entries(result.snh.results)
-    .sort(([a], [b]) => Number(a) - Number(b))
+    .sort(([a], [b]) => keyRank(a) - keyRank(b))
     .map(([key, module]) => ({ key, module, kind: 'SNH' as const }));
 
   return (

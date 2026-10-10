@@ -38,17 +38,7 @@ export class ConsultationsController {
     return { success: true, data: { consultations } };
   }
 
-  // ⚠️ by-customer 라우트는 :id 보다 먼저 정의
-  @Get('by-customer/:phone')
-  @ApiOperation({ summary: '전화번호로 고객 컨설팅 이력 조회' })
-  async findByCustomerPhone(@Request() req, @Param('phone') phone: string) {
-    const consultations = await this.consultationsService.findByCustomerPhone(
-      req.user.id,
-      decodeURIComponent(phone),
-    );
-    return { success: true, data: { consultations } };
-  }
-
+  // ⚠️ by-customer-id 라우트는 :id 보다 먼저 정의
   @Get('by-customer-id/:customerId')
   @ApiOperation({ summary: '고객 UUID로 컨설팅 이력 조회' })
   async findByCustomerId(@Request() req, @Param('customerId') customerId: string) {

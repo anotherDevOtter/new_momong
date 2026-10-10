@@ -57,15 +57,35 @@ export async function detectLandmarks(imageUrl: string): Promise<LandmarkPoint[]
   await loadLandmarker();
   if (!landmarker) return null;
 
-  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-    const el = new Image();
-    // 촬영본이 S3 presigned URL 이라 CORS 를 켜 두지 않으면 캔버스로 못 읽는다
-    el.crossOrigin = 'anonymous';
-    el.onload = () => resolve(el);
-    el.onerror = () => reject(new Error('이미지를 불러오지 못했습니다'));
-    el.src = imageUrl;
-  });
+  // 원격 사진(S3 presigned URL)은 캐시를 거치지 않고 CORS 로 받아 온다.
+  // 같은 화면의 <img> 가 먼저 CORS 없이 불러오면 S3 응답이 Access-Control 헤더 없이 캐시되고,
+  // crossOrigin 으로 다시 읽을 때 그 캐시가 쓰여 막힌다 → 가이드선이 안 그려졌다. (2026-10-10)
+  let src = imageUrl;
+  let objectUrl: string | null = null;
+  if (/^https?:/.test(imageUrl)) {
+    const res = await fetch(imageUrl, { mode: 'cors', cache: 'no-store' });
+    if (!res.ok) throw new Error('이미지를 불러오지 못했습니다');
+    objectUrl = URL.createObjectURL(await res.blob());
+    src = objectUrl;
+  }
 
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const el = new Image();
+      // 촬영본이 S3 presigned URL 이라 CORS 를 켜 두지 않으면 캔버스로 못 읽는다
+      el.crossOrigin = 'anonymous';
+      el.onload = () => resolve(el);
+      el.onerror = () => reject(new Error('이미지를 불러오지 못했습니다'));
+      el.src = src;
+    });
+    return detectFrom(img);
+  } finally {
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
+  }
+}
+
+function detectFrom(img: HTMLImageElement): LandmarkPoint[] | null {
+  if (!landmarker) return null;
   const result = landmarker.detect(img);
   const face = result.faceLandmarks?.[0];
   return face && face.length ? (face as LandmarkPoint[]) : null;

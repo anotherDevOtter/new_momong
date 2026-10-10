@@ -1,10 +1,11 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { randomUUID } from 'crypto';
 import { ImageDetectionResult, AnalysisSource } from './face-analysis.entity';
-import { PythonAnalysisService, PythonAnalysisResponse } from './python-analysis.service';
+import { S3Service } from '../storage/s3.service';
 import { ModuleConfigsService } from '../module-configs/module-configs.service';
+import { GroupResult, parseEngine, parseGroup } from './face-measure';
 
 export interface AdminTestRecord {
   id: string;
@@ -22,7 +23,7 @@ export class FaceAnalysisService {
   constructor(
     @InjectRepository(ImageDetectionResult)
     private readonly resultsRepo: Repository<ImageDetectionResult>,
-    private readonly python: PythonAnalysisService,
+    private readonly s3: S3Service,
     private readonly moduleConfigs: ModuleConfigsService,
   ) {}
 
@@ -38,32 +39,42 @@ export class FaceAnalysisService {
   async createUploadUrl(opts: { userId?: string; contentType: string; ext?: string }) {
     const ext = (opts.ext || this.extFromContentType(opts.contentType)).replace('.', '');
     const key = `face-analysis/${opts.userId || 'anonymous'}/${randomUUID()}.${ext}`;
-    return this.python.createUploadPresignedUrl({ key, contentType: opts.contentType });
+    return this.s3.createUploadPresignedUrl({ key, contentType: opts.contentType });
   }
 
   /**
-   * Python 서버로 분석 호출 + WNC/SNH 결과를 각각 한 행씩 저장.
+   * 브라우저가 측정한 WNC/SNH 결과를 검증해 각각 한 행씩 저장한다.
+   * 예전에는 여기서 Python 서버를 불러 측정했다 (INFRA-MIGRATION B4, 2026-10-10).
    */
-  async analyze(opts: {
+  async saveMeasurement(opts: {
     userId?: string | null;
     customerId?: string | null;
     faceImageUrl: string;
     imageId?: string;
+    wnc: unknown;
+    snh: unknown;
+    engine?: unknown;
     clientProvidedData?: Record<string, unknown> | null;
     source?: AnalysisSource;
   }): Promise<{
-    wnc: PythonAnalysisResponse['data']['wnc'];
-    snh: PythonAnalysisResponse['data']['snh'];
-    metadata: PythonAnalysisResponse['metadata'];
+    wnc: GroupResult;
+    snh: GroupResult;
+    metadata: { image_id: string; total_modules: number };
     wncId: string;
     snhId: string;
   }> {
+    // 촬영본은 반드시 우리 버킷에 올라간 것이어야 한다 (임의 URL 저장 방지)
+    if (!opts.faceImageUrl || !this.s3.isOwnBucketUrl(opts.faceImageUrl)) {
+      throw new BadRequestException('faceImageUrl 은 업로드 URL 발급으로 올린 이미지여야 합니다');
+    }
+    const engine = parseEngine(opts.engine);
+    const wnc = parseGroup('WNC', opts.wnc, engine);
+    const snh = parseGroup('SNH', opts.snh, engine);
     const imageId = opts.imageId || randomUUID();
-    const response = await this.python.analyzeImage(opts.faceImageUrl, imageId);
 
-    // 응답에 설정 없는 모듈이 오면 표시설정 자동 생성(숨김). 비치명적.
-    await this.moduleConfigs.ensureModules('WNC', this.moduleItems(response.data.wnc));
-    await this.moduleConfigs.ensureModules('SNH', this.moduleItems(response.data.snh));
+    // 처음 보는 항목 키가 오면 표시설정 자동 생성(숨김). 비치명적.
+    await this.moduleConfigs.ensureModules('WNC', this.moduleItems(wnc));
+    await this.moduleConfigs.ensureModules('SNH', this.moduleItems(snh));
 
     const baseRow = {
       user_id: opts.userId || null,
@@ -77,7 +88,7 @@ export class FaceAnalysisService {
         this.resultsRepo.create({
           ...baseRow,
           detection_type: 'WNC',
-          python_analysis_result: response.data.wnc as unknown as Record<string, unknown>,
+          python_analysis_result: wnc as unknown as Record<string, unknown>,
           client_provided_data: opts.clientProvidedData || null,
         }),
       ),
@@ -85,16 +96,17 @@ export class FaceAnalysisService {
         this.resultsRepo.create({
           ...baseRow,
           detection_type: 'SNH',
-          python_analysis_result: response.data.snh as unknown as Record<string, unknown>,
+          python_analysis_result: snh as unknown as Record<string, unknown>,
           client_provided_data: opts.clientProvidedData || null,
         }),
       ),
     ]);
+    this.logger.log(`측정 결과 저장 wnc=${wnc.final} snh=${snh.final} source=${baseRow.source}`);
 
     return {
-      wnc: response.data.wnc,
-      snh: response.data.snh,
-      metadata: response.metadata,
+      wnc,
+      snh,
+      metadata: { image_id: imageId, total_modules: Object.keys(wnc.results).length + Object.keys(snh.results).length },
       wncId: wncSaved.id,
       snhId: snhSaved.id,
     };
@@ -126,7 +138,7 @@ export class FaceAnalysisService {
       const wnc = pair.find((r) => r.detection_type === 'WNC');
       const snh = pair.find((r) => r.detection_type === 'SNH');
       if (!wnc || !snh) continue; // 불완전 쌍 스킵
-      const downloadUrl = await this.python.createDownloadPresignedUrl(faceImageUrl);
+      const downloadUrl = await this.s3.createDownloadPresignedUrl(faceImageUrl);
       records.push({
         id: wnc.id, // 식별용 — WNC id 사용
         faceImageUrl,
@@ -138,29 +150,6 @@ export class FaceAnalysisService {
       if (records.length >= limit) break;
     }
     return records;
-  }
-
-  /**
-   * id (WNC 또는 SNH) 로 짝 조회. 이미지 다운로드 URL 포함.
-   */
-  async getRecordById(id: string): Promise<AdminTestRecord> {
-    const row = await this.resultsRepo.findOne({ where: { id } });
-    if (!row) throw new NotFoundException('분석 기록을 찾을 수 없습니다');
-    const pair = await this.resultsRepo.find({
-      where: { face_image_url: row.face_image_url, source: row.source },
-    });
-    const wnc = pair.find((r) => r.detection_type === 'WNC');
-    const snh = pair.find((r) => r.detection_type === 'SNH');
-    if (!wnc || !snh) throw new NotFoundException('짝이 되는 분석 행을 찾을 수 없습니다');
-    const downloadUrl = await this.python.createDownloadPresignedUrl(row.face_image_url);
-    return {
-      id: wnc.id,
-      faceImageUrl: row.face_image_url,
-      faceImageDownloadUrl: downloadUrl,
-      detectedAt: wnc.detected_at,
-      wnc: { id: wnc.id, result: wnc.python_analysis_result },
-      snh: { id: snh.id, result: snh.python_analysis_result },
-    };
   }
 
   /**

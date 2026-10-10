@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { randomBytes, randomUUID } from 'crypto';
 import { PreSurvey } from './pre-surveys.entity';
 import { Customer } from '../customers/customers.entity';
-import { PythonAnalysisService } from '../face-analysis/python-analysis.service';
+import { S3Service } from '../storage/s3.service';
 
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 
@@ -15,7 +15,7 @@ export class PreSurveysService {
     private readonly repo: Repository<PreSurvey>,
     @InjectRepository(Customer)
     private readonly customers: Repository<Customer>,
-    private readonly python: PythonAnalysisService,
+    private readonly s3: S3Service,
   ) {}
 
   private generateToken(): string {
@@ -73,7 +73,7 @@ export class PreSurveysService {
       }
     }
     const entries = await Promise.all(
-      Array.from(rawUrls).map(async (url) => [url, await this.python.createDownloadPresignedUrl(url)] as const),
+      Array.from(rawUrls).map(async (url) => [url, await this.s3.createDownloadPresignedUrl(url)] as const),
     );
     return Object.fromEntries(entries);
   }
@@ -105,7 +105,7 @@ export class PreSurveysService {
 
     const ext = (opts.ext || extFromContentType(opts.contentType)).replace('.', '');
     const key = `pre-surveys/${survey.customer_id}/${randomUUID()}.${ext}`;
-    return this.python.createUploadPresignedUrl({ key, contentType: opts.contentType });
+    return this.s3.createUploadPresignedUrl({ key, contentType: opts.contentType });
   }
 }
 

@@ -41,17 +41,6 @@ export const createCustomer = async (token: string, data: Partial<Customer>): Pr
   return json.data;
 };
 
-export const updateCustomer = async (token: string, id: string, data: Partial<Customer>): Promise<Customer> => {
-  const res = await fetch(`${API_BASE}/customers/${id}`, {
-    method: 'PATCH',
-    headers: authHeaders(token),
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error('고객 수정 실패');
-  const json = await res.json();
-  return json.data;
-};
-
 export const deleteCustomer = async (token: string, id: string): Promise<void> => {
   const res = await fetch(`${API_BASE}/customers/${id}`, {
     method: 'DELETE',
@@ -87,15 +76,6 @@ export const getConsultationById = async (token: string, id: string): Promise<Co
   if (!res.ok) throw new Error('컨설팅 조회 실패');
   const json = await res.json();
   return json.data.consultation;
-};
-
-export const getConsultationsByCustomerPhone = async (token: string, phone: string): Promise<ConsultationRecord[]> => {
-  const res = await fetch(`${API_BASE}/consultations/by-customer/${encodeURIComponent(phone)}`, {
-    headers: authHeaders(token),
-  });
-  if (!res.ok) throw new Error('컨설팅 이력 조회 실패');
-  const json = await res.json();
-  return json.data.consultations;
 };
 
 // 고객 UUID 로 컨설팅 이력 조회 (전화번호 변경·미입력에도 안정적으로 연결)

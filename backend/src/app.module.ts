@@ -37,7 +37,10 @@ import { RequestLoggerMiddleware } from './common/middleware/request-logger.midd
         password: config.get('DB_PASSWORD', 'password'),
         database: config.get('DB_DATABASE', 'fit_hair'),
         entities: [User, Customer, Consultation, ConsultationShare, AdminAccount, FeatureSettings, ImageDetectionResult, PreSurvey, ModuleConfig],
-        synchronize: config.get('NODE_ENV') !== 'production',
+        // 스키마는 migrations/*.sql 로만 바꾼다 (TODO D1, 2026-10-10).
+        // 예전에는 NODE_ENV 가 정확히 'production' 이 아니면 켜져서, 설정이 빠진 환경에서
+        // 접속하는 순간 DB 구조가 엔티티에 맞춰 자동 변경될 수 있었다.
+        synchronize: false,
         logging: config.get('NODE_ENV') === 'development',
         ssl: config.get('NODE_ENV') !== 'development' ? { rejectUnauthorized: false } : false,
         extra: {

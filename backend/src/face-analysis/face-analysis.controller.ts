@@ -4,7 +4,7 @@ import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminGuard } from '../admin/admin.guard';
 import { FaceAnalysisService } from './face-analysis.service';
-import { PythonAnalysisService } from './python-analysis.service';
+import { S3Service } from '../storage/s3.service';
 
 const MAX_UPLOAD_BYTES = 3 * 1024 * 1024;
 
@@ -14,7 +14,7 @@ const MAX_UPLOAD_BYTES = 3 * 1024 * 1024;
 export class FaceAnalysisController {
   constructor(
     private readonly service: FaceAnalysisService,
-    private readonly python: PythonAnalysisService,
+    private readonly s3: S3Service,
   ) {}
 
   @Post('upload-url')
@@ -25,7 +25,9 @@ export class FaceAnalysisController {
     @Req() req: Request,
   ) {
     validateUploadBody(body);
-    const userId = (req.user as { sub?: string } | undefined)?.sub;
+    // JwtStrategy.validate 는 { id, email, … } 를 돌려준다 (sub 아님).
+    // 예전에는 .sub 를 읽어 항상 undefined → user_id 가 비고 S3 경로가 anonymous 였다 (2026-10-10 수정)
+    const userId = (req.user as { id?: string } | undefined)?.id;
     const data = await this.service.createUploadUrl({
       userId,
       contentType: body.contentType,
@@ -52,55 +54,70 @@ export class FaceAnalysisController {
 
   @Post('analyze')
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: '얼굴 이미지 분석 (실제 컨설팅)' })
+  @ApiOperation({ summary: '얼굴 자동 측정 결과 저장 (실제 컨설팅) — 측정은 브라우저가 한다' })
   async analyze(
     @Body()
     body: {
       faceImageUrl: string;
       customerId?: string;
       imageId?: string;
+      /** 브라우저 측정 결과 (results 키 = 화면 항목 id). final · counts 는 서버가 다시 계산 */
+      wnc: unknown;
+      snh: unknown;
+      engine?: { name: string; version: string };
       clientProvidedData?: Record<string, unknown>;
     },
     @Req() req: Request,
   ) {
-    const userId = (req.user as { sub?: string } | undefined)?.sub;
-    const data = await this.service.analyze({
+    // JwtStrategy.validate 는 { id, email, … } 를 돌려준다 (sub 아님).
+    // 예전에는 .sub 를 읽어 항상 undefined → user_id 가 비고 S3 경로가 anonymous 였다 (2026-10-10 수정)
+    const userId = (req.user as { id?: string } | undefined)?.id;
+    const data = await this.service.saveMeasurement({
       userId: userId || null,
       customerId: body.customerId || null,
       faceImageUrl: body.faceImageUrl,
       imageId: body.imageId,
+      wnc: body.wnc,
+      snh: body.snh,
+      engine: body.engine,
       clientProvidedData: body.clientProvidedData || null,
       source: 'consultation',
     });
     // 버킷이 비공개라 업로드에 쓴 publicUrl 로는 이미지를 못 읽는다.
     // 프론트가 촬영본을 화면에 표시할 수 있도록 GET presigned URL 을 함께 준다
     // (admin 의 analyze-test 는 이미 같은 값을 반환하고 있었다).
-    const faceImageDownloadUrl = await this.python.createDownloadPresignedUrl(body.faceImageUrl);
+    const faceImageDownloadUrl = await this.s3.createDownloadPresignedUrl(body.faceImageUrl);
     return { data: { ...data, faceImageDownloadUrl } };
   }
 
   @Post('analyze-test')
   @UseGuards(AdminGuard)
-  @ApiOperation({ summary: '[admin] 얼굴 이미지 분석 테스트 (source=admin_test)' })
+  @ApiOperation({ summary: '[admin] 얼굴 자동 측정 결과 저장 테스트 (source=admin_test)' })
   async analyzeTest(
     @Body()
     body: {
       faceImageUrl: string;
       imageId?: string;
+      wnc: unknown;
+      snh: unknown;
+      engine?: { name: string; version: string };
     },
   ) {
     // admin 의 sub 는 admin_accounts.id 라서 users FK 위반 → user_id 는 null 로 저장
     // source='admin_test' 로 구분되므로 admin 호출임을 추적 가능
-    const data = await this.service.analyze({
+    const data = await this.service.saveMeasurement({
       userId: null,
       customerId: null,
       faceImageUrl: body.faceImageUrl,
       imageId: body.imageId,
+      wnc: body.wnc,
+      snh: body.snh,
+      engine: body.engine,
       clientProvidedData: null,
       source: 'admin_test',
     });
     // 프론트가 원본 이미지를 표시할 수 있도록 GET presigned URL 도 함께 반환
-    const faceImageDownloadUrl = await this.python.createDownloadPresignedUrl(body.faceImageUrl);
+    const faceImageDownloadUrl = await this.s3.createDownloadPresignedUrl(body.faceImageUrl);
     return { data: { ...data, faceImageDownloadUrl } };
   }
 
@@ -112,14 +129,6 @@ export class FaceAnalysisController {
       limit: limit ? parseInt(limit, 10) : undefined,
     });
     return { data: records };
-  }
-
-  @Get('admin/:id')
-  @UseGuards(AdminGuard)
-  @ApiOperation({ summary: '[admin] 분석 기록 단건 조회' })
-  async getRecord(@Param('id') id: string) {
-    const record = await this.service.getRecordById(id);
-    return { data: record };
   }
 
   @Delete('admin/:id')

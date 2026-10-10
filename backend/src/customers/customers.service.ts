@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
 import { Customer } from './customers.entity';
 import { CreateCustomerDto } from './dto/create-customer.dto';
-import { UpdateCustomerDto } from './dto/update-customer.dto';
 
 @Injectable()
 export class CustomersService {
@@ -49,12 +48,6 @@ export class CustomersService {
       }
     }
     return this.create(userId, dto);
-  }
-
-  async update(userId: string, id: string, dto: UpdateCustomerDto): Promise<Customer> {
-    const customer = await this.findOne(userId, id);
-    Object.assign(customer, dto);
-    return this.repo.save(customer);
   }
 
   async remove(userId: string, id: string): Promise<void> {

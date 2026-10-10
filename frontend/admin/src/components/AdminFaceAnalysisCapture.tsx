@@ -11,6 +11,8 @@ import {
   AnalyzeResponse,
 } from '@/utils/face-analysis-api';
 import { prepareImageForAnalysis } from '@/utils/image-resize';
+import { measureFaceFromFile } from '@/lib/face-measure/browser';
+import { ENGINE } from '@/lib/face-measure';
 
 interface FaceAnalysisCaptureProps {
   onBack?: () => void;
@@ -386,16 +388,25 @@ export function AdminFaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCapture
       // 1-1) 3MB / 2048px 초과 시 자동 리사이즈 (재압축 최소화)
       const { file } = await prepareImageForAnalysis(rawFile);
 
-      // 2) admin 전용 S3 presigned URL 발급 (백엔드가 3MB 한도 확인)
+      // 2) 브라우저에서 얼굴 자동 측정 (2026-10-10, 예전에는 서버 Python). 얼굴을 못 찾으면 올리지 않는다
+      const measured = await measureFaceFromFile(file);
+      if (!measured) throw new Error('사진에서 얼굴을 찾지 못했습니다');
+
+      // 3) admin 전용 S3 presigned URL 발급 (백엔드가 3MB 한도 확인)
       const { uploadUrl, publicUrl } = await requestAdminUploadUrl(file.type, file.size);
 
-      // 3) S3 에 직접 업로드
+      // 4) S3 에 직접 업로드
       await uploadToS3(uploadUrl, file, file.type);
 
-      // 4) admin 테스트 분석 호출 (source=admin_test 로 저장)
-      const result = await analyzeTest(publicUrl);
+      // 5) 측정 결과 저장 (source=admin_test)
+      const result = await analyzeTest({
+        faceImageUrl: publicUrl,
+        wnc: measured.result.wnc,
+        snh: measured.result.snh,
+        engine: ENGINE,
+      });
 
-      // 5) 결과 + 다운로드 가능한 GET presigned URL 을 상위로 전달
+      // 6) 결과 + 다운로드 가능한 GET presigned URL 을 상위로 전달
       onNext(result, result.faceImageDownloadUrl);
     } catch (e) {
       const msg = e instanceof Error ? e.message : '분석 중 오류가 발생했습니다';

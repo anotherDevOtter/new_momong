@@ -80,13 +80,19 @@ export async function uploadToS3(uploadUrl: string, file: Blob, contentType: str
 }
 
 /**
- * admin 테스트 분석. source=admin_test 로 저장됨.
+ * admin 테스트 — 브라우저에서 측정한 결과를 저장한다. source=admin_test 로 저장됨.
+ * (2026-10-10 부터 측정은 브라우저 lib/face-measure 가 한다. 서버는 검증 후 저장만.)
  */
-export async function analyzeTest(faceImageUrl: string): Promise<AnalyzeResponse> {
+export async function analyzeTest(opts: {
+  faceImageUrl: string;
+  wnc: { results: Record<string, unknown> };
+  snh: { results: Record<string, unknown> };
+  engine: { name: string; version: string };
+}): Promise<AnalyzeResponse> {
   const res = await fetch(`${API_BASE}/face-analysis/analyze-test`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeader() },
-    body: JSON.stringify({ faceImageUrl }),
+    body: JSON.stringify(opts),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
@@ -101,15 +107,6 @@ export async function listAdminHistory(limit = 30): Promise<AdminHistoryRecord[]
     headers: authHeader(),
   });
   if (!res.ok) throw new Error('기록 목록 조회 실패');
-  const json = await res.json();
-  return json.data;
-}
-
-export async function getAdminRecord(id: string): Promise<AdminHistoryRecord> {
-  const res = await fetch(`${API_BASE}/face-analysis/admin/${id}`, {
-    headers: authHeader(),
-  });
-  if (!res.ok) throw new Error('기록 조회 실패');
   const json = await res.json();
   return json.data;
 }

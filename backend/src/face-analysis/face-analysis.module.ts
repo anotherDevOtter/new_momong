@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { HttpModule } from '@nestjs/axios';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { ImageDetectionResult } from './face-analysis.entity';
-import { PythonAnalysisService } from './python-analysis.service';
+import { StorageModule } from '../storage/storage.module';
 import { FaceAnalysisService } from './face-analysis.service';
 import { FaceAnalysisController } from './face-analysis.controller';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -14,7 +13,7 @@ import { ModuleConfigsModule } from '../module-configs/module-configs.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([ImageDetectionResult]),
-    HttpModule,
+    StorageModule,
     ModuleConfigsModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -26,7 +25,6 @@ import { ModuleConfigsModule } from '../module-configs/module-configs.module';
     }),
   ],
   controllers: [FaceAnalysisController],
-  providers: [FaceAnalysisService, PythonAnalysisService, JwtAuthGuard, AdminGuard],
-  exports: [PythonAnalysisService],
+  providers: [FaceAnalysisService, JwtAuthGuard, AdminGuard],
 })
 export class FaceAnalysisModule {}

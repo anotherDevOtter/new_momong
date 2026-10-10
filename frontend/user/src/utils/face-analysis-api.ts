@@ -53,6 +53,8 @@ export interface AnalyzeResponse {
   metadata: { image_id: string; total_modules: number };
   wncId: string;
   snhId: string;
+  /** 브라우저 측정에 걸린 시간 (프론트에서만 붙인다, 저장 안 됨) */
+  clientTiming?: { landmarkMs: number; measureMs: number };
   /** 촬영본을 화면에 표시하기 위한 GET presigned URL.
    *  버킷이 비공개라 업로드용 publicUrl 로는 읽을 수 없다. */
   faceImageDownloadUrl?: string;
@@ -120,11 +122,16 @@ export async function uploadToS3(uploadUrl: string, file: Blob, contentType: str
 }
 
 /**
- * 업로드된 S3 URL 로 얼굴 분석 요청.
+ * 브라우저에서 측정한 결과를 저장한다 (업로드된 S3 URL 과 함께).
+ * 측정은 lib/face-measure 가 한다 — 서버는 검증 후 저장만 한다. (2026-10-10, 예전에는 서버가 Python 으로 측정)
+ * results 키는 화면 항목 id. final · counts 는 서버가 다시 계산해 돌려준다.
  */
 export async function analyzeFace(opts: {
   faceImageUrl: string;
   customerId?: string;
+  wnc: { results: Record<string, AnalysisModule> };
+  snh: { results: Record<string, AnalysisModule> };
+  engine: { name: string; version: string };
   clientProvidedData?: Record<string, unknown>;
 }): Promise<AnalyzeResponse> {
   const res = await fetch(`${API_BASE}/face-analysis/analyze`, {

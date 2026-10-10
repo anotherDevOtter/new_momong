@@ -6,6 +6,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { FaceDetector } from '@mediapipe/tasks-vision';
+import { silenceMediapipeInfoLog } from '@/lib/mediapipeLog';
 
 // 운영에서 갑자기 깨지지 않도록 npm 설치 버전과 동일한 픽스 버전 사용
 const WASM_URL =
@@ -19,6 +20,7 @@ let loadPromise: Promise<void> | null = null;
 
 async function loadDetectors() {
   if (loadPromise) return loadPromise;
+  silenceMediapipeInfoLog();   // wasm 을 불러오기 전에 걸어야 한다 (INFO 로그가 개발 오버레이에 오류로 뜬다)
   loadPromise = (async () => {
     const { FilesetResolver, FaceDetector: FaceDetectorClass } = await import(
       '@mediapipe/tasks-vision'

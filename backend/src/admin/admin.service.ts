@@ -2,7 +2,6 @@ import {
   Injectable,
   UnauthorizedException,
   NotFoundException,
-  ConflictException,
   Logger,
   OnModuleInit,
 } from '@nestjs/common';
@@ -64,29 +63,6 @@ export class AdminService implements OnModuleInit {
     }
 
     throw new UnauthorizedException('이메일 또는 비밀번호가 올바르지 않습니다');
-  }
-
-  async register(email: string, password: string, authHeader?: string) {
-    const adminCount = await this.adminAccountsRepo.count();
-
-    if (adminCount > 0) {
-      let isAdmin = false;
-      if (authHeader?.startsWith('Bearer ')) {
-        try {
-          const payload = this.jwtService.verify(authHeader.slice(7));
-          isAdmin = !!payload.admin;
-        } catch {}
-      }
-      if (!isAdmin) throw new UnauthorizedException('기존 어드민 인증이 필요합니다');
-    }
-
-    const existing = await this.adminAccountsRepo.findOne({ where: { email } });
-    if (existing) throw new ConflictException('이미 존재하는 이메일입니다');
-
-    const password_hash = await bcrypt.hash(password, 10);
-    const admin = this.adminAccountsRepo.create({ email, password_hash });
-    await this.adminAccountsRepo.save(admin);
-    return { message: '어드민 계정이 생성되었습니다' };
   }
 
   async getUsers() {

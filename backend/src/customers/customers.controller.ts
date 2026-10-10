@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Post,
-  Patch,
   Delete,
   Body,
   Param,
@@ -16,7 +15,6 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CustomersService } from './customers.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
-import { UpdateCustomerDto } from './dto/update-customer.dto';
 
 @ApiTags('customers')
 @ApiBearerAuth()
@@ -45,13 +43,6 @@ export class CustomersController {
   @HttpCode(HttpStatus.CREATED)
   async create(@Request() req, @Body() dto: CreateCustomerDto) {
     const customer = await this.customersService.create(req.user.id, dto);
-    return { success: true, data: customer };
-  }
-
-  @Patch(':id')
-  @ApiOperation({ summary: '고객 정보 수정' })
-  async update(@Request() req, @Param('id') id: string, @Body() dto: UpdateCustomerDto) {
-    const customer = await this.customersService.update(req.user.id, id, dto);
     return { success: true, data: customer };
   }
 
