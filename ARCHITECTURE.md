@@ -92,8 +92,7 @@ new_momong/
 │  │  ├─ 004_create_module_configs.sql
 │  │  ├─ 005_face_measure_keys.sql   (+ .down) 결과 키 → 화면 항목 id
 │  │  └─ 006_s3_bucket_rename.sql    (+ .down) 사진 주소 버킷 변경 · 서명 제거
-│  ├─ Dockerfile                  운영 이미지 (node:22, migrations 포함)
-│  └─ Procfile                    예전 EB 용 — 정리 때 삭제
+│  └─ Dockerfile                  운영 이미지 (node:22, migrations 포함)
 ├─ frontend/
 │  ├─ user/                       디자이너용 (3203)
 │  │  └─ src/
@@ -385,7 +384,7 @@ frontend `FaceOverlay` 가 그릴 수 있는 도형:
 
 | 환경 | S3 버킷 | 백엔드 | DB |
 |---|---|---|---|
-| dev (로컬) | `momong-dev` (localhost CORS) | localhost:3200 (Python 은 `test` 코스 비교용 선택) | Postgres.app `momong_dev` |
+| dev (로컬) | `momong-dev` (localhost CORS) | localhost:3200 | Postgres.app `momong_dev` |
 | prod | `momong-prod` (`https://*.merci-momong.com` CORS) | Lightsail `momong-prod-api` | Lightsail `momong-prod-db` / `momong_prod` |
 
 > 예전 운영 자원(`momong-staging` 버킷 · EB `Momong-staging-env` · `momong-face-analyze-staging-env` · RDS `momong-staging`)은
@@ -434,8 +433,8 @@ AllowedMethods: ["PUT", "POST", "GET", "HEAD"]
 - 빌드 시간: 각 3-5분
 
 ### 8-3. Python 서버 (face_landmark) — 운영에서 안 씀
-- 예전 EB `momong-face-analyze-staging-env` 는 2026-10-18 종료 예정, 저장소 배포 워크플로도 그때 끈다
-- 로컬에서는 `test` 코스 비교용으로만 띄운다
+- 예전 EB `momong-face-analyze-staging-env` 는 2026-10-18 종료, 저장소 배포 워크플로도 끔
+- 웹 · Python 비교 화면(`test` 코스)도 2026-10-18 삭제 — 로컬에서도 띄울 일이 없다
 
 ### 8-4. DB 마이그레이션 (수동)
 - **`synchronize` 는 모든 환경에서 꺼져 있다** (2026-10-10, TODO D1). 구조 변경은 `backend/migrations/*.sql` 로만
@@ -490,7 +489,6 @@ AllowedMethods: ["PUT", "POST", "GET", "HEAD"]
 | backend | `npm run start:dev` (3200) | Lightsail Docker (GitHub Actions 자동 배포) |
 | user frontend | `PORT=3203 npm run dev` | Amplify |
 | admin frontend | `PORT=3202 npm run dev` | Amplify |
-| Python 서버 | (선택) `python -m uvicorn application:app --port 3201` — `test` 코스 비교용 | 없음 |
 | S3 | `momong-dev` (CORS: localhost) | `momong-prod` (CORS: `*.merci-momong.com`) |
 | 인증 | 자동 시드 admin (`admin@momong.com` / `!Password1234`) | env 통한 강한 시드 |
 

@@ -104,7 +104,7 @@
 | **S9** ✅ 2026-10-11 (Caddyfile · next.config, 배포 시 caddy reload) | 보안 헤더 없음 | API · 웹 모두 HSTS · `X-Frame-Options` 없음, `X-Powered-By` 노출. Caddyfile `header` 와 Next `headers()` 로 추가 |
 | **S10** ✅ 2026-10-11 | 거절 · 삭제된 디자이너 토큰이 7일간 유효 | `JwtStrategy.validate` 가 `status` 를 보지 않는다 |
 | **S11** | 업로드 크기를 S3 가 강제하지 않음 | `contentLength` 는 선택값이고 서명에 안 들어간다 → presigned PUT 으로 큰 파일 업로드 가능 (로그인 · 토큰 필요) |
-| 정리 | `/dev-screens` 운영에서 열림 · `Procfile` | DECOMMISSION 5단계에서 삭제 |
+| 정리 ✅ 2026-10-18 | `/dev-screens` 운영에서 열림 · `Procfile` | 삭제 (DECOMMISSION 5단계) |
 
 ### M5 — 테스트가 1개뿐
 
@@ -115,7 +115,7 @@
 
 - 소유권 검증이 대체로 일관 — customers · consultations · pre-surveys · shares 전부 `where: { id, user_id }` (예외는 위 D3)
 - S3 presigned URL 구현이 견고 — 버킷 소유 검증(`loc.bucket !== bucketName` 이면 서명 거부), 이미 서명된 URL 재서명 방지, virtual-hosted/path-style 양쪽 파싱
-- (EB 시절) `Procfile` 은 `web: node dist/main` 로 정상. 2026-10-11 부터 운영은 Dockerfile `node dist/main` — Procfile 은 정리 때 삭제
+- (EB 시절) `Procfile` 은 `web: node dist/main` 로 정상. 2026-10-11 부터 운영은 Dockerfile `node dist/main` — Procfile 은 2026-10-18 삭제
 - 비밀번호는 bcrypt(rounds 10) 해시 저장, 로그인 실패 메시지가 이메일/비번을 구분하지 않음
 
 ---

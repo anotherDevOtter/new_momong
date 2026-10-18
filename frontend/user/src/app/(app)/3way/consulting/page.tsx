@@ -37,7 +37,6 @@ import { PremiumReport as NewPremiumReport } from '@/components/new/PremiumRepor
 // 시안3 구조(표지+4장). new 코스만 쓴다 — 공유 링크의 옛 기록은 아직 위쪽 V1 이 그린다.
 import { PremiumReport as NewPremiumReportV2 } from '@/components/new/PremiumReportV2';
 import { CompletionPage as NewCompletionPage } from '@/components/new/CompletionPage';
-import { FaceMeasureCompare } from '@/components/new/FaceMeasureCompare';
 import { preSurveyToPreInterview, EMPTY_PRE_INTERVIEW, type PreInterviewData as NewPreInterviewData } from '@/components/new/preSurveyToPreInterview';
 import { faceAnalysisToPosMap, faceAnalysisToMeasurements, faceAnalysisToValues, faceAnalysisToNumbers, deriveImageType } from '@/components/new/faceAnalysisToPosMap';
 import { designScreenRecommendation, strategyOf } from '@/components/new/hairPrescription';
@@ -52,9 +51,7 @@ type PageKey =
   | 'imageDirection' | 'hairDesign' | 'hairTexture'
   | 'nextDirection' | 'preSurveyReview' | 'completion'
   // ↓ 'new' 코스(시안 이식) 전용 화면. 기존 코스는 쓰지 않는다.
-  | 'aiFaceFeature' | 'aiFaceResultDerived' | 'hairConsulting'
-  // ↓ 'test' 코스 전용 — 웹 측정 · Python 측정 비교
-  | 'measureCompare';
+  | 'aiFaceFeature' | 'aiFaceResultDerived' | 'hairConsulting';
 
 // ─────────────────────────────────────────────────────────────────────────
 // 코스별 단계 구성. 배열 순서 = 진행 순서.
@@ -128,14 +125,8 @@ const COURSE_STEPS: Record<string, PageKey[]> = {
   ],
 };
 
-// 'test' — 'new' 와 같은 화면에 '웹 · Python 측정 비교' 화면을 하나 끼운 개발 전용 코스.
-// 얼굴 자동 측정을 Python 서버에서 브라우저로 옮기는 작업(INFRA-MIGRATION 1단계)을 실제 흐름에서 확인한다.
-// 촬영 → (Python 분석) → 비교 화면에서 같은 사진을 브라우저로 측정 → 고른 쪽 결과로 이목구비 화면.
-// 웹 측정이 본선으로 들어가면 지운다.
-COURSE_STEPS['test'] = COURSE_STEPS['new'].flatMap((s): PageKey[] => (s === 'faceProcessing' ? [s, 'measureCompare'] : [s]));
-
 /** 'new' 화면 흐름을 쓰는 코스 */
-const usesNewFlow = (course: string) => course === 'new' || course === 'test';
+const usesNewFlow = (course: string) => course === 'new';
 
 // 짧은 전환 화면 — 진행률에 세지 않고, "이전" 으로 되돌아가지도 않는다.
 const TRANSIENT_STEPS: PageKey[] = ['faceProcessing'];
@@ -233,9 +224,6 @@ function Inner() {
   const [afterPhoto, setAfterPhoto] = useState<string | null>(null);
   const [directionSubSel, setDirectionSubSel] = useState<Record<string, string>>({});
   const [faceAnalysisResult, setFaceAnalysisResult] = useState<AnalyzeResponse | null>(null);
-  // 'test' 코스 — 촬영 화면이 측정 · 저장한 원래 결과. 비교 화면에서 Python 쪽을 고르면
-  // faceAnalysisResult 만 바뀌고 이건 그대로 남는다 (다시 비교 화면으로 돌아올 때 쓴다)
-  const [capturedFaceResult, setCapturedFaceResult] = useState<AnalyzeResponse | null>(null);
   const [faceImageUrl, setFaceImageUrl] = useState<string | null>(null);
   // 디자이너가 확정/수정한 다운스트림 입력값 (저장 + step 간 연동)
   const [faceResultData, setFaceResultData] = useState<FaceResultData | null>(null);
@@ -431,7 +419,6 @@ function Inner() {
   const handleFaceAnalysisBack = () => goBack('faceAnalysis');
   const handleFaceAnalysisNext = (result: AnalyzeResponse, imageUrl: string) => {
     setFaceAnalysisResult(result);
-    setCapturedFaceResult(result);
     // 화면 표시는 GET presigned URL 로 한다. 업로드에 쓴 imageUrl 은 비공개 버킷이라 읽히지 않는다.
     setFaceImageUrl(result.faceImageDownloadUrl || imageUrl);
     goNext('faceAnalysis');
@@ -484,7 +471,6 @@ function Inner() {
         '2way-skeleton': '2WAY (Skeleton Image)',
         '1way': '1WAY',
         'new': '1WAY (신규 이식 · 개발)',
-        'test': '1WAY (웹 측정 테스트 · 개발)',
       };
       // F6: 알 수 없는 코스는 '1WAY' 로 단정하지 않고 받은 값 그대로 보존
       const courseName = COURSE_NAMES[selectedCourse] || selectedCourse;
@@ -611,20 +597,6 @@ function Inner() {
     }
     if (currentPage === 'faceProcessing') {
       return <NewFaceAnalysisProcessing onComplete={() => goNext('faceProcessing')} />;
-    }
-    if (currentPage === 'measureCompare') {
-      return (
-        <FaceMeasureCompare
-          imageUrl={faceImageUrl}
-          webResult={capturedFaceResult}
-          onBack={() => goBack('measureCompare')}
-          onNext={(result) => {
-            setFaceAnalysisResult(result);
-            setFaceResultPosMap({});   // 고른 결과로 이목구비 화면을 새로 시작한다
-            goNext('measureCompare');
-          }}
-        />
-      );
     }
     if (currentPage === 'aiFaceFeature') {
       return (
@@ -859,7 +831,6 @@ function Inner() {
     '2way-skeleton': '2WAY 골격',
     '1way': '1WAY',
     'new': '1WAY · 신규',
-    'test': '1WAY · 웹 측정 테스트',
   };
   const courseChipLabel = COURSE_CHIP[selectedCourse] || selectedCourse;
 
@@ -871,7 +842,6 @@ function Inner() {
           totalSteps={visibleSteps.length + 1}
           leftSlot={
             // 'new' 는 코스 칩을 띄우지 않는다 — 이 코스가 곧 1WAY 가 되므로 구분 표시가 불필요하다.
-            // 'test' 는 띄운다 — 지금 웹 측정 테스트 중이라는 걸 화면에서 알 수 있게.
             selectedCourse === 'new' ? undefined : (
               <span className="shrink-0 inline-flex items-center rounded-full bg-[#111111] text-white text-xs font-medium px-3 py-1 tracking-wide">
                 {courseChipLabel}

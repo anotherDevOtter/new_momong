@@ -74,7 +74,6 @@ function ConsultingStartInner() {
     '2way-skeleton': '2WAY 골격',
     '3way': '3WAY',
     'new': '1WAY · 신규',
-    'test': '1WAY · 웹 측정 테스트',
   };
   const title =
     type === 'fit' ? 'FIT 컨설팅 시작' : `${COURSE_TITLE[course] || '3WAY'} 컨설팅 시작`;

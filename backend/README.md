@@ -16,7 +16,7 @@ npm run start:dev        # http://localhost:3001
 |---|---|
 | `npm run start:dev` | watch 모드 개발 서버 |
 | `npm run build` | `dist/` 로 컴파일 |
-| `npm run start:prod` | `node dist/main` (EB 가 Procfile 로 실행) |
+| `npm run start:prod` | `node dist/main` (운영은 Dockerfile 이 같은 명령으로 실행) |
 | `npm test` | Jest 단위 테스트 |
 | `npm run test:e2e` | Jest e2e (`test/jest-e2e.json`) |
 | `npm run lint` | ESLint (자동 수정) |

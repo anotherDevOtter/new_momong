@@ -22,7 +22,6 @@
    ```
    > 백엔드는 DB 구조를 자동으로 바꾸지 않는다(`synchronize: false`). 빈 DB 는 위 기준 SQL 로 테이블을 만들고,
    > 이후 구조 변경은 `backend/migrations/` 에 번호를 붙인 SQL 로 한다.
-4. **(선택) Python 3.9 + face_landmark repo** — `test` 코스의 웹 · Python 측정 비교 화면에서만 쓴다
 
 ---
 
@@ -35,7 +34,7 @@ CORS(`ALLOWED_ORIGINS`) · 공유링크(`FRONTEND_URL`) 가
 | 포트 | 서비스 | 실행 |
 |:--:|---|---|
 | **3200** | backend (NestJS) | `cd backend && npm run start:dev` |
-| **3201** | (선택) Python 얼굴분석 — `test` 코스 비교용 | `cd face_landmark && source venv/bin/activate && python -m uvicorn application:app --port 3201` |
+| 3201 | (비어 있음 — 예전 Python 얼굴분석 자리, 2026-10-18 비교 화면과 함께 정리) | |
 | **3202** | admin 프론트 (Next.js) | `cd frontend/admin && PORT=3202 npm run dev` |
 | **3203** | user 프론트 (Next.js) | `cd frontend/user && PORT=3203 npm run dev` |
 
@@ -56,7 +55,7 @@ for p in 3200 3201 3202 3203; do lsof -nP -iTCP:$p -sTCP:LISTEN >/dev/null 2>&1 
 
 ## 빠른 시작
 
-3개 터미널 (+ `test` 코스 비교를 볼 때만 Python):
+3개 터미널:
 
 ```bash
 # 1) backend
@@ -77,10 +76,6 @@ cp .env.example .env.local
 npm install
 PORT=3202 npm run dev      # http://localhost:3202
 
-# 4) (선택) Python 얼굴 분석 서버 — test 코스 비교 화면용
-cd ../face_landmark
-source venv/bin/activate
-python -m uvicorn application:app --port 3201   # http://localhost:3201
 ```
 
 ### 접속
@@ -185,7 +180,7 @@ new_momong/
 └─ README.md            본 문서
 ```
 
-> 별도 repo: `face_landmark/` (Python 얼굴 분석 서버) — 운영은 인프라 이전 전까지 이 서버를 쓴다. 로컬에서는 `test` 코스 비교용으로만 선택 사용.
+> 별도 repo: `face_landmark/` (Python 얼굴 분석 서버) — 얼굴 측정이 브라우저로 옮겨져(2026-10-11) 운영 · 로컬 모두 쓰지 않는다. `tools/face-baseline/` 의 기준값 비교에만 참고용으로 남겨 둔다.
 
 ---
 
@@ -202,7 +197,6 @@ new_momong/
 | 기능 토글 변경 안 보임 | user 프론트 새로고침 |
 | 카메라 권한 거부됨 | HTTPS 또는 localhost 에서만 동작. 권한 거부 후엔 브라우저 주소창 자물쇠 → 카메라 재허용 |
 | "얼굴 측정 모델을 불러오지 못했습니다" | MediaPipe wasm · 모델을 CDN 에서 받는다 — 인터넷 연결 확인 |
-| `test` 코스 비교 화면 "Python 비교 실패" | 로컬 Python(3201) 이 켜져 있는지 확인 (위 uvicorn 명령) |
 | S3 PUT 403 | `momong-dev` 버킷의 CORS 에 `http://localhost:3203` 포함되어 있는지 확인 |
 | `EADDRINUSE: :::3203` | `lsof -ti:3203 \| xargs kill -9` |
 | backend 가 3200 에서 안 뜸 | 다른 프로세스가 점유 중인지 확인 (`lsof -ti:3200`). 포트를 옮기면 프론트 `NEXT_PUBLIC_API_URL` 도 같이 변경할 것 |

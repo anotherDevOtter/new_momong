@@ -209,6 +209,6 @@ docker compose restart api         # 재시작
 - S3 `elasticbeanstalk-ap-northeast-2-…`: EB 가 만든 배포 · 로그 버킷. EB 종료 뒤 삭제 (사진 없음)
 - `face_landmark` 저장소 배포 워크플로 끄기
 - Amplify 앱 이름 → `momong-prod-user` · `momong-prod-admin` (선택)
-- `test` 코스 · 비교 화면 삭제 후 배포 (INFRA-MIGRATION C5)
+- `test` 코스 · 비교 화면 삭제 후 배포 (INFRA-MIGRATION C5) — ✅ 2026-10-18
 - 다음 달 청구서로 절감 확인
 - (참고) 운영 DB 를 맥에서 백업하려면 `pg_dump` 18 필요: `brew install postgresql@18`

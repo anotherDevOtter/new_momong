@@ -2,7 +2,8 @@
 
 > 목표: 월 인프라 비용을 **약 $120 → $27~33** 으로 줄인다.
 > 작성: 2026-10-07. 수정: 2026-10-10 (진행 구조 변경, 모듈 키 방식 결정).
-> 상태: **1단계 진행 중** (브랜치 `feat/face-measure-web`, 미커밋). 17개 모듈 TS 이식 + 비교 완료, 화면 연결은 아직.
+> 상태: **완료.** 2026-10-11 Lightsail 로 전환, 2026-10-18 예전 EB · RDS 정리 ([deploy/lightsail/DECOMMISSION.md](./deploy/lightsail/DECOMMISSION.md)).
+> 남은 것: 2026-11-11 예전 사진 버킷 `momong-staging` 삭제, 11월 청구서 확인.
 > 관련: [ARCHITECTURE.md](./ARCHITECTURE.md) (현재 구조), [TODO.md](./TODO.md) (D1 등 남은 작업).
 
 ---
@@ -61,7 +62,7 @@
 | C2 | **화면 키 전환** — `faceAnalysisToPosMap` · 구 3WAY · admin 정렬 | ✅ 새 기록 이목구비 화면 · admin 예전 기록 표시 확인 |
 | C3 | **로컬 E2E** — 로그인 → 촬영 → 이목구비 → 헤어컨설팅 → 저장 → 리포트 → 공유 링크 | ✅ 2026-10-11 헤드리스 11단계 통과, 콘솔 오류 0. 저장된 상담에 위치값 20 · 측정값 17(새 키) · 최종 타입, 분석 기록은 engine=face-measure-web · user_id 있음. 로그아웃 상태 공유 링크 + 비밀번호로 리포트 열림 |
 | C4 | **정리** — 안 쓰는 API · 코드 · 문서 정리, 문서 갱신, 커밋 | ✅ 정리 · 문서 (2026-10-10, 아래). 커밋은 남음 |
-| C5 | **`test` 코스 · 비교 화면 제거** — `test` 코스 카드 · `FaceMeasureCompare` · `legacy.ts` · `dev-screens` | **배포 후 테스트하고** 지운다 (2026-10-10 사용자 결정) |
+| C5 | **`test` 코스 · 비교 화면 제거** — `test` 코스 카드 · `FaceMeasureCompare` · `legacy.ts` · `dev-screens` ✅ 2026-10-18 삭제 (배포 · 1주 운영 확인 후) |
 
 **C4 정리 내역 (2026-10-10)**
 - API 삭제: `GET /consultations/by-customer/:phone` · `PATCH /customers/:id` · `GET /face-analysis/admin/:id` · `POST /admin/auth/register` (화면에서 안 씀. register 는 관리자 0명일 때 인증 없이 열리던 것)

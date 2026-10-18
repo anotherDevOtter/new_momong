@@ -22,8 +22,6 @@ export function CourseSelection({ onNext, onBack }: CourseSelectionProps) {
   // 스테이징에서 내부 테스트를 하기로 해서 운영 빌드에서도 보이게 열어뒀다 (2026-09-02).
   // 기존 1WAY 를 이 코스로 교체하는 시점에 이 카드와 'new' 코스를 함께 지운다.
   const devCourse = true;
-  // 웹 측정 테스트('test' 코스) 카드 — 로컬 개발에서만. 운영 빌드에는 나오지 않는다.
-  const localDevOnly = process.env.NODE_ENV === 'development';
 
   const courses = [
     {
@@ -61,13 +59,6 @@ export function CourseSelection({ onNext, onBack }: CourseSelectionProps) {
       title: '1WAY 헤어컨설팅 (신규)',
       description: '개편 시안 적용본 — 내부 테스트용',
       services: '사전인터뷰 통합 · 이목구비/이미지타입 분리 · 헤어컨설팅 통합',
-    },
-    // 개발 전용 — 'new' 와 같은 흐름에 웹 측정 · Python 측정 비교 화면을 끼운 것 (INFRA-MIGRATION 1단계)
-    {
-      id: 'test',
-      title: '1WAY 헤어컨설팅 (웹 측정 테스트)',
-      description: '얼굴 자동 측정을 브라우저에서 돌려 Python 서버 결과와 비교',
-      services: '신규 흐름 + 웹/Python 측정 비교 화면',
     },
   ];
 
@@ -119,7 +110,6 @@ export function CourseSelection({ onNext, onBack }: CourseSelectionProps) {
               if (course.id === '2way') return twoWayAvailable;
               if (course.id === '1way') return features.courses['1way'];
               if (course.id === 'new') return devCourse;   // 개발 모드에서만
-              if (course.id === 'test') return localDevOnly;  // 로컬 개발에서만
               return true;
             })
             .map((course, index) => (
