@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { motion, useInView } from 'motion/react';
 import { BrandHeader } from './BrandHeader';
-import { FORM, PROP, MONO, IMAP, computeScores, dominantOf, dominantIdx } from './faceAnalysisData';
+import { FORM, PROP, MONO, IMAP, computeScores, dominantOf, dominantIdx, sideText } from './faceAnalysisData';
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer,
 } from 'recharts';
@@ -323,7 +323,7 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
               const type = pos < 0.33 ? FORM_AXIS[0] : pos < 0.67 ? FORM_AXIS[1] : FORM_AXIS[2];
               const strength = Math.round(Math.abs(pos - 0.5) * 200);
               const side = pos < 0.33 ? it.l : pos > 0.67 ? it.r : '균형';
-              return { item: it, type, strength, side, axis: 'form' as const };
+              return { item: it, type, strength, side, axis: 'form' as const, text: sideText(it, pos) };
             // 판정이 Neutral 이면 항목도 전부 Neutral 로 걸러져 핵심 해석이 통째로 비었다.
             // 그럴 때는 개별 항목 중 Warm·Cool 로 잡힌 것을 매력 포인트로 보여준다. (2026-09-11)
             }).filter(f => formDominant === 'Neutral' ? f.type !== 'Neutral' : f.type === formDominant),
@@ -332,7 +332,7 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
               const type = pos < 0.33 ? PROP_AXIS[0] : pos < 0.67 ? PROP_AXIS[1] : PROP_AXIS[2];
               const strength = Math.round(Math.abs(pos - 0.5) * 200);
               const side = pos < 0.33 ? it.l : pos > 0.67 ? it.r : '균형';
-              return { item: it, type, strength, side, axis: 'prop' as const };
+              return { item: it, type, strength, side, axis: 'prop' as const, text: sideText(it, pos) };
             }).filter(f => propDominant === 'Neutral' ? f.type !== 'Neutral' : f.type === propDominant),
           ]
             .sort((a, b) => b.strength - a.strength)
@@ -438,13 +438,13 @@ export function AIFaceResultDerived({ posMap, onNext, onBack, facePhotoUrl }: Pr
 
                         {/* 매력 설명 */}
                         <p className="text-[10px] text-[#AAAAAA] leading-[1.7] pl-4 mb-2" style={{ fontWeight: 300 }}>
-                          → {f.item.desc}
+                          → {f.text.desc}
                         </p>
 
                         {/* 매력 태그 */}
                         <div className="flex items-center gap-1 pl-4">
                           <span className="text-[8px] text-[#CCCCCC] mr-0.5">매력</span>
-                          {f.item.tags.slice(0, 3).map(t => (
+                          {f.text.tags.slice(0, 3).map(t => (
                             <span key={t} className="text-[8px] px-1.5 py-0.5"
                               style={{ background: '#F5F5F3', color: '#888888' }}>
                               {t}

@@ -25,7 +25,7 @@ export const PROP: MItem[] = [
   { id: 'facelen',    num:  1, title: '얼굴 길이',       l: '가로비율',   r: '세로비율',              defaultPos: 0.46, vType: 'Neutral', defaultValue: '비율 1.42',   tags: ['#균형', '#자연스러운'], desc: '세로/가로 비율이 표준 범위로 전체 실루엣의 기준선을 형성합니다.', breakdown: [{ label: 'Neutral', pct: 50 }, { label: 'Soft', pct: 28 }, { label: 'Hard', pct: 22 }] },
   { id: 'thirds',     num:  2, title: '상중하안부 비율',  l: '상↑',        r: '하↑',             defaultPos: 0.54, vType: 'Neutral', defaultValue: '1:0.98:1.04', tags: ['#균형', '#안정적'], desc: '이마·중안부·하안부 세 구간의 균형이 고른 편입니다.', breakdown: [{ label: 'Neutral', pct: 55 }, { label: 'Soft', pct: 25 }, { label: 'Hard', pct: 20 }] },
   { id: 'broweye',    num:  3, title: '눈썹~눈 거리',    l: '멀다',       r: '가까움',          defaultPos: 0.55, vType: 'Neutral', defaultValue: '표준',        tags: ['#자연스러운'], desc: '눈썹과 눈 사이 간격이 표준으로 눈매의 인상 강도를 중립적으로 유지합니다.', breakdown: [{ label: 'Neutral', pct: 52 }, { label: 'Soft', pct: 26 }, { label: 'Hard', pct: 22 }] },
-  { id: 'eyelid',     num:  4, title: '쌍꺼풀',          l: '무쌍 · 속쌍', r: '인아웃 · 세미아웃', defaultPos: 0.70, vType: 'Hard',    defaultValue: '인아웃',      tags: ['#선명한', '#또렷한', '#강한'], desc: '쌍꺼풀 라인이 선명하게 눈매의 존재감을 높이는 Hard 성향입니다.', breakdown: [{ label: 'Hard', pct: 48 }, { label: 'Neutral', pct: 32 }, { label: 'Soft', pct: 20 }] },
+  { id: 'eyelid',     num:  4, title: '쌍꺼풀',          l: '무쌍 · 속쌍', r: '인아웃 · 세미아웃', defaultPos: 0.70, vType: 'Hard',    defaultValue: '인아웃',      tags: ['#선명한', '#또렷한', '#강한'], desc: '쌍꺼풀 라인이 비교적 선명해 눈매의 존재감을 높이는 Hard 성향입니다.', breakdown: [{ label: 'Hard', pct: 48 }, { label: 'Neutral', pct: 32 }, { label: 'Soft', pct: 20 }] },
   { id: 'intereye',   num:  5, title: '눈 사이 거리',    l: '넓다',       r: '좁다',            defaultPos: 0.36, vType: 'Soft',    defaultValue: '34.1mm',      tags: ['#부드러운', '#편안한', '#친근한'], desc: '두 눈 사이가 넓어 부드럽고 편안한 인상을 만듭니다.', breakdown: [{ label: 'Soft', pct: 48 }, { label: 'Neutral', pct: 30 }, { label: 'Hard', pct: 22 }] },
   { id: 'eyeouter',   num:  6, title: '눈 바깥 여백',    l: '넓음',       r: '좁음',            defaultPos: 0.50, vType: 'Neutral', defaultValue: '표준',        tags: ['#균형', '#안정적'], desc: '눈꼬리에서 얼굴 외곽선까지 여백이 표준 범위로 눈매와 윤곽의 균형을 유지합니다.', breakdown: [{ label: 'Neutral', pct: 50 }, { label: 'Soft', pct: 28 }, { label: 'Hard', pct: 22 }] },
   { id: 'noselen',    num:  7, title: '코 길이',          l: '짧음',       r: '김',              defaultPos: 0.52, vType: 'Neutral', defaultValue: '표준',        tags: ['#균형', '#자연스러운'], desc: '미간에서 코끝까지의 세로 길이가 표준 범위로 중안부 비율의 기준선을 잡아 줍니다.', breakdown: [{ label: 'Neutral', pct: 52 }, { label: 'Soft', pct: 26 }, { label: 'Hard', pct: 22 }] },
@@ -34,7 +34,65 @@ export const PROP: MItem[] = [
   { id: 'chinlen',    num: 10, title: '턱 길이',          l: '짧음',       r: '김',              defaultPos: 0.66, vType: 'Hard',    defaultValue: '긴 편',       tags: ['#강한', '#또렷한', '#입체적'], desc: '턱 길이가 긴 편으로 골격의 존재감이 드러나는 입체적인 인상을 줍니다.', breakdown: [{ label: 'Hard', pct: 46 }, { label: 'Neutral', pct: 32 }, { label: 'Soft', pct: 22 }] },
 ];
 
-export const MONO = "'JetBrains Mono', ui-monospace, monospace";
+interface SideText { desc: string; tags: string[] }
+
+/**
+ * 항목별 양쪽 문구. MItem.desc/tags 는 한쪽 성향만 적혀 있어서, 반대쪽(예: 둥근 페이스라인)인데도
+ * '세련되고 도시적' 같은 각진 쪽 설명이 나왔다. 진단(l/r)과 설명이 어긋나지 않도록 쪽별로 둔다.
+ * L = l 쪽(pos < 0.5), R = r 쪽(pos ≥ 0.5)
+ */
+const SIDE_TEXT: Record<string, { L: SideText; R: SideText }> = {
+  faceline:   { L: { desc: '윤곽이 둥글어 부드럽고 친근하며 어려 보이는 인상을 줍니다.', tags: ['#부드러운', '#친근한', '#동안의'] },
+                R: { desc: '세련되고 도시적이며 성숙한 인상을 줍니다.', tags: ['#세련된', '#도시적인', '#지적인'] } },
+  cheek:      { L: { desc: '광대가 도드라지지 않아 부드럽고 편안한 인상을 줍니다.', tags: ['#부드러운', '#편안한'] },
+                R: { desc: '광대가 발달해 입체적이고 또렷한 인상을 줍니다.', tags: ['#입체적', '#또렷한', '#강한'] } },
+  browshape:  { L: { desc: '눈썹이 둥글게 이어져 부드럽고 온화한 인상을 줍니다.', tags: ['#부드러운', '#온화한', '#편안한'] },
+                R: { desc: '눈썹 산에 각이 있어 이목구비를 선명하게 정돈해 줍니다.', tags: ['#선명한', '#각진', '#정돈된'] } },
+  browdir:    { L: { desc: '눈썹 꼬리가 아래로 내려가 온화하고 순한 인상을 줍니다.', tags: ['#온화한', '#순한', '#친근한'] },
+                R: { desc: '눈썹 꼬리가 위로 올라가 또렷하고 상승감 있는 인상을 줍니다.', tags: ['#또렷한', '#상승감', '#시크한'] } },
+  eyeshape:   { L: { desc: '눈이 둥글어 귀엽고 부드러운 인상을 줍니다.', tags: ['#귀여운', '#부드러운', '#순한'] },
+                R: { desc: '눈이 가로로 길어 시원하고 세련된 인상을 줍니다.', tags: ['#시원한', '#세련된', '#강한'] } },
+  eyetail:    { L: { desc: '눈꼬리가 내려가 순하고 다정한 인상을 줍니다.', tags: ['#순한', '#다정한', '#편안한'] },
+                R: { desc: '눈꼬리가 올라가 시크하고 또렷한 인상을 줍니다.', tags: ['#시크한', '#또렷한', '#상승감'] } },
+  eyefront:   { L: { desc: '눈 앞머리가 부드럽게 이어져 온화한 인상을 만듭니다.', tags: ['#부드러운', '#온화한'] },
+                R: { desc: '눈 앞머리 각이 날카로워 인상의 시작점을 선명하게 만듭니다.', tags: ['#선명한', '#날카로운'] } },
+  nosewidth:  { L: { desc: '콧볼이 넓은 편으로 부드럽고 친근한 인상을 줍니다.', tags: ['#친근한', '#부드러운'] },
+                R: { desc: '콧볼이 좁아 날렵하고 세련된 인상을 줍니다.', tags: ['#날렵한', '#세련된'] } },
+  nosehigh:   { L: { desc: '콧대가 낮아 평면적이고 편안한 인상을 줍니다.', tags: ['#편안한', '#부드러운', '#친근한'] },
+                R: { desc: '콧대가 높아 얼굴 중앙에 입체감과 세련된 인상을 더합니다.', tags: ['#입체적', '#세련된', '#또렷한'] } },
+  lips:       { L: { desc: '입술이 도톰해 부드럽고 풍성한 인상을 줍니다.', tags: ['#부드러운', '#풍성한', '#친근한'] },
+                R: { desc: '입술 두께가 얇아 절제되고 정돈된 인상을 줍니다.', tags: ['#절제된', '#정돈된', '#차분한'] } },
+  facelen:    { L: { desc: '얼굴이 가로로 넓은 비율로 부드럽고 친근한 실루엣을 만듭니다.', tags: ['#부드러운', '#친근한'] },
+                R: { desc: '얼굴이 세로로 길어 갸름하고 성숙한 실루엣을 만듭니다.', tags: ['#갸름한', '#성숙한'] } },
+  thirds:     { L: { desc: '상안부가 길어 이마가 시원하고 어려 보이는 인상을 줍니다.', tags: ['#시원한', '#어려보이는'] },
+                R: { desc: '하안부가 길어 성숙하고 안정감 있는 인상을 줍니다.', tags: ['#성숙한', '#안정적'] } },
+  broweye:    { L: { desc: '눈썹과 눈 사이가 멀어 여유롭고 부드러운 인상을 줍니다.', tags: ['#여유로운', '#부드러운'] },
+                R: { desc: '눈썹과 눈이 가까워 눈매가 깊고 또렷한 인상을 줍니다.', tags: ['#깊은', '#또렷한'] } },
+  eyelid:     { L: { desc: '쌍꺼풀 라인이 드러나지 않아 차분하고 부드러운 눈매를 만듭니다.', tags: ['#차분한', '#부드러운', '#은은한'] },
+                R: { desc: '쌍꺼풀 라인이 비교적 선명해 눈매의 존재감을 높이는 Hard 성향입니다.', tags: ['#선명한', '#또렷한', '#강한'] } },
+  intereye:   { L: { desc: '두 눈 사이가 넓어 부드럽고 편안한 인상을 만듭니다.', tags: ['#부드러운', '#편안한', '#친근한'] },
+                R: { desc: '두 눈 사이가 좁아 또렷하고 집중된 인상을 줍니다.', tags: ['#또렷한', '#집중된'] } },
+  eyeouter:   { L: { desc: '눈 바깥 여백이 넓어 여유롭고 편안한 인상을 줍니다.', tags: ['#여유로운', '#편안한'] },
+                R: { desc: '눈 바깥 여백이 좁아 눈매가 꽉 차고 또렷한 인상을 줍니다.', tags: ['#또렷한', '#집중된'] } },
+  noselen:    { L: { desc: '코가 짧아 앳되고 귀여운 인상을 줍니다.', tags: ['#앳된', '#귀여운'] },
+                R: { desc: '코가 길어 성숙하고 또렷한 인상을 줍니다.', tags: ['#성숙한', '#또렷한'] } },
+  philtrum:   { L: { desc: '인중이 짧아 어려 보이고 귀여운 인상을 줍니다.', tags: ['#어려보이는', '#귀여운'] },
+                R: { desc: '인중이 길어 차분하고 성숙한 인상을 줍니다.', tags: ['#차분한', '#성숙한'] } },
+  mouthwidth: { L: { desc: '입이 작아 앙증맞고 단정한 인상을 줍니다.', tags: ['#앙증맞은', '#단정한'] },
+                R: { desc: '입이 커서 시원하고 존재감 있는 인상을 줍니다.', tags: ['#시원한', '#존재감'] } },
+  chinlen:    { L: { desc: '턱이 짧아 앳되고 부드러운 인상을 줍니다.', tags: ['#앳된', '#부드러운'] },
+                R: { desc: '턱 길이가 긴 편으로 골격의 존재감이 드러나는 입체적인 인상을 줍니다.', tags: ['#강한', '#또렷한', '#입체적'] } },
+};
+
+/** 진단에 쓰인 쪽(pos < 0.5 → l, 아니면 r)에 맞는 설명·태그. 균형 구간이면 항목 기본 문구. */
+export function sideText(item: MItem, pos: number): SideText {
+  if (pos >= 0.33 && pos < 0.67) return { desc: item.desc, tags: item.tags };
+  const t = SIDE_TEXT[item.id];
+  if (!t) return { desc: item.desc, tags: item.tags };
+  return pos < 0.5 ? t.L : t.R;
+}
+
+export const MONO ="'JetBrains Mono', ui-monospace, monospace";
 
 // 3×3 image type map
 export const IMAP = [

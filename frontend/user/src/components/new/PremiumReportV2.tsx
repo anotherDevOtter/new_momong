@@ -4,7 +4,7 @@ import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowRight, ArrowLeft, ChevronDown, Download, Share2, Home } from 'lucide-react';
 import { CycleData, ServiceKey, SERVICE_KO, AFTER_CARE, HOME_CARE_TIPS } from './NextDirection';
-import { MONO, IMAP, FORM, PROP, dominantIdx, dominantOf } from './faceAnalysisData';
+import { MONO, IMAP, FORM, PROP, dominantIdx, dominantOf, sideText } from './faceAnalysisData';
 import { AREA_ITEMS, areaScores } from './AIFaceResultDerived';
 import type { MItem } from './faceAnalysisData';
 import {
@@ -265,8 +265,8 @@ function buildSession({
       label: area,
       score: value,
       result: item ? `${item.title} ${side}` : '측정값 없음',
-      interpretation: item?.desc ?? '',
-      keywords: item?.tags ?? [],
+      interpretation: item && lead ? sideText(item, lead.pos).desc : '',
+      keywords: item && lead ? sideText(item, lead.pos).tags : [],
     };
   });
 
