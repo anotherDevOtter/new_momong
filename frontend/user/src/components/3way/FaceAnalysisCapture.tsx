@@ -145,7 +145,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
       return !on;
     });
   };
-  const [delegate, setDelegate] = useState<FaceDelegate>('GPU');
+  const [delegate, setDelegate] = useState<FaceDelegate>('CPU');   // 기본 CPU — useFaceDetector 참고
   const [mirrorPreview, setMirrorPreview] = useState(true);
   const statsRef = useRef({ frames: 0, withFace: 0, lastFaces: 0, lastError: '' });
   const [debugInfo, setDebugInfo] = useState('');

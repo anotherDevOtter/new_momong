@@ -14,6 +14,7 @@ const WASM_URL =
 const MODEL_URL =
   'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite';
 
+// CPU 로 돈다 — 안드로이드 크롬 실기기에서 GPU 는 오류 없이 빈 결과만 돌려줬다 (user 쪽과 같이, 2026-10-24)
 let videoDetector: FaceDetector | null = null;
 let imageDetector: FaceDetector | null = null;
 let loadPromise: Promise<void> | null = null;
@@ -28,11 +29,11 @@ async function loadDetectors() {
     const vision = await FilesetResolver.forVisionTasks(WASM_URL);
     [videoDetector, imageDetector] = await Promise.all([
       FaceDetectorClass.createFromOptions(vision, {
-        baseOptions: { modelAssetPath: MODEL_URL, delegate: 'GPU' },
+        baseOptions: { modelAssetPath: MODEL_URL, delegate: 'CPU' },
         runningMode: 'VIDEO',
       }),
       FaceDetectorClass.createFromOptions(vision, {
-        baseOptions: { modelAssetPath: MODEL_URL, delegate: 'GPU' },
+        baseOptions: { modelAssetPath: MODEL_URL, delegate: 'CPU' },
         runningMode: 'IMAGE',
       }),
     ]);

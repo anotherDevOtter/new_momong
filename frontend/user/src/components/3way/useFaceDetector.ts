@@ -16,8 +16,9 @@ const MODEL_URL =
 
 export type FaceDelegate = 'GPU' | 'CPU';
 
-// 검출 방식(GPU/CPU)별로 한 번만 만든다. 기본은 GPU.
-// CPU 는 진단용 — 일부 안드로이드에서 GPU 가 오류 없이 빈 결과만 돌려주는지 보려고 둔다 (2026-10-23).
+// 검출 방식(GPU/CPU)별로 한 번만 만든다. 기본은 CPU.
+// 안드로이드 크롬 실기기에서 GPU 는 오류 없이 빈 결과만 돌려줘 얼굴을 끝내 못 찾았다 (CPU 는 정상, 2026-10-24).
+// 이 모델(blaze_face_short_range)은 작아서 CPU 로도 휴대폰에서 충분히 빠르다. GPU 는 진단 모드에서만 고른다.
 type Detectors = { video: FaceDetector; image: FaceDetector };
 const detectors: Partial<Record<FaceDelegate, Detectors>> = {};
 const loadPromises: Partial<Record<FaceDelegate, Promise<void>>> = {};
@@ -52,7 +53,7 @@ export interface DetectedBox {
   height: number;
 }
 
-export function useFaceDetector(delegate: FaceDelegate = 'GPU') {
+export function useFaceDetector(delegate: FaceDelegate = 'CPU') {
   // 어느 방식이 준비됐는지로 들고 있어서, 방식을 바꾸면 새 방식이 준비될 때까지 ready 가 false 다
   const [readyDelegate, setReadyDelegate] = useState<FaceDelegate | null>(null);
   const [failed, setFailed] = useState<{ delegate: FaceDelegate; message: string } | null>(null);
