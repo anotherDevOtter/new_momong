@@ -124,11 +124,27 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
   // 안드로이드 크롬에서 미리보기가 반전돼 보이지 않고 얼굴을 못 찾는다는 보고 (2026-10-23).
   // 실기기에서 검출 방식(GPU/CPU)과 미리보기 반전을 바꿔 보며 원인을 가리려고 둔다.
   // 이 화면은 페이지가 불러온 뒤 클라이언트에서만 그려지므로 주소를 바로 읽어도 된다.
-  const [debug] = useState(() => {
+  // 켜는 방법: /3way?debug=1 로 들어오기, 또는 이 화면 제목을 5번 연속 누르기.
+  // QR 로 열면 별도 탭이 되는 경우가 있어 탭과 무관한 localStorage 에 둔다.
+  const [debug, setDebug] = useState(() => {
     if (typeof window === 'undefined') return false;
     if (new URLSearchParams(window.location.search).get('debug') === '1') return true;
-    try { return sessionStorage.getItem('momong_debug') === '1'; } catch { return false; }
+    try { return localStorage.getItem('momong_debug') === '1'; } catch { return false; }
   });
+  const titleTapsRef = useRef<number[]>([]);
+  const handleTitleTap = () => {
+    const now = Date.now();
+    titleTapsRef.current = [...titleTapsRef.current.filter((t) => now - t < 2000), now];
+    if (titleTapsRef.current.length < 5) return;
+    titleTapsRef.current = [];
+    setDebug((on) => {
+      try {
+        if (on) localStorage.removeItem('momong_debug');
+        else localStorage.setItem('momong_debug', '1');
+      } catch { /* 저장 불가면 이 화면에서만 켠다 */ }
+      return !on;
+    });
+  };
   const [delegate, setDelegate] = useState<FaceDelegate>('GPU');
   const [mirrorPreview, setMirrorPreview] = useState(true);
   const statsRef = useRef({ frames: 0, withFace: 0, lastFaces: 0, lastError: '' });
@@ -570,7 +586,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
             className="text-center mb-8"
           >
           
-            <h2 className="text-2xl font-bold text-[#111111] tracking-[-0.01em] mb-3">
+            <h2 onClick={handleTitleTap} className="text-2xl font-bold text-[#111111] tracking-[-0.01em] mb-3 select-none">
               Face Precision Analysis
             </h2>
             <p className="text-sm text-[#999999] leading-relaxed">
