@@ -1,4 +1,4 @@
-import { saveConsultation } from './api';
+import { saveConsultation, updateConsultation } from './api';
 import type { ConsultationData } from '@/types';
 
 function getToken(): string {
@@ -28,10 +28,8 @@ function normalizeGender(g?: string): 'female' | 'male' | '' {
   return '';
 }
 
-export async function saveConsult(payload: SaveConsultPayload): Promise<{ success: true; id: string }> {
-  const token = getToken();
-
-  const data: ConsultationData = {
+function toConsultationData(payload: SaveConsultPayload): ConsultationData {
+  return {
     ...(payload.customerId ? { customerId: payload.customerId } : {}),
     clientInfo: {
       name: payload.name,
@@ -57,7 +55,15 @@ export async function saveConsult(payload: SaveConsultPayload): Promise<{ succes
     visitDate: new Date().toLocaleDateString('ko-KR'),
     afterNote: '',
   };
+}
 
-  const saved = await saveConsultation(token, data);
+export async function saveConsult(payload: SaveConsultPayload): Promise<{ success: true; id: string }> {
+  const saved = await saveConsultation(getToken(), toConsultationData(payload));
+  return { success: true, id: saved.id };
+}
+
+/** 이미 저장된 상담(임시저장 포함)을 같은 id 로 덮어쓴다 — 새 기록을 만들지 않는다 */
+export async function updateConsult(id: string, payload: SaveConsultPayload): Promise<{ success: true; id: string }> {
+  const saved = await updateConsultation(getToken(), id, toConsultationData(payload));
   return { success: true, id: saved.id };
 }

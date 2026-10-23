@@ -1,16 +1,18 @@
 import { motion } from 'motion/react';
-import { Download, Share2, Home } from 'lucide-react';
+import { Download, Share2, Home, PenLine } from 'lucide-react';
 import { CHAPTERS } from './PremiumReportV2';
 
 interface CompletionPageProps {
   onDownloadPDF: () => void;
   onShareLink: () => void;
   onGoHome: () => void;
+  /** 다음 방향 화면으로 돌아가 고친다 (시술 후 사진 추가 등). 없으면 버튼을 그리지 않는다 */
+  onEdit?: () => void;
   /** 화면에 쓸 코스 이름. 시안이 '3WAY' 로 박아둬서 1WAY 에도 3WAY 라고 떴다. */
   courseLabel?: string;
 }
 
-export function CompletionPage({ onDownloadPDF, onShareLink, onGoHome, courseLabel = '1WAY' }: CompletionPageProps) {
+export function CompletionPage({ onDownloadPDF, onShareLink, onGoHome, onEdit, courseLabel = '1WAY' }: CompletionPageProps) {
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-8 py-20">
       <motion.div
@@ -107,6 +109,18 @@ export function CompletionPage({ onDownloadPDF, onShareLink, onGoHome, courseLab
             <Share2 className="w-4 h-4" strokeWidth={1.5} />
             링크 공유
           </button>
+
+          {/* 수정하기 — 시술 후 사진은 상담이 끝난 뒤에 찍으므로 돌아가서 올릴 수 있어야 한다 */}
+          {onEdit && (
+            <button
+              onClick={onEdit}
+              className="w-full bg-white text-[#111111] py-4 text-[13px] tracking-[0.05em] border border-[#111111] transition-all hover:bg-[#FAFAFA] flex items-center justify-center gap-3"
+              style={{ fontWeight: 300 }}
+            >
+              <PenLine className="w-4 h-4" strokeWidth={1.5} />
+              수정하기 · 시술 사진 추가
+            </button>
+          )}
 
           {/* 홈으로 이동 버튼 */}
           <button
