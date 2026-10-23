@@ -1369,7 +1369,11 @@ function Page03({ session, cycleData = null, subSel, setSubSel, memos = {}, befo
 }
 
 interface PremiumReportProps {
+  /** 끝까지 보고 '완료' — 상담을 마무리한다 */
   onBack: () => void;
+  /** 표지의 '돌아가기' — 완료하지 않고 리포트만 닫는다. 없으면 onBack 과 같다.
+   *  시술 후 사진처럼 리포트를 본 뒤에 고칠 것이 있어 따로 둔다. */
+  onExit?: () => void;
   /** 완료 화면의 'PDF 다운로드' 로 열린 경우. 바로 내보내고 스스로 닫는다 */
   autoPdf?: boolean;
   customerName: string;
@@ -1398,7 +1402,7 @@ interface PremiumReportProps {
 }
 
 export function PremiumReport({
-  onBack, customerName, consultDate, designerName, cycleData,
+  onBack, onExit, customerName, consultDate, designerName, cycleData,
   guideStyles = [],
   initialDesigns = {},
   initialSubSel = {},
@@ -1556,7 +1560,7 @@ export function PremiumReport({
     <div style={{ minHeight: '100vh', background: '#FFFFFF', ...FF }}>
       <ReportHeader
         page={page}
-        onBack={page === 0 ? onBack : () => { if (page === 1) { setPage(0); toTop(); } else goTo(page - 1); }}
+        onBack={page === 0 ? (onExit ?? onBack) : () => { if (page === 1) { setPage(0); toTop(); } else goTo(page - 1); }}
         onPrev={() => { if (page > 1) goTo(page - 1); else { setPage(0); toTop(); } }}
         onNext={() => { if (page > 0 && page < 3) goTo(page + 1); else if (page === 3) onBack(); }}
       />

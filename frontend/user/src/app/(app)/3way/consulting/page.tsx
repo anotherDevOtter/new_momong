@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { CustomerData } from '@/components/3way/CustomerInfo';
@@ -11,7 +11,8 @@ import { ConsultingSummary } from '@/components/3way/ConsultingSummary';
 import { FaceAnalysisCapture } from '@/components/3way/FaceAnalysisCapture';
 import { FaceAnalysisProcessing } from '@/components/3way/FaceAnalysisProcessing';
 import { FaceAnalysisResult, type FaceResultData } from '@/components/3way/FaceAnalysisResult';
-import type { AnalyzeResponse } from '@/utils/face-analysis-api';
+import { requestUploadUrl, uploadToS3, type AnalyzeResponse } from '@/utils/face-analysis-api';
+import { prepareImageForAnalysis } from '@/utils/image-resize';
 import { PersonalColorAnalysis, type PersonalColorData } from '@/components/3way/PersonalColorAnalysis';
 import { SkeletonImageAnalysis, type SkeletonData } from '@/components/3way/SkeletonImageAnalysis';
 import { ImageDirectionSetting, type ImageDirectionData } from '@/components/3way/ImageDirectionSetting';
@@ -21,7 +22,7 @@ import { NextDirection, type CycleData as LegacyCycleData } from '@/components/3
 import { PreSurveyReview } from '@/components/3way/PreSurveyReview';
 import { PremiumReport } from '@/components/3way/PremiumReport';
 import { CompletionPage } from '@/components/3way/CompletionPage';
-import { saveConsult } from '@/utils/3way-api';
+import { saveConsult, updateConsult, type SaveConsultPayload } from '@/utils/3way-api';
 import { getCustomerById, getConsultationsByCustomerId } from '@/utils/api';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 
@@ -222,6 +223,45 @@ function Inner() {
   const [newCycleData, setNewCycleData] = useState<CycleData | null>(null);
   const [beforePhoto, setBeforePhoto] = useState<string | null>(null);
   const [afterPhoto, setAfterPhoto] = useState<string | null>(null);
+  // 시술 전·후 사진의 저장용 주소. 화면은 blob: 주소로 바로 보여주고, 뒤에서 S3 에 올린 주소를
+  // 상담 기록에 저장한다. blob: 은 이 탭에서만 살아 있어서 그대로 저장하면 다시 열 때 사라진다.
+  // 시술 후 사진은 리포트를 만든 뒤에 찍으므로, 돌아와서 올려도 남아 있어야 한다.
+  const [treatmentPhotoUrls, setTreatmentPhotoUrls] = useState<{ before: string | null; after: string | null }>({ before: null, after: null });
+  const latestPhotoRef = useRef<{ before: string | null; after: string | null }>({ before: null, after: null });
+  // 사진이 바뀌어 저장이 필요하다는 표시 — 복원으로 채울 때는 세우지 않는다
+  const photoDirtyRef = useRef(false);
+  const handleTreatmentPhoto = (slot: 'before' | 'after') => (url: string | null) => {
+    const setPhoto = slot === 'before' ? setBeforePhoto : setAfterPhoto;
+    const previous = slot === 'before' ? beforePhoto : afterPhoto;
+    setPhoto(url);
+    latestPhotoRef.current[slot] = url;
+    if (!url) {
+      photoDirtyRef.current = true;
+      setTreatmentPhotoUrls((p) => ({ ...p, [slot]: null }));
+      return;
+    }
+    if (!url.startsWith('blob:')) return;
+    (async () => {
+      const blob = await (await fetch(url)).blob();
+      // 휴대폰 사진은 3MB(업로드 한도)를 넘기 쉽다 — 얼굴 사진과 같은 방식으로 줄여서 올린다
+      const { file } = await prepareImageForAnalysis(
+        new File([blob], `treatment-${slot}-${Date.now()}.jpg`, { type: blob.type || 'image/jpeg' }),
+      );
+      const { uploadUrl, publicUrl } = await requestUploadUrl(file.type, undefined, file.size);
+      await uploadToS3(uploadUrl, file, file.type);
+      // 올리는 동안 다른 사진으로 바꾸거나 지웠으면 이 결과는 버린다
+      if (latestPhotoRef.current[slot] !== url) return;
+      photoDirtyRef.current = true;
+      setTreatmentPhotoUrls((p) => ({ ...p, [slot]: publicUrl.split('?')[0] }));
+    })().catch((e) => {
+      console.error('시술 사진 업로드 실패', e);
+      if (latestPhotoRef.current[slot] !== url) return;
+      // 화면에 사진이 남아 있으면 저장된 줄 안다 — 이전 사진으로 되돌리고 알린다
+      setPhoto(previous);
+      latestPhotoRef.current[slot] = previous;
+      alert(`${slot === 'before' ? '시술 전' : '시술 후'} 사진을 올리지 못했습니다. 인터넷 연결을 확인하고 다시 올려 주세요.`);
+    });
+  };
   const [directionSubSel, setDirectionSubSel] = useState<Record<string, string>>({});
   const [faceAnalysisResult, setFaceAnalysisResult] = useState<AnalyzeResponse | null>(null);
   const [faceImageUrl, setFaceImageUrl] = useState<string | null>(null);
@@ -293,6 +333,11 @@ function Inner() {
   // 같은 날 기록만 되살린다. 재방문 고객의 지난 방문 값을 미리 채워 두면
   // 디자이너가 못 보고 그대로 저장해 엉뚱한 기록이 남는다. (2026-09-11)
   const [restored, setRestored] = useState<Record<string, unknown> | null>(null);
+  // 임시저장이 마지막으로 본 화면. 복원도 이걸 건드리므로 복원 effect 보다 먼저 선언한다.
+  const lastDraftPageRef = useRef<PageKey | null>(null);
+  // 이 상담이 이미 완료(리포트 '완료')됐는지. 완료 뒤에 돌아와 고친 것은 임시저장이 아니라
+  // 완료 기록을 고치는 것이므로 draft 표시를 다시 붙이지 않는다.
+  const completedRef = useRef(false);
   const [restoring, setRestoring] = useState(isNewFlow);
   useEffect(() => {
     if (!isNewFlow || !token || !customerId) { setRestoring(false); return; }
@@ -308,16 +353,44 @@ function Inner() {
         if (cancelled || !three) return;
         setRestored(three);
         setSavedConsultId(latest.id);
+        savedIdRef.current = latest.id;
         const pos = three.faceItemPositions as Record<string, number> | undefined;
         if (pos && Object.keys(pos).length) setFaceResultPosMap(pos);
         const fa = three.faceAnalysis as { faceImageUrl?: string } | undefined;
         if (fa?.faceImageUrl) setFaceImageUrl(fa.faceImageUrl);
+        const tp = three.treatmentPhotos as { before?: string | null; after?: string | null } | undefined;
+        if (tp) {
+          if (tp.before) setBeforePhoto(tp.before);
+          if (tp.after) setAfterPhoto(tp.after);
+          latestPhotoRef.current = { before: tp.before ?? null, after: tp.after ?? null };
+          setTreatmentPhotoUrls({
+            before: tp.before ? tp.before.split('?')[0] : null,
+            after: tp.after ? tp.after.split('?')[0] : null,
+          });
+        }
         const hc = three.hairConsulting as HairConsultingData | undefined;
         if (hc) setHairConsultingData(hc);
         const cd = three.cycleData as CycleData | undefined;
         if (cd) {
           setNewCycleData(cd);
           if (cd.subSelections) setDirectionSubSel(cd.subSelections);
+        }
+        // 임시저장된 상담이면 그 화면에서 이어간다. 사진 이후 화면은 분석 결과 원본이 있어야 열린다.
+        const draftStep = (three.draft as { step?: PageKey } | undefined)?.step;
+        completedRef.current = !draftStep;
+        if (draftStep) {
+          const raw = three.faceAnalysisRaw as AnalyzeResponse | null | undefined;
+          if (raw) setFaceAnalysisResult(raw);
+          const order = stepsFor(selectedCourse);
+          const afterPhoto = order.indexOf(draftStep) > order.indexOf('faceAnalysis');
+          const target = order.includes(draftStep) && !TRANSIENT_STEPS.includes(draftStep) ? draftStep : null;
+          if (target) {
+            const to = afterPhoto && !raw ? 'faceAnalysis' : target;
+            // 복원으로 옮겨 가는 것은 사용자가 화면을 넘긴 게 아니다 — 임시저장 대상이 아니라고 알려 둔다.
+            // (토큰이 늦게 와서 위 restoring 이 먼저 false 가 되는 경우, 이걸 안 하면 복원 직후 덮어써진다)
+            lastDraftPageRef.current = to;
+            setCurrentPage(to);
+          }
         }
       } catch {
         // 이력 조회가 실패해도 화면은 빈 상태로 그대로 쓴다
@@ -326,7 +399,7 @@ function Inner() {
       }
     })();
     return () => { cancelled = true; };
-  }, [isNewFlow, token, customerId]);
+  }, [isNewFlow, token, customerId, selectedCourse]);
 
   // 'new' 코스는 사전 인터뷰 화면을 뺐으므로, 고객이 방문 전 작성한 사전설문을 대신 읽는다.
   // 제출된 것 중 가장 최근 1건. 없으면 빈 값으로 두고 화면은 그대로 띄운다.
@@ -364,6 +437,133 @@ function Inner() {
     if (currentPage !== 'completion' && !steps.includes(currentPage)) setCurrentPage(steps[0]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasPreSurvey, selectedCourse]);
+
+  // 상담 저장 내용 만들기. draftStep 이 있으면 임시저장, null 이면 최종 저장.
+  const buildSavePayload = (draftStep: PageKey | null): SaveConsultPayload | null => {
+    // customerId 는 진입 시 항상 존재(없으면 입장 거부) → 전화번호 유무와 무관하게 저장
+    if (!customerId || !customerData) return null;
+    const COURSE_NAMES: Record<string, string> = {
+      '3way': '3WAY',
+      '2way-personal': '2WAY (Personal Color)',
+      '2way-skeleton': '2WAY (Skeleton Image)',
+      '1way': '1WAY',
+      'new': '1WAY (신규 이식 · 개발)',
+    };
+    // F6: 알 수 없는 코스는 '1WAY' 로 단정하지 않고 받은 값 그대로 보존
+    const courseName = COURSE_NAMES[selectedCourse] || selectedCourse;
+
+    return {
+      customerId,
+      phone: customerData.phone,
+      name: customerData.name,
+      course: courseName,
+      designerName: customerData.designerName,
+      ageGroup: customerData.ageGroup,
+      gender: customerData.gender as 'female' | 'male' | '여자' | '남자' | '',
+      occupation: customerData.occupation,
+      consultData: {
+        faceAnalysis: faceAnalysisResult
+          ? {
+              wncId: faceAnalysisResult.wncId,
+              snhId: faceAnalysisResult.snhId,
+              // 디자이너가 수정한 최종값 우선, 없으면 원본 분석값
+              wncFinal: faceResultData?.wncFinal ?? faceAnalysisResult.wnc.final,
+              snhFinal: faceResultData?.snhFinal ?? faceAnalysisResult.snh.final,
+              imageType: `${faceResultData?.wncFinal ?? faceAnalysisResult.wnc.final} / ${faceResultData?.snhFinal ?? faceAnalysisResult.snh.final}`,
+              ratios: faceResultData?.ratios,
+              summaryItems: faceResultData?.summaryItems,
+              warmCool: faceResultData?.warmCool,
+              softHard: faceResultData?.softHard,
+              // 화면 표시용은 5분짜리 서명 주소라 서명을 떼고 원래 주소만 저장한다.
+              // 다시 읽을 때 백엔드가 새로 서명해 준다 (S3Service.refreshOwnUrls, 2026-10-11)
+              faceImageUrl: faceImageUrl ? faceImageUrl.split('?')[0] : null,
+            }
+          : null,
+        // B1: 이전에 저장 누락되던 디자이너 입력값들
+        personalColor: personalColorData,
+        skeleton: skeletonData,
+        imageDirection: imageDirectionData,
+        hairDesign: hairDesignData,
+        hairTexture: hairTextureData,
+        cycleData: isNewFlow ? newCycleData : cycleData,
+        imagePreferenceData,
+        fashionPreferenceData,
+        preInterviewData,
+
+        // ── 'new' 코스 전용 ────────────────────────────────────────
+        // 시안 화면들은 값을 자기 안에만 들고 있어 저장되지 않던 것들.
+        ...(isNewFlow
+          ? {
+              // 사전설문에서 끌어온 값 (사전 인터뷰 화면을 뺐으므로 이게 그 자리)
+              newPreInterview: newPreInterviewData,
+              // 이목구비 20개 항목의 최종 위치값 — 디자이너가 슬라이더로 고친 결과가 반영된 값
+              faceItemPositions: faceResultPosMap,
+              // 항목별 실측 표시값·숫자. 공유 페이지는 로그인 없이 열리므로 분석 결과를
+              // 다시 조회할 수 없다 → 리포트를 그리는 데 필요한 값을 함께 저장한다
+              faceValues: faceAnalysisToValues(faceAnalysisResult),
+              faceNumbers: faceAnalysisToNumbers(faceAnalysisResult),
+              // 위 위치값에서 나온 최종 이미지타입 (화면과 같은 계산)
+              finalImageType: Object.keys(faceResultPosMap).length
+                ? deriveImageType(faceResultPosMap)
+                : null,
+              hairConsulting: hairConsultingData,
+              // 시술 전·후 사진 (S3 주소, 서명 없이) — 다시 읽을 때 백엔드가 새로 서명해 준다
+              treatmentPhotos: treatmentPhotoUrls,
+              // 임시저장 표시 — 끝나지 않은 상담. 최종 저장(draftStep=null)에서는 빠져서 완료로 바뀐다.
+              // faceAnalysisRaw 는 사진 이후 화면을 다시 열 때 필요한 분석 결과 원본.
+              // 서명 주소(faceImageDownloadUrl)는 5분짜리라 떼고 저장한다.
+              ...(draftStep
+                ? {
+                    draft: { step: draftStep, savedAt: new Date().toISOString() },
+                    faceAnalysisRaw: faceAnalysisResult
+                      ? { ...faceAnalysisResult, faceImageDownloadUrl: undefined }
+                      : null,
+                  }
+                : {}),
+            }
+          : {}),
+      },
+    };
+  };
+
+  // 저장은 한 줄로 세운다 — 임시저장이 겹쳐 나가도 첫 저장이 끝나 id 를 받은 뒤에
+  // 다음 저장이 그 id 로 덮어쓴다. (안 그러면 상담이 두 건으로 갈라진다)
+  const savedIdRef = useRef<string | null>(null);
+  const saveChainRef = useRef<Promise<unknown>>(Promise.resolve());
+  const persistConsult = (payload: SaveConsultPayload) => {
+    const run = saveChainRef.current.then(async () => {
+      const id = savedIdRef.current;
+      const res = id ? await updateConsult(id, payload) : await saveConsult(payload);
+      if (res?.id) { savedIdRef.current = res.id; setSavedConsultId(res.id); }
+    });
+    saveChainRef.current = run.catch(() => undefined);
+    return run;
+  };
+
+  // 임시저장 — 'new' 코스에서 화면이 바뀔 때마다 지금까지 값을 저장한다.
+  // 새로고침하거나 나갔다 와도 그 화면에서 이어서 하도록 (restore 가 읽는다).
+  // 첫 화면(아직 입력 전)과 복원 직후 화면은 저장하지 않는다.
+  useEffect(() => {
+    if (!isNewFlow || restoring || hasPreSurvey === null) return;
+    if (currentPage === 'completion' || TRANSIENT_STEPS.includes(currentPage)) return;
+    if (lastDraftPageRef.current === null) { lastDraftPageRef.current = currentPage; return; }
+    if (lastDraftPageRef.current === currentPage) return;
+    lastDraftPageRef.current = currentPage;
+    if (currentPage === stepsFor(selectedCourse, stepOpts)[0]) return;
+    const payload = buildSavePayload(completedRef.current ? null : currentPage);
+    if (payload) persistConsult(payload).catch(() => undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, restoring, hasPreSurvey]);
+
+  // 시술 사진은 올라가는 즉시 저장한다. 시술 후 사진은 상담을 끝낸 뒤 올리는 경우가 많아,
+  // 화면을 넘기거나 리포트를 다시 끝내기 전에 나가도 남아 있어야 한다.
+  useEffect(() => {
+    if (!isNewFlow || !photoDirtyRef.current) return;
+    photoDirtyRef.current = false;
+    const payload = buildSavePayload(completedRef.current || currentPage === 'completion' ? null : currentPage);
+    if (payload) persistConsult(payload).catch(() => undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [treatmentPhotoUrls]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -463,80 +663,9 @@ function Inner() {
 
   const handleReportClose = () => {
     setShowReport(false);
-    // customerId 는 진입 시 항상 존재(없으면 입장 거부) → 전화번호 유무와 무관하게 저장
-    if (customerId) {
-      const COURSE_NAMES: Record<string, string> = {
-        '3way': '3WAY',
-        '2way-personal': '2WAY (Personal Color)',
-        '2way-skeleton': '2WAY (Skeleton Image)',
-        '1way': '1WAY',
-        'new': '1WAY (신규 이식 · 개발)',
-      };
-      // F6: 알 수 없는 코스는 '1WAY' 로 단정하지 않고 받은 값 그대로 보존
-      const courseName = COURSE_NAMES[selectedCourse] || selectedCourse;
-
-      saveConsult({
-        customerId,
-        phone: customerData.phone,
-        name: customerData.name,
-        course: courseName,
-        designerName: customerData.designerName,
-        ageGroup: customerData.ageGroup,
-        gender: customerData.gender as 'female' | 'male' | '여자' | '남자' | '',
-        occupation: customerData.occupation,
-        consultData: {
-          faceAnalysis: faceAnalysisResult
-            ? {
-                wncId: faceAnalysisResult.wncId,
-                snhId: faceAnalysisResult.snhId,
-                // 디자이너가 수정한 최종값 우선, 없으면 원본 분석값
-                wncFinal: faceResultData?.wncFinal ?? faceAnalysisResult.wnc.final,
-                snhFinal: faceResultData?.snhFinal ?? faceAnalysisResult.snh.final,
-                imageType: `${faceResultData?.wncFinal ?? faceAnalysisResult.wnc.final} / ${faceResultData?.snhFinal ?? faceAnalysisResult.snh.final}`,
-                ratios: faceResultData?.ratios,
-                summaryItems: faceResultData?.summaryItems,
-                warmCool: faceResultData?.warmCool,
-                softHard: faceResultData?.softHard,
-                // 화면 표시용은 5분짜리 서명 주소라 서명을 떼고 원래 주소만 저장한다.
-                // 다시 읽을 때 백엔드가 새로 서명해 준다 (S3Service.refreshOwnUrls, 2026-10-11)
-                faceImageUrl: faceImageUrl ? faceImageUrl.split('?')[0] : null,
-              }
-            : null,
-          // B1: 이전에 저장 누락되던 디자이너 입력값들
-          personalColor: personalColorData,
-          skeleton: skeletonData,
-          imageDirection: imageDirectionData,
-          hairDesign: hairDesignData,
-          hairTexture: hairTextureData,
-          cycleData: isNewFlow ? newCycleData : cycleData,
-          imagePreferenceData,
-          fashionPreferenceData,
-          preInterviewData,
-
-          // ── 'new' 코스 전용 ────────────────────────────────────────
-          // 시안 화면들은 값을 자기 안에만 들고 있어 저장되지 않던 것들.
-          ...(isNewFlow
-            ? {
-                // 사전설문에서 끌어온 값 (사전 인터뷰 화면을 뺐으므로 이게 그 자리)
-                newPreInterview: newPreInterviewData,
-                // 이목구비 20개 항목의 최종 위치값 — 디자이너가 슬라이더로 고친 결과가 반영된 값
-                faceItemPositions: faceResultPosMap,
-                // 항목별 실측 표시값·숫자. 공유 페이지는 로그인 없이 열리므로 분석 결과를
-                // 다시 조회할 수 없다 → 리포트를 그리는 데 필요한 값을 함께 저장한다
-                faceValues: faceAnalysisToValues(faceAnalysisResult),
-                faceNumbers: faceAnalysisToNumbers(faceAnalysisResult),
-                // 위 위치값에서 나온 최종 이미지타입 (화면과 같은 계산)
-                finalImageType: Object.keys(faceResultPosMap).length
-                  ? deriveImageType(faceResultPosMap)
-                  : null,
-                hairConsulting: hairConsultingData,
-              }
-            : {}),
-        },
-      })
-        .then((res) => { if (res?.id) setSavedConsultId(res.id); })
-        .catch(() => undefined);
-    }
+    completedRef.current = true;
+    const payload = buildSavePayload(null);
+    if (payload) persistConsult(payload).catch(() => undefined);
     setCurrentPage('completion');
   };
 
@@ -680,12 +809,13 @@ function Inner() {
             onSubSelectionsChange={setDirectionSubSel}
             beforePhoto={beforePhoto}
             afterPhoto={afterPhoto}
-            onBeforePhotoChange={setBeforePhoto}
-            onAfterPhotoChange={setAfterPhoto}
+            onBeforePhotoChange={handleTreatmentPhoto('before')}
+            onAfterPhotoChange={handleTreatmentPhoto('after')}
           />
           {showReport && (
             <NewPremiumReportV2
               onBack={handleReportClose}
+              onExit={() => setShowReport(false)}
               customerName={customerData.name}
               consultDate={new Date().toLocaleDateString('ko-KR')}
               designerName={customerData.designerName || '디자이너'}
@@ -697,8 +827,8 @@ function Inner() {
               facePhotoUrl={faceImageUrl}
               beforePhoto={beforePhoto}
               afterPhoto={afterPhoto}
-              onBeforePhotoChange={setBeforePhoto}
-              onAfterPhotoChange={setAfterPhoto}
+              onBeforePhotoChange={handleTreatmentPhoto('before')}
+              onAfterPhotoChange={handleTreatmentPhoto('after')}
               initialSubSel={directionSubSel}
               selectedCourse={selectedCourse}
             />
@@ -711,6 +841,7 @@ function Inner() {
         <>
           <NewCompletionPage
             onDownloadPDF={handleDownloadPDF}
+            onEdit={() => setCurrentPage('nextDirection')}
             onShareLink={handleShareLink}
             onGoHome={handleGoHome}
             courseLabel={courseChipLabel}
@@ -740,8 +871,8 @@ function Inner() {
               facePhotoUrl={faceImageUrl}
               beforePhoto={beforePhoto}
               afterPhoto={afterPhoto}
-              onBeforePhotoChange={setBeforePhoto}
-              onAfterPhotoChange={setAfterPhoto}
+              onBeforePhotoChange={handleTreatmentPhoto('before')}
+              onAfterPhotoChange={handleTreatmentPhoto('after')}
               initialSubSel={directionSubSel}
               selectedCourse={selectedCourse}
             />
