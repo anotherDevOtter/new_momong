@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Camera, Eye, Sun, Minus, Circle, Lock, MoveLeft, Upload, X } from 'lucide-react';
 import { NavigationButtons } from './NavigationButtons';
-import { useFaceDetector, isFaceInsideOval } from './useFaceDetector';
+import { useFaceDetector, isFaceInsideOval, type FaceDelegate } from './useFaceDetector';
 import {
   requestUploadUrl,
   uploadToS3,
@@ -120,7 +120,20 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
   const dragRef = useRef<{ startX: number; startY: number; startTx: number; startTy: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  const faceDetector = useFaceDetector();
+  // ── 진단 모드 (?debug=1) ─────────────────────────────────────────
+  // 안드로이드 크롬에서 미리보기가 반전돼 보이지 않고 얼굴을 못 찾는다는 보고 (2026-10-23).
+  // 실기기에서 검출 방식(GPU/CPU)과 미리보기 반전을 바꿔 보며 원인을 가리려고 둔다.
+  // 이 화면은 페이지가 불러온 뒤 클라이언트에서만 그려지므로 주소를 바로 읽어도 된다.
+  const [debug] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    if (new URLSearchParams(window.location.search).get('debug') === '1') return true;
+    try { return sessionStorage.getItem('momong_debug') === '1'; } catch { return false; }
+  });
+  const [delegate, setDelegate] = useState<FaceDelegate>('GPU');
+  const [mirrorPreview, setMirrorPreview] = useState(true);
+  const statsRef = useRef({ frames: 0, withFace: 0, lastFaces: 0, lastError: '' });
+  const [debugInfo, setDebugInfo] = useState('');
+  const faceDetector = useFaceDetector(delegate);
 
   const stopCamera = () => {
     if (streamRef.current) {
@@ -225,6 +238,27 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
   }, []);
 
   // 비디오 프레임마다 얼굴 검출
+  useEffect(() => {
+    if (!debug) return;
+    const id = setInterval(() => {
+      const st = statsRef.current;
+      const video = videoRef.current;
+      const settings = streamRef.current?.getVideoTracks()[0]?.getSettings();
+      setDebugInfo([
+        `카메라: ${settings?.facingMode ?? '(정보 없음)'} ${settings?.width ?? '?'}x${settings?.height ?? '?'}`,
+        `영상: ${video?.videoWidth ?? 0}x${video?.videoHeight ?? 0}`,
+        `검출: ${faceDetector.delegate} ${faceDetector.ready ? '준비됨' : '로딩 중'}${faceDetector.error ? ' · ' + faceDetector.error : ''}`,
+        `1초간 검출 ${st.frames}회 · 얼굴 찾은 횟수 ${st.withFace} · 마지막 ${st.lastFaces}개`,
+        st.lastError ? `오류: ${st.lastError.slice(0, 80)}` : '오류: 없음',
+        `미리보기 반전: ${mirrorPreview ? '켬' : '끔'}`,
+        `UA: ${navigator.userAgent.slice(0, 90)}`,
+      ].join('\n'));
+      st.frames = 0;
+      st.withFace = 0;
+    }, 1000);
+    return () => clearInterval(id);
+  }, [debug, faceDetector.delegate, faceDetector.ready, faceDetector.error, mirrorPreview]);
+
   const detectLoop = useCallback(() => {
     const video = videoRef.current;
     const preview = previewRef.current;
@@ -235,10 +269,15 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
     if (video.readyState >= 2 && video.videoWidth > 0) {
       try {
         const detections = faceDetector.detectInVideo(video, performance.now());
+        const st = statsRef.current;
+        st.frames += 1;
+        st.lastFaces = detections.length;
+        if (detections.length > 0) st.withFace += 1;
         const rect = preview.getBoundingClientRect();
         evaluateDetections(detections, rect, video.videoWidth, video.videoHeight, true);
       } catch (e) {
-        // ignore transient errors
+        // ignore transient errors (진단 모드에서는 마지막 오류를 보여준다)
+        statsRef.current.lastError = e instanceof Error ? e.message : String(e);
       }
     }
     rafRef.current = requestAnimationFrame(detectLoop);
@@ -330,6 +369,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
       const rect = preview.getBoundingClientRect();
       evaluateDetections(detections, rect, img.naturalWidth, img.naturalHeight, false);
     } catch (e) {
+      statsRef.current.lastError = e instanceof Error ? e.message : String(e);
       setFaceInOval(false);
       setDetectionHint('얼굴 검출에 실패했습니다');
     }
@@ -633,7 +673,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
                       playsInline
                       muted
                       className="absolute inset-0 w-full h-full object-cover"
-                      style={{ transform: 'scaleX(-1) scale(1.5)' }}
+                      style={{ transform: mirrorPreview ? 'scaleX(-1) scale(1.5)' : 'scale(1.5)' }}
                     />
                   )}
 
@@ -844,6 +884,26 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
           <NavigationButtons onBack={onBack} showNext={false} backLabel="이전" />
         </div>
       </div>
+
+      {debug && (
+        <div className="fixed left-2 right-2 bottom-2 z-[9999] rounded-lg bg-black/85 text-white p-3 text-[11px] leading-snug">
+          <pre className="whitespace-pre-wrap break-all font-mono mb-2">{debugInfo || '진단 정보 수집 중…'}</pre>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setDelegate((d) => (d === 'GPU' ? 'CPU' : 'GPU'))}
+              className="flex-1 rounded bg-white text-black py-2 font-medium"
+            >
+              검출 방식 → {delegate === 'GPU' ? 'CPU' : 'GPU'}
+            </button>
+            <button
+              onClick={() => setMirrorPreview((m) => !m)}
+              className="flex-1 rounded bg-white text-black py-2 font-medium"
+            >
+              반전 {mirrorPreview ? '끄기' : '켜기'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

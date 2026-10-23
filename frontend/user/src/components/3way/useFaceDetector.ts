@@ -14,30 +14,35 @@ const WASM_URL =
 const MODEL_URL =
   'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite';
 
-let videoDetector: FaceDetector | null = null;
-let imageDetector: FaceDetector | null = null;
-let loadPromise: Promise<void> | null = null;
+export type FaceDelegate = 'GPU' | 'CPU';
 
-async function loadDetectors() {
-  if (loadPromise) return loadPromise;
-  loadPromise = (async () => {
+// 검출 방식(GPU/CPU)별로 한 번만 만든다. 기본은 GPU.
+// CPU 는 진단용 — 일부 안드로이드에서 GPU 가 오류 없이 빈 결과만 돌려주는지 보려고 둔다 (2026-10-23).
+type Detectors = { video: FaceDetector; image: FaceDetector };
+const detectors: Partial<Record<FaceDelegate, Detectors>> = {};
+const loadPromises: Partial<Record<FaceDelegate, Promise<void>>> = {};
+
+async function loadDetectors(delegate: FaceDelegate) {
+  if (loadPromises[delegate]) return loadPromises[delegate];
+  loadPromises[delegate] = (async () => {
     const { FilesetResolver, FaceDetector: FaceDetectorClass } = await import(
       '@mediapipe/tasks-vision'
     );
     silenceMediapipeInfoLog();   // wasm 을 불러오기 전에 걸어야 한다
     const vision = await FilesetResolver.forVisionTasks(WASM_URL);
-    [videoDetector, imageDetector] = await Promise.all([
+    const [video, image] = await Promise.all([
       FaceDetectorClass.createFromOptions(vision, {
-        baseOptions: { modelAssetPath: MODEL_URL, delegate: 'GPU' },
+        baseOptions: { modelAssetPath: MODEL_URL, delegate },
         runningMode: 'VIDEO',
       }),
       FaceDetectorClass.createFromOptions(vision, {
-        baseOptions: { modelAssetPath: MODEL_URL, delegate: 'GPU' },
+        baseOptions: { modelAssetPath: MODEL_URL, delegate },
         runningMode: 'IMAGE',
       }),
     ]);
+    detectors[delegate] = { video, image };
   })();
-  return loadPromise;
+  return loadPromises[delegate];
 }
 
 export interface DetectedBox {
@@ -47,22 +52,31 @@ export interface DetectedBox {
   height: number;
 }
 
-export function useFaceDetector() {
-  const [ready, setReady] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export function useFaceDetector(delegate: FaceDelegate = 'GPU') {
+  // 어느 방식이 준비됐는지로 들고 있어서, 방식을 바꾸면 새 방식이 준비될 때까지 ready 가 false 다
+  const [readyDelegate, setReadyDelegate] = useState<FaceDelegate | null>(null);
+  const [failed, setFailed] = useState<{ delegate: FaceDelegate; message: string } | null>(null);
+  const ready = readyDelegate === delegate;
+  const error = failed?.delegate === delegate ? failed.message : null;
 
   useEffect(() => {
-    loadDetectors()
-      .then(() => setReady(true))
+    let cancelled = false;
+    loadDetectors(delegate)
+      .then(() => { if (!cancelled) setReadyDelegate(delegate); })
       .catch((err) => {
         console.error('face detector load failed', err);
-        setError('얼굴 인식 모델 로드 실패');
+        if (!cancelled) setFailed({ delegate, message: `얼굴 인식 모델 로드 실패 (${delegate})` });
       });
-  }, []);
+    return () => { cancelled = true; };
+  }, [delegate]);
+
+  const videoDetector = ready ? detectors[delegate]?.video ?? null : null;
+  const imageDetector = ready ? detectors[delegate]?.image ?? null : null;
 
   return {
     ready,
     error,
+    delegate,
     detectInVideo(video: HTMLVideoElement, timestampMs: number): DetectedBox[] {
       if (!videoDetector || video.readyState < 2) return [];
       const result = videoDetector.detectForVideo(video, timestampMs);

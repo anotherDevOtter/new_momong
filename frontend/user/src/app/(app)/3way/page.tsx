@@ -20,6 +20,13 @@ function ThreeWayPageInner() {
   const { user, loading } = useAuth();
   const { features, loading: featuresLoading } = useFeatures();
 
+  // 촬영 화면 진단 모드 — /3way?debug=1 로 들어오면 이 탭이 열려 있는 동안 유지한다.
+  // 휴대폰에서 촬영 화면 주소를 직접 고치기 어려워서 여기서 받는다 (2026-10-23).
+  useEffect(() => {
+    if (searchParams.get('debug') !== '1') return;
+    try { sessionStorage.setItem('momong_debug', '1'); } catch { /* 저장 불가면 진단 모드 없이 진행 */ }
+  }, [searchParams]);
+
   useEffect(() => {
     if (!loading && !user) router.replace('/login');
   }, [loading, user, router]);
