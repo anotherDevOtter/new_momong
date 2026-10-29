@@ -40,7 +40,9 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
   const handleStart3Way = () => router.push(`/3way?customerId=${customer.id}`);
   const handleEditConsultation = (record: ConsultationRecord) => {
     // TODO: 컨설팅 편집 라우트 별도 처리. 현재는 /fit 으로 라우트하면서 customerId 만 넘김
-    router.push(`/fit?customerId=${customer.id}&editId=${record.id}`);
+    // FIT-NEW 기록은 저장 꼴이 달라(스타일 5축·6개월 플랜) 옛 FIT 화면으로 열면 값이 빠진다
+    const route = record.hairStyleProposal?.flow === 'fit-new' ? '/fit-new' : '/fit';
+    router.push(`${route}?customerId=${customer.id}&editId=${record.id}`);
   };
 
   return (

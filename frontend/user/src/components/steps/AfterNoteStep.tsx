@@ -4,21 +4,31 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { DesignCycleGuide } from '@/components/ui/DesignCycleGuide';
-import { ConsultationData, CycleMonth } from '@/types';
+import { SixMonthPlanInput, toCycleMonths } from '@/components/fit-new/SixMonthPlan';
+import { imageTypeLabel } from '@/components/fit-new/fitNewData';
+import { ConsultationData, CycleMonth, SixMonthCycle } from '@/types';
 
 interface AfterNoteStepProps {
   data: ConsultationData;
   onChange: (data: ConsultationData) => void;
   onBack: () => void;
   onComplete: () => void;
+  /** 'fit-new' — 월 직접 선택 대신 오늘의 시술 → 6개월 관리 주기 자동 생성 (2026-10-28) */
+  variant?: 'fit' | 'fit-new';
 }
 
-export const AfterNoteStep = ({ data, onChange, onBack, onComplete }: AfterNoteStepProps) => {
+export const AfterNoteStep = ({ data, onChange, onBack, onComplete, variant = 'fit' }: AfterNoteStepProps) => {
   const [designerName, setDesignerName] = useState(data.designerName || '');
   const [afterNote, setAfterNote] = useState(data.afterNote || '');
+  const fitNew = variant === 'fit-new';
 
   const handleCycleGuideChange = (selectedMonths: CycleMonth[]) => {
     onChange({ ...data, designCycleGuide: { selectedMonths } });
+  };
+
+  // 기존 화면(공유 링크·고객 상세)이 읽는 월별 로드맵도 자동 주기에서 같이 채운다
+  const handleSixMonthChange = (cycle: SixMonthCycle) => {
+    onChange({ ...data, designCycleGuide: { selectedMonths: toCycleMonths(cycle.cycleEvents), cycle } });
   };
 
   const handleComplete = () => {
@@ -56,7 +66,7 @@ export const AfterNoteStep = ({ data, onChange, onBack, onComplete }: AfterNoteS
         <div>
           <h3 className="mb-3 font-semibold text-[#111111] text-sm tracking-[-0.01em]">이미지 타입 & 모발 상태</h3>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div><span className="text-[#999999]">타입: </span>{data.faceImageType.type.toUpperCase()}</div>
+            <div><span className="text-[#999999]">타입: </span>{fitNew ? imageTypeLabel(data.faceImageType.type) : data.faceImageType.type.toUpperCase()}</div>
             <div><span className="text-[#999999]">손상도: </span>{data.hairCondition.damageLevel}</div>
           </div>
         </div>
@@ -101,10 +111,18 @@ export const AfterNoteStep = ({ data, onChange, onBack, onComplete }: AfterNoteS
 
         {/* DESIGN CYCLE GUIDE */}
         <div className="pt-6 border-t border-[#EAEAEA]">
-          <DesignCycleGuide
-            selectedMonths={data.designCycleGuide.selectedMonths}
-            onChange={handleCycleGuideChange}
-          />
+          {fitNew ? (
+            <SixMonthPlanInput
+              initial={data.designCycleGuide.cycle}
+              gender={data.clientInfo.gender}
+              onChange={handleSixMonthChange}
+            />
+          ) : (
+            <DesignCycleGuide
+              selectedMonths={data.designCycleGuide.selectedMonths}
+              onChange={handleCycleGuideChange}
+            />
+          )}
         </div>
 
         {/* AFTER DESIGN MEMO */}

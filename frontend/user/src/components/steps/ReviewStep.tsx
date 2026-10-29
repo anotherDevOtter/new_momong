@@ -9,6 +9,8 @@ import { ShareLinkModal } from '@/components/ShareLinkModal';
 import { Pencil, Link } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/Button';
+import { SixMonthPlanReport } from '@/components/fit-new/SixMonthPlan';
+import { imageTypeLabel, styleRows } from '@/components/fit-new/fitNewData';
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'failed';
 
@@ -18,6 +20,13 @@ interface ReviewStepProps {
   onSaveStatusChange: (status: SaveStatus) => void;
   onGoToStep: (step: number) => void;
   onRestart: () => void;
+  /**
+   * 'fit-new' (2026-10-28) — 원장님 수정 요청 반영본
+   *   · '색조 타입' → '타입', 값은 WARM타입 / COOL타입
+   *   · 스타일 제안 5개 축 (7단계에 합쳐져 수정도 7단계로)
+   *   · 디자인 사이클 → 방문 후 6개월 관리 플랜
+   */
+  variant?: 'fit' | 'fit-new';
 }
 
 const SectionTitle = ({ title, onEdit }: { title: string; onEdit?: () => void }) => (
@@ -46,7 +55,8 @@ const InfoItem = ({ label, value }: { label: string; value?: string | string[] }
   );
 };
 
-export const ReviewStep = ({ data, saveStatus, onSaveStatusChange, onGoToStep, onRestart }: ReviewStepProps) => {
+export const ReviewStep = ({ data, saveStatus, onSaveStatusChange, onGoToStep, onRestart, variant = 'fit' }: ReviewStepProps) => {
+  const fitNew = variant === 'fit-new';
   const { token } = useAuth();
   const [consultationId, setConsultationId] = useState<string | null>(data.id || null);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -71,7 +81,10 @@ export const ReviewStep = ({ data, saveStatus, onSaveStatusChange, onGoToStep, o
 
   const { clientInfo, todayKeyword, fashionStyle, faceImageType, hairCondition, hairStyleProposal, todayDesign, nextDirection, designerName, visitDate, afterNote } = data;
 
-  const toneLabel = faceImageType.type === 'warm' ? '웜톤' : faceImageType.type === 'neutral' ? '중간톤' : faceImageType.type === 'cool' ? '쿨톤' : '';
+  const toneLabel = fitNew
+    ? imageTypeLabel(faceImageType.type)
+    : faceImageType.type === 'warm' ? '웜톤' : faceImageType.type === 'neutral' ? '중간톤' : faceImageType.type === 'cool' ? '쿨톤' : '';
+  const sixMonth = fitNew ? data.designCycleGuide.cycle : undefined;
 
   const designRows = [
     { label: '길이', values: todayDesign.length, memo: todayDesign.lengthMemo },
@@ -129,7 +142,7 @@ export const ReviewStep = ({ data, saveStatus, onSaveStatusChange, onGoToStep, o
           <div className="pb-6 border-b border-[#EAEAEA]">
             <SectionTitle title="페이스 이미지 타입" onEdit={!completed ? () => onGoToStep(6) : undefined} />
             <div className="grid grid-cols-3 gap-4">
-              <InfoItem label="색조 타입" value={toneLabel} />
+              <InfoItem label={fitNew ? '타입' : '색조 타입'} value={toneLabel} />
               <InfoItem label="얼굴형" value={faceImageType.features.face} />
               <InfoItem label="눈썹" value={faceImageType.features.eyebrows} />
               <InfoItem label="눈" value={faceImageType.features.eyes} />
@@ -145,16 +158,25 @@ export const ReviewStep = ({ data, saveStatus, onSaveStatusChange, onGoToStep, o
               <InfoItem label="손상도" value={hairCondition.damageLevel} />
               <InfoItem label="모질" value={hairCondition.hairType} />
               <InfoItem label="굵기" value={hairCondition.thickness} />
-              <InfoItem label="밀도" value={hairCondition.density} />
+              <InfoItem label={fitNew ? '숱' : '밀도'} value={hairCondition.density} />
               <InfoItem label="컬" value={hairCondition.curl} />
             </div>
           </div>
 
-          {/* 원하는 스타일 */}
-          <div className="pb-6 border-b border-[#EAEAEA]">
-            <SectionTitle title="원하는 스타일" onEdit={!completed ? () => onGoToStep(8) : undefined} />
-            <InfoItem label="원하는 길이" value={hairStyleProposal.length} />
-          </div>
+          {/* 원하는 스타일 — FIT-NEW 는 스타일 제안 5개 축 */}
+          {fitNew ? (
+            <div className="pb-6 border-b border-[#EAEAEA]">
+              <SectionTitle title="스타일 제안" onEdit={!completed ? () => onGoToStep(7) : undefined} />
+              <div className="grid grid-cols-3 gap-4">
+                {styleRows(hairStyleProposal).map((r) => <InfoItem key={r.label} label={r.label} value={r.value} />)}
+              </div>
+            </div>
+          ) : (
+            <div className="pb-6 border-b border-[#EAEAEA]">
+              <SectionTitle title="원하는 스타일" onEdit={!completed ? () => onGoToStep(8) : undefined} />
+              <InfoItem label="원하는 길이" value={hairStyleProposal.length} />
+            </div>
+          )}
 
           {/* TODAY DESIGN */}
           <div className="pb-6 border-b border-[#EAEAEA]">
@@ -187,8 +209,16 @@ export const ReviewStep = ({ data, saveStatus, onSaveStatusChange, onGoToStep, o
             </div>
           )}
 
+          {/* 방문 후 6개월 관리 플랜 — FIT-NEW, After Note 의 오늘의 시술에서 자동 생성 */}
+          {sixMonth && sixMonth.todayServices.length > 0 && (
+            <div className="pb-6 border-b border-[#EAEAEA]">
+              <SectionTitle title="방문 후 6개월 관리 플랜" onEdit={!completed ? () => onGoToStep(10) : undefined} />
+              <SixMonthPlanReport cycle={sixMonth} hideTitle />
+            </div>
+          )}
+
           {/* 디자인 사이클 가이드 */}
-          {cycleMonths.length > 0 && (
+          {!fitNew && cycleMonths.length > 0 && (
             <div className="pb-6 border-b border-[#EAEAEA]">
               <SectionTitle title="디자인 사이클 가이드" onEdit={!completed ? () => onGoToStep(10) : undefined} />
               <div className="space-y-1 text-sm text-[#555555]">

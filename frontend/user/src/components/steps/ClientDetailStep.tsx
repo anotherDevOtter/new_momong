@@ -270,6 +270,10 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
                         <p className="text-xs text-[#999999] mt-0.5">담당: {record.designerName || '-'}</p>
                       </div>
                       <div className="flex flex-wrap gap-2">
+                        {/* FIT-NEW 테스트 기록 — 기존 FIT 과 섞이지 않게 표시 (2026-10-30) */}
+                        {record.hairStyleProposal?.flow === 'fit-new' && (
+                          <span className="px-2 py-0.5 border border-[#111111] text-[#111111] text-xs">FIT-NEW (테스트)</span>
+                        )}
                         {record.faceImageType?.type && (
                           <span className="px-2 py-0.5 bg-[#F5F5F5] text-[#555555] text-xs">{record.faceImageType.type.toUpperCase()}</span>
                         )}
@@ -322,6 +326,9 @@ export const ClientDetailStep = ({ client, onBack, onStartNewConsultation, onSta
             <span>
               컨설팅 상세 · {modalConsultation.visitDate || formatDate(modalConsultation.createdAt)}
               <span className="text-xs text-[#999999] font-normal ml-2">담당: {modalConsultation.designerName || '-'}</span>
+              {modalConsultation.hairStyleProposal?.flow === 'fit-new' && (
+                <span className="text-xs font-normal ml-2 px-2 py-0.5 border border-[#111111]">FIT-NEW (테스트)</span>
+              )}
             </span>
           ) : null
         }

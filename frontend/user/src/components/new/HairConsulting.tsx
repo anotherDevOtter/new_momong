@@ -67,6 +67,12 @@ interface Props {
   onChange?: (data: HairConsultingData) => void;
   /** 저장된 상담을 다시 열 때 복원할 값 (같은 날 기록만) */
   initial?: HairConsultingData | null;
+  /**
+   * 'fit' — FIT-NEW 의 'FIT 헤어스타일 제안' 화면 (2026-10-28).
+   * 얼굴 분석이 없는 흐름이라 이미지맵·헤어스타일 가이드를 빼고 모질 + 스타일 제안만 보인다.
+   * posMap 은 {} 로 넘긴다 — 판정이 없으면 얼굴 기반 추천 뱃지도 뜨지 않는다.
+   */
+  variant?: 'full' | 'fit';
 }
 
 // ── Option data ───────────────────────────────────────────────────────
@@ -326,7 +332,8 @@ function MapLegend({
   );
 }
 
-export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Props) {
+export function HairConsulting({ posMap, onNext, onBack, onChange, initial, variant = 'full' }: Props) {
+  const fit = variant === 'fit';
   const formDominant = dominantOf(FORM, posMap);
   const propDominant = dominantOf(PROP, posMap);
 
@@ -435,9 +442,9 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
 
         {/* ── Header ─────────────────────────────────────────────── */}
         <div className="mb-6">
-          <p className="text-[10px] tracking-[0.22em] text-[#AAAAAA] mb-1.5" style={{ fontFamily: MONO }}>HAIR CONSULTING</p>
+          <p className="text-[10px] tracking-[0.22em] text-[#AAAAAA] mb-1.5" style={{ fontFamily: MONO }}>{fit ? 'FIT HAIR STYLE' : 'HAIR CONSULTING'}</p>
           <div className="flex items-end justify-between">
-            <h1 className="text-[1.5rem] font-light text-[#111111] tracking-tight">헤어컨설팅</h1>
+            <h1 className="text-[1.5rem] font-light text-[#111111] tracking-tight">{fit ? 'FIT 헤어스타일 제안' : '헤어컨설팅'}</h1>
             <div className="flex items-center gap-2 mb-0.5">
               {onBack && (
                 <button onClick={onBack}
@@ -456,6 +463,8 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
           <div className="mt-4 h-px bg-[#E8E8E4]" />
         </div>
 
+        {/* FIT 은 얼굴 분석이 없어 이미지맵·가이드를 쓰지 않는다 */}
+        {!fit && (<>
         {/* ── Image Map / Hair Map ─────────────────────────────────── */}
         <div className="mb-12">
 
@@ -1010,6 +1019,7 @@ export function HairConsulting({ posMap, onNext, onBack, onChange, initial }: Pr
             ))}
           </AnimatePresence>
         </motion.div>
+        </>)}
 
         {/* ── Hair Condition (toggled) ─────────────────────────────── */}
         <motion.div

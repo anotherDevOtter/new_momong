@@ -60,6 +60,14 @@ export function CourseSelection({ onNext, onBack }: CourseSelectionProps) {
       description: '개편 시안 적용본 — 내부 테스트용',
       services: '사전인터뷰 통합 · 이목구비/이미지타입 분리 · 헤어컨설팅 통합',
     },
+    // 테스트 전용 — FIT 수정본 (2026-10-28). 3WAY 코스가 아니라 /fit-new 로 들어간다.
+    // 기존 FIT 을 이것으로 교체하는 시점에 이 카드를 지운다.
+    {
+      id: 'fit-new',
+      title: 'FIT 헤어컨설팅 (신규)',
+      description: 'FIT 수정본 — 내부 테스트용',
+      services: '헤어스타일 제안 통합 · 이미지 타입 표기 · 6개월 관리 플랜',
+    },
   ];
 
   const handleCourseSelect = (courseId: string) => {
@@ -110,6 +118,7 @@ export function CourseSelection({ onNext, onBack }: CourseSelectionProps) {
               if (course.id === '2way') return twoWayAvailable;
               if (course.id === '1way') return features.courses['1way'];
               if (course.id === 'new') return devCourse;   // 개발 모드에서만
+              if (course.id === 'fit-new') return devCourse;
               return true;
             })
             .map((course, index) => (

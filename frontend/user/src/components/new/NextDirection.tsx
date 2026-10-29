@@ -89,7 +89,7 @@ type ServiceMeta = {
   noAutoRepeat?: boolean;
 };
 
-const SERVICES: Record<ServiceKey, ServiceMeta> = {
+export const SERVICES: Record<ServiceKey, ServiceMeta> = {
   CUT:        { label: 'CUT',        ko: '커트',           type: 'DESIGN', femaleWeeks: [7, 9],   maleWeeks: [3, 4],   nextLabel: 'CUT CHECK' },
   BANG:       { label: 'BANG',       ko: '앞머리',          type: 'DESIGN', weeks: [3, 4],                               nextLabel: 'BANG CHECK' },
   PERM:       { label: 'PERM',       ko: '펌',              type: 'DESIGN', femaleWeeks: [18, 22], maleWeeks: [12, 14], nextLabel: 'PERM CHECK' },
@@ -102,7 +102,7 @@ const SERVICES: Record<ServiceKey, ServiceMeta> = {
   SCALP:      { label: 'SCALP',      ko: '두피 관리',       type: 'CARE',   weeks: [0, 0],                               nextLabel: 'SCALP CHECK' },
 };
 
-const SERVICE_ORDER: ServiceKey[] = [
+export const SERVICE_ORDER: ServiceKey[] = [
   'CUT', 'BANG', 'PERM', 'ROOT_PERM', 'STRAIGHT',
   'COLOR', 'ROOT_COLOR', 'BLEACH', 'CLINIC', 'SCALP',
 ];
@@ -153,14 +153,14 @@ function weekToKoLabel(week: number): string {
   return `약 ${months}개월 후`;
 }
 
-function weekToMonthHint(week: number): string {
+export function weekToMonthHint(week: number): string {
   const d = new Date();
   d.setDate(d.getDate() + week * 7);
   return `${d.getMonth() + 1}월`;
 }
 
 // 매장에서 실제로 쓰는 말로 바꿨다. 원장님이 글자로 넘긴 목록 그대로다. (2026-09-12)
-const SERVICE_DETAILS: Partial<Record<ServiceKey, string[]>> = {
+export const SERVICE_DETAILS: Partial<Record<ServiceKey, string[]>> = {
   CUT:       ['전체 커트', '앞머리 커트', '레이어', '길이 조정', '숱 조절'],
   PERM:      ['C컬', 'S컬', 'C + S', '웨이브', '스트레이트'],
   ROOT_PERM: ['윗볼륨', '옆볼륨', '뒷볼륨'],
@@ -291,7 +291,7 @@ function getServiceWeeks(key: ServiceKey, gender: 'female' | 'male'): [number, n
   return meta.weeks ?? [0, 0];
 }
 
-function computeNextCare(services: ServiceKey[], gender: 'female' | 'male') {
+export function computeNextCare(services: ServiceKey[], gender: 'female' | 'male') {
   const care = services.filter(s => SERVICES[s].type === 'CARE');
   if (!care.length) return null;
   let minW = Infinity, maxW = Infinity;
@@ -306,7 +306,7 @@ function computeNextCare(services: ServiceKey[], gender: 'female' | 'male') {
   return minW === Infinity ? null : { minWeeks: minW, maxWeeks: maxW, services: labels };
 }
 
-function computeNextDesign(services: ServiceKey[], gender: 'female' | 'male') {
+export function computeNextDesign(services: ServiceKey[], gender: 'female' | 'male') {
   const design = services.filter(s => SERVICES[s].type === 'DESIGN');
   if (!design.length) return null;
   let minW = Infinity, maxW = Infinity;
@@ -321,7 +321,7 @@ function computeNextDesign(services: ServiceKey[], gender: 'female' | 'male') {
   return minW === Infinity ? null : { minWeeks: minW, maxWeeks: maxW, services: labels };
 }
 
-function computeCycleEvents(services: ServiceKey[], gender: 'female' | 'male'): CycleEvent[] {
+export function computeCycleEvents(services: ServiceKey[], gender: 'female' | 'male'): CycleEvent[] {
   const MAX_WEEKS = 26;
 
   // Raw events with key + iteration number

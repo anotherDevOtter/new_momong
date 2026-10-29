@@ -21,7 +21,7 @@ function ConsultingStartInner() {
   const searchParams = useSearchParams();
   const { user, token, loading } = useAuth();
 
-  const type = (searchParams.get('type') as 'fit' | '3way' | null) || 'fit';
+  const type = (searchParams.get('type') as 'fit' | 'fit-new' | '3way' | null) || 'fit';
   const course = searchParams.get('course') || '';
   const preCustomerId = searchParams.get('customerId') || '';
 
@@ -76,7 +76,9 @@ function ConsultingStartInner() {
     'new': '1WAY · 신규',
   };
   const title =
-    type === 'fit' ? 'FIT 컨설팅 시작' : `${COURSE_TITLE[course] || '3WAY'} 컨설팅 시작`;
+    type === 'fit' ? 'FIT 컨설팅 시작'
+    : type === 'fit-new' ? 'FIT · 신규 컨설팅 시작'
+    : `${COURSE_TITLE[course] || '3WAY'} 컨설팅 시작`;
 
   const handleSelectExisting = async (c: CustomerSummary) => {
     if (!token) return;
@@ -123,6 +125,8 @@ function ConsultingStartInner() {
     const customerId = confirming.id;
     if (type === 'fit') {
       router.push(`/fit?customerId=${customerId}`);
+    } else if (type === 'fit-new') {
+      router.push(`/fit-new?customerId=${customerId}`);
     } else {
       const q = new URLSearchParams();
       q.set('course', course);
@@ -134,7 +138,7 @@ function ConsultingStartInner() {
 
   const handleCancel = () => {
     if (type === 'fit') router.push('/');
-    else router.push('/3way');
+    else router.push('/3way');   // fit-new 도 3WAY 코스 선택에서 들어왔다
   };
 
   return (

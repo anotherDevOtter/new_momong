@@ -1,18 +1,5 @@
-import { motion } from 'motion/react';
-
+// 시안에 있던 상단 고정 헤더. 앱 레이아웃의 AppHeader(로고·로그아웃) 위를 덮어서 그리지 않는다 (2026-10-29).
+// 쓰는 화면이 여럿이라 컴포넌트는 남겨 둔다.
 export function BrandHeader() {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.8 }}
-      className="fixed top-0 right-0 left-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200"
-    >
-      <div className="px-6 py-4 flex justify-end">
-        <span className="text-xs tracking-[0.3em] font-light text-black">
-          MERCI MOMONG
-        </span>
-      </div>
-    </motion.div>
-  );
+  return null;
 }

@@ -310,6 +310,8 @@ function AfterNoteView({ data }: { data: ConsultationData }) {
                 {data.designCycleGuide.selectedMonths
                   .filter(m => m.services.length > 0)
                   .sort((a, b) => {
+                    // FIT-NEW 는 방문일부터 시간순으로 저장돼 있다 — 해를 넘기면(10월→12월→2월) 월 번호순 정렬이 틀린다
+                    if (data.designCycleGuide.cycle) return 0;
                     const order = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
                     return order.indexOf(a.month) - order.indexOf(b.month);
                   })

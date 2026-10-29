@@ -45,6 +45,11 @@ function ThreeWayPageInner() {
 
   const handleCourseNext = (courseId: string) => {
     const customerId = searchParams.get('customerId');
+    // FIT-NEW 는 3WAY 코스가 아니라 FIT 수정본이다 — 카드만 여기 있고 흐름은 /fit-new
+    if (courseId === 'fit-new') {
+      router.push(customerId ? `/fit-new?customerId=${customerId}` : '/consulting/start?type=fit-new');
+      return;
+    }
     if (customerId) {
       // 고객 상세에서 진입한 경우 — 고객 선택 단계 우회, 바로 컨설팅으로
       router.push(`/3way/consulting?course=${courseId}&customerId=${customerId}`);
