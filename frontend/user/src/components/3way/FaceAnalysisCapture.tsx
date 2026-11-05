@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Camera, Eye, Sun, Minus, Circle, Lock, MoveLeft, Upload, X } from 'lucide-react';
+import { Camera, Eye, Sun, Minus, Circle, Lock, MoveLeft, SwitchCamera, Upload, X } from 'lucide-react';
 import { NavigationButtons } from './NavigationButtons';
 import { useFaceDetector, isFaceInsideOval, type FaceDelegate } from './useFaceDetector';
 import {
@@ -21,6 +21,8 @@ interface FaceAnalysisCaptureProps {
   onBack: () => void;
   onNext: (result: AnalyzeResponse, faceImageUrl: string) => void;
 }
+
+type CameraFacing = 'user' | 'environment';
 
 const OVAL_RATIO = { cx: 0.5, cy: 0.44, rx: 0.3, ry: 0.32 };
 
@@ -111,6 +113,12 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
   const previewRef = useRef<HTMLDivElement>(null);
   const uploadedImgRef = useRef<HTMLImageElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  // 전면(셀카)·후면 카메라. 검출 루프가 최신 값을 읽도록 ref 도 같이 둔다.
+  const [facing, setFacing] = useState<CameraFacing>('user');
+  const facingRef = useRef<CameraFacing>('user');
+  const [canSwitchCamera, setCanSwitchCamera] = useState(false);
+  // 전환을 연달아 누르면 늦게 끝난 요청의 스트림이 남는다 — 마지막 요청만 살린다
+  const cameraRequestRef = useRef(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const rafRef = useRef<number | null>(null);
   // 업로드된 새 파일에 대해 한 번만 얼굴 자동 크롭 수행
@@ -194,7 +202,10 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
     if (cameraStarted) startCamera();
   };
 
-  const startCamera = async () => {
+  const startCamera = async (nextFacing: CameraFacing = facingRef.current) => {
+    const requestId = ++cameraRequestRef.current;
+    facingRef.current = nextFacing;
+    setFacing(nextFacing);
     setCameraStarted(true);
     setCameraError(false);
     setCameraErrorMessage('');
@@ -216,8 +227,13 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
 
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user', width: 1280, height: 720 },
+        video: { facingMode: nextFacing, width: 1280, height: 720 },
       });
+
+      if (requestId !== cameraRequestRef.current) {
+        mediaStream.getTracks().forEach((track) => track.stop());
+        return;
+      }
 
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
@@ -225,7 +241,12 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
         setIsCameraReady(true);
         setCameraError(false);
       }
+
+      // 기기 목록은 권한을 받은 뒤에야 온전히 나온다. 카메라가 하나면 전환 버튼을 숨긴다.
+      const devices = await navigator.mediaDevices.enumerateDevices().catch(() => []);
+      setCanSwitchCamera(devices.filter((d) => d.kind === 'videoinput').length > 1);
     } catch (error) {
+      if (requestId !== cameraRequestRef.current) return;
       console.error('카메라 시작 실패', error);
       setCameraError(true);
       setIsCameraReady(true);
@@ -243,6 +264,13 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
         setCameraErrorMessage(`카메라를 시작할 수 없습니다. (${name || 'Unknown'})`);
       }
     }
+  };
+
+  const handleSwitchCamera = () => {
+    stopCamera();
+    setFaceInOval(false);
+    setDetectionHint('얼굴을 원 안에 맞춰주세요');
+    startCamera(facingRef.current === 'user' ? 'environment' : 'user');
   };
 
   // 컴포넌트 언마운트 시에만 스트림 정리 (자동 시작 X — 사용자가 버튼 클릭 시 시작)
@@ -290,7 +318,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
         st.lastFaces = detections.length;
         if (detections.length > 0) st.withFace += 1;
         const rect = preview.getBoundingClientRect();
-        evaluateDetections(detections, rect, video.videoWidth, video.videoHeight, true);
+        evaluateDetections(detections, rect, video.videoWidth, video.videoHeight, facingRef.current === 'user');
       } catch (e) {
         // ignore transient errors (진단 모드에서는 마지막 오류를 보여준다)
         statsRef.current.lastError = e instanceof Error ? e.message : String(e);
@@ -421,8 +449,10 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.save();
-    ctx.translate(canvas.width, 0);
-    ctx.scale(-1, 1); // 셀카처럼 좌우 반전 보정
+    if (facing === 'user') {
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1); // 셀카처럼 좌우 반전 보정. 후면은 보이는 그대로 저장한다.
+    }
     ctx.drawImage(video, srcX, srcY, srcW, srcH, 0, 0, canvas.width, canvas.height);
     ctx.restore();
     const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
@@ -673,7 +703,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
                     아래에서 파일을 업로드하세요
                   </p>
                   <button
-                    onClick={startCamera}
+                    onClick={() => startCamera()}
                     className="px-6 py-2.5 bg-black text-white text-sm font-normal rounded-full hover:bg-gray-800 transition-colors"
                   >
                     카메라 시작
@@ -689,7 +719,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
                       playsInline
                       muted
                       className="absolute inset-0 w-full h-full object-cover"
-                      style={{ transform: mirrorPreview ? 'scaleX(-1) scale(1.5)' : 'scale(1.5)' }}
+                      style={{ transform: facing === 'user' && mirrorPreview ? 'scaleX(-1) scale(1.5)' : 'scale(1.5)' }}
                     />
                   )}
 
@@ -705,7 +735,7 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
                         {cameraErrorMessage || '알 수 없는 오류가 발생했습니다.'}
                       </p>
                       <button
-                        onClick={startCamera}
+                        onClick={() => startCamera()}
                         className="px-4 py-2 bg-black text-white text-xs font-normal rounded-full hover:bg-gray-800 transition-colors"
                       >
                         다시 시도
@@ -783,6 +813,17 @@ export function FaceAnalysisCapture({ onBack, onNext }: FaceAnalysisCaptureProps
                   strokeWidth="0.5"
                 />
               </svg>
+              )}
+
+              {/* 전면·후면 전환 (카메라가 둘 이상일 때만) */}
+              {cameraStarted && !previewImage && !cameraError && canSwitchCamera && (
+                <button
+                  onClick={handleSwitchCamera}
+                  className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center hover:bg-black/80 transition-colors"
+                  aria-label={facing === 'user' ? '후면 카메라로 전환' : '전면 카메라로 전환'}
+                >
+                  <SwitchCamera className="w-4 h-4 text-white" strokeWidth={2} />
+                </button>
               )}
 
               {/* 상단 상태 뱃지 - 카메라/프리뷰 활성 시에만 */}

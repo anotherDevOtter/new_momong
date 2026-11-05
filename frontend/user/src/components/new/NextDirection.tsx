@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Edit3, ChevronDown } from 'lucide-react';
 import { BrandHeader } from './BrandHeader';
+import { TreatmentPhotoCamera } from './TreatmentPhotoCamera';
 import { MONO } from './faceAnalysisData';
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -502,6 +503,7 @@ export function NextDirection({
   // Photo input refs
   const beforeInputRef = useRef<HTMLInputElement>(null);
   const afterInputRef = useRef<HTMLInputElement>(null);
+  const [cameraSlot, setCameraSlot] = useState<'before' | 'after' | null>(null);
 
   // Computed
   const nextCareAuto = useMemo(() => computeNextCare(todayServices, gender), [todayServices, gender]);
@@ -706,10 +708,25 @@ export function NextDirection({
           <input type="file" accept="image/*" ref={beforeInputRef} style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) onBeforePhotoChange?.(URL.createObjectURL(f)); e.target.value = ''; }} />
           <input type="file" accept="image/*" ref={afterInputRef} style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) onAfterPhotoChange?.(URL.createObjectURL(f)); e.target.value = ''; }} />
 
+          {cameraSlot && (
+            <TreatmentPhotoCamera
+              title={cameraSlot === 'before' ? '시술 전 사진' : '시술 후 사진'}
+              onCapture={(url) => {
+                (cameraSlot === 'before' ? onBeforePhotoChange : onAfterPhotoChange)?.(url);
+                setCameraSlot(null);
+              }}
+              onPickFile={() => {
+                (cameraSlot === 'before' ? beforeInputRef : afterInputRef).current?.click();
+                setCameraSlot(null);
+              }}
+              onClose={() => setCameraSlot(null)}
+            />
+          )}
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             {([
-              { label: 'BEFORE', sub: '시술 전', photo: beforePhoto ?? null, onClick: () => beforeInputRef.current?.click(), onRemove: () => onBeforePhotoChange?.(null) },
-              { label: 'AFTER',  sub: '시술 후', photo: afterPhoto ?? null,  onClick: () => afterInputRef.current?.click(),  onRemove: () => onAfterPhotoChange?.(null) },
+              { label: 'BEFORE', sub: '시술 전', photo: beforePhoto ?? null, onClick: () => setCameraSlot('before'), onRemove: () => onBeforePhotoChange?.(null) },
+              { label: 'AFTER',  sub: '시술 후', photo: afterPhoto ?? null,  onClick: () => setCameraSlot('after'),  onRemove: () => onAfterPhotoChange?.(null) },
             ] as const).map(({ label, sub, photo, onClick, onRemove }) => (
               <div key={label} style={{ position: 'relative' }}>
                 <button onClick={onClick} style={{ display: 'block', width: '100%', aspectRatio: '3/4', overflow: 'hidden', border: '1px solid #E8E8E4', background: photo ? 'none' : '#F8F8F5', cursor: 'pointer', padding: 0, position: 'relative' }}>

@@ -4,6 +4,7 @@ import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowRight, ArrowLeft, ChevronDown, Download, Share2, Home } from 'lucide-react';
 import { CycleData, ServiceKey, SERVICE_KO, AFTER_CARE, HOME_CARE_TIPS } from './NextDirection';
+import { TreatmentPhotoCamera } from './TreatmentPhotoCamera';
 import { MONO, IMAP, FORM, PROP, dominantIdx, dominantOf, sideText } from './faceAnalysisData';
 import { AREA_ITEMS, areaScores } from './AIFaceResultDerived';
 import type { MItem } from './faceAnalysisData';
@@ -973,8 +974,17 @@ function PhotoSlot({ label, sub, photo, setPhoto, inputRef }: {
   inputRef: React.RefObject<HTMLInputElement | null>;
 }) {
   const isBefore = label === 'BEFORE';
+  const [cameraOpen, setCameraOpen] = useState(false);
   return (
     <div>
+      {cameraOpen && (
+        <TreatmentPhotoCamera
+          title={`${sub} 사진`}
+          onCapture={(url) => { setPhoto(url); setCameraOpen(false); }}
+          onPickFile={() => { inputRef.current?.click(); setCameraOpen(false); }}
+          onClose={() => setCameraOpen(false)}
+        />
+      )}
       <input type="file" accept="image/*" ref={inputRef} style={{ display: 'none' }}
         onChange={e => {
           const f = e.target.files?.[0];
@@ -982,7 +992,7 @@ function PhotoSlot({ label, sub, photo, setPhoto, inputRef }: {
           e.target.value = '';
         }}
       />
-      <button onClick={() => inputRef.current?.click()}
+      <button onClick={() => setCameraOpen(true)}
         style={{ display: 'block', width: '100%', border: `1px solid ${G7}`, background: photo ? 'none' : G9, cursor: 'pointer', position: 'relative', aspectRatio: '3/4', overflow: 'hidden', padding: 0 }}>
         {photo ? (
           <>

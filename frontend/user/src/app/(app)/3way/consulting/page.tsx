@@ -13,6 +13,8 @@ import { FaceAnalysisProcessing } from '@/components/3way/FaceAnalysisProcessing
 import { FaceAnalysisResult, type FaceResultData } from '@/components/3way/FaceAnalysisResult';
 import { requestUploadUrl, uploadToS3, type AnalyzeResponse } from '@/utils/face-analysis-api';
 import { prepareImageForAnalysis } from '@/utils/image-resize';
+import { retouchFaceImage, TREATMENT_PHOTO_SLIM } from '@/lib/face-retouch/browser';
+import { useRetouchedPhoto } from '@/lib/face-retouch/useRetouchedPhoto';
 import { PersonalColorAnalysis, type PersonalColorData } from '@/components/3way/PersonalColorAnalysis';
 import { SkeletonImageAnalysis, type SkeletonData } from '@/components/3way/SkeletonImageAnalysis';
 import { ImageDirectionSetting, type ImageDirectionData } from '@/components/3way/ImageDirectionSetting';
@@ -241,21 +243,38 @@ function Inner() {
       return;
     }
     if (!url.startsWith('blob:')) return;
+    let shownUrl = url;
     (async () => {
       const blob = await (await fetch(url)).blob();
+      const fileName = `treatment-${slot}-${Date.now()}.jpg`;
       // 휴대폰 사진은 3MB(업로드 한도)를 넘기 쉽다 — 얼굴 사진과 같은 방식으로 줄여서 올린다
-      const { file } = await prepareImageForAnalysis(
-        new File([blob], `treatment-${slot}-${Date.now()}.jpg`, { type: blob.type || 'image/jpeg' }),
+      const { file: resized } = await prepareImageForAnalysis(
+        new File([blob], fileName, { type: blob.type || 'image/jpeg' }),
       );
+      // 전후 사진은 고객에게 보이는 사진이라 보정본만 저장한다. 뒷머리처럼 얼굴이 없거나
+      // 보정이 실패한 사진은 그대로 올린다 — 보정 때문에 사진을 잃으면 안 된다.
+      const retouched = await retouchFaceImage(resized, { slim: TREATMENT_PHOTO_SLIM }).catch((e) => {
+        console.warn('[retouch] 시술 사진 보정 실패 — 원본을 올립니다', e);
+        return null;
+      });
+      if (latestPhotoRef.current[slot] !== shownUrl) return;
+      let file = resized;
+      if (retouched?.applied) {
+        ({ file } = await prepareImageForAnalysis(new File([retouched.blob], fileName, { type: 'image/jpeg' })));
+        if (latestPhotoRef.current[slot] !== shownUrl) return;
+        shownUrl = URL.createObjectURL(file);
+        latestPhotoRef.current[slot] = shownUrl;
+        setPhoto(shownUrl);
+      }
       const { uploadUrl, publicUrl } = await requestUploadUrl(file.type, undefined, file.size);
       await uploadToS3(uploadUrl, file, file.type);
       // 올리는 동안 다른 사진으로 바꾸거나 지웠으면 이 결과는 버린다
-      if (latestPhotoRef.current[slot] !== url) return;
+      if (latestPhotoRef.current[slot] !== shownUrl) return;
       photoDirtyRef.current = true;
       setTreatmentPhotoUrls((p) => ({ ...p, [slot]: publicUrl.split('?')[0] }));
     })().catch((e) => {
       console.error('시술 사진 업로드 실패', e);
-      if (latestPhotoRef.current[slot] !== url) return;
+      if (latestPhotoRef.current[slot] !== shownUrl) return;
       // 화면에 사진이 남아 있으면 저장된 줄 안다 — 이전 사진으로 되돌리고 알린다
       setPhoto(previous);
       latestPhotoRef.current[slot] = previous;
@@ -265,6 +284,8 @@ function Inner() {
   const [directionSubSel, setDirectionSubSel] = useState<Record<string, string>>({});
   const [faceAnalysisResult, setFaceAnalysisResult] = useState<AnalyzeResponse | null>(null);
   const [faceImageUrl, setFaceImageUrl] = useState<string | null>(null);
+  // 고객 화면용 보정본. 저장·분석은 faceImageUrl(원본)을 쓴다.
+  const displayFaceUrl = useRetouchedPhoto(faceImageUrl);
   // 디자이너가 확정/수정한 다운스트림 입력값 (저장 + step 간 연동)
   const [faceResultData, setFaceResultData] = useState<FaceResultData | null>(null);
   const [imageDirectionData, setImageDirectionData] = useState<ImageDirectionData | null>(null);
@@ -730,7 +751,7 @@ function Inner() {
     if (currentPage === 'aiFaceFeature') {
       return (
         <AIFaceFeature
-          facePhotoUrl={faceImageUrl}
+          facePhotoUrl={displayFaceUrl}
           /* 한 번 조정한 뒤 되돌아오면 그 값에서 다시 시작한다.
              (예전에는 분석 결과로 되돌아가 디자이너가 잡은 값이 전부 날아갔다) */
           initialPosMap={
@@ -748,7 +769,7 @@ function Inner() {
     if (currentPage === 'aiFaceResultDerived') {
       return (
         <AIFaceResultDerived
-          facePhotoUrl={faceImageUrl}
+          facePhotoUrl={displayFaceUrl}
           posMap={faceResultPosMap}
           onNext={() => goNext('aiFaceResultDerived')}
           onBack={() => goBack('aiFaceResultDerived')}
@@ -824,7 +845,7 @@ function Inner() {
               hairCondition={hairConsultingData?.condition ?? null}
               hairStyle={hairConsultingData?.style ?? null}
               facePosMap={faceResultPosMap}
-              facePhotoUrl={faceImageUrl}
+              facePhotoUrl={displayFaceUrl}
               beforePhoto={beforePhoto}
               afterPhoto={afterPhoto}
               onBeforePhotoChange={handleTreatmentPhoto('before')}
@@ -868,7 +889,7 @@ function Inner() {
               hairCondition={hairConsultingData?.condition ?? null}
               hairStyle={hairConsultingData?.style ?? null}
               facePosMap={faceResultPosMap}
-              facePhotoUrl={faceImageUrl}
+              facePhotoUrl={displayFaceUrl}
               beforePhoto={beforePhoto}
               afterPhoto={afterPhoto}
               onBeforePhotoChange={handleTreatmentPhoto('before')}
