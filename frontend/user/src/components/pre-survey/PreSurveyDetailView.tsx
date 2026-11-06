@@ -1,4 +1,8 @@
-import type { ReactNode } from 'react';
+'use client';
+
+import { useEffect, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 import type { PreSurveyDetail } from '@/utils/pre-survey-api';
 
 // 사전설문 상세 렌더 (고객 상세 탭 + 3WAY 사전설문 리뷰 단계에서 공용 사용)
@@ -97,6 +101,41 @@ function DetailChips({ label, values, note }: { label: string; values?: string[]
   );
 }
 
+/** 사진을 화면 안에서 크게 본다. 새 주소로 나가면 돌아올 때 고객 상세가 처음부터 다시 열린다. */
+function PhotoViewer({ src, alt, onClose }: { src: string; alt: string; onClose: () => void }) {
+  useEffect(() => {
+    const closeOnEscape = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      e.stopImmediatePropagation();
+      onClose();
+    };
+    document.addEventListener('keydown', closeOnEscape, true);
+    return () => document.removeEventListener('keydown', closeOnEscape, true);
+  }, [onClose]);
+
+  return createPortal(
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={alt}
+      onClick={onClose}
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 p-4"
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="닫기"
+        className="absolute top-4 right-4 w-11 h-11 flex items-center justify-center text-white"
+      >
+        <X className="w-6 h-6" strokeWidth={2} />
+      </button>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt={alt} onClick={(e) => e.stopPropagation()} className="max-w-full max-h-full object-contain" />
+    </div>,
+    document.body,
+  );
+}
+
 function PhotoGroup({
   label,
   photos,
@@ -107,8 +146,10 @@ function PhotoGroup({
   displayMap: Record<string, string>;
 }) {
   const items = photos ?? [];
+  const [viewing, setViewing] = useState<{ src: string; alt: string } | null>(null);
   return (
     <div>
+      {viewing && <PhotoViewer {...viewing} onClose={() => setViewing(null)} />}
       <div className="flex items-baseline justify-between mb-2">
         <p className="text-[11px] text-[#999999] uppercase tracking-wider">{label}</p>
         <span className="text-[11px] text-[#CCCCCC]">{items.length}장</span>
@@ -119,21 +160,22 @@ function PhotoGroup({
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
           {items.map((raw, i) => {
             const src = displayMap[raw] || raw;
+            const alt = `${label} ${i + 1}`;
             return (
-              <a
+              <button
                 key={`${raw}-${i}`}
-                href={src}
-                target="_blank"
-                rel="noopener noreferrer"
+                type="button"
+                onClick={() => setViewing({ src, alt })}
+                aria-label={`${alt} 크게 보기`}
                 className="relative aspect-square bg-[#F7F7F5] border border-[#E5E5E5] overflow-hidden group"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={src}
-                  alt={`${label} ${i + 1}`}
+                  alt={alt}
                   className="absolute inset-0 w-full h-full object-cover group-hover:opacity-80 transition-opacity"
                 />
-              </a>
+              </button>
             );
           })}
         </div>
