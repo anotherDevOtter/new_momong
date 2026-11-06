@@ -50,6 +50,10 @@ export class ResetPasswordDto {
   @IsString()
   ownerName: string;
 
+  @ApiProperty({ description: '가입 시 등록한 전화번호' })
+  @IsString()
+  phone: string;
+
   @ApiProperty({ description: '새 비밀번호', minLength: 6 })
   @IsString()
   @MinLength(6)

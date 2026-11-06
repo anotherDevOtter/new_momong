@@ -2,6 +2,7 @@ import { Controller, Post, Get, Patch, Body, Param, Query, UseGuards, HttpCode, 
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { AdminGuard } from './admin.guard';
+import { RateLimit } from '../common/decorators/rate-limit.decorator';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -9,6 +10,7 @@ export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @Post('auth/login')
+  @RateLimit(5, 1)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: '어드민 로그인' })
   @ApiBody({ schema: { properties: { email: { type: 'string' }, password: { type: 'string' } } } })

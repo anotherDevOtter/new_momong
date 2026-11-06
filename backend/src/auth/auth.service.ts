@@ -71,7 +71,10 @@ export class AuthService {
     const user = await this.usersRepo.findOne({
       where: { email: dto.email, owner_name: dto.ownerName },
     });
-    if (!user) throw new NotFoundException('이메일과 대표명이 일치하는 계정이 없습니다');
+    const digits = (phone?: string | null) => (phone ?? '').replace(/\D/g, '');
+    if (!user || !digits(user.phone) || digits(user.phone) !== digits(dto.phone)) {
+      throw new NotFoundException('입력한 정보와 일치하는 계정이 없습니다');
+    }
 
     user.password_hash = await bcrypt.hash(dto.newPassword, 10);
     await this.usersRepo.save(user);

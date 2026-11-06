@@ -19,7 +19,7 @@ interface AuthContextValue {
   logout: () => void;
   signup: (email: string, storeName: string, ownerName: string, password: string, phone?: string) => Promise<void>;
   findId: (phone: string) => Promise<string>;
-  resetPassword: (email: string, ownerName: string, newPassword: string) => Promise<void>;
+  resetPassword: (email: string, ownerName: string, phone: string, newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -125,11 +125,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return json.data.email;
   }
 
-  async function resetPassword(email: string, ownerName: string, newPassword: string) {
+  async function resetPassword(email: string, ownerName: string, phone: string, newPassword: string) {
     const res = await fetch(`${API_BASE}/auth/reset-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, ownerName, newPassword }),
+      body: JSON.stringify({ email, ownerName, phone, newPassword }),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));

@@ -8,6 +8,8 @@ import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.disable('x-powered-by');
+  // 운영은 Caddy 뒤에 있다. 이 설정이 없으면 모든 요청이 같은 IP 로 보여 횟수 제한이 전체에 걸린다.
+  app.set('trust proxy', 1);
 
   // Global prefix
   app.setGlobalPrefix('api', { exclude: ['/'] });

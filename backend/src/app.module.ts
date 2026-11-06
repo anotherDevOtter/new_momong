@@ -1,6 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -26,6 +27,11 @@ import { RequestLoggerMiddleware } from './common/middleware/request-logger.midd
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    // 실제 제한값은 @RateLimit 을 붙인 경로마다 정한다. 일반 화면은 매장 태블릿이 IP 를 같이 쓰므로 제한하지 않는다.
+    ThrottlerModule.forRoot({
+      throttlers: [{ limit: 60, ttl: 60_000 }],
+      errorMessage: '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.',
+    }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

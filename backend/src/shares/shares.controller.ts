@@ -12,6 +12,7 @@ import {
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { SharesService } from './shares.service';
+import { RateLimit } from '../common/decorators/rate-limit.decorator';
 
 @ApiTags('shares')
 @Controller('shares')
@@ -50,6 +51,7 @@ export class SharesController {
 
   // 공개: 비밀번호로 결과 조회
   @Post(':token/verify')
+  @RateLimit(10, 1)
   @HttpCode(HttpStatus.OK)
   async verify(
     @Param('token') token: string,
