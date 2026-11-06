@@ -10,7 +10,7 @@ export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @Post('auth/login')
-  @RateLimit(5, 1)
+  @RateLimit(10, 1)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: '어드민 로그인' })
   @ApiBody({ schema: { properties: { email: { type: 'string' }, password: { type: 'string' } } } })

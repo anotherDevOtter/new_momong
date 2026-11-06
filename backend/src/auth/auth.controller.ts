@@ -19,7 +19,7 @@ export class AuthController {
   }
 
   @Post('login')
-  @RateLimit(10, 1)
+  @RateLimit(20, 1)
   @ApiOperation({ summary: '로그인' })
   async login(@Body() dto: LoginDto) {
     const result = await this.authService.login(dto);
