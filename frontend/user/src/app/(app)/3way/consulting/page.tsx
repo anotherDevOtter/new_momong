@@ -229,6 +229,8 @@ function Inner() {
   // 상담 기록에 저장한다. blob: 은 이 탭에서만 살아 있어서 그대로 저장하면 다시 열 때 사라진다.
   // 시술 후 사진은 리포트를 만든 뒤에 찍으므로, 돌아와서 올려도 남아 있어야 한다.
   const [treatmentPhotoUrls, setTreatmentPhotoUrls] = useState<{ before: string | null; after: string | null }>({ before: null, after: null });
+  // 보정 전 원본. 고객 화면에는 쓰지 않고 관리자가 확인할 때만 쓴다. 보정이 안 된 사진은 위와 같은 주소다.
+  const [treatmentOriginalUrls, setTreatmentOriginalUrls] = useState<{ before: string | null; after: string | null }>({ before: null, after: null });
   const latestPhotoRef = useRef<{ before: string | null; after: string | null }>({ before: null, after: null });
   // 사진이 바뀌어 저장이 필요하다는 표시 — 복원으로 채울 때는 세우지 않는다
   const photoDirtyRef = useRef(false);
@@ -239,6 +241,7 @@ function Inner() {
     latestPhotoRef.current[slot] = url;
     if (!url) {
       photoDirtyRef.current = true;
+      setTreatmentOriginalUrls((p) => ({ ...p, [slot]: null }));
       setTreatmentPhotoUrls((p) => ({ ...p, [slot]: null }));
       return;
     }
@@ -251,7 +254,7 @@ function Inner() {
       const { file: resized } = await prepareImageForAnalysis(
         new File([blob], fileName, { type: blob.type || 'image/jpeg' }),
       );
-      // 전후 사진은 고객에게 보이는 사진이라 보정본만 저장한다. 뒷머리처럼 얼굴이 없거나
+      // 고객에게는 보정본을 보여 주고, 원본은 관리자 확인용으로 같이 올린다. 뒷머리처럼 얼굴이 없거나
       // 보정이 실패한 사진은 그대로 올린다 — 보정 때문에 사진을 잃으면 안 된다.
       const retouched = await retouchFaceImage(resized, { slim: TREATMENT_PHOTO_SLIM }).catch((e) => {
         console.warn('[retouch] 시술 사진 보정 실패 — 원본을 올립니다', e);
@@ -266,12 +269,17 @@ function Inner() {
         latestPhotoRef.current[slot] = shownUrl;
         setPhoto(shownUrl);
       }
-      const { uploadUrl, publicUrl } = await requestUploadUrl(file.type, undefined, file.size);
-      await uploadToS3(uploadUrl, file, file.type);
+      const upload = async (photo: File) => {
+        const { uploadUrl, publicUrl } = await requestUploadUrl(photo.type, undefined, photo.size);
+        await uploadToS3(uploadUrl, photo, photo.type);
+        return publicUrl.split('?')[0];
+      };
+      const [savedUrl, originalUrl] = await Promise.all([upload(file), file === resized ? null : upload(resized)]);
       // 올리는 동안 다른 사진으로 바꾸거나 지웠으면 이 결과는 버린다
       if (latestPhotoRef.current[slot] !== shownUrl) return;
       photoDirtyRef.current = true;
-      setTreatmentPhotoUrls((p) => ({ ...p, [slot]: publicUrl.split('?')[0] }));
+      setTreatmentOriginalUrls((p) => ({ ...p, [slot]: originalUrl ?? savedUrl }));
+      setTreatmentPhotoUrls((p) => ({ ...p, [slot]: savedUrl }));
     })().catch((e) => {
       console.error('시술 사진 업로드 실패', e);
       if (latestPhotoRef.current[slot] !== shownUrl) return;
@@ -387,6 +395,13 @@ function Inner() {
           setTreatmentPhotoUrls({
             before: tp.before ? tp.before.split('?')[0] : null,
             after: tp.after ? tp.after.split('?')[0] : null,
+          });
+        }
+        const originals = three.treatmentPhotoOriginals as { before?: string | null; after?: string | null } | undefined;
+        if (originals) {
+          setTreatmentOriginalUrls({
+            before: originals.before ? originals.before.split('?')[0] : null,
+            after: originals.after ? originals.after.split('?')[0] : null,
           });
         }
         const hc = three.hairConsulting as HairConsultingData | undefined;
@@ -530,6 +545,7 @@ function Inner() {
               hairConsulting: hairConsultingData,
               // 시술 전·후 사진 (S3 주소, 서명 없이) — 다시 읽을 때 백엔드가 새로 서명해 준다
               treatmentPhotos: treatmentPhotoUrls,
+              treatmentPhotoOriginals: treatmentOriginalUrls,
               // 임시저장 표시 — 끝나지 않은 상담. 최종 저장(draftStep=null)에서는 빠져서 완료로 바뀐다.
               // faceAnalysisRaw 는 사진 이후 화면을 다시 열 때 필요한 분석 결과 원본.
               // 서명 주소(faceImageDownloadUrl)는 5분짜리라 떼고 저장한다.

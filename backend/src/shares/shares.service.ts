@@ -11,6 +11,13 @@ import { ConsultationShare } from './shares.entity';
 import { Consultation } from '../consultations/consultations.entity';
 import { S3Service } from '../storage/s3.service';
 
+/** 시술 사진 원본은 관리자 확인용이다. 공유 링크로는 보정본만 나간다 */
+function withoutPhotoOriginals(clientInfo: Record<string, any>) {
+  if (!clientInfo?.threeWay) return clientInfo;
+  const { treatmentPhotoOriginals: _originals, ...threeWay } = clientInfo.threeWay;
+  return { ...clientInfo, threeWay };
+}
+
 @Injectable()
 export class SharesService {
   constructor(
@@ -87,7 +94,7 @@ export class SharesService {
       visitDate: c.visit_date,
       designerName: c.designer_name,
       afterNote: c.after_note,
-      clientInfo: await this.s3.refreshOwnUrls(c.client_info),
+      clientInfo: await this.s3.refreshOwnUrls(withoutPhotoOriginals(c.client_info)),
       todayKeyword: c.today_keyword,
       fashionStyle: c.fashion_style,
       faceImageType: c.face_image_type,

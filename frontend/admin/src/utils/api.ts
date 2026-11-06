@@ -130,3 +130,34 @@ export const updateModuleConfig = async (
   const json = await res.json();
   return json.data;
 };
+
+export type TreatmentPhotoSlot = {
+  /** 고객에게 보이는 사진 */
+  shown: string | null;
+  /** 보정 전 원본. 이 기능 전에 저장한 사진은 없다 */
+  original: string | null;
+};
+
+export type TreatmentPhotoRecord = {
+  id: string;
+  visitDate: string;
+  storeName: string;
+  designerName: string | null;
+  customerName: string;
+  before: TreatmentPhotoSlot;
+  after: TreatmentPhotoSlot;
+};
+
+export type TreatmentPhotoPage = {
+  items: TreatmentPhotoRecord[];
+  total: number;
+  page: number;
+  perPage: number;
+};
+
+export const getTreatmentPhotos = async (token: string, page: number): Promise<TreatmentPhotoPage> => {
+  const res = await fetch(`${API_BASE}/admin/treatment-photos?page=${page}`, { headers: authHeaders(token) });
+  if (!res.ok) throw new Error('시술 사진 조회 실패');
+  const json = await res.json();
+  return json.data;
+};

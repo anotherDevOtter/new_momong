@@ -8,10 +8,12 @@ import { AdminGuard } from './admin.guard';
 import { User } from '../auth/users.entity';
 import { Consultation } from '../consultations/consultations.entity';
 import { AdminAccount } from './admin-account.entity';
+import { StorageModule } from '../storage/storage.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Consultation, AdminAccount]),
+    StorageModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

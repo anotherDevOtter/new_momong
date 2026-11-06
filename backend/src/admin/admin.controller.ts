@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Patch, Body, Param, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Body, Param, Query, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { AdminGuard } from './admin.guard';
@@ -40,6 +40,15 @@ export class AdminController {
   @ApiOperation({ summary: '유저 거절' })
   async rejectUser(@Param('id') id: string) {
     return this.adminService.updateStatus(id, 'rejected');
+  }
+
+  @Get('treatment-photos')
+  @UseGuards(AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '시술 전후 사진 목록 — 보정본과 원본 (어드민)' })
+  async getTreatmentPhotos(@Query('page') page?: string) {
+    const result = await this.adminService.getTreatmentPhotos(Number(page) || 1);
+    return { data: result };
   }
 
   @Get('stats')

@@ -12,9 +12,11 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '../auth/users.entity';
 import { Consultation } from '../consultations/consultations.entity';
 import { AdminAccount } from './admin-account.entity';
+import { S3Service } from '../storage/s3.service';
 
 const DEFAULT_ADMIN_EMAIL = 'admin@momong.com';
 const DEFAULT_ADMIN_PASSWORD = '!Password1234';
+const TREATMENT_PHOTOS_PER_PAGE = 20;
 
 @Injectable()
 export class AdminService implements OnModuleInit {
@@ -28,6 +30,7 @@ export class AdminService implements OnModuleInit {
     @InjectRepository(AdminAccount)
     private readonly adminAccountsRepo: Repository<AdminAccount>,
     private readonly jwtService: JwtService,
+    private readonly s3: S3Service,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -95,6 +98,39 @@ export class AdminService implements OnModuleInit {
     user.status = status;
     await this.usersRepo.save(user);
     return { success: true };
+  }
+
+  async getTreatmentPhotos(page: number) {
+    const current = Math.max(1, Math.floor(page));
+    const [rows, total] = await this.consultationsRepo
+      .createQueryBuilder('c')
+      .leftJoinAndSelect('c.user', 'u')
+      .where(`c.client_info #>> '{threeWay,treatmentPhotos,before}' IS NOT NULL`)
+      .orWhere(`c.client_info #>> '{threeWay,treatmentPhotos,after}' IS NOT NULL`)
+      .orderBy('c.created_at', 'DESC')
+      .skip((current - 1) * TREATMENT_PHOTOS_PER_PAGE)
+      .take(TREATMENT_PHOTOS_PER_PAGE)
+      .getManyAndCount();
+
+    const items = await Promise.all(
+      rows.map(async (c) => {
+        const { treatmentPhotos = {}, treatmentPhotoOriginals = {} } = c.client_info?.threeWay ?? {};
+        const slot = (key: 'before' | 'after') => ({
+          shown: treatmentPhotos[key] ?? null,
+          original: treatmentPhotoOriginals[key] ?? null,
+        });
+        return {
+          id: c.id,
+          visitDate: c.visit_date,
+          storeName: c.user?.store_name ?? '',
+          designerName: c.designer_name,
+          customerName: c.client_info?.name ?? '',
+          ...(await this.s3.refreshOwnUrls({ before: slot('before'), after: slot('after') })),
+        };
+      }),
+    );
+
+    return { items, total, page: current, perPage: TREATMENT_PHOTOS_PER_PAGE };
   }
 
   async getStats() {
