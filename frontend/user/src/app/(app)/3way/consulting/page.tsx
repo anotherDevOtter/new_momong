@@ -13,7 +13,7 @@ import { FaceAnalysisProcessing } from '@/components/3way/FaceAnalysisProcessing
 import { FaceAnalysisResult, type FaceResultData } from '@/components/3way/FaceAnalysisResult';
 import { requestUploadUrl, uploadToS3, type AnalyzeResponse } from '@/utils/face-analysis-api';
 import { prepareImageForAnalysis } from '@/utils/image-resize';
-import { retouchFaceImage, TREATMENT_PHOTO_SLIM } from '@/lib/face-retouch/browser';
+import { retouchFaceImage } from '@/lib/face-retouch/browser';
 import { useRetouchedPhoto } from '@/lib/face-retouch/useRetouchedPhoto';
 import { PersonalColorAnalysis, type PersonalColorData } from '@/components/3way/PersonalColorAnalysis';
 import { SkeletonImageAnalysis, type SkeletonData } from '@/components/3way/SkeletonImageAnalysis';
@@ -256,7 +256,7 @@ function Inner() {
       );
       // 고객에게는 보정본을 보여 주고, 원본은 관리자 확인용으로 같이 올린다. 뒷머리처럼 얼굴이 없거나
       // 보정이 실패한 사진은 그대로 올린다 — 보정 때문에 사진을 잃으면 안 된다.
-      const retouched = await retouchFaceImage(resized, { slim: TREATMENT_PHOTO_SLIM }).catch((e) => {
+      const retouched = await retouchFaceImage(resized).catch((e) => {
         console.warn('[retouch] 시술 사진 보정 실패 — 원본을 올립니다', e);
         return null;
       });

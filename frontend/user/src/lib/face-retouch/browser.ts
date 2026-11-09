@@ -21,18 +21,19 @@ const BROWS_AND_LIPS = [
 ];
 const NASOLABIAL = [[98, 206, 216, 212], [327, 426, 436, 432]];
 const UNDER_EYE = [[111, 117, 118, 119, 120, 121], [340, 346, 347, 348, 349, 350]];
-// 얼굴 양쪽 턱선 점과 당기는 비율. 눈높이는 그대로, 턱 모서리를 가장 많이 당긴다.
+// 얼굴 양쪽 턱선 점과 당기는 비율. 광대·볼은 그대로, 턱 모서리만 당긴다.
+// 볼 중간(93·323)부터 당기면 광대 아래가 패여 해골처럼 보인다 (2026-11-09 현장 제보).
 const JAWLINE_SIDES: [number, number][][] = [
-  [[234, 0], [93, 0.5], [132, 0.8], [58, 1], [172, 1]],
-  [[454, 0], [323, 0.5], [361, 0.8], [288, 1], [397, 1]],
+  [[234, 0], [93, 0], [132, 0.35], [58, 0.85], [172, 1]],
+  [[454, 0], [323, 0], [361, 0.35], [288, 0.85], [397, 1]],
 ];
+/** 좌우 턱 폭 비가 이보다 작으면(고개를 많이 돌렸으면) 얼굴 작게를 건너뛴다 */
+const SLIM_MIN_SYMMETRY = 0.65;
 const FACE_MIDLINE = [10, 152]; // 이마 위 → 턱끝
 const SLIM_BAND = 0.12; // 턱선 바깥으로 영향이 미치는 폭(얼굴 폭 대비)
 const SLIM_NECK = 0.5; // 턱끝 아래로 이만큼(얼굴 폭 대비) 내려가며 0 이 된다
 const SLIM_SMOOTH = 0.04; // 높이 방향으로 흐리는 폭(얼굴 폭 대비)
 
-/** 전후 사진 전용 얼굴 작게 강도. 턱 모서리가 얼굴 폭의 이 비율만큼 안쪽으로 온다. */
-export const TREATMENT_PHOTO_SLIM = 0.04;
 
 export interface RetouchOptions {
   strength?: number;
@@ -88,13 +89,18 @@ function slimFace(ctx: CanvasRenderingContext2D, landmarks: LandmarkPoint[], W: 
 
   const lateral = (p: { x: number; y: number }) => (p.x - top.x) * -dy + (p.y - top.y) * dx;
   const neckEnd = length + faceSize * SLIM_NECK;
+  // 고개를 돌린 사진은 먼 쪽 턱이 중심선에 붙어 있어 조금만 당겨도 얼굴이 찌그러진다
+  const jawWidths = JAWLINE_SIDES.map((side) => Math.abs(lateral(px(side[side.length - 1][0]))));
+  if (Math.min(...jawWidths) < Math.max(...jawWidths) * SLIM_MIN_SYMMETRY) return;
   const [first, second] = JAWLINE_SIDES.map((side) => {
     const points = side.map(([i, weight]): JawPoint => {
       const p = px(i);
+      const across = Math.abs(lateral(p));
       return {
         along: (p.x - top.x) * dx + (p.y - top.y) * dy,
-        across: Math.abs(lateral(p)),
-        move: faceSize * slim * weight,
+        across,
+        // 그쪽 얼굴 폭에 비례해 당긴다 — 정면이면 얼굴 폭 × slim 과 같다
+        move: Math.min(faceSize * slim, across * 2 * slim) * weight,
       };
     });
     return [...points, { along: neckEnd, across: points[points.length - 1].across, move: 0 }];
