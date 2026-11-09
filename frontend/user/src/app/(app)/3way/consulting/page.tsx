@@ -13,8 +13,6 @@ import { FaceAnalysisProcessing } from '@/components/3way/FaceAnalysisProcessing
 import { FaceAnalysisResult, type FaceResultData } from '@/components/3way/FaceAnalysisResult';
 import { requestUploadUrl, uploadToS3, type AnalyzeResponse } from '@/utils/face-analysis-api';
 import { prepareImageForAnalysis } from '@/utils/image-resize';
-import { retouchFaceImage } from '@/lib/face-retouch/browser';
-import { useRetouchedPhoto } from '@/lib/face-retouch/useRetouchedPhoto';
 import { PersonalColorAnalysis, type PersonalColorData } from '@/components/3way/PersonalColorAnalysis';
 import { SkeletonImageAnalysis, type SkeletonData } from '@/components/3way/SkeletonImageAnalysis';
 import { ImageDirectionSetting, type ImageDirectionData } from '@/components/3way/ImageDirectionSetting';
@@ -246,7 +244,7 @@ function Inner() {
       return;
     }
     if (!url.startsWith('blob:')) return;
-    let shownUrl = url;
+    const shownUrl = url;
     (async () => {
       const blob = await (await fetch(url)).blob();
       const fileName = `treatment-${slot}-${Date.now()}.jpg`;
@@ -254,31 +252,15 @@ function Inner() {
       const { file: resized } = await prepareImageForAnalysis(
         new File([blob], fileName, { type: blob.type || 'image/jpeg' }),
       );
-      // 고객에게는 보정본을 보여 주고, 원본은 관리자 확인용으로 같이 올린다. 뒷머리처럼 얼굴이 없거나
-      // 보정이 실패한 사진은 그대로 올린다 — 보정 때문에 사진을 잃으면 안 된다.
-      const retouched = await retouchFaceImage(resized).catch((e) => {
-        console.warn('[retouch] 시술 사진 보정 실패 — 원본을 올립니다', e);
-        return null;
-      });
+      // 보정 없이 찍은 그대로 올린다 (2026-11-09 현장 요청: 기본 카메라처럼).
       if (latestPhotoRef.current[slot] !== shownUrl) return;
-      let file = resized;
-      if (retouched?.applied) {
-        ({ file } = await prepareImageForAnalysis(new File([retouched.blob], fileName, { type: 'image/jpeg' })));
-        if (latestPhotoRef.current[slot] !== shownUrl) return;
-        shownUrl = URL.createObjectURL(file);
-        latestPhotoRef.current[slot] = shownUrl;
-        setPhoto(shownUrl);
-      }
-      const upload = async (photo: File) => {
-        const { uploadUrl, publicUrl } = await requestUploadUrl(photo.type, undefined, photo.size);
-        await uploadToS3(uploadUrl, photo, photo.type);
-        return publicUrl.split('?')[0];
-      };
-      const [savedUrl, originalUrl] = await Promise.all([upload(file), file === resized ? null : upload(resized)]);
+      const { uploadUrl, publicUrl } = await requestUploadUrl(resized.type, undefined, resized.size);
+      await uploadToS3(uploadUrl, resized, resized.type);
+      const savedUrl = publicUrl.split('?')[0];
       // 올리는 동안 다른 사진으로 바꾸거나 지웠으면 이 결과는 버린다
       if (latestPhotoRef.current[slot] !== shownUrl) return;
       photoDirtyRef.current = true;
-      setTreatmentOriginalUrls((p) => ({ ...p, [slot]: originalUrl ?? savedUrl }));
+      setTreatmentOriginalUrls((p) => ({ ...p, [slot]: savedUrl }));
       setTreatmentPhotoUrls((p) => ({ ...p, [slot]: savedUrl }));
     })().catch((e) => {
       console.error('시술 사진 업로드 실패', e);
@@ -292,8 +274,8 @@ function Inner() {
   const [directionSubSel, setDirectionSubSel] = useState<Record<string, string>>({});
   const [faceAnalysisResult, setFaceAnalysisResult] = useState<AnalyzeResponse | null>(null);
   const [faceImageUrl, setFaceImageUrl] = useState<string | null>(null);
-  // 고객 화면용 보정본. 저장·분석은 faceImageUrl(원본)을 쓴다.
-  const displayFaceUrl = useRetouchedPhoto(faceImageUrl);
+  // 고객 화면도 보정 없이 원본을 보여 준다 (2026-11-09 현장 요청).
+  const displayFaceUrl = faceImageUrl;
   // 디자이너가 확정/수정한 다운스트림 입력값 (저장 + step 간 연동)
   const [faceResultData, setFaceResultData] = useState<FaceResultData | null>(null);
   const [imageDirectionData, setImageDirectionData] = useState<ImageDirectionData | null>(null);
