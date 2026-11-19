@@ -43,6 +43,33 @@ export class OsSyncService {
     this.post({ id, del: 1 }).catch((err) => this.log.warn(`delete ${id} failed: ${err?.message || err}`));
   }
 
+  /**
+   * 저장된 상담 전체를 모몽 OS 로 한 번 보낸다 — 연동 전 예전 상담 옮기기용.
+   * 모몽 OS 가 상담 id 로 덮어쓰므로 여러 번 돌려도 안전하다. 실행: src/scripts/os-backfill.ts
+   */
+  async backfillAll(opts: { dryRun?: boolean; gapMs?: number } = {}) {
+    if (!this.target) throw new Error('MOMONG_OS_URL / MOMONG_OS_KEY 없음');
+    const rows = await this.consultRepo.find({ select: ['id'], order: { created_at: 'ASC' } });
+    let ok = 0;
+    let fail = 0;
+    for (const { id } of rows) {
+      if (opts.dryRun) {
+        ok++;
+        continue;
+      }
+      try {
+        await this.send(id);
+        ok++;
+      } catch (err: any) {
+        fail++;
+        this.log.warn(`backfill ${id} failed: ${err?.message || err}`);
+      }
+      await new Promise((r) => setTimeout(r, opts.gapMs ?? 300)); // 한꺼번에 몰아 보내지 않게
+    }
+    this.log.log(`backfill ${opts.dryRun ? '(dry) ' : ''}done: total ${rows.length}, ok ${ok}, fail ${fail}`);
+    return { total: rows.length, ok, fail };
+  }
+
   private async send(id: string) {
     const c = await this.consultRepo.findOne({ where: { id } });
     if (!c) return;
