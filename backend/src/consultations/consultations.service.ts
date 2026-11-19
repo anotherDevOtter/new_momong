@@ -5,6 +5,7 @@ import { Consultation } from './consultations.entity';
 import { CreateConsultationDto } from './dto/create-consultation.dto';
 import { CustomersService } from '../customers/customers.service';
 import { S3Service } from '../storage/s3.service';
+import { OsSyncService } from '../os-sync/os-sync.service';
 
 @Injectable()
 export class ConsultationsService {
@@ -13,6 +14,7 @@ export class ConsultationsService {
     private readonly repo: Repository<Consultation>,
     private readonly customersService: CustomersService,
     private readonly s3: S3Service,
+    private readonly osSync: OsSyncService,
   ) {}
 
   private generateId(): string {
@@ -107,6 +109,7 @@ export class ConsultationsService {
     });
 
     const saved = await this.repo.save(consultation);
+    this.osSync.pushConsultation(id); // 모몽 OS 고객 기록으로 (실패해도 저장은 그대로)
     return { id, consultation: await this.toRecord(saved) };
   }
 
@@ -153,6 +156,7 @@ export class ConsultationsService {
     if (dto.afterNote !== undefined) record.after_note = dto.afterNote;
 
     const saved = await this.repo.save(record);
+    this.osSync.pushConsultation(id);
     return { consultation: await this.toRecord(saved) };
   }
 
@@ -160,5 +164,6 @@ export class ConsultationsService {
     const record = await this.repo.findOne({ where: { id, user_id: userId } });
     if (!record) throw new NotFoundException('컨설팅을 찾을 수 없습니다');
     await this.repo.remove(record);
+    this.osSync.pushDelete(id);
   }
 }

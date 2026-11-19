@@ -10,6 +10,7 @@ import * as bcrypt from 'bcrypt';
 import { ConsultationShare } from './shares.entity';
 import { Consultation } from '../consultations/consultations.entity';
 import { S3Service } from '../storage/s3.service';
+import { OsSyncService } from '../os-sync/os-sync.service';
 
 /** 시술 사진 원본은 관리자 확인용이다. 공유 링크로는 보정본만 나간다 */
 function withoutPhotoOriginals(clientInfo: Record<string, any>) {
@@ -26,6 +27,7 @@ export class SharesService {
     @InjectRepository(Consultation)
     private readonly consultationRepo: Repository<Consultation>,
     private readonly s3: S3Service,
+    private readonly osSync: OsSyncService,
   ) {}
 
   async createShare(
@@ -51,6 +53,7 @@ export class SharesService {
       password_plain: password,
     });
     await this.shareRepo.save(share);
+    this.osSync.pushConsultation(consultationId); // 모몽 OS 고객 기록에 리포트 링크도
 
     return { token };
   }
