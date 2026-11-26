@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { clearAdminToken } from '@/utils/auth';
+import { IS_LOCAL_DEV, LOCAL_ONLY_PATHS } from '@/lib/localOnly';
 
 interface AdminHeaderProps {
   currentPath: string;
@@ -23,7 +24,10 @@ export default function AdminHeader({ currentPath }: AdminHeaderProps) {
     { href: '/features', label: '기능 설정' },
     { href: '/face-modules', label: '얼굴분석 모듈' },
     { href: '/face-analysis-test', label: '얼굴 분석 테스트' },
-  ];
+    { href: '/face-criteria', label: '측정 기준' },
+    { href: '/landmark-review', label: '랜드마크 검수' },
+    { href: '/landmark-truth', label: '랜드마크 정답' },
+  ].filter((link) => IS_LOCAL_DEV || !LOCAL_ONLY_PATHS.includes(link.href));
 
   return (
     <header className="border-b border-[#E5E5E5] bg-white">

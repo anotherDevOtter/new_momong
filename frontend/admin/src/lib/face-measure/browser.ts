@@ -62,6 +62,19 @@ export interface BrowserMeasure {
   measureMs: number;
 }
 
+/**
+ * 저장된 사진(서명 주소)에서 랜드마크만 뽑는다. 고객 화면과 같은 모델 · 설정이라 고객이 받은 점과 같다.
+ * 얼굴을 못 찾으면 landmarks 가 null.
+ */
+export async function detectLandmarksFromUrl(
+  url: string,
+): Promise<{ img: HTMLImageElement; landmarks: LandmarkPoint[] | null }> {
+  await loadLandmarker();
+  const img = await loadImage(url);
+  const face = landmarker?.detect(img).faceLandmarks?.[0];
+  return { img, landmarks: face && face.length ? (face as LandmarkPoint[]) : null };
+}
+
 /** 업로드 전 파일(촬영본)을 그대로 측정한다. 얼굴을 못 찾으면 null */
 export async function measureFaceFromFile(file: Blob): Promise<BrowserMeasure | null> {
   const url = URL.createObjectURL(file);

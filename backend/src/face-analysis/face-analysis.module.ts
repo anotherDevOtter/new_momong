@@ -9,10 +9,15 @@ import { FaceAnalysisController } from './face-analysis.controller';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminGuard } from '../admin/admin.guard';
 import { ModuleConfigsModule } from '../module-configs/module-configs.module';
+import { FaceLandmarkReview } from './face-landmark-review.entity';
+import { FaceLandmarkReviewService } from './face-landmark-review.service';
+import { FaceLandmarkReviewController } from './face-landmark-review.controller';
+import { FaceLandmarkTruthService } from './face-landmark-truth.service';
+import { FaceLandmarkTruthController } from './face-landmark-truth.controller';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ImageDetectionResult]),
+    TypeOrmModule.forFeature([ImageDetectionResult, FaceLandmarkReview]),
     StorageModule,
     ModuleConfigsModule,
     JwtModule.registerAsync({
@@ -24,7 +29,7 @@ import { ModuleConfigsModule } from '../module-configs/module-configs.module';
       }),
     }),
   ],
-  controllers: [FaceAnalysisController],
-  providers: [FaceAnalysisService, JwtAuthGuard, AdminGuard],
+  controllers: [FaceAnalysisController, FaceLandmarkReviewController, FaceLandmarkTruthController],
+  providers: [FaceAnalysisService, FaceLandmarkReviewService, FaceLandmarkTruthService, JwtAuthGuard, AdminGuard],
 })
 export class FaceAnalysisModule {}

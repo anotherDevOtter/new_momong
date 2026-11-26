@@ -150,7 +150,7 @@ export class S3Service {
     );
   }
 
-  private extractS3Location(url: URL): { bucket: string; key: string } | null {
+  extractS3Location(url: URL): { bucket: string; key: string } | null {
     const host = url.hostname.split('.');
     // virtual-hosted: <bucket>.s3.<region>.amazonaws.com
     if (host.length >= 3 && host[1] === 's3') {
