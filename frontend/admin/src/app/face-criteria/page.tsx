@@ -9,10 +9,13 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import AdminHeader from '@/components/AdminHeader';
 import { getAdminToken } from '@/utils/auth';
-import { measureFaceFromFile } from '@/lib/face-measure/browser';
+import { downscaledUrl, measureFaceFromFile } from '@/lib/face-measure/browser';
 import type { FaceMeasureResult, MeasureResult, MeasurementShape } from '@/lib/face-measure';
 import { FINAL_RULE, FORM_CRITERIA, PROP_CRITERIA, type Criterion } from '@/lib/face-measure/criteria';
-import { fetchTruthPhoto } from '@/utils/landmark-truth-api';
+import { fetchTruthPhotoBlob } from '@/utils/landmark-truth-api';
+
+/** 항목별 그림용 축소본 가로 — 그림이 화면에서 176px, 부위만 잘라 보여 주니 이 정도면 충분하다 */
+const PREVIEW_MAX_W = 1400;
 
 const GRADE_COLOR: Record<string, string> = { W: '#C8693F', C: '#4F7BB5', S: '#C98AA0', H: '#4A4A4A', N: '#8A8A8A' };
 
@@ -41,21 +44,16 @@ export default function FaceCriteriaPage() {
   const measure = useCallback(async (blob: Blob, label: string) => {
     setBusy(true);
     try {
+      // 측정은 원본으로 (고객 화면과 같게). 화면의 항목별 그림 23개는 축소본 하나를 같이 쓴다
       const m = await measureFaceFromFile(blob);
       if (!m) {
         toast.error('얼굴을 찾지 못했습니다');
         return;
       }
-      const url = URL.createObjectURL(blob);
-      const img = new Image();
-      await new Promise((res, rej) => {
-        img.onload = res;
-        img.onerror = rej;
-        img.src = url;
-      });
+      const url = await downscaledUrl(m.image, PREVIEW_MAX_W);
       setPhoto((old) => {
         if (old) URL.revokeObjectURL(old.url);
-        return { url, width: img.naturalWidth, height: img.naturalHeight, label };
+        return { url, width: m.image.naturalWidth, height: m.image.naturalHeight, label };
       });
       setResult(m.result);
     } catch (e) {
@@ -73,10 +71,7 @@ export default function FaceCriteriaPage() {
     // 로컬 전용: 랜드마크 정답 폴더의 사진 1. 없거나 운영이면 조용히 넘어간다
     (async () => {
       try {
-        const u = await fetchTruthPhoto('local_1.jpg');
-        const blob = await (await fetch(u)).blob();
-        URL.revokeObjectURL(u);
-        await measure(blob, '사진 1');
+        await measure(await fetchTruthPhotoBlob('local_1.jpg'), '사진 1');
       } catch {
         /* 예시 사진 없음 — 직접 올리면 된다 */
       }

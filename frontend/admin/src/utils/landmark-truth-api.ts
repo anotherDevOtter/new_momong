@@ -55,9 +55,14 @@ export async function fetchExample(name: string): Promise<string> {
   return URL.createObjectURL(await res.blob());
 }
 
-/** 사진 원본 → blob: 주소. 다 쓰면 URL.revokeObjectURL */
-export async function fetchTruthPhoto(name: string): Promise<string> {
+/** 사진 원본 */
+export async function fetchTruthPhotoBlob(name: string): Promise<Blob> {
   const res = await fetch(`${BASE}/photo?${new URLSearchParams({ name })}`, { headers: auth() });
   if (!res.ok) throw new Error(`사진을 받지 못했습니다 (HTTP ${res.status})`);
-  return URL.createObjectURL(await res.blob());
+  return res.blob();
+}
+
+/** 사진 원본 → blob: 주소. 다 쓰면 URL.revokeObjectURL */
+export async function fetchTruthPhoto(name: string): Promise<string> {
+  return URL.createObjectURL(await fetchTruthPhotoBlob(name));
 }

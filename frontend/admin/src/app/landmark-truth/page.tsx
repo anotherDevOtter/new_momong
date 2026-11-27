@@ -1,6 +1,6 @@
 'use client';
 
-// 랜드마크 정답 입력 (로컬 전용) — 판정에 쓰는 점끼리 묶어 6단계로 확인한다 (얼굴 윤곽 → 상중하안부 → 눈 → 눈썹 → 코 → 입).
+// 랜드마크 정답 입력 (로컬 · 운영은 관리자 본인 계정만) —판정에 쓰는 점끼리 묶어 6단계로 확인한다 (얼굴 윤곽 → 상중하안부 → 눈 → 눈썹 → 코 → 입).
 // 단계마다 그 부위로 확대해 MediaPipe 가 찍은 위치와 판정 선을 보여 준다. 틀린 점만 끌어서 옮기고 '다음'.
 // '다음'을 누를 때마다 자동 저장. 이렇게 모은 정답으로 여러 검출 방법을 채점한다 (tools/landmark-bench).
 
@@ -13,7 +13,7 @@ import { detectLandmarksFromUrl } from '@/lib/face-measure/browser';
 import { MIDLINE_ANCHORS, MIDLINE_POINTS, POINT_BY_ID, STEPS, TRUTH_POINTS, seedPosition } from '@/lib/landmark-truth/points';
 import LandmarkExample from '@/components/LandmarkExample';
 import LocalOnlyNotice from '@/components/LocalOnlyNotice';
-import { IS_LOCAL_DEV } from '@/lib/localOnly';
+import { useIsOwner } from '@/lib/localOnly';
 import { fetchTruthPhoto, getTruth, listTruth, saveTruth, type TruthListItem, type TruthPoints } from '@/utils/landmark-truth-api';
 
 type XY = [number, number];
@@ -45,7 +45,9 @@ function project(v: XY, line: { a: XY; d: XY }, aspect: number): XY {
 }
 
 export default function LandmarkTruthPage() {
-  return IS_LOCAL_DEV ? <LandmarkTruth /> : <LocalOnlyNotice />;
+  const owner = useIsOwner();
+  if (owner === null) return null; // 운영: 토큰 확인 전
+  return owner ? <LandmarkTruth /> : <LocalOnlyNotice owner />;
 }
 
 function LandmarkTruth() {

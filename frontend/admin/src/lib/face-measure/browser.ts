@@ -60,6 +60,26 @@ export interface BrowserMeasure {
   landmarks: LandmarkPoint[];
   landmarkMs: number;
   measureMs: number;
+  /** 측정한 사진 (원본 크기) — 화면용 축소본을 만들 때 다시 읽지 않도록 */
+  image: HTMLImageElement;
+}
+
+/** downscaledUrl 을 다시 이미지로. 다 쓰면 url 을 URL.revokeObjectURL */
+export async function downscaledImage(img: HTMLImageElement, maxW: number): Promise<{ img: HTMLImageElement; url: string }> {
+  const url = await downscaledUrl(img, maxW);
+  return { img: await loadImage(url), url };
+}
+
+/** 화면 표시용 축소본 (가로 maxW 이하). 측정에는 쓰지 않는다 — 측정은 고객 화면과 같게 원본으로 */
+export function downscaledUrl(img: HTMLImageElement, maxW: number): Promise<string> {
+  const s = Math.min(1, maxW / img.naturalWidth);
+  const c = document.createElement('canvas');
+  c.width = Math.round(img.naturalWidth * s);
+  c.height = Math.round(img.naturalHeight * s);
+  c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height);
+  return new Promise((resolve, reject) =>
+    c.toBlob((b) => (b ? resolve(URL.createObjectURL(b)) : reject(new Error('축소본을 만들지 못했습니다'))), 'image/jpeg', 0.9),
+  );
 }
 
 /**
@@ -87,7 +107,7 @@ export async function measureFaceFromFile(file: Blob): Promise<BrowserMeasure | 
     if (!face || !face.length) return null;
     const landmarks = face as LandmarkPoint[];
     const result = analyzeFace({ landmarks, image: pixelsOf(img) });
-    return { result, landmarks, landmarkMs: t1 - t0, measureMs: performance.now() - t1 };
+    return { result, landmarks, landmarkMs: t1 - t0, measureMs: performance.now() - t1, image: img };
   } finally {
     URL.revokeObjectURL(url);
   }

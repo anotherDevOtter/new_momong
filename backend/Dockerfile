@@ -17,6 +17,8 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 # 운영 DB 에 직접 적용하는 SQL 도 이미지에 같이 넣어 둔다 (서버에서 psql 로 실행)
 COPY --from=build /app/migrations ./migrations
+# 랜드마크 정답 화면의 예시 그림 (받은 기준시각화 PDF 페이지)
+COPY --from=build /app/assets ./assets
 USER node
 EXPOSE 3200
 CMD ["node", "dist/main"]

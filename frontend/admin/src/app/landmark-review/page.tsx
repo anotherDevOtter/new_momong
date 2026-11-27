@@ -12,7 +12,7 @@ import LocalOnlyNotice from '@/components/LocalOnlyNotice';
 import { IS_LOCAL_DEV } from '@/lib/localOnly';
 import LandmarkCanvas, { LEGEND, type Layers } from '@/components/LandmarkCanvas';
 import { getAdminToken } from '@/utils/auth';
-import { detectLandmarksFromUrl } from '@/lib/face-measure/browser';
+import { detectLandmarksFromUrl, downscaledImage } from '@/lib/face-measure/browser';
 import type { LandmarkPoint } from '@/lib/face-measure';
 import {
   PARTS,
@@ -30,6 +30,8 @@ import {
 
 const PAGE = 24;
 const CARD_W = 260;
+/** 카드에 남기는 축소본 가로 (카드 260px × 레티나 2배 + 여유). 크게 보기는 원본을 따로 받는다 */
+const PREVIEW_MAX_W = 800;
 
 type Detection =
   | { status: 'loading' }
@@ -110,9 +112,39 @@ function LandmarkReview() {
   }, [source]);
 
   // ── 랜드마크 검출: 한 장씩 차례로 ─────────────────────────────────────────
+  // 점은 원본으로 찾고, 화면에는 가로 PREVIEW_MAX_W 축소본만 남긴다 (원본 한 장 = 펼치면 수십 MB)
   const detectionsRef = useRef(detections);
   detectionsRef.current = detections;
   const runningRef = useRef(false);
+  const onScreenRef = useRef<Set<string>>(new Set());
+  onScreenRef.current = new Set(items.map((i) => i.faceImageUrl));
+  const previewUrls = useRef<Map<string, string>>(new Map());
+
+  // 목록에서 빠진 사진(필터 · 출처 변경)은 검출 결과와 축소본을 버린다
+  useEffect(() => {
+    const keep = new Set(items.map((i) => i.faceImageUrl));
+    for (const [url, blobUrl] of previewUrls.current) {
+      if (keep.has(url)) continue;
+      URL.revokeObjectURL(blobUrl);
+      previewUrls.current.delete(url);
+    }
+    setDetections((d) => {
+      const gone = Object.keys(d).filter((u) => !keep.has(u) && d[u].status !== 'loading');
+      if (!gone.length) return d;
+      const next = { ...d };
+      for (const u of gone) delete next[u];
+      return next;
+    });
+  }, [items]);
+
+  // 화면을 떠날 때 축소본 정리
+  useEffect(() => {
+    const urls = previewUrls.current;
+    return () => {
+      for (const u of urls.values()) URL.revokeObjectURL(u);
+      urls.clear();
+    };
+  }, []);
 
   useEffect(() => {
     if (runningRef.current) return;
@@ -122,15 +154,26 @@ function LandmarkReview() {
     (async () => {
       for (const item of queue) {
         const url = item.faceImageUrl;
-        if (detectionsRef.current[url]) continue;
+        // 필터를 바꿔 목록에서 빠진 사진은 건너뛴다 (새 목록이 예전 목록을 기다리지 않게)
+        if (detectionsRef.current[url] || !onScreenRef.current.has(url)) continue;
         setDetections((d) => ({ ...d, [url]: { status: 'loading' } }));
         try {
           const objectUrl = await fetchPhotoObjectUrl(url);
           try {
-            const { img, landmarks } = await detectLandmarksFromUrl(objectUrl);
-            setDetections((d) => ({ ...d, [url]: { status: 'done', img, landmarks } }));
+            const { img: full, landmarks } = await detectLandmarksFromUrl(objectUrl);
+            const preview = await downscaledImage(full, PREVIEW_MAX_W);
+            if (!onScreenRef.current.has(url)) {
+              URL.revokeObjectURL(preview.url);
+              setDetections((d) => {
+                const next = { ...d };
+                delete next[url];
+                return next;
+              });
+              continue;
+            }
+            previewUrls.current.set(url, preview.url);
+            setDetections((d) => ({ ...d, [url]: { status: 'done', img: preview.img, landmarks } }));
           } finally {
-            // 이미지는 이미 디코딩돼 캔버스에 그릴 수 있다
             URL.revokeObjectURL(objectUrl);
           }
         } catch (e) {
@@ -468,6 +511,31 @@ function Viewer({
   const [badKey, setBadKey] = useState(0);
   const base = useMemo(() => (typeof window === 'undefined' ? 600 : Math.min(720, window.innerWidth - 420)), []);
 
+  // 카드는 축소본만 들고 있다. 크게 볼 때는 이 사진 한 장만 원본을 다시 받아 쓴다 (확대해도 선명하게)
+  const [full, setFull] = useState<{ url: string; img: HTMLImageElement } | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    let objectUrl: string | null = null;
+    setFull(null);
+    (async () => {
+      try {
+        objectUrl = await fetchPhotoObjectUrl(item.faceImageUrl);
+        if (cancelled) return;
+        const img = new Image();
+        img.src = objectUrl;
+        await img.decode();
+        if (!cancelled) setFull({ url: item.faceImageUrl, img });
+      } catch {
+        /* 원본을 못 받으면 축소본으로 보여 준다 */
+      }
+    })();
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [item.faceImageUrl]);
+  const viewImg = full?.url === item.faceImageUrl ? full.img : detection?.status === 'done' ? detection.img : null;
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLTextAreaElement) return;
@@ -486,7 +554,7 @@ function Viewer({
       <div className="flex-1 overflow-auto flex items-start justify-center p-6" onClick={(e) => e.stopPropagation()}>
         {detection?.status === 'done' ? (
           <div className="relative">
-            <LandmarkCanvas img={detection.img} landmarks={detection.landmarks} width={Math.max(240, base) * zoom} layers={layers} />
+            <LandmarkCanvas img={viewImg ?? detection.img} landmarks={detection.landmarks} width={Math.max(240, base) * zoom} layers={layers} />
             {!detection.landmarks && (
               <div className="absolute inset-x-0 top-3 text-center">
                 <span className="px-2 py-0.5 text-sm bg-[#E5484D] text-white rounded">얼굴을 찾지 못함</span>

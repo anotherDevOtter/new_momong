@@ -65,12 +65,14 @@ export default function LandmarkCanvas({
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas) return;
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = Math.round(width * dpr);
-    canvas.height = Math.round(height * dpr);
+    // 그림판 해상도는 사진보다 크게 잡지 않는다 (3배 확대 · 레티나에서 사진보다 몇 배 큰 그림판이 되면 메모리만 쓴다).
+    // 사진이 화면보다 작을 때도 1배 밑으로는 내리지 않는다 — 점 · 글자가 흐려지지 않게
+    const k = Math.max(1, Math.min(window.devicePixelRatio || 1, img.naturalWidth / width));
+    canvas.width = Math.round(width * k);
+    canvas.height = Math.round(height * k);
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.setTransform(k, 0, 0, k, 0, 0);
     ctx.drawImage(img, 0, 0, width, height);
     if (!landmarks) return;
 
