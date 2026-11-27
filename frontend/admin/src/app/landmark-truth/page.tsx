@@ -44,6 +44,12 @@ function project(v: XY, line: { a: XY; d: XY }, aspect: number): XY {
   return [ax + ux * t, (ay + uy * t) / aspect];
 }
 
+/** 목록 이름 — 운영 상담 사진(prod_YYMMDD_…)은 촬영일을 붙인다 */
+function photoLabel(name: string, i: number): string {
+  const m = /^prod_(\d{2})(\d{2})(\d{2})_/.exec(name);
+  return m ? `사진 ${i + 1} · ${m[2]}.${m[3]}` : `사진 ${i + 1}`;
+}
+
 export default function LandmarkTruthPage() {
   const owner = useIsOwner();
   if (owner === null) return null; // 운영: 토큰 확인 전
@@ -113,40 +119,63 @@ function LandmarkTruth() {
   return (
     <div className="flex h-screen flex-col bg-gray-50">
       <AdminHeader currentPath="/landmark-truth" />
-      <div className="flex items-center gap-3 px-6 py-3 text-sm">
-        <button onClick={() => setIdx((i) => Math.max(0, i - 1))} disabled={idx <= 0} className="rounded px-2 py-1 hover:bg-gray-200 disabled:opacity-30">
-          ‹
-        </button>
-        <select value={idx} onChange={(e) => setIdx(Number(e.target.value))} className="rounded border bg-white px-2 py-1">
-          {items.map((it, i) => (
-            <option key={it.name} value={i}>
-              사진 {i + 1} {it.pointCount >= TOTAL ? '· 완료' : it.pointCount ? '· 하는 중' : ''}
-            </option>
-          ))}
-        </select>
-        <button
-          onClick={() => setIdx((i) => Math.min(items.length - 1, i + 1))}
-          disabled={idx >= items.length - 1}
-          className="rounded px-2 py-1 hover:bg-gray-200 disabled:opacity-30"
-        >
-          ›
-        </button>
-        <span className="text-gray-500">
-          완료 {done} / {items.length}장
-        </span>
-        <button
-          onClick={download}
-          disabled={exporting}
-          className="ml-auto rounded border bg-white px-3 py-1 text-gray-700 hover:bg-gray-100 disabled:opacity-50"
-        >
-          {exporting ? '받는 중…' : '정답 내려받기'}
-        </button>
+      <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-6">
+        <div className="flex flex-wrap items-end justify-between gap-4 pb-4 pt-6">
+          <div>
+            <h1 className="text-2xl font-bold">랜드마크 정답</h1>
+            <p className="mt-1 text-sm text-gray-500">
+              완료 <b className="font-semibold text-gray-900">{done}</b> / {items.length}장
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <div className="flex items-stretch overflow-hidden rounded-lg border border-gray-200 bg-white">
+              <button
+                onClick={() => setIdx((i) => Math.max(0, i - 1))}
+                disabled={idx <= 0}
+                title="이전 사진"
+                className="px-3 text-gray-600 hover:bg-gray-50 disabled:text-gray-300 disabled:hover:bg-white"
+              >
+                ‹
+              </button>
+              <select
+                value={idx}
+                onChange={(e) => setIdx(Number(e.target.value))}
+                className="border-x border-gray-200 bg-white px-3 py-2 text-gray-900 outline-none"
+              >
+                {items.map((it, i) => (
+                  <option key={it.name} value={i}>
+                    {photoLabel(it.name, i)}
+                    {it.pointCount >= TOTAL ? ' · 완료' : it.pointCount ? ' · 하는 중' : ''}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => setIdx((i) => Math.min(items.length - 1, i + 1))}
+                disabled={idx >= items.length - 1}
+                title="다음 사진"
+                className="px-3 text-gray-600 hover:bg-gray-50 disabled:text-gray-300 disabled:hover:bg-white"
+              >
+                ›
+              </button>
+            </div>
+            <button
+              onClick={download}
+              disabled={exporting}
+              className="rounded-lg border border-gray-200 bg-white px-4 py-2 font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            >
+              {exporting ? '받는 중…' : '정답 내려받기'}
+            </button>
+          </div>
+        </div>
+        <div className="mb-4 h-1 overflow-hidden rounded-full bg-gray-200">
+          <div className="h-full rounded-full bg-gray-900 transition-all" style={{ width: `${items.length ? (done / items.length) * 100 : 0}%` }} />
+        </div>
+        {item ? (
+          <Editor key={item.name} name={item.name} onSaved={markSaved} onFinished={() => setIdx((i) => (i < items.length - 1 ? i + 1 : i))} />
+        ) : (
+          <p className="text-sm text-gray-500">{!loaded ? '불러오는 중…' : dir ? `사진이 없습니다 — ${dir}/images 에 넣으세요` : '상담 사진이 없습니다'}</p>
+        )}
       </div>
-      {item ? (
-        <Editor key={item.name} name={item.name} onSaved={markSaved} onFinished={() => setIdx((i) => (i < items.length - 1 ? i + 1 : i))} />
-      ) : (
-        <p className="px-6 text-sm text-gray-500">{!loaded ? '불러오는 중…' : dir ? `사진이 없습니다 — ${dir}/images 에 넣으세요` : '상담 사진이 없습니다'}</p>
-      )}
     </div>
   );
 }
@@ -534,7 +563,7 @@ function Editor({ name, onSaved, onFinished }: { name: string; onSaved: (name: s
   const hidden = step.points.filter((id) => pos[id] === null);
 
   return (
-    <div className="flex min-h-0 flex-1 gap-4 px-6 pb-6">
+    <div className="flex min-h-0 flex-1 gap-4 pb-6">
       <div ref={boxRef} className="relative min-w-0 flex-1 overflow-hidden rounded-xl bg-gray-900">
         {img ? (
           <canvas
@@ -558,28 +587,33 @@ function Editor({ name, onSaved, onFinished }: { name: string; onSaved: (name: s
         </div>
       </div>
 
-      <aside className="flex w-80 shrink-0 flex-col rounded-xl bg-white p-6 shadow-sm">
-        <div className="flex gap-1">
+      <aside className="flex w-80 shrink-0 flex-col rounded-xl border border-gray-200 bg-white p-6">
+        <div className="flex items-center justify-between text-xs text-gray-400">
+          <span>단계</span>
+          <span>
+            {stepIdx + 1} / {STEPS.length}
+          </span>
+        </div>
+        <div className="mt-2 flex gap-1">
           {STEPS.map((s, i) => (
-            <div key={s.id} className={`h-1.5 flex-1 rounded-full ${i < stepIdx ? 'bg-blue-600' : i === stepIdx ? 'bg-blue-300' : 'bg-gray-100'}`} />
+            <div key={s.id} className={`h-1 flex-1 rounded-full ${i < stepIdx ? 'bg-gray-900' : i === stepIdx ? 'bg-gray-400' : 'bg-gray-100'}`} />
           ))}
         </div>
-        <div className="mt-2 text-xs text-gray-400">
-          {stepIdx + 1} / {STEPS.length}
-        </div>
 
-        <h2 className="mt-4 text-2xl font-bold">{step.title}</h2>
+        <h2 className="mt-6 text-xl font-bold">{step.title}</h2>
         <p className="mt-1 text-xs text-gray-400">{step.judgments.join(' · ')}</p>
         <p className="mt-4 text-sm leading-6 text-gray-600">{step.tip}</p>
         <button
           onClick={() => setShowExample(true)}
-          className="mt-4 flex items-center justify-center gap-2 rounded-lg border border-blue-200 bg-blue-50 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-100"
+          className="mt-4 flex items-center justify-center gap-2 rounded-lg border border-gray-200 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
-          예시 그림 보기 <span className="text-xs font-normal text-blue-400">H</span>
+          예시 그림 보기 <kbd className="rounded border border-gray-200 px-1 text-[10px] font-normal text-gray-400">H</kbd>
         </button>
 
-        <p className="mt-4 text-sm font-medium text-gray-800">틀린 점만 끌어서 옮기세요.</p>
-        <p className="mt-1 text-xs text-gray-500">Shift 를 누른 채 끌면 가로 · 세로로만 움직입니다.</p>
+        <div className="mt-6 rounded-lg bg-gray-50 p-4 text-xs leading-5 text-gray-500">
+          <p className="text-sm font-medium text-gray-800">틀린 점만 끌어서 옮기세요.</p>
+          <p className="mt-1">Shift 를 누른 채 끌면 가로 · 세로로만 움직입니다.</p>
+        </div>
 
         {step.points.some((id) => MIDLINE_POINTS.includes(id)) && (
           <label className="mt-3 flex cursor-pointer items-start gap-2 text-xs text-gray-600">
@@ -614,7 +648,7 @@ function Editor({ name, onSaved, onFinished }: { name: string; onSaved: (name: s
         )}
 
         <div className="mt-auto flex flex-col gap-2">
-          <button onClick={next} disabled={!img} className="rounded-lg bg-gray-900 py-3 text-base font-semibold text-white disabled:opacity-40">
+          <button onClick={next} disabled={!img} className="rounded-lg bg-gray-900 py-3 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-40">
             {stepIdx < STEPS.length - 1 ? '다음' : '완료'} <span className="ml-1 text-xs font-normal text-gray-400">Enter</span>
           </button>
           <button
