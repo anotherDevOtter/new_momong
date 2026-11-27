@@ -13,6 +13,8 @@ import { downscaledUrl, measureFaceFromFile } from '@/lib/face-measure/browser';
 import type { FaceMeasureResult, MeasureResult, MeasurementShape } from '@/lib/face-measure';
 import { FINAL_RULE, FORM_CRITERIA, PROP_CRITERIA, type Criterion } from '@/lib/face-measure/criteria';
 import { fetchTruthPhotoBlob } from '@/utils/landmark-truth-api';
+import LocalOnlyNotice from '@/components/LocalOnlyNotice';
+import { useIsOwner } from '@/lib/localOnly';
 
 /** 항목별 그림용 축소본 가로 — 그림이 화면에서 176px, 부위만 잘라 보여 주니 이 정도면 충분하다 */
 const PREVIEW_MAX_W = 1400;
@@ -34,7 +36,13 @@ interface Photo {
   label: string;
 }
 
-export default function FaceCriteriaPage() {
+export default function FaceCriteriaPageGate() {
+  const owner = useIsOwner();
+  if (owner === null) return null; // 운영: 토큰 확인 전
+  return owner ? <FaceCriteriaPage /> : <LocalOnlyNotice owner />;
+}
+
+function FaceCriteriaPage() {
   const router = useRouter();
   const [photo, setPhoto] = useState<Photo | null>(null);
   const [result, setResult] = useState<FaceMeasureResult | null>(null);

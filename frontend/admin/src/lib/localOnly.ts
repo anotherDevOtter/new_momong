@@ -12,7 +12,7 @@ export const LOCAL_ONLY_PATHS = ['/landmark-review'];
 
 // 운영에서는 관리자 본인 계정(OWNER_EMAILS, 또는 서버 .env.prod ADMIN_EMAIL 로그인 → 토큰 sub='admin')에만 보이는 화면.
 // 여기서는 메뉴 · 화면만 숨긴다. 실제로 막는 것은 서버 (face-landmark-truth.service 의 OWNER_EMAILS — 같게 유지)
-export const OWNER_ONLY_PATHS = ['/landmark-truth'];
+export const OWNER_ONLY_PATHS = ['/landmark-truth', '/face-criteria'];
 const OWNER_EMAILS = ['another.dev.otter@gmail.com'];
 
 function isOwnerToken(token: string | null): boolean {
