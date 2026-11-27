@@ -20,7 +20,7 @@ import { S3Service } from '../storage/s3.service';
  *   로컬 기본: 저장소 바깥 ../../landmark-bench (Git 밖). 운영: docker-compose 가 서버 ~/momong/landmark-bench 를 붙인다
  * 예시 그림: assets/landmark-examples/ (받은 기준시각화 PDF 페이지 — 이미지에 같이 들어간다)
  *
- * 쓸 수 있는 사람: 로컬은 admin 누구나. 운영은 .env.prod 의 ADMIN_EMAIL 로 로그인한 계정(sub='admin')만.
+ * 쓸 수 있는 사람: 로컬은 admin 누구나. 운영은 OWNER_EMAILS 계정 (또는 .env.prod ADMIN_EMAIL 계정 sub='admin') 만.
  */
 const NAME_RE = /^[\w.-]{1,120}$/;
 const IMAGE_RE = /\.(jpe?g|png|webp)$/i;
@@ -37,7 +37,11 @@ export interface TruthFile {
 /** AdminGuard 가 req.user 에 넣는 JWT 내용 */
 export interface AdminUser {
   sub?: string;
+  email?: string;
 }
+
+/** 운영에서 정답 화면을 쓸 수 있는 관리자 계정 (운영 .env.prod 에 ADMIN_EMAIL 이 없어서 DB 계정으로 지정). 화면 쪽 localOnly.ts 와 같게 */
+const OWNER_EMAILS = ['another.dev.otter@gmail.com'];
 
 @Injectable()
 export class FaceLandmarkTruthService {
@@ -66,9 +70,10 @@ export class FaceLandmarkTruthService {
     }
   }
 
-  /** 운영은 env 관리자 계정만 */
+  /** 운영은 관리자 본인 계정만 (env 관리자 계정 또는 OWNER_EMAILS) */
   allowed(user: AdminUser | undefined): boolean {
-    return !this.prod || user?.sub === 'admin';
+    if (!this.prod) return true;
+    return user?.sub === 'admin' || OWNER_EMAILS.includes((user?.email ?? '').toLowerCase());
   }
 
   private guard(user: AdminUser | undefined) {
