@@ -20,6 +20,12 @@ export class FaceLandmarkTruthController {
     return { data: await this.service.list(req.user) };
   }
 
+  @Get('export')
+  @ApiOperation({ summary: '[admin] 채점용 — 정답이 있는 사진 전부' })
+  async export(@Req() req: AdminRequest) {
+    return { data: await this.service.export(req.user) };
+  }
+
   @Get('one')
   @ApiOperation({ summary: '[admin] 사진 한 장의 정답 (없으면 null)' })
   async one(@Req() req: AdminRequest, @Query('name') name: string) {

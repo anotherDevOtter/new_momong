@@ -37,6 +37,18 @@ export async function listTruth(): Promise<{ dir: string; items: TruthListItem[]
   return json(await fetch(BASE, { headers: auth() }), '사진 목록을 불러오지 못했습니다');
 }
 
+export interface TruthExportItem extends TruthFile {
+  name: string;
+  /** 운영 상담 사진 주소 (로컬 폴더 사진은 null) */
+  photo: string | null;
+  updatedBy: string | null;
+}
+
+/** 채점용 — 정답이 있는 사진 전부 */
+export async function exportTruth(): Promise<TruthExportItem[]> {
+  return json(await fetch(`${BASE}/export`, { headers: auth() }), '정답을 내려받지 못했습니다');
+}
+
 export async function getTruth(name: string): Promise<TruthFile | null> {
   return json(await fetch(`${BASE}/one?${new URLSearchParams({ name })}`, { headers: auth() }), '정답을 불러오지 못했습니다');
 }

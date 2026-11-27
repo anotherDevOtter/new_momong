@@ -14,7 +14,7 @@ import { MIDLINE_ANCHORS, MIDLINE_POINTS, POINT_BY_ID, STEPS, TRUTH_POINTS, seed
 import LandmarkExample from '@/components/LandmarkExample';
 import LocalOnlyNotice from '@/components/LocalOnlyNotice';
 import { useIsOwner } from '@/lib/localOnly';
-import { fetchTruthPhoto, getTruth, listTruth, saveTruth, type TruthListItem, type TruthPoints } from '@/utils/landmark-truth-api';
+import { exportTruth, fetchTruthPhoto, getTruth, listTruth, saveTruth,type TruthListItem, type TruthPoints } from '@/utils/landmark-truth-api';
 
 type XY = [number, number];
 const TOTAL = TRUTH_POINTS.length;
@@ -54,13 +54,16 @@ function LandmarkTruth() {
   const router = useRouter();
   const [items, setItems] = useState<TruthListItem[]>([]);
   const [dir, setDir] = useState('');
+  const [loaded, setLoaded] = useState(false);
   const [idx, setIdx] = useState(-1);
+  const [exporting, setExporting] = useState(false);
 
   const loadList = useCallback(async () => {
     try {
       const r = await listTruth();
       setItems(r.items);
       setDir(r.dir);
+      setLoaded(true);
       return r.items;
     } catch (e) {
       toast.error(e instanceof Error ? e.message : '목록을 불러오지 못했습니다');
@@ -84,6 +87,25 @@ function LandmarkTruth() {
     (n: string, pointCount: number) => setItems((its) => its.map((i) => (i.name === n ? { ...i, pointCount } : i))),
     [],
   );
+
+  /** 채점용 — 정답 전부를 JSON 파일로 */
+  const download = useCallback(async () => {
+    setExporting(true);
+    try {
+      const data = await exportTruth();
+      const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `landmark-truth-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success(`정답 ${data.length}장을 내려받았습니다`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : '내려받기 실패');
+    } finally {
+      setExporting(false);
+    }
+  }, []);
 
   const done = items.filter((i) => i.pointCount >= TOTAL).length;
   const item = items[idx];
@@ -112,11 +134,18 @@ function LandmarkTruth() {
         <span className="text-gray-500">
           완료 {done} / {items.length}장
         </span>
+        <button
+          onClick={download}
+          disabled={exporting}
+          className="ml-auto rounded border bg-white px-3 py-1 text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+        >
+          {exporting ? '받는 중…' : '정답 내려받기'}
+        </button>
       </div>
       {item ? (
         <Editor key={item.name} name={item.name} onSaved={markSaved} onFinished={() => setIdx((i) => (i < items.length - 1 ? i + 1 : i))} />
       ) : (
-        <p className="px-6 text-sm text-gray-500">{idx === -1 && dir ? `사진이 없습니다 — ${dir}/images 에 넣으세요` : '불러오는 중…'}</p>
+        <p className="px-6 text-sm text-gray-500">{!loaded ? '불러오는 중…' : dir ? `사진이 없습니다 — ${dir}/images 에 넣으세요` : '상담 사진이 없습니다'}</p>
       )}
     </div>
   );
